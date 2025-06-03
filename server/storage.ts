@@ -150,6 +150,21 @@ export class MemStorage implements IStorage {
   private bills: Map<number, Bill> = new Map();
   private billPayments: Map<number, BillPayment> = new Map();
   private groceryItems: Map<number, GroceryItem> = new Map();
+  private groceryLists: Map<number, GroceryList> = new Map();
+  private goals: Map<number, Goal> = new Map();
+  private habits: Map<number, Habit> = new Map();
+  private habitLogs: Map<number, HabitLog> = new Map();
+  private medications: Map<number, Medication> = new Map();
+  private todos: Map<number, Todo> = new Map();
+  private timeBlocks: Map<number, TimeBlock> = new Map();
+  private focusSessions: Map<number, FocusSession> = new Map();
+  private budgets: Map<number, Budget> = new Map();
+  private incomeEntries: Map<number, IncomeEntry> = new Map();
+  private challenges: Map<number, Challenge> = new Map();
+  private appProjects: Map<number, AppProject> = new Map();
+  private appTasks: Map<number, AppTask> = new Map();
+  private appSprints: Map<number, AppSprint> = new Map();
+  private appTimeEntries: Map<number, AppTimeEntry> = new Map();
   private currentId = 1;
 
   constructor() {

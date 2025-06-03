@@ -10,6 +10,7 @@ import GoalsSection from "@/components/GoalsSection";
 import ReportsSection from "@/components/ReportsSection";
 import DashboardHome from "@/components/DashboardHome";
 import SiteMapSection from "@/components/SiteMapSection";
+import AppDevelopmentSection from "@/components/AppDevelopmentSection";
 import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
@@ -17,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "sitemap";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "apps" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
 
 export default function Dashboard() {
