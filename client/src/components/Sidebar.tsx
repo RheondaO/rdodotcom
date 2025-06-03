@@ -56,7 +56,10 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   const navItems = [
     { key: "dashboard", icon: Home, label: "Dashboard" },
     { key: "health", icon: Heart, label: "Health & Wellness" },
-    { key: "work", icon: Briefcase, label: "Work & Time" },
+    { key: "habits", icon: Sparkles, label: "Habits & Mood" },
+    { key: "productivity", icon: Briefcase, label: "Productivity" },
+    { key: "goals", icon: Plus, label: "Goals & Achievements" },
+    { key: "reports", icon: ChevronRight, label: "Progress Reports" },
     { key: "finances", icon: DollarSign, label: "Finances" },
     { key: "groceries", icon: ShoppingCart, label: "Groceries" },
   ] as const;
