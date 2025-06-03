@@ -200,6 +200,42 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       comments: "",
       createdAt: "2025-04-20T00:00:00Z",
       updatedAt: "2025-04-20T00:00:00Z"
+    },
+    {
+      id: 4,
+      projectId: 1,
+      title: "Test mobile navigation",
+      description: "Verify navigation works correctly on all mobile devices",
+      status: "testing",
+      priority: "high",
+      category: "bug",
+      estimatedHours: 4,
+      actualHours: 2,
+      dueDate: "2025-06-05",
+      dependencies: [],
+      tags: ["mobile", "navigation", "testing"],
+      attachments: [],
+      comments: "Found issues with hamburger menu on iOS",
+      createdAt: "2025-06-01T00:00:00Z",
+      updatedAt: "2025-06-03T10:00:00Z"
+    },
+    {
+      id: 5,
+      projectId: 2,
+      title: "Test animation performance",
+      description: "Ensure all animations run smoothly on different devices",
+      status: "testing",
+      priority: "medium",
+      category: "improvement",
+      estimatedHours: 6,
+      actualHours: 3,
+      dueDate: "2025-06-08",
+      dependencies: [],
+      tags: ["animation", "performance", "testing"],
+      attachments: [],
+      comments: "Testing on various browsers and devices",
+      createdAt: "2025-05-28T00:00:00Z",
+      updatedAt: "2025-06-03T14:00:00Z"
     }
   ];
 
@@ -251,6 +287,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   const activeProjects = projects.filter(p => p.isActive);
   const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
+  const testingTasks = tasks.filter(t => t.status === 'testing');
 
   // Testing Template for AI Development Projects
   const testingTemplate = {
@@ -738,6 +775,79 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </Button>
             </div>
           </div>
+
+          {/* Tasks in Testing Status */}
+          {testingTasks.length > 0 && (
+            <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
+                  <AlertCircle className="h-5 w-5" />
+                  Tasks Currently in Testing
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {testingTasks.map((task) => (
+                    <div key={task.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-orange-400">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
+                          <p className="text-sm text-muted-foreground dark:text-gray-400">{task.description}</p>
+                          <p className="text-xs text-muted-foreground dark:text-gray-400 mt-1">
+                            {projects.find(p => p.id === task.projectId)?.name}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(task.status)}>
+                            {task.status}
+                          </Badge>
+                          <Badge variant="outline" className={getPriorityColor(task.priority)}>
+                            {task.priority}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground dark:text-gray-400">Category:</span>
+                          <span className="ml-1 font-medium capitalize">{task.category}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground dark:text-gray-400">Time Spent:</span>
+                          <span className="ml-1 font-medium">{task.actualHours}h / {task.estimatedHours}h</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground dark:text-gray-400">Due Date:</span>
+                          <span className="ml-1 font-medium">
+                            {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {task.comments && (
+                        <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
+                          <span className="text-blue-600 dark:text-blue-400 font-medium">Testing Notes:</span>
+                          <span className="ml-1">{task.comments}</span>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 mt-3">
+                        <Button size="sm" variant="outline">
+                          Pass Test
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          Fail Test
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          Add Notes
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Simple Test Lists */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
