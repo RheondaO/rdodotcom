@@ -187,6 +187,54 @@ export const challenges = pgTable("challenges", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Content Creation System
+export const contentCategories = pgTable("content_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  color: text("color").default("#8B5CF6"), // hex color for theming
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const contentTypes = pgTable("content_types", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").notNull().references(() => contentCategories.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  frequency: text("frequency").notNull(), // monthly, yearly, custom
+  targetCount: integer("target_count").notNull(), // how many per frequency period
+  isRecurring: boolean("is_recurring").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const contentPieces = pgTable("content_pieces", {
+  id: serial("id").primaryKey(),
+  contentTypeId: integer("content_type_id").notNull().references(() => contentTypes.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").default("draft"), // draft, review, approved, scheduled, published
+  targetDate: date("target_date"),
+  scheduledDate: date("scheduled_date"),
+  publishedDate: date("published_date"),
+  notes: text("notes"),
+  priority: text("priority").default("medium"), // low, medium, high, urgent
+  estimatedDuration: integer("estimated_duration"), // minutes to complete
+  actualDuration: integer("actual_duration"), // actual time spent
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contentProgress = pgTable("content_progress", {
+  id: serial("id").primaryKey(),
+  contentPieceId: integer("content_piece_id").notNull().references(() => contentPieces.id),
+  phase: text("phase").notNull(), // research, draft, edit, review, final
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertDailyEntrySchema = createInsertSchema(dailyEntries).omit({
   id: true,
@@ -264,6 +312,27 @@ export const insertChallengeSchema = createInsertSchema(challenges).omit({
   createdAt: true,
 });
 
+export const insertContentCategorySchema = createInsertSchema(contentCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertContentTypeSchema = createInsertSchema(contentTypes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertContentPieceSchema = createInsertSchema(contentPieces).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContentProgressSchema = createInsertSchema(contentProgress).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Type exports
 export type InsertDailyEntry = z.infer<typeof insertDailyEntrySchema>;
 export type DailyEntry = typeof dailyEntries.$inferSelect;
@@ -309,3 +378,15 @@ export type IncomeEntry = typeof incomeEntries.$inferSelect;
 
 export type InsertChallenge = z.infer<typeof insertChallengeSchema>;
 export type Challenge = typeof challenges.$inferSelect;
+
+export type InsertContentCategory = z.infer<typeof insertContentCategorySchema>;
+export type ContentCategory = typeof contentCategories.$inferSelect;
+
+export type InsertContentType = z.infer<typeof insertContentTypeSchema>;
+export type ContentType = typeof contentTypes.$inferSelect;
+
+export type InsertContentPiece = z.infer<typeof insertContentPieceSchema>;
+export type ContentPiece = typeof contentPieces.$inferSelect;
+
+export type InsertContentProgress = z.infer<typeof insertContentProgressSchema>;
+export type ContentProgress = typeof contentProgress.$inferSelect;

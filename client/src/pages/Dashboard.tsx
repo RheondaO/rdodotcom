@@ -12,7 +12,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 
-type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries";
+type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries" | "content";
 type TimeViewType = "day" | "week" | "month";
 
 export default function Dashboard() {
@@ -38,6 +38,7 @@ export default function Dashboard() {
       case "work": return "Work & Time Tracking";
       case "finances": return "Financial Tracking";
       case "groceries": return "Grocery Management";
+      case "content": return "Content Creation";
       default: return "Dashboard";
     }
   };
@@ -54,6 +55,7 @@ export default function Dashboard() {
       case "work": return "Track your work hours and screen time usage";
       case "finances": return "Manage your finances, bills, and spending";
       case "groceries": return "Plan and track your grocery shopping";
+      case "content": return "Manage your content planning, creation, and scheduling";
       default: return "Track your daily habits and goals";
     }
   };
@@ -141,6 +143,7 @@ export default function Dashboard() {
               {activeView === "work" && <WorkTimeSection selectedDate={selectedDate} />}
               {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
               {activeView === "groceries" && <GrocerySection />}
+              {activeView === "content" && <ContentCreationSection />}
             </>
           )}
         </div>

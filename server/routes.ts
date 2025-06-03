@@ -5,7 +5,11 @@ import {
   insertDailyEntrySchema, 
   insertBillSchema, 
   insertBillPaymentSchema, 
-  insertGroceryItemSchema 
+  insertGroceryItemSchema,
+  insertContentCategorySchema,
+  insertContentTypeSchema,
+  insertContentPieceSchema,
+  insertContentProgressSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -131,6 +135,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete grocery item" });
+    }
+  });
+
+  // Content Categories
+  app.get("/api/content-categories", async (req, res) => {
+    try {
+      const categories = await storage.getAllContentCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch content categories" });
+    }
+  });
+
+  app.post("/api/content-categories", async (req, res) => {
+    try {
+      const data = insertContentCategorySchema.parse(req.body);
+      const category = await storage.createContentCategory(data);
+      res.json(category);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid content category data" });
+    }
+  });
+
+  // Content Types
+  app.get("/api/content-types", async (req, res) => {
+    try {
+      const types = await storage.getAllContentTypes();
+      res.json(types);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch content types" });
+    }
+  });
+
+  app.post("/api/content-types", async (req, res) => {
+    try {
+      const data = insertContentTypeSchema.parse(req.body);
+      const type = await storage.createContentType(data);
+      res.json(type);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid content type data" });
+    }
+  });
+
+  // Content Pieces
+  app.get("/api/content-pieces", async (req, res) => {
+    try {
+      const pieces = await storage.getAllContentPieces();
+      res.json(pieces);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch content pieces" });
+    }
+  });
+
+  app.post("/api/content-pieces", async (req, res) => {
+    try {
+      const data = insertContentPieceSchema.parse(req.body);
+      const piece = await storage.createContentPiece(data);
+      res.json(piece);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid content piece data" });
+    }
+  });
+
+  app.patch("/api/content-pieces/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const piece = await storage.updateContentPiece(id, updates);
+      res.json(piece);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update content piece" });
     }
   });
 

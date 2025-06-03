@@ -17,7 +17,7 @@ import { format, addDays, subDays } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
 import { useTheme } from "@/hooks/use-theme";
 
-type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries";
+type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries" | "content";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -59,6 +59,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     { key: "habits", icon: Sparkles, label: "Habits & Mood" },
     { key: "productivity", icon: Briefcase, label: "Productivity" },
     { key: "goals", icon: Plus, label: "Goals & Achievements" },
+    { key: "content", icon: Sparkles, label: "Content Creation" },
     { key: "reports", icon: ChevronRight, label: "Progress Reports" },
     { key: "finances", icon: DollarSign, label: "Finances" },
     { key: "groceries", icon: ShoppingCart, label: "Groceries" },
