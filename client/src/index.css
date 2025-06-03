@@ -1,30 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: 250 250% 98%; /* #FAFBFC */
-  --foreground: 210 14% 9%;
-  --muted: 210 12% 96%;
-  --muted-foreground: 215 8% 46%; /* #64748B */
+  --background: 330 50% 98%; /* #FDF8FD */
+  --foreground: 330 15% 15%;
+  --muted: 320 25% 96%;
+  --muted-foreground: 320 8% 55%; /* #8B7A8B */
   --popover: 0 0% 100%;
-  --popover-foreground: 210 14% 9%;
+  --popover-foreground: 330 15% 15%;
   --card: 0 0% 100%;
-  --card-foreground: 210 14% 9%;
-  --border: 220 10% 87%;
-  --input: 220 10% 87%;
-  --primary: 224 76% 32%; /* #1E3A8A */
-  --primary-foreground: 220 100% 98%;
-  --secondary: 172 66% 30%; /* #0D9488 */
+  --card-foreground: 330 15% 15%;
+  --border: 320 20% 90%;
+  --input: 320 20% 90%;
+  --primary: 315 85% 55%; /* #E879C7 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 280 70% 65%; /* #A78BFA */
   --secondary-foreground: 0 0% 100%;
-  --accent: 38 92% 50%; /* #F59E0B */
+  --accent: 340 82% 70%; /* #F472B6 */
   --accent-foreground: 0 0% 100%;
-  --success: 160 84% 39%; /* #059669 */
+  --success: 155 75% 60%; /* #4ADE80 */
   --success-foreground: 0 0% 100%;
-  --destructive: 0 84% 60%;
+  --destructive: 0 84% 70%;
   --destructive-foreground: 60 9% 98%;
-  --ring: 210 14% 9%;
-  --radius: 0.75rem;
+  --ring: 315 85% 55%;
+  --radius: 1rem;
 }
 
 .dark {
@@ -60,6 +62,20 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+  }
+
+  .font-heading {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .font-script {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
   }
 }
 

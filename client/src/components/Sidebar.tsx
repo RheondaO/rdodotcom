@@ -5,7 +5,7 @@ import {
   DollarSign, 
   ShoppingCart, 
   Plus,
-  CircleDot
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -43,46 +43,49 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   ] as const;
 
   return (
-    <aside className="w-80 bg-white border-r border-gray-200 flex flex-col">
+    <aside className="w-80 bg-gradient-to-b from-pink-50 to-purple-50 border-r border-pink-200 flex flex-col shadow-lg">
       {/* Logo and Date */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="p-6 border-b border-pink-100">
         <div className="flex items-center space-x-3 mb-4">
-          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-            <CircleDot className="text-white text-lg h-5 w-5" />
+          <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-md">
+            <Sparkles className="text-white text-lg h-6 w-6" />
           </div>
-          <h1 className="text-xl font-bold text-primary">DotTracker</h1>
+          <h1 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+            Belle Journal
+          </h1>
         </div>
-        <div className="text-sm text-neutral-cool">
-          Today: <span className="font-medium text-gray-800">
+        <div className="text-sm text-muted-foreground">
+          <span className="font-script text-base">Today: </span>
+          <span className="font-medium text-pink-700">
             {format(selectedDate, 'MMMM d, yyyy')}
           </span>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="p-6 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-neutral-cool uppercase tracking-wide mb-4">
-          Today's Progress
+      <div className="p-6 border-b border-pink-100">
+        <h3 className="text-sm font-heading font-semibold text-pink-600 uppercase tracking-wide mb-4">
+          Today's Progress ✨
         </h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between bg-white/60 rounded-xl p-3 backdrop-blur-sm">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-secondary rounded-full"></div>
-              <span className="text-sm">Water</span>
+              <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
+              <span className="text-sm font-medium text-gray-700">Water</span>
             </div>
             <div className="flex items-center space-x-2">
               <Progress value={waterProgress} className="w-16 h-2" />
-              <span className="text-xs text-neutral-cool">{waterCount}</span>
+              <span className="text-xs text-muted-foreground font-medium">{waterCount}</span>
             </div>
           </div>
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between bg-white/60 rounded-xl p-3 backdrop-blur-sm">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-accent rounded-full"></div>
-              <span className="text-sm">Exercise</span>
+              <div className="w-3 h-3 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full shadow-sm"></div>
+              <span className="text-sm font-medium text-gray-700">Exercise</span>
             </div>
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-              dailyEntry?.exerciseCompleted ? 'bg-success' : 'bg-gray-200'
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
+              dailyEntry?.exerciseCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gray-200'
             }`}>
               {dailyEntry?.exerciseCompleted && (
                 <div className="w-3 h-3 bg-white rounded-full"></div>
@@ -90,22 +93,22 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between bg-white/60 rounded-xl p-3 backdrop-blur-sm">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span className="text-sm">Meals</span>
+              <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
+              <span className="text-sm font-medium text-gray-700">Meals</span>
             </div>
-            <span className="text-xs text-neutral-cool">{mealCount}/3</span>
+            <span className="text-xs text-muted-foreground font-medium">{mealCount}/3</span>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-6">
-        <h3 className="text-sm font-semibold text-neutral-cool uppercase tracking-wide mb-4">
-          Categories
+        <h3 className="text-sm font-heading font-semibold text-pink-600 uppercase tracking-wide mb-4">
+          Categories 💖
         </h3>
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.key;
@@ -114,14 +117,14 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               <li key={item.key}>
                 <button
                   onClick={() => onViewChange(item.key)}
-                  className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                  className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all duration-200 shadow-sm ${
                     isActive
-                      ? 'bg-primary bg-opacity-10 text-primary font-medium'
-                      : 'hover:bg-gray-100 text-gray-700'
+                      ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white font-medium shadow-lg transform scale-105'
+                      : 'hover:bg-white/80 text-gray-700 hover:shadow-md hover:transform hover:scale-102'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
                 </button>
               </li>
             );
