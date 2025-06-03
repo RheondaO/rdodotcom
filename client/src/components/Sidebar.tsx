@@ -5,11 +5,13 @@ import {
   DollarSign, 
   ShoppingCart, 
   Plus,
-  Sparkles
+  Sparkles,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { format } from "date-fns";
+import { format, addDays, subDays } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
 
 type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries";
@@ -19,11 +21,24 @@ interface SidebarProps {
   onViewChange: (view: ViewType) => void;
   onQuickAdd: () => void;
   selectedDate: Date;
+  onDateChange: (date: Date) => void;
 }
 
-export default function Sidebar({ activeView, onViewChange, onQuickAdd, selectedDate }: SidebarProps) {
+export default function Sidebar({ activeView, onViewChange, onQuickAdd, selectedDate, onDateChange }: SidebarProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
+
+  const goToPreviousDay = () => {
+    onDateChange(subDays(selectedDate, 1));
+  };
+
+  const goToNextDay = () => {
+    onDateChange(addDays(selectedDate, 1));
+  };
+
+  const goToToday = () => {
+    onDateChange(new Date());
+  };
 
   const waterProgress = dailyEntry?.waterIntake ? (dailyEntry.waterIntake / 8) * 100 : 0;
   const waterCount = `${dailyEntry?.waterIntake || 0}/8`;

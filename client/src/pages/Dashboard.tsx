@@ -5,16 +5,19 @@ import WorkTimeSection from "@/components/WorkTimeSection";
 import FinanceSection from "@/components/FinanceSection";
 import GrocerySection from "@/components/GrocerySection";
 import QuickAddModal from "@/components/QuickAddModal";
+import WeekView from "@/components/WeekView";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 
 type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries";
+type TimeViewType = "day" | "week" | "month";
 
 export default function Dashboard() {
   const [activeView, setActiveView] = useState<ViewType>("dashboard");
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [timeView, setTimeView] = useState<TimeViewType>("day");
 
   const handleExportData = () => {
     // TODO: Implement data export functionality
@@ -22,6 +25,9 @@ export default function Dashboard() {
   };
 
   const getViewTitle = () => {
+    if (timeView === "week") {
+      return "Week Overview";
+    }
     switch (activeView) {
       case "health": return "Health & Wellness";
       case "work": return "Work & Time Tracking";
@@ -32,6 +38,9 @@ export default function Dashboard() {
   };
 
   const getViewDescription = () => {
+    if (timeView === "week") {
+      return "View your weekly progress and patterns";
+    }
     switch (activeView) {
       case "health": return "Monitor your daily health habits and wellness goals";
       case "work": return "Track your work hours and screen time usage";
@@ -68,13 +77,34 @@ export default function Dashboard() {
                 Export Data
               </Button>
               <div className="flex items-center space-x-2 bg-white/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
-                <button className="px-4 py-2 text-sm bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-xl shadow-sm font-medium">
+                <button 
+                  onClick={() => setTimeView("day")}
+                  className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
+                    timeView === "day" 
+                      ? "bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-sm" 
+                      : "text-muted-foreground hover:text-pink-600"
+                  }`}
+                >
                   Day
                 </button>
-                <button className="px-4 py-2 text-sm text-muted-foreground hover:text-pink-600 transition-colors rounded-xl">
+                <button 
+                  onClick={() => setTimeView("week")}
+                  className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
+                    timeView === "week" 
+                      ? "bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-sm" 
+                      : "text-muted-foreground hover:text-pink-600"
+                  }`}
+                >
                   Week
                 </button>
-                <button className="px-4 py-2 text-sm text-muted-foreground hover:text-pink-600 transition-colors rounded-xl">
+                <button 
+                  onClick={() => setTimeView("month")}
+                  className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
+                    timeView === "month" 
+                      ? "bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-sm" 
+                      : "text-muted-foreground hover:text-pink-600"
+                  }`}
+                >
                   Month
                 </button>
               </div>
@@ -84,18 +114,24 @@ export default function Dashboard() {
 
         {/* Content */}
         <div className="p-8">
-          {activeView === "dashboard" && (
+          {timeView === "week" ? (
+            <WeekView selectedDate={selectedDate} onDateChange={setSelectedDate} />
+          ) : (
             <>
-              <HealthSection selectedDate={selectedDate} />
-              <WorkTimeSection selectedDate={selectedDate} />
-              <FinanceSection selectedDate={selectedDate} />
-              <GrocerySection />
+              {activeView === "dashboard" && (
+                <>
+                  <HealthSection selectedDate={selectedDate} />
+                  <WorkTimeSection selectedDate={selectedDate} />
+                  <FinanceSection selectedDate={selectedDate} />
+                  <GrocerySection />
+                </>
+              )}
+              {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
+              {activeView === "work" && <WorkTimeSection selectedDate={selectedDate} />}
+              {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
+              {activeView === "groceries" && <GrocerySection />}
             </>
           )}
-          {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
-          {activeView === "work" && <WorkTimeSection selectedDate={selectedDate} />}
-          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
-          {activeView === "groceries" && <GrocerySection />}
         </div>
       </main>
 
