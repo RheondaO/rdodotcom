@@ -157,6 +157,9 @@ export default function Dashboard() {
               {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
               {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
               {activeView === "groceries" && <GrocerySection />}
+              {activeView === "sitemap" && (
+                <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} />
+              )}
             </>
           )}
         </div>
