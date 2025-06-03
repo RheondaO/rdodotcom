@@ -4,15 +4,18 @@ import HealthSection from "@/components/HealthSection";
 import WorkTimeSection from "@/components/WorkTimeSection";
 import FinanceSection from "@/components/FinanceSection";
 import GrocerySection from "@/components/GrocerySection";
+import HabitsSection from "@/components/HabitsSection";
+import ProductivitySection from "@/components/ProductivitySection";
+import GoalsSection from "@/components/GoalsSection";
+import ReportsSection from "@/components/ReportsSection";
 import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 
-type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries" | "content";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries";
 type TimeViewType = "day" | "week" | "month";
 
 export default function Dashboard() {
@@ -140,10 +143,12 @@ export default function Dashboard() {
                 </>
               )}
               {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
-              {activeView === "work" && <WorkTimeSection selectedDate={selectedDate} />}
+              {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
+              {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} />}
+              {activeView === "goals" && <GoalsSection selectedDate={selectedDate} />}
+              {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
               {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
               {activeView === "groceries" && <GrocerySection />}
-              {activeView === "content" && <ContentCreationSection />}
             </>
           )}
         </div>
