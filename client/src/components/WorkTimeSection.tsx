@@ -29,60 +29,60 @@ export default function WorkTimeSection({ selectedDate }: WorkTimeSectionProps) 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Work Hours */}
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-medium text-gray-900">Work Hours</h4>
-              <Button variant="ghost" size="sm">
-                <Edit className="h-4 w-4" />
+              <h4 className="font-heading font-semibold text-gray-800">Work Hours</h4>
+              <Button variant="ghost" size="sm" className="hover:bg-purple-50 rounded-xl">
+                <Edit className="h-4 w-4 text-purple-500" />
               </Button>
             </div>
             
             <div className="text-center">
-              <div className="text-3xl font-bold text-accent mb-2">
+              <div className="text-3xl font-heading font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
                 {workHours.toFixed(1)}h
               </div>
-              <Progress value={workProgress} className="w-full h-2 mb-2" />
-              <div className="text-sm text-neutral-cool">Goal: 8h</div>
+              <Progress value={workProgress} className="w-full h-3 mb-3" />
+              <div className="text-sm text-muted-foreground bg-purple-50 rounded-lg px-3 py-1">Goal: 8h</div>
             </div>
           </CardContent>
         </Card>
 
         {/* TV Hours */}
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-medium text-gray-900">TV Time</h4>
-              <Button variant="ghost" size="sm">
-                <Plus className="h-4 w-4" />
+              <h4 className="font-heading font-semibold text-gray-800">TV Time</h4>
+              <Button variant="ghost" size="sm" className="hover:bg-blue-50 rounded-xl">
+                <Plus className="h-4 w-4 text-blue-500" />
               </Button>
             </div>
             
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">
+              <div className="text-3xl font-heading font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
                 {tvHours.toFixed(1)}h
               </div>
-              <div className="text-sm text-neutral-cool">Limit: 3h</div>
+              <div className="text-sm text-muted-foreground bg-blue-50 rounded-lg px-3 py-1">Limit: 3h</div>
             </div>
           </CardContent>
         </Card>
 
         {/* Phone Screen Time */}
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-medium text-gray-900">Phone Time</h4>
-              <Button variant="ghost" size="sm">
-                <Smartphone className="h-4 w-4" />
+              <h4 className="font-heading font-semibold text-gray-800">Phone Time</h4>
+              <Button variant="ghost" size="sm" className="hover:bg-pink-50 rounded-xl">
+                <Smartphone className="h-4 w-4 text-pink-500" />
               </Button>
             </div>
             
             <div className="text-center">
-              <div className="text-3xl font-bold text-secondary mb-2">
+              <div className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent mb-3">
                 {phoneHours.toFixed(1)}h
               </div>
-              <div className={`text-sm ${
-                phoneHours > 3 ? 'text-red-500' : 'text-neutral-cool'
+              <div className={`text-sm rounded-lg px-3 py-1 ${
+                phoneHours > 3 ? 'text-red-600 bg-red-50' : 'text-muted-foreground bg-pink-50'
               }`}>
                 {phoneHours > 3 ? 'Over limit (3h)' : 'Limit: 3h'}
               </div>
