@@ -30,27 +30,27 @@
 }
 
 .dark {
-  --background: 224 71% 4%;
-  --foreground: 213 31% 91%;
-  --muted: 223 47% 11%;
-  --muted-foreground: 215 14% 65%;
-  --popover: 224 71% 4%;
-  --popover-foreground: 213 31% 91%;
-  --card: 224 71% 4%;
-  --card-foreground: 213 31% 91%;
-  --border: 216 34% 17%;
-  --input: 216 34% 17%;
-  --primary: 224 76% 32%;
-  --primary-foreground: 220 100% 98%;
-  --secondary: 172 66% 30%;
+  --background: 270 25% 8%; /* Dark purple background */
+  --foreground: 0 0% 98%; /* White text */
+  --muted: 270 20% 12%; /* Slightly lighter purple for muted areas */
+  --muted-foreground: 0 0% 70%; /* Light gray for muted text */
+  --popover: 270 25% 8%;
+  --popover-foreground: 0 0% 98%;
+  --card: 270 20% 10%; /* Card background slightly lighter */
+  --card-foreground: 0 0% 98%;
+  --border: 270 15% 18%; /* Purple border */
+  --input: 270 15% 18%;
+  --primary: 315 85% 55%; /* Pink primary color */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 280 35% 25%; /* Muted purple secondary */
   --secondary-foreground: 0 0% 100%;
-  --accent: 38 92% 50%;
-  --accent-foreground: 0 0% 100%;
-  --success: 160 84% 39%;
+  --accent: 330 82% 70%; /* Light pink accent */
+  --accent-foreground: 270 25% 8%;
+  --success: 155 75% 60%;
   --success-foreground: 0 0% 100%;
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 213 31% 91%;
-  --ring: 216 34% 17%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 315 85% 55%;
   --radius: 0.75rem;
 }
 
