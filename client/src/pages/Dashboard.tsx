@@ -9,6 +9,7 @@ import ProductivitySection from "@/components/ProductivitySection";
 import GoalsSection from "@/components/GoalsSection";
 import ReportsSection from "@/components/ReportsSection";
 import DashboardHome from "@/components/DashboardHome";
+import SiteMapSection from "@/components/SiteMapSection";
 import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
@@ -16,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
 
 export default function Dashboard() {
@@ -47,6 +48,7 @@ export default function Dashboard() {
       case "finances": return "Financial Tracking";
       case "groceries": return "Grocery Management";
       case "content": return "Content Creation";
+      case "sitemap": return "Site Map";
       default: return "Dashboard";
     }
   };
@@ -67,6 +69,7 @@ export default function Dashboard() {
       case "finances": return "Manage your finances, bills, and spending";
       case "groceries": return "Plan and track your grocery shopping";
       case "content": return "Manage your content planning, creation, and scheduling";
+      case "sitemap": return "Quick access to all pages and sections";
       default: return "Track your daily habits and goals";
     }
   };

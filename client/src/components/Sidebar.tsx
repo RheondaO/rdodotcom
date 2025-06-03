@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   Zap,
-  PenTool
+  PenTool,
+  Map
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -23,7 +24,7 @@ import { format, addDays, subDays } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
 import { useTheme } from "@/hooks/use-theme";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "sitemap";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -62,6 +63,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     { key: "finances" as ViewType, label: "Finances", icon: DollarSign },
     { key: "groceries" as ViewType, label: "Groceries", icon: ShoppingCart },
     { key: "content" as ViewType, label: "Content", icon: PenTool },
+    { key: "sitemap" as ViewType, label: "Site Map", icon: Map },
   ];
 
   // Calculate progress metrics
