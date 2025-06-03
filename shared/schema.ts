@@ -235,6 +235,77 @@ export const contentProgress = pgTable("content_progress", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// App Development Tables
+export const appProjects = pgTable("app_projects", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  status: text("status").notNull().default("planning"), // planning, in_progress, testing, deployed, on_hold
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  projectType: text("project_type").notNull().default("web"), // web, mobile, desktop, api
+  repositoryUrl: text("repository_url"),
+  deploymentUrl: text("deployment_url"),
+  targetDate: timestamp("target_date"),
+  startDate: timestamp("start_date"),
+  completedDate: timestamp("completed_date"),
+  progress: integer("progress").notNull().default(0), // 0-100
+  estimatedHours: integer("estimated_hours"),
+  actualHours: integer("actual_hours").default(0),
+  techStack: text("tech_stack").array().notNull().default([]),
+  tags: text("tags").array().notNull().default([]),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const appTasks = pgTable("app_tasks", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => appProjects.id),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  status: text("status").notNull().default("todo"), // todo, in_progress, review, testing, done
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  category: text("category").notNull().default("feature"), // feature, bug, improvement, documentation
+  assignee: text("assignee"), // for team projects
+  estimatedHours: integer("estimated_hours"),
+  actualHours: integer("actual_hours").default(0),
+  dueDate: timestamp("due_date"),
+  completedDate: timestamp("completed_date"),
+  dependencies: text("dependencies").array().notNull().default([]), // task IDs that must be completed first
+  tags: text("tags").array().notNull().default([]),
+  attachments: text("attachments").array().notNull().default([]),
+  comments: text("comments").notNull().default(""),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const appSprints = pgTable("app_sprints", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => appProjects.id),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  status: text("status").notNull().default("planning"), // planning, active, completed
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  goal: text("goal").notNull().default(""),
+  velocity: integer("velocity").default(0), // story points completed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const appTimeEntries = pgTable("app_time_entries", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => appProjects.id),
+  taskId: integer("task_id").references(() => appTasks.id),
+  description: text("description").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time"),
+  duration: integer("duration").notNull().default(0), // in minutes
+  date: timestamp("date").notNull(),
+  billable: boolean("billable").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // Insert schemas
 export const insertDailyEntrySchema = createInsertSchema(dailyEntries).omit({
   id: true,
@@ -333,6 +404,29 @@ export const insertContentProgressSchema = createInsertSchema(contentProgress).o
   createdAt: true,
 });
 
+export const insertAppProjectSchema = createInsertSchema(appProjects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAppTaskSchema = createInsertSchema(appTasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAppSprintSchema = createInsertSchema(appSprints).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAppTimeEntrySchema = createInsertSchema(appTimeEntries).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Type exports
 export type InsertDailyEntry = z.infer<typeof insertDailyEntrySchema>;
 export type DailyEntry = typeof dailyEntries.$inferSelect;
@@ -390,3 +484,15 @@ export type ContentPiece = typeof contentPieces.$inferSelect;
 
 export type InsertContentProgress = z.infer<typeof insertContentProgressSchema>;
 export type ContentProgress = typeof contentProgress.$inferSelect;
+
+export type InsertAppProject = z.infer<typeof insertAppProjectSchema>;
+export type AppProject = typeof appProjects.$inferSelect;
+
+export type InsertAppTask = z.infer<typeof insertAppTaskSchema>;
+export type AppTask = typeof appTasks.$inferSelect;
+
+export type InsertAppSprint = z.infer<typeof insertAppSprintSchema>;
+export type AppSprint = typeof appSprints.$inferSelect;
+
+export type InsertAppTimeEntry = z.infer<typeof insertAppTimeEntrySchema>;
+export type AppTimeEntry = typeof appTimeEntries.$inferSelect;

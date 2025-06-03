@@ -10,7 +10,37 @@ import {
   type BillPayment,
   type InsertBillPayment,
   type GroceryItem,
-  type InsertGroceryItem
+  type InsertGroceryItem,
+  type GroceryList,
+  type InsertGroceryList,
+  type Goal,
+  type InsertGoal,
+  type Habit,
+  type InsertHabit,
+  type HabitLog,
+  type InsertHabitLog,
+  type Medication,
+  type InsertMedication,
+  type Todo,
+  type InsertTodo,
+  type TimeBlock,
+  type InsertTimeBlock,
+  type FocusSession,
+  type InsertFocusSession,
+  type Budget,
+  type InsertBudget,
+  type IncomeEntry,
+  type InsertIncomeEntry,
+  type Challenge,
+  type InsertChallenge,
+  type AppProject,
+  type InsertAppProject,
+  type AppTask,
+  type InsertAppTask,
+  type AppSprint,
+  type InsertAppSprint,
+  type AppTimeEntry,
+  type InsertAppTimeEntry
 } from "@shared/schema";
 
 export interface IStorage {
@@ -90,6 +120,29 @@ export interface IStorage {
   createChallenge(challenge: InsertChallenge): Promise<Challenge>;
   updateChallenge(id: number, updates: Partial<Challenge>): Promise<Challenge>;
   deleteChallenge(id: number): Promise<void>;
+  
+  // App Development
+  getAllAppProjects(): Promise<AppProject[]>;
+  getAppProject(id: number): Promise<AppProject | undefined>;
+  createAppProject(project: InsertAppProject): Promise<AppProject>;
+  updateAppProject(id: number, updates: Partial<AppProject>): Promise<AppProject>;
+  deleteAppProject(id: number): Promise<void>;
+  
+  getAppTasksByProject(projectId: number): Promise<AppTask[]>;
+  getAllAppTasks(): Promise<AppTask[]>;
+  createAppTask(task: InsertAppTask): Promise<AppTask>;
+  updateAppTask(id: number, updates: Partial<AppTask>): Promise<AppTask>;
+  deleteAppTask(id: number): Promise<void>;
+  
+  getAppSprintsByProject(projectId: number): Promise<AppSprint[]>;
+  createAppSprint(sprint: InsertAppSprint): Promise<AppSprint>;
+  updateAppSprint(id: number, updates: Partial<AppSprint>): Promise<AppSprint>;
+  deleteAppSprint(id: number): Promise<void>;
+  
+  getAppTimeEntriesByProject(projectId: number, startDate?: string, endDate?: string): Promise<AppTimeEntry[]>;
+  createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry>;
+  updateAppTimeEntry(id: number, updates: Partial<AppTimeEntry>): Promise<AppTimeEntry>;
+  deleteAppTimeEntry(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
