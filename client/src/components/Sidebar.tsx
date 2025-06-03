@@ -83,72 +83,75 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </Button>
       </div>
       
-      {/* Logo and Date */}
-      <div className="p-6 border-b border-pink-100 dark:border-purple-800">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-2xl flex items-center justify-center shadow-md">
-              <Sparkles className="text-white text-lg h-6 w-6" />
+      {/* Logo and Date - Hidden when collapsed */}
+      {!isCollapsed && (
+        <div className="p-6 border-b border-pink-100 dark:border-purple-800">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-2xl flex items-center justify-center shadow-md">
+                <Sparkles className="text-white text-lg h-6 w-6" />
+              </div>
+              <h1 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+                Belle Journal
+              </h1>
             </div>
-            <h1 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
-              Belle Journal
-            </h1>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="h-8 w-8 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
+            >
+              {theme === "light" ? (
+                <Moon className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+              ) : (
+                <Sun className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+              )}
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="h-8 w-8 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
-          >
-            {theme === "light" ? (
-              <Moon className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-            ) : (
-              <Sun className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-            )}
-          </Button>
-        </div>
-        <div className="space-y-3">
-          <div className="text-sm text-muted-foreground dark:text-white">
-            <span className="font-script text-base">Selected: </span>
-            <span className="font-medium text-pink-700 dark:text-white">
-              {format(selectedDate, 'MMMM d, yyyy')}
-            </span>
-          </div>
-          
-          {/* Date Navigation */}
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToPreviousDay}
-              className="h-8 w-8 p-0 hover:bg-pink-100 rounded-xl"
-            >
-              <ChevronLeft className="h-4 w-4 text-pink-600" />
-            </Button>
+          <div className="space-y-3">
+            <div className="text-sm text-muted-foreground dark:text-white">
+              <span className="font-script text-base">Selected: </span>
+              <span className="font-medium text-pink-700 dark:text-white">
+                {format(selectedDate, 'MMMM d, yyyy')}
+              </span>
+            </div>
             
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToToday}
-              className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium"
-            >
-              Today
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={goToNextDay}
-              className="h-8 w-8 p-0 hover:bg-pink-100 rounded-xl"
-            >
-              <ChevronRight className="h-4 w-4 text-pink-600" />
-            </Button>
+            {/* Date Navigation */}
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToPreviousDay}
+                className="h-8 w-8 p-0 hover:bg-pink-100 rounded-xl"
+              >
+                <ChevronLeft className="h-4 w-4 text-pink-600" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToToday}
+                className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium"
+              >
+                Today
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToNextDay}
+                className="h-8 w-8 p-0 hover:bg-pink-100 rounded-xl"
+              >
+                <ChevronRight className="h-4 w-4 text-pink-600" />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Quick Stats */}
-      <div className="p-6 border-b border-pink-100 dark:border-purple-800">
+      {!isCollapsed && (
+        <div className="p-6 border-b border-pink-100 dark:border-purple-800">
         <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
           Today's Progress ✨
         </h3>
@@ -186,14 +189,16 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
             <span className="text-xs text-muted-foreground dark:text-white font-medium">{mealCount}/3</span>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Navigation */}
-      <nav className="flex-1 p-6">
-        <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
-          Categories 💖
-        </h3>
-        <ul className="space-y-3">
+      {!isCollapsed && (
+        <nav className="flex-1 p-6">
+          <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
+            Categories 💖
+          </h3>
+          <ul className="space-y-3">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.key;
@@ -214,19 +219,50 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               </li>
             );
           })}
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      )}
+
+      {/* Collapsed Navigation - Icons Only */}
+      {isCollapsed && (
+        <nav className="flex-1 p-2">
+          <ul className="space-y-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeView === item.key;
+              
+              return (
+                <li key={item.key}>
+                  <button
+                    onClick={() => onViewChange(item.key)}
+                    className={`w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-lg'
+                        : 'hover:bg-pink-50 dark:hover:bg-purple-900 text-gray-600 dark:text-gray-300'
+                    }`}
+                    title={item.label}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      )}
 
       {/* Quick Add Button */}
-      <div className="p-6 border-t border-pink-100">
-        <Button 
-          onClick={onQuickAdd}
-          className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:from-pink-500 hover:to-purple-600 shadow-lg rounded-2xl font-medium py-3 transform hover:scale-105 transition-all duration-200"
-        >
-          <Plus className="mr-2 h-5 w-5" />
-          Quick Add Entry ✨
-        </Button>
-      </div>
+      {!isCollapsed && (
+        <div className="p-6 border-t border-pink-100">
+          <Button 
+            onClick={onQuickAdd}
+            className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:from-pink-500 hover:to-purple-600 shadow-lg rounded-2xl font-medium py-3 transform hover:scale-105 transition-all duration-200"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Quick Add Entry ✨
+          </Button>
+        </div>
+      )}
     </aside>
   );
 }
