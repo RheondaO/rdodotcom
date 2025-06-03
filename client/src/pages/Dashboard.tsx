@@ -73,6 +73,8 @@ export default function Dashboard() {
         onQuickAdd={() => setQuickAddOpen(true)}
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
       <main className="flex-1 overflow-auto">
