@@ -461,11 +461,11 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
             </Button>
             
             <Button
-              onClick={() => onNavigate('habits')}
+              onClick={() => onNavigate('goals')}
               variant="outline"
               className="h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-700"
             >
-              <Star className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              <Award className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               <span className="text-xs">Achievements</span>
             </Button>
           </div>
