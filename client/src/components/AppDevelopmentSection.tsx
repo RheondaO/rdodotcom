@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -85,6 +85,21 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
+  
+  // Time tracking state
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [activeTask, setActiveTask] = useState<string>("");
+  const [timeEntries, setTimeEntries] = useState<Array<{
+    id: number;
+    projectId: number;
+    taskDescription: string;
+    startTime: Date;
+    endTime: Date;
+    duration: number; // in minutes
+    date: string;
+  }>>([]);
 
   // Mock data - in real app would come from API
   const projects: AppProject[] = [
@@ -283,6 +298,56 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     };
     const Icon = icons[category as keyof typeof icons] || Lightbulb;
     return <Icon className="h-4 w-4" />;
+  };
+
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning && startTime) {
+      interval = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime.getTime()) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, startTime]);
+
+  // Timer functions
+  const startTimer = (taskDescription: string = "") => {
+    setStartTime(new Date());
+    setIsTimerRunning(true);
+    setActiveTask(taskDescription);
+    setElapsedTime(0);
+  };
+
+  const stopTimer = () => {
+    if (startTime && isTimerRunning) {
+      const endTime = new Date();
+      const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 60000); // minutes
+      
+      const newEntry = {
+        id: timeEntries.length + 1,
+        projectId: selectedProject || 1,
+        taskDescription: activeTask,
+        startTime,
+        endTime,
+        duration,
+        date: format(selectedDate, 'yyyy-MM-dd')
+      };
+      
+      setTimeEntries([...timeEntries, newEntry]);
+    }
+    
+    setIsTimerRunning(false);
+    setStartTime(null);
+    setElapsedTime(0);
+    setActiveTask("");
+  };
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const activeProjects = projects.filter(p => p.isActive);
@@ -1036,10 +1101,15 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Time Tracking</h2>
-            <Button className="bg-gradient-to-r from-green-400 to-emerald-500 text-white">
-              <Play className="h-4 w-4 mr-2" />
-              Start Timer
-            </Button>
+            {!isTimerRunning && (
+              <Button 
+                onClick={() => startTimer()}
+                className="bg-gradient-to-r from-green-400 to-emerald-500 text-white"
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Start Timer
+              </Button>
+            )}
           </div>
 
           <Card className="border-green-100 dark:border-green-800 shadow-lg">
@@ -1094,26 +1164,109 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center p-8">
-                <div className="text-6xl font-mono font-bold text-gray-900 dark:text-white mb-4">
-                  00:00:00
-                </div>
-                <p className="text-muted-foreground dark:text-gray-400 mb-6">
-                  No active session
-                </p>
-                <div className="flex gap-4 justify-center">
-                  <Button className="bg-gradient-to-r from-green-400 to-emerald-500 text-white">
+              {!isTimerRunning ? (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Task Description</label>
+                    <input
+                      type="text"
+                      placeholder="What are you working on?"
+                      className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600"
+                      value={activeTask}
+                      onChange={(e) => setActiveTask(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Project</label>
+                    <select
+                      className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600"
+                      value={selectedProject || ""}
+                      onChange={(e) => setSelectedProject(Number(e.target.value))}
+                    >
+                      <option value="">Select a project</option>
+                      {activeProjects.map(project => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Button 
+                    onClick={() => startTimer(activeTask)}
+                    className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white"
+                  >
                     <Play className="h-4 w-4 mr-2" />
                     Start Session
                   </Button>
-                  <Button variant="outline">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Settings
+                </div>
+              ) : (
+                <div className="text-center p-8">
+                  <div className="text-6xl font-mono font-bold text-green-600 dark:text-green-400 mb-4">
+                    {formatTime(elapsedTime)}
+                  </div>
+                  <div className="space-y-2 mb-6">
+                    <p className="text-gray-900 dark:text-white font-medium">
+                      {activeTask || "Unnamed task"}
+                    </p>
+                    <p className="text-muted-foreground dark:text-gray-400">
+                      {projects.find(p => p.id === selectedProject)?.name || "No project selected"}
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={stopTimer}
+                    variant="destructive"
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    <Square className="h-4 w-4 mr-2" />
+                    Stop Session
                   </Button>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
+
+          {/* Time Entries */}
+          {timeEntries.length > 0 && (
+            <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
+                  <BarChart3 className="h-5 w-5" />
+                  Today's Sessions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {timeEntries.map((entry) => (
+                    <div key={entry.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">
+                            {entry.taskDescription || "Unnamed task"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground dark:text-gray-400">
+                            {projects.find(p => p.id === entry.projectId)?.name || "No project"}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-green-600 dark:text-green-400">
+                            {entry.duration}m
+                          </div>
+                          <div className="text-xs text-muted-foreground dark:text-gray-400">
+                            {format(entry.startTime, 'HH:mm')} - {format(entry.endTime, 'HH:mm')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
+                    <div className="font-semibold text-green-700 dark:text-green-400">
+                      Total today: {timeEntries.reduce((sum, entry) => sum + entry.duration, 0)} minutes
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>
