@@ -6,6 +6,7 @@ import FinanceSection from "@/components/FinanceSection";
 import GrocerySection from "@/components/GrocerySection";
 import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
+import MonthView from "@/components/MonthView";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
@@ -28,6 +29,9 @@ export default function Dashboard() {
     if (timeView === "week") {
       return "Week Overview";
     }
+    if (timeView === "month") {
+      return "Month Overview";
+    }
     switch (activeView) {
       case "health": return "Health & Wellness";
       case "work": return "Work & Time Tracking";
@@ -40,6 +44,9 @@ export default function Dashboard() {
   const getViewDescription = () => {
     if (timeView === "week") {
       return "View your weekly progress and patterns";
+    }
+    if (timeView === "month") {
+      return "View your monthly progress and statistics";
     }
     switch (activeView) {
       case "health": return "Monitor your daily health habits and wellness goals";
@@ -117,6 +124,8 @@ export default function Dashboard() {
         <div className="p-8">
           {timeView === "week" ? (
             <WeekView selectedDate={selectedDate} onDateChange={setSelectedDate} />
+          ) : timeView === "month" ? (
+            <MonthView selectedDate={selectedDate} onDateChange={setSelectedDate} />
           ) : (
             <>
               {activeView === "dashboard" && (
