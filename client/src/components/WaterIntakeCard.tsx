@@ -29,20 +29,21 @@ export default function WaterIntakeCard({ selectedDate }: WaterIntakeCardProps) 
   };
 
   return (
-    <Card className="bg-white shadow-sm">
+    <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-secondary rounded-full"></div>
-            <h4 className="font-medium text-gray-900">Water Intake</h4>
+            <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
+            <h4 className="font-heading font-semibold text-gray-800">Water Intake</h4>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={handleAddWater}
             disabled={waterIntake >= waterGoal || updateDailyEntry.isPending}
+            className="hover:bg-blue-50 rounded-xl"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 text-blue-500" />
           </Button>
         </div>
         
@@ -76,11 +77,11 @@ export default function WaterIntakeCard({ selectedDate }: WaterIntakeCardProps) 
         </div>
         
         <div className="text-center">
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-2xl font-heading font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-1">
             {waterIntake * 8}oz
           </div>
-          <div className="text-sm text-neutral-cool">
-            Goal: {waterGoal * 8}oz
+          <div className="text-sm text-muted-foreground">
+            Goal: {waterGoal * 8}oz 💧
           </div>
         </div>
       </CardContent>
