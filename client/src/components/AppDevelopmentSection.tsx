@@ -81,7 +81,7 @@ interface AppDevelopmentSectionProps {
 }
 
 export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSectionProps) {
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "sprints" | "time">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "time">("overview");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -252,6 +252,64 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const activeProjects = projects.filter(p => p.isActive);
   const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
 
+  // Testing Template for AI Development Projects
+  const testingTemplate = {
+    designGaps: [
+      {
+        id: 1,
+        area: "User Experience",
+        issue: "Navigation flow unclear on mobile devices",
+        severity: "medium",
+        project: "Professional Portfolio",
+        status: "identified",
+        dateFound: "2025-06-03",
+        resolution: "",
+        testSteps: ["Navigate on mobile", "Check menu accessibility", "Verify responsive design"]
+      },
+      {
+        id: 2,
+        area: "Visual Design",
+        issue: "Color contrast insufficient for accessibility",
+        severity: "high",
+        project: "Really Obvious Media Lab",
+        status: "in_progress",
+        dateFound: "2025-06-01",
+        resolution: "Updating color palette to meet WCAG guidelines",
+        testSteps: ["Run accessibility audit", "Test with color blindness simulator", "Verify contrast ratios"]
+      }
+    ],
+    oversights: [
+      {
+        id: 1,
+        category: "Performance",
+        description: "Image optimization not implemented",
+        impact: "Slow page load times",
+        project: "Professional Portfolio",
+        priority: "high",
+        discoveredDuring: "Manual testing",
+        solution: "Implement next/image or similar optimization"
+      },
+      {
+        id: 2,
+        category: "SEO",
+        description: "Meta descriptions missing on key pages",
+        impact: "Poor search engine visibility",
+        project: "Really Obvious Media Lab",
+        priority: "medium",
+        discoveredDuring: "SEO audit",
+        solution: "Add dynamic meta descriptions"
+      }
+    ],
+    testChecklist: [
+      { category: "Functionality", items: ["All forms submit correctly", "Navigation works on all pages", "Search functionality accurate", "User authentication secure"] },
+      { category: "Design", items: ["Responsive on all devices", "Color contrast accessible", "Typography consistent", "Loading states present"] },
+      { category: "Performance", items: ["Page load under 3 seconds", "Images optimized", "Code minified", "CDN implemented"] },
+      { category: "SEO", items: ["Meta tags complete", "Alt text on images", "Structured data", "Sitemap generated"] },
+      { category: "Accessibility", items: ["Keyboard navigation", "Screen reader compatible", "Focus indicators", "ARIA labels"] },
+      { category: "Security", items: ["HTTPS enabled", "Input validation", "XSS protection", "Data encryption"] }
+    ]
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
@@ -276,7 +334,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
             { key: "overview", label: "Overview", icon: BarChart3 },
             { key: "projects", label: "Projects", icon: Code2 },
             { key: "tasks", label: "Tasks", icon: CheckSquare },
-            { key: "sprints", label: "Sprints", icon: Zap },
+            { key: "testing", label: "Testing & QA", icon: AlertCircle },
             { key: "time", label: "Time Tracking", icon: Timer }
           ].map((tab) => {
             const Icon = tab.icon;
@@ -664,6 +722,174 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         </div>
       )}
 
+      {/* Testing & QA View */}
+      {activeView === "testing" && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Testing & Quality Assurance</h2>
+            <Button className="bg-gradient-to-r from-red-400 to-orange-500 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Log Issue
+            </Button>
+          </div>
+
+          {/* Design Gaps Tracking */}
+          <Card className="border-red-100 dark:border-red-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                <AlertTriangle className="h-5 w-5" />
+                Design Gaps & Issues
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {testingTemplate.designGaps.map((gap) => (
+                  <div key={gap.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-red-400">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">{gap.issue}</h4>
+                        <p className="text-sm text-muted-foreground dark:text-gray-400">{gap.area} • {gap.project}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={
+                          gap.severity === "high" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" :
+                          gap.severity === "medium" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" :
+                          "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        }>
+                          {gap.severity}
+                        </Badge>
+                        <Badge variant="outline" className={
+                          gap.status === "identified" ? "text-orange-500" :
+                          gap.status === "in_progress" ? "text-blue-500" :
+                          "text-green-500"
+                        }>
+                          {gap.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Found:</span>
+                        <span className="ml-1 font-medium">{format(new Date(gap.dateFound), 'MMM dd, yyyy')}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Test Steps:</span>
+                        <span className="ml-1 font-medium">{gap.testSteps.length} defined</span>
+                      </div>
+                    </div>
+
+                    {gap.resolution && (
+                      <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
+                        <span className="text-blue-600 dark:text-blue-400 font-medium">Resolution:</span>
+                        <span className="ml-1">{gap.resolution}</span>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2 mt-3">
+                      <Button size="sm" variant="outline">
+                        Edit
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        <CheckSquare className="h-4 w-4 mr-1" />
+                        Test Steps
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Development Oversights */}
+          <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
+                <Lightbulb className="h-5 w-5" />
+                Development Oversights
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {testingTemplate.oversights.map((oversight) => (
+                  <div key={oversight.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-orange-400">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">{oversight.description}</h4>
+                        <p className="text-sm text-muted-foreground dark:text-gray-400">{oversight.category} • {oversight.project}</p>
+                      </div>
+                      <Badge className={
+                        oversight.priority === "high" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" :
+                        oversight.priority === "medium" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" :
+                        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                      }>
+                        {oversight.priority}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Impact:</span>
+                        <span className="ml-1">{oversight.impact}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Discovered During:</span>
+                        <span className="ml-1">{oversight.discoveredDuring}</span>
+                      </div>
+                      <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded">
+                        <span className="text-green-600 dark:text-green-400 font-medium">Solution:</span>
+                        <span className="ml-1">{oversight.solution}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mt-3">
+                      <Button size="sm" variant="outline">
+                        Assign Task
+                      </Button>
+                      <Button size="sm" variant="outline">
+                        Mark Resolved
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Testing Checklist */}
+          <Card className="border-green-100 dark:border-green-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
+                <CheckSquare className="h-5 w-5" />
+                Comprehensive Testing Checklist
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {testingTemplate.testChecklist.map((category, index) => (
+                  <div key={index} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
+                    <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
+                        <CheckSquare className="h-3 w-3 text-white" />
+                      </div>
+                      {category.category}
+                    </h4>
+                    <div className="space-y-2">
+                      {category.items.map((item, itemIndex) => (
+                        <label key={itemIndex} className="flex items-center space-x-2 text-sm">
+                          <input type="checkbox" className="rounded border-gray-300" />
+                          <span className="text-gray-600 dark:text-gray-300">{item}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Time Tracking View */}
       {activeView === "time" && (
         <div className="space-y-6">
@@ -714,6 +940,36 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Active Timer */}
+          <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+                <Clock className="h-5 w-5" />
+                Active Session
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center p-8">
+                <div className="text-6xl font-mono font-bold text-gray-900 dark:text-white mb-4">
+                  00:00:00
+                </div>
+                <p className="text-muted-foreground dark:text-gray-400 mb-6">
+                  No active session
+                </p>
+                <div className="flex gap-4 justify-center">
+                  <Button className="bg-gradient-to-r from-green-400 to-emerald-500 text-white">
+                    <Play className="h-4 w-4 mr-2" />
+                    Start Session
+                  </Button>
+                  <Button variant="outline">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
