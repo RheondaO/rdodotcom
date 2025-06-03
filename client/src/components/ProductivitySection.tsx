@@ -557,15 +557,20 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
         <Card className="bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg border-0 rounded-2xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <h4 className="text-lg font-semibold mb-1">Focus Session Active</h4>
-                <p className="text-pink-100">{focusSession.taskDescription}</p>
-                <p className="text-pink-200 text-sm">
-                  Started: {format(focusSession.startTime, 'HH:mm')} | 
-                  Target: {focusSession.plannedDuration} minutes
-                </p>
+                <p className="text-pink-100 mb-2">{focusSession.taskDescription}</p>
+                <div className="text-center">
+                  <div className="text-4xl font-mono font-bold text-white mb-2">
+                    {formatTime(elapsedTime)}
+                  </div>
+                  <p className="text-pink-200 text-sm">
+                    Target: {focusSession.plannedDuration} minutes | 
+                    Started: {format(focusSession.startTime, 'HH:mm')}
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col items-center space-y-2 ml-4">
                 <Button
                   onClick={() => endFocusSession(true)}
                   className="bg-white/20 hover:bg-white/30 text-white"
@@ -713,6 +718,49 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
             )}
           </CardContent>
         </Card>
+
+        {/* Time Entries */}
+        {timeEntries.length > 0 && (
+          <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
+                <BarChart3 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <span>Today's Time Tracking</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {timeEntries.map((entry) => (
+                  <div key={entry.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          {entry.taskDescription || "Unnamed task"}
+                        </h4>
+                        <p className="text-sm text-muted-foreground dark:text-gray-400 capitalize">
+                          {entry.category}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-green-600 dark:text-green-400">
+                          {entry.duration}m
+                        </div>
+                        <div className="text-xs text-muted-foreground dark:text-gray-400">
+                          {format(entry.startTime, 'HH:mm')} - {format(entry.endTime, 'HH:mm')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
+                  <div className="font-semibold text-green-700 dark:text-green-400">
+                    Total today: {timeEntries.reduce((sum, entry) => sum + entry.duration, 0)} minutes
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
