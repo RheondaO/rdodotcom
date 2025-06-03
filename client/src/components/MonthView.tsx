@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
@@ -15,6 +15,7 @@ import {
   endOfWeek
 } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
+import { useQuery } from "@tanstack/react-query";
 
 interface MonthViewProps {
   selectedDate: Date;
@@ -131,21 +132,65 @@ interface MonthlyStatsProps {
 }
 
 function MonthlyStats({ monthDays }: MonthlyStatsProps) {
-  // For now, show simplified stats without individual day queries
-  // This avoids the React hooks violation and will be enhanced later
   const totalDays = monthDays.length;
-  const currentDate = new Date();
-  const currentMonthDay = monthDays.find(day => 
-    day.getDate() === currentDate.getDate() &&
-    day.getMonth() === currentDate.getMonth() &&
-    day.getFullYear() === currentDate.getFullYear()
+  
+  // Create a query to fetch all daily entries for the month
+  const monthDateStrings = useMemo(() => 
+    monthDays.map(day => format(day, 'yyyy-MM-dd')),
+    [monthDays]
   );
 
-  // Show basic stats for demonstration
-  const averageWater = "6.5";
-  const exercisePercentage = 75;
-  const averageMeals = "2.8";
-  const totalWorkHours = 160;
+  const { data: monthlyData } = useQuery({
+    queryKey: ['/api/daily-entries-bulk', monthDateStrings],
+    queryFn: async () => {
+      // Fetch all daily entries for the month in parallel
+      const promises = monthDateStrings.map(async (dateString) => {
+        try {
+          const response = await fetch(`/api/daily-entry/${dateString}`);
+          if (response.ok) {
+            const data = await response.json();
+            return data;
+          }
+          return null;
+        } catch {
+          return null;
+        }
+      });
+      
+      const results = await Promise.all(promises);
+      return results.filter(Boolean);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Calculate statistics from the fetched data
+  const dailyEntries = monthlyData || [];
+  let totalWater = 0;
+  let exerciseDays = 0;
+  let totalMeals = 0;
+  let totalWorkHours = 0;
+  let daysWithData = 0;
+
+  dailyEntries.forEach((entry: any) => {
+    if (entry) {
+      daysWithData++;
+      totalWater += entry.waterIntake ?? 0;
+      if (entry.exerciseCompleted) exerciseDays++;
+      
+      const meals = [
+        entry.breakfastCompleted,
+        entry.lunchCompleted,
+        entry.dinnerCompleted
+      ].filter(Boolean).length;
+      totalMeals += meals;
+      
+      totalWorkHours += parseFloat(entry.workHours || "0");
+    }
+  });
+
+  const averageWater = daysWithData > 0 ? (totalWater / daysWithData).toFixed(1) : "0";
+  const exercisePercentage = daysWithData > 0 ? Math.round((exerciseDays / daysWithData) * 100) : 0;
+  const averageMeals = daysWithData > 0 ? (totalMeals / daysWithData).toFixed(1) : "0";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

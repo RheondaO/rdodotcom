@@ -79,7 +79,7 @@ export default function GrocerySection() {
     deleteItemMutation.mutate(id);
   };
 
-  const totalEstimated = groceryItems.reduce((sum, item) => {
+  const totalEstimated = (groceryItems || []).reduce((sum: number, item: any) => {
     return sum + parseFloat(item.estimatedPrice || "0");
   }, 0);
 
