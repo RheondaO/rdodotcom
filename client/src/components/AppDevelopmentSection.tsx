@@ -727,280 +727,194 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Testing & Quality Assurance</h2>
-            <Button className="bg-gradient-to-r from-red-400 to-orange-500 text-white">
-              <Plus className="h-4 w-4 mr-2" />
-              Log Issue
-            </Button>
+            <div className="flex gap-2">
+              <Button className="bg-gradient-to-r from-red-400 to-orange-500 text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Test Item
+              </Button>
+              <Button variant="outline">
+                <CheckSquare className="h-4 w-4 mr-2" />
+                Run All Tests
+              </Button>
+            </div>
           </div>
 
-          {/* Design Gaps Tracking */}
-          <Card className="border-red-100 dark:border-red-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-red-600 dark:text-red-400">
-                <AlertTriangle className="h-5 w-5" />
-                Design Gaps & Issues
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {testingTemplate.designGaps.map((gap) => (
-                  <div key={gap.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-red-400">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{gap.issue}</h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">{gap.area} • {gap.project}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={
-                          gap.severity === "high" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" :
-                          gap.severity === "medium" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" :
-                          "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        }>
-                          {gap.severity}
-                        </Badge>
-                        <Badge variant="outline" className={
-                          gap.status === "identified" ? "text-orange-500" :
-                          gap.status === "in_progress" ? "text-blue-500" :
-                          "text-green-500"
-                        }>
-                          {gap.status.replace('_', ' ')}
-                        </Badge>
-                      </div>
+          {/* Simple Test Lists */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Portfolio Testing */}
+            <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+                  <Globe className="h-5 w-5" />
+                  Professional Portfolio Tests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Mobile navigation works correctly</span>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Found:</span>
-                        <span className="ml-1 font-medium">{format(new Date(gap.dateFound), 'MMM dd, yyyy')}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Test Steps:</span>
-                        <span className="ml-1 font-medium">{gap.testSteps.length} defined</span>
-                      </div>
-                    </div>
-
-                    {gap.resolution && (
-                      <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
-                        <span className="text-blue-600 dark:text-blue-400 font-medium">Resolution:</span>
-                        <span className="ml-1">{gap.resolution}</span>
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 mt-3">
-                      <Button size="sm" variant="outline">
-                        Edit
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <CheckSquare className="h-4 w-4 mr-1" />
-                        Test Steps
-                      </Button>
-                    </div>
+                    <Badge variant="outline" className="text-red-500">Failed</Badge>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Development Oversights */}
-          <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
-                <Lightbulb className="h-5 w-5" />
-                Development Oversights
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {testingTemplate.oversights.map((oversight) => (
-                  <div key={oversight.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-orange-400">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{oversight.description}</h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">{oversight.category} • {oversight.project}</p>
-                      </div>
-                      <Badge className={
-                        oversight.priority === "high" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" :
-                        oversight.priority === "medium" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" :
-                        "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                      }>
-                        {oversight.priority}
-                      </Badge>
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Project showcase loads properly</span>
                     </div>
-                    
-                    <div className="space-y-2 text-sm">
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Impact:</span>
-                        <span className="ml-1">{oversight.impact}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Discovered During:</span>
-                        <span className="ml-1">{oversight.discoveredDuring}</span>
-                      </div>
-                      <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded">
-                        <span className="text-green-600 dark:text-green-400 font-medium">Solution:</span>
-                        <span className="ml-1">{oversight.solution}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 mt-3">
-                      <Button size="sm" variant="outline">
-                        Assign Task
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        Mark Resolved
-                      </Button>
-                    </div>
+                    <Badge variant="outline" className="text-green-500">Passed</Badge>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Contact form submits successfully</span>
+                    </div>
+                    <Badge variant="outline" className="text-yellow-500">Pending</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Page load time under 3 seconds</span>
+                    </div>
+                    <Badge variant="outline" className="text-yellow-500">Pending</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">SEO meta tags complete</span>
+                    </div>
+                    <Badge variant="outline" className="text-green-500">Passed</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* AI Development Testing Checklist */}
+            {/* Media Lab Testing */}
+            <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
+                  <Globe className="h-5 w-5" />
+                  Really Obvious Media Lab Tests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Animation performance smooth</span>
+                    </div>
+                    <Badge variant="outline" className="text-green-500">Passed</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Media gallery displays correctly</span>
+                    </div>
+                    <Badge variant="outline" className="text-red-500">Failed</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Content management system functional</span>
+                    </div>
+                    <Badge variant="outline" className="text-yellow-500">Pending</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Cross-browser compatibility</span>
+                    </div>
+                    <Badge variant="outline" className="text-yellow-500">Pending</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span className="text-sm">Accessibility standards met</span>
+                    </div>
+                    <Badge variant="outline" className="text-red-500">Failed</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* General Testing Checklist */}
           <Card className="border-green-100 dark:border-green-800 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
                 <CheckSquare className="h-5 w-5" />
-                AI Development Testing Checklist
+                General Testing Checklist
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {testingTemplate.testChecklist.map((category, index) => (
-                  <div key={index} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                      <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
-                        <CheckSquare className="h-3 w-3 text-white" />
-                      </div>
-                      {category.category}
-                    </h4>
-                    <div className="space-y-2">
-                      {category.items.map((item, itemIndex) => (
-                        <label key={itemIndex} className="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                          <input type="checkbox" className="rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                          <span className="text-gray-600 dark:text-gray-300">{item}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* AI-Specific Testing Areas */}
-          <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
-                <Code2 className="h-5 w-5" />
-                AI-Assisted Development Considerations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Code Quality Checks</h4>
-                  <div className="space-y-2 text-sm">
-                    <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                      <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                      <span className="text-gray-600 dark:text-gray-300">AI-generated code reviewed for logic errors</span>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Functionality</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>All forms work correctly</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                      <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                      <span className="text-gray-600 dark:text-gray-300">Variable names and functions are meaningful</span>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Navigation is functional</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                      <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                      <span className="text-gray-600 dark:text-gray-300">No unused imports or variables</span>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Search works properly</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                      <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                      <span className="text-gray-600 dark:text-gray-300">Error handling is comprehensive</span>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>User authentication secure</span>
                     </label>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Integration Testing</h4>
-                  <div className="space-y-2 text-sm">
-                    <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                      <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                      <span className="text-gray-600 dark:text-gray-300">Components work together seamlessly</span>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Performance</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Page load under 3 seconds</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                      <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                      <span className="text-gray-600 dark:text-gray-300">API endpoints return expected data</span>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Images optimized</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                      <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                      <span className="text-gray-600 dark:text-gray-300">State management is consistent</span>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Code minified</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
-                      <input type="checkbox" className="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
-                      <span className="text-gray-600 dark:text-gray-300">Navigation flows are logical</span>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Mobile performance good</span>
                     </label>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Testing Progress Summary */}
-          <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                <BarChart3 className="h-5 w-5" />
-                Testing Progress Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">
-                    {testingTemplate.designGaps.length}
-                  </div>
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">Design Gaps Identified</p>
-                  <div className="mt-2">
-                    <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                      {testingTemplate.designGaps.filter(g => g.severity === 'high').length} High Priority
-                    </Badge>
                   </div>
                 </div>
 
-                <div className="text-center p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
-                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                    {testingTemplate.oversights.length}
-                  </div>
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">Development Oversights</p>
-                  <div className="mt-2">
-                    <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
-                      {testingTemplate.oversights.filter(o => o.priority === 'high').length} High Priority
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="text-center p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
-                    {testingTemplate.testChecklist.reduce((sum, cat) => sum + cat.items.length, 0)}
-                  </div>
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">Total Test Items</p>
-                  <div className="mt-2">
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                      {testingTemplate.testChecklist.length} Categories
-                    </Badge>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Design</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Responsive on all devices</span>
+                    </label>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Color contrast accessible</span>
+                    </label>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Typography consistent</span>
+                    </label>
+                    <label className="flex items-center space-x-2 text-sm cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                      <span>Loading states present</span>
+                    </label>
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-6">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-muted-foreground dark:text-gray-400">Overall Testing Progress</span>
-                  <span className="font-medium">65%</span>
-                </div>
-                <Progress value={65} className="h-3" />
-                <p className="text-xs text-muted-foreground dark:text-gray-400 mt-1">
-                  Based on completed checklist items and resolved issues
-                </p>
               </div>
             </CardContent>
           </Card>
