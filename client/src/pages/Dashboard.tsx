@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [timeView, setTimeView] = useState<TimeViewType>("day");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleExportData = () => {
     // TODO: Implement data export functionality

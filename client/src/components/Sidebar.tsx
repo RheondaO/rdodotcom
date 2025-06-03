@@ -9,7 +9,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Sun,
-  Moon
+  Moon,
+  Menu,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -25,9 +27,11 @@ interface SidebarProps {
   onQuickAdd: () => void;
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export default function Sidebar({ activeView, onViewChange, onQuickAdd, selectedDate, onDateChange }: SidebarProps) {
+export default function Sidebar({ activeView, onViewChange, onQuickAdd, selectedDate, onDateChange, isCollapsed, onToggleCollapse }: SidebarProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const { theme, toggleTheme } = useTheme();
@@ -66,7 +70,19 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   ] as const;
 
   return (
-    <aside className="w-80 bg-gradient-to-b from-pink-50 to-purple-50 dark:bg-gradient-to-b dark:from-purple-950 dark:to-pink-950 border-r border-pink-200 dark:border-purple-800 flex flex-col shadow-lg" data-sidebar>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} bg-gradient-to-b from-pink-50 to-purple-50 dark:bg-gradient-to-b dark:from-purple-950 dark:to-pink-950 border-r border-pink-200 dark:border-purple-800 flex flex-col shadow-lg transition-all duration-300 ease-in-out`} data-sidebar>
+      {/* Toggle Button */}
+      <div className="p-4 border-b border-pink-200 dark:border-purple-800">
+        <Button
+          onClick={onToggleCollapse}
+          variant="ghost"
+          size="sm"
+          className={`${isCollapsed ? 'w-full' : 'ml-auto'} hover:bg-pink-100 dark:hover:bg-purple-800`}
+        >
+          {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+        </Button>
+      </div>
+      
       {/* Logo and Date */}
       <div className="p-6 border-b border-pink-100 dark:border-purple-800">
         <div className="flex items-center justify-between mb-4">
