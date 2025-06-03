@@ -11,6 +11,7 @@ import ReportsSection from "@/components/ReportsSection";
 import DashboardHome from "@/components/DashboardHome";
 import SiteMapSection from "@/components/SiteMapSection";
 import AppDevelopmentSection from "@/components/AppDevelopmentSection";
+import ContentManagementSuite from "@/components/ContentManagementSuite";
 import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
@@ -48,7 +49,7 @@ export default function Dashboard() {
       case "reports": return "Reports & Analytics";
       case "finances": return "Financial Tracking";
       case "groceries": return "Grocery Management";
-      case "content": return "Content Creation";
+      case "content": return "Content Management Suite";
       case "sitemap": return "Site Map";
       default: return "Dashboard";
     }
@@ -158,6 +159,7 @@ export default function Dashboard() {
               {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
               {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
               {activeView === "groceries" && <GrocerySection />}
+              {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
               {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
               {activeView === "sitemap" && (
                 <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} />

@@ -65,6 +65,7 @@ interface MiniGameDesign {
 }
 
 export default function ContentCreationSection() {
+  const [activeView, setActiveView] = useState<"overview" | "categories" | "content" | "calendar" | "analytics">("overview");
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedMiniGame, setSelectedMiniGame] = useState<number | null>(null);
   const [showCreateMiniGameDialog, setShowCreateMiniGameDialog] = useState(false);
