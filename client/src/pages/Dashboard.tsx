@@ -8,6 +8,7 @@ import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 
@@ -66,7 +67,7 @@ export default function Dashboard() {
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
       />
-      
+
       <main className="flex-1 overflow-auto">
         {/* Header */}
         <header className="bg-white/70 backdrop-blur-sm border-b border-pink-200 px-8 py-6 shadow-sm">
@@ -76,6 +77,7 @@ export default function Dashboard() {
               <p className="text-muted-foreground mt-2 font-medium">{getViewDescription()}</p>
             </div>
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               <Button 
                 variant="outline" 
                 onClick={handleExportData}
