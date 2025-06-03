@@ -7,12 +7,15 @@ import {
   Plus,
   Sparkles,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Sun,
+  Moon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { format, addDays, subDays } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
+import { useTheme } from "@/hooks/use-theme";
 
 type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries";
 
@@ -27,6 +30,7 @@ interface SidebarProps {
 export default function Sidebar({ activeView, onViewChange, onQuickAdd, selectedDate, onDateChange }: SidebarProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
+  const { theme, toggleTheme } = useTheme();
 
   const goToPreviousDay = () => {
     onDateChange(subDays(selectedDate, 1));

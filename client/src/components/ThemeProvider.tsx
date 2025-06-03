@@ -1,0 +1,1 @@
+// This file is redundant - using the theme provider from hooks/use-theme.tsx instead
