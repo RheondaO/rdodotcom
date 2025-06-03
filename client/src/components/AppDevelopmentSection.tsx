@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Play,
   Pause,
+  Square,
   Plus,
   Calendar,
   Target,

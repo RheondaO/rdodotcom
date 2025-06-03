@@ -83,6 +83,21 @@ interface ProductivitySectionProps {
 }
 
 export default function ProductivitySection({ selectedDate }: ProductivitySectionProps) {
+  // Time tracking state
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [activeTask, setActiveTask] = useState<string>("");
+  const [timeEntries, setTimeEntries] = useState<Array<{
+    id: number;
+    taskDescription: string;
+    startTime: Date;
+    endTime: Date;
+    duration: number; // in minutes
+    date: string;
+    category: string;
+  }>>([]);
+
   const [todos, setTodos] = useState<Todo[]>([
     {
       id: 1,
@@ -220,6 +235,56 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
     { value: "meeting", label: "Meeting", icon: "👥" }
   ];
 
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isTimerRunning && startTime) {
+      interval = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime.getTime()) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, startTime]);
+
+  // Timer functions
+  const startTimer = (taskDescription: string = "", category: string = "work") => {
+    setStartTime(new Date());
+    setIsTimerRunning(true);
+    setActiveTask(taskDescription);
+    setElapsedTime(0);
+  };
+
+  const stopTimer = () => {
+    if (startTime && isTimerRunning) {
+      const endTime = new Date();
+      const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 60000); // minutes
+      
+      const newEntry = {
+        id: timeEntries.length + 1,
+        taskDescription: activeTask,
+        startTime,
+        endTime,
+        duration,
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        category: 'work'
+      };
+      
+      setTimeEntries([...timeEntries, newEntry]);
+    }
+    
+    setIsTimerRunning(false);
+    setStartTime(null);
+    setElapsedTime(0);
+    setActiveTask("");
+  };
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const todaysTodos = todos.filter(todo => !todo.isCompleted);
   const completedTodos = todos.filter(todo => todo.isCompleted);
   const todaysTimeBlocks = timeBlocks.filter(block => block.date === format(selectedDate, 'yyyy-MM-dd'));
@@ -239,6 +304,7 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
       isActive: true
     };
     setFocusSession(session);
+    startTimer(task, "focus");
   };
 
   const endFocusSession = (successful: boolean, notes: string = "") => {
@@ -255,6 +321,7 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
       notes,
       isActive: false
     });
+    stopTimer();
 
     // Update challenge progress
     if (successful) {
