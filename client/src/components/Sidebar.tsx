@@ -42,7 +42,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
   const waterProgress = dailyEntry?.waterIntake ? (dailyEntry.waterIntake / 8) * 100 : 0;
   const waterCount = `${dailyEntry?.waterIntake || 0}/8`;
-  
+
   const mealCount = [
     dailyEntry?.breakfastCompleted,
     dailyEntry?.lunchCompleted,
@@ -76,7 +76,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               {format(selectedDate, 'MMMM d, yyyy')}
             </span>
           </div>
-          
+
           {/* Date Navigation */}
           <div className="flex items-center justify-between">
             <Button
@@ -87,7 +87,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
             >
               <ChevronLeft className="h-4 w-4 text-pink-600" />
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -96,7 +96,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
             >
               Today
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -125,7 +125,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               <span className="text-xs text-muted-foreground font-medium">{waterCount}</span>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between bg-white/60 rounded-xl p-3 backdrop-blur-sm">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full shadow-sm"></div>
@@ -159,7 +159,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.key;
-            
+
             return (
               <li key={item.key}>
                 <button
@@ -192,3 +192,4 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     </aside>
   );
 }
+```
