@@ -82,6 +82,14 @@ export default function SiteMapSection({ onNavigate }: SiteMapSectionProps) {
         { key: "groceries", label: "Grocery Management", icon: ShoppingCart, description: "Shopping lists and meal planning" },
         { key: "content", label: "Content Creation", icon: PenTool, description: "Content planning and scheduling" }
       ]
+    },
+    {
+      category: "Development & Projects",
+      icon: Code2,
+      color: "from-purple-400 to-indigo-500",
+      items: [
+        { key: "apps", label: "App Development", icon: Code2, description: "Project management for software development" }
+      ]
     }
   ];
 
