@@ -88,9 +88,9 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
           </Button>
         </div>
         <div className="space-y-3">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground dark:text-white">
             <span className="font-script text-base">Selected: </span>
-            <span className="font-medium text-pink-700">
+            <span className="font-medium text-pink-700 dark:text-white">
               {format(selectedDate, 'MMMM d, yyyy')}
             </span>
           </div>
@@ -110,7 +110,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               variant="ghost"
               size="sm"
               onClick={goToToday}
-              className="text-xs px-3 py-1 h-7 hover:bg-pink-100 rounded-lg text-pink-600 font-medium"
+              className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium"
             >
               Today
             </Button>
@@ -128,26 +128,26 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
       </div>
 
       {/* Quick Stats */}
-      <div className="p-6 border-b border-pink-100">
-        <h3 className="text-sm font-heading font-semibold text-pink-600 uppercase tracking-wide mb-4">
+      <div className="p-6 border-b border-pink-100 dark:border-purple-800">
+        <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
           Today's Progress ✨
         </h3>
         <div className="space-y-4">
-          <div className="flex items-center justify-between bg-white/60 rounded-xl p-3 backdrop-blur-sm">
+          <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700">Water</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-white">Water</span>
             </div>
             <div className="flex items-center space-x-2">
               <Progress value={waterProgress} className="w-16 h-2" />
-              <span className="text-xs text-muted-foreground font-medium">{waterCount}</span>
+              <span className="text-xs text-muted-foreground dark:text-white font-medium">{waterCount}</span>
             </div>
           </div>
           
-          <div className="flex items-center justify-between bg-white/60 rounded-xl p-3 backdrop-blur-sm">
+          <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700">Exercise</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-white">Exercise</span>
             </div>
             <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
               dailyEntry?.exerciseCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gray-200'
@@ -158,19 +158,19 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
             </div>
           </div>
 
-          <div className="flex items-center justify-between bg-white/60 rounded-xl p-3 backdrop-blur-sm">
+          <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700">Meals</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-white">Meals</span>
             </div>
-            <span className="text-xs text-muted-foreground font-medium">{mealCount}/3</span>
+            <span className="text-xs text-muted-foreground dark:text-white font-medium">{mealCount}/3</span>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-6">
-        <h3 className="text-sm font-heading font-semibold text-pink-600 uppercase tracking-wide mb-4">
+        <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
           Categories 💖
         </h3>
         <ul className="space-y-3">
@@ -184,8 +184,8 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
                   onClick={() => onViewChange(item.key)}
                   className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all duration-200 shadow-sm ${
                     isActive
-                      ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white font-medium shadow-lg transform scale-105'
-                      : 'hover:bg-white/80 text-gray-700 hover:shadow-md hover:transform hover:scale-102'
+                      ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white font-medium shadow-lg transform scale-105'
+                      : 'hover:bg-white/80 dark:hover:bg-gray-800/80 text-gray-700 dark:text-white hover:shadow-md hover:transform hover:scale-102'
                   }`}
                 >
                   <Icon className="h-5 w-5" />

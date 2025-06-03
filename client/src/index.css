@@ -31,35 +31,35 @@
 
 .dark {
   --background: 270 30% 5%; /* Deeper purple background */
-  --foreground: 315 25% 96%; /* Slightly warm white text */
+  --foreground: 0 0% 98%; /* Pure white text */
   --muted: 270 25% 9%; /* Muted areas with more depth */
-  --muted-foreground: 270 8% 65%; /* Softer muted text */
+  --muted-foreground: 0 0% 85%; /* Light gray muted text */
   --popover: 270 25% 7%; /* Darker popover for depth */
-  --popover-foreground: 315 25% 96%;
+  --popover-foreground: 0 0% 98%; /* Pure white text */
   --card: 270 22% 8%; /* Card with subtle purple tint */
-  --card-foreground: 315 25% 96%;
+  --card-foreground: 0 0% 98%; /* Pure white text */
   --border: 270 20% 15%; /* More defined borders */
   --input: 270 20% 12%; /* Input fields slightly darker */
   --primary: 315 90% 58%; /* More vibrant pink */
-  --primary-foreground: 270 30% 5%;
+  --primary-foreground: 0 0% 98%; /* Pure white text */
   --secondary: 280 40% 20%; /* Richer purple secondary */
-  --secondary-foreground: 315 25% 96%;
+  --secondary-foreground: 0 0% 98%; /* Pure white text */
   --accent: 330 85% 65%; /* Brighter accent pink */
-  --accent-foreground: 270 30% 5%;
+  --accent-foreground: 0 0% 98%; /* Pure white text */
   --success: 155 75% 55%;
-  --success-foreground: 270 30% 5%;
+  --success-foreground: 0 0% 98%; /* Pure white text */
   --destructive: 0 84% 65%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive-foreground: 0 0% 98%; /* Pure white text */
   --ring: 315 90% 58%;
   --radius: 0.75rem;
   
   /* Enhanced dark mode specific variables */
   --sidebar-background: 270 28% 6%;
-  --sidebar-foreground: 315 25% 96%;
+  --sidebar-foreground: 0 0% 98%; /* Pure white text */
   --sidebar-primary: 315 90% 58%;
-  --sidebar-primary-foreground: 270 30% 5%;
+  --sidebar-primary-foreground: 0 0% 98%; /* Pure white text */
   --sidebar-accent: 330 85% 65%;
-  --sidebar-accent-foreground: 270 30% 5%;
+  --sidebar-accent-foreground: 0 0% 98%; /* Pure white text */
   --sidebar-border: 270 20% 12%;
   --sidebar-ring: 315 90% 58%;
 }
