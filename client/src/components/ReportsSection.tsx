@@ -14,15 +14,57 @@ import {
   Droplets,
   Dumbbell,
   Clock,
-  DollarSign
+  DollarSign,
+  Heart,
+  Zap,
+  CheckSquare,
+  ShoppingCart,
+  Pill,
+  Coffee,
+  Moon,
+  Flame,
+  AlertTriangle,
+  ArrowUp,
+  ArrowDown,
+  Minus
 } from "lucide-react";
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, subWeeks, subMonths } from "date-fns";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, eachDayOfInterval, subWeeks, subMonths, isToday, isSameDay } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
 
-type ReportPeriod = "week" | "month";
+type ReportPeriod = "week" | "month" | "quarter";
 
 interface ReportsSectionProps {
   selectedDate: Date;
+}
+
+interface AnalyticsData {
+  healthMetrics: {
+    waterIntakeAvg: number;
+    exerciseCompletionRate: number;
+    sleepQualityAvg: number;
+    mealCompletionRate: number;
+  };
+  productivityMetrics: {
+    focusSessionsCompleted: number;
+    totalFocusHours: number;
+    taskCompletionRate: number;
+    averageWorkHours: number;
+  };
+  habitMetrics: {
+    totalHabitsTracked: number;
+    overallCompletionRate: number;
+    longestStreak: number;
+    mostConsistentHabit: string;
+  };
+  goalMetrics: {
+    goalsInProgress: number;
+    goalsCompleted: number;
+    averageProgress: number;
+    onTrackGoals: number;
+  };
+  wellnessScore: number;
+  productivityScore: number;
+  trend: "up" | "down" | "stable";
 }
 
 export default function ReportsSection({ selectedDate }: ReportsSectionProps) {
@@ -30,365 +72,400 @@ export default function ReportsSection({ selectedDate }: ReportsSectionProps) {
   
   const currentPeriodStart = reportPeriod === "week" 
     ? startOfWeek(selectedDate) 
-    : startOfMonth(selectedDate);
+    : reportPeriod === "month"
+    ? startOfMonth(selectedDate)
+    : new Date(selectedDate.getFullYear(), Math.floor(selectedDate.getMonth() / 3) * 3, 1);
+    
   const currentPeriodEnd = reportPeriod === "week" 
     ? endOfWeek(selectedDate) 
-    : endOfMonth(selectedDate);
-  
-  const previousPeriodStart = reportPeriod === "week"
-    ? startOfWeek(subWeeks(selectedDate, 1))
-    : startOfMonth(subMonths(selectedDate, 1));
-  const previousPeriodEnd = reportPeriod === "week"
-    ? endOfWeek(subWeeks(selectedDate, 1))
-    : endOfMonth(subMonths(selectedDate, 1));
+    : reportPeriod === "month"
+    ? endOfMonth(selectedDate)
+    : new Date(selectedDate.getFullYear(), Math.floor(selectedDate.getMonth() / 3) * 3 + 3, 0);
 
-  const currentPeriodDays = eachDayOfInterval({ start: currentPeriodStart, end: currentPeriodEnd });
-  const previousPeriodDays = eachDayOfInterval({ start: previousPeriodStart, end: previousPeriodEnd });
+  // Mock analytics data - in real app would come from API
+  const analyticsData: AnalyticsData = {
+    healthMetrics: {
+      waterIntakeAvg: 6.8,
+      exerciseCompletionRate: 78,
+      sleepQualityAvg: 7.2,
+      mealCompletionRate: 89
+    },
+    productivityMetrics: {
+      focusSessionsCompleted: 12,
+      totalFocusHours: 24.5,
+      taskCompletionRate: 85,
+      averageWorkHours: 7.2
+    },
+    habitMetrics: {
+      totalHabitsTracked: 8,
+      overallCompletionRate: 76,
+      longestStreak: 14,
+      mostConsistentHabit: "Morning Meditation"
+    },
+    goalMetrics: {
+      goalsInProgress: 5,
+      goalsCompleted: 2,
+      averageProgress: 68,
+      onTrackGoals: 4
+    },
+    wellnessScore: 82,
+    productivityScore: 77,
+    trend: "up"
+  };
 
-  // Calculate current period stats
-  const currentStats = calculatePeriodStats(currentPeriodDays);
-  const previousStats = calculatePeriodStats(previousPeriodDays);
+  const weeklyHabitData = [
+    { day: "Mon", completion: 85 },
+    { day: "Tue", completion: 92 },
+    { day: "Wed", completion: 78 },
+    { day: "Thu", completion: 88 },
+    { day: "Fri", completion: 75 },
+    { day: "Sat", completion: 90 },
+    { day: "Sun", completion: 82 }
+  ];
+
+  const monthlyGoalProgress = [
+    { goal: "Read 4 Books", progress: 75, target: 100, category: "personal" },
+    { goal: "Exercise 20 Days", progress: 85, target: 100, category: "health" },
+    { goal: "Save $2000", progress: 60, target: 100, category: "finance" },
+    { goal: "Learn Spanish", progress: 45, target: 100, category: "personal" },
+    { goal: "Complete Project", progress: 90, target: 100, category: "work" }
+  ];
+
+  const getTrendIcon = (trend: string) => {
+    switch(trend) {
+      case "up": return <ArrowUp className="h-4 w-4 text-green-500" />;
+      case "down": return <ArrowDown className="h-4 w-4 text-red-500" />;
+      default: return <Minus className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      health: "from-red-400 to-pink-500",
+      personal: "from-blue-400 to-indigo-500", 
+      finance: "from-green-400 to-emerald-500",
+      work: "from-purple-400 to-violet-500"
+    };
+    return colors[category as keyof typeof colors] || "from-gray-400 to-gray-500";
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="text-center space-y-4">
+        <div className="w-20 h-20 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-3xl flex items-center justify-center mx-auto shadow-lg">
+          <BarChart3 className="h-10 w-10 text-white" />
+        </div>
         <div>
-          <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
-            Progress Reports
-          </h3>
-          <p className="text-muted-foreground dark:text-gray-300 mt-1">
-            Track your {reportPeriod}ly progress and achievements
+          <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent mb-2">
+            Reports & Analytics
+          </h1>
+          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
+            Track your progress across all areas of life with comprehensive analytics and insights.
           </p>
         </div>
-        
+      </div>
+
+      {/* Period Selector */}
+      <div className="flex justify-center">
         <div className="flex items-center space-x-2 bg-white/60 dark:bg-gray-800/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
-          <button 
-            onClick={() => setReportPeriod("week")}
-            className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
-              reportPeriod === "week" 
-                ? "bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-sm" 
-                : "text-muted-foreground hover:text-pink-600 dark:text-gray-300 dark:hover:text-pink-400"
-            }`}
-          >
-            Weekly
-          </button>
-          <button 
-            onClick={() => setReportPeriod("month")}
-            className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
-              reportPeriod === "month" 
-                ? "bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-sm" 
-                : "text-muted-foreground hover:text-pink-600 dark:text-gray-300 dark:hover:text-pink-400"
-            }`}
-          >
-            Monthly
-          </button>
+          {(["week", "month", "quarter"] as ReportPeriod[]).map((period) => (
+            <button
+              key={period}
+              onClick={() => setReportPeriod(period)}
+              className={`px-6 py-2 text-sm rounded-xl font-medium transition-all duration-200 capitalize ${
+                reportPeriod === period
+                  ? "bg-gradient-to-r from-blue-400 to-indigo-500 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+              }`}
+            >
+              {period}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Period Overview */}
-      <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
-            <Calendar className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-            <span>
-              {format(currentPeriodStart, 'MMM d')} - {format(currentPeriodEnd, 'MMM d, yyyy')}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <StatCard
-              icon={Droplets}
-              title="Water Intake"
-              current={currentStats.avgWater}
-              previous={previousStats.avgWater}
-              unit="glasses/day"
-              color="blue"
-            />
-            <StatCard
-              icon={Dumbbell}
-              title="Exercise"
-              current={currentStats.exercisePercentage}
-              previous={previousStats.exercisePercentage}
-              unit="% completion"
-              color="green"
-            />
-            <StatCard
-              icon={Clock}
-              title="Sleep Hours"
-              current={currentStats.avgSleep}
-              previous={previousStats.avgSleep}
-              unit="hours/night"
-              color="purple"
-            />
-            <StatCard
-              icon={DollarSign}
-              title="Savings"
-              current={currentStats.totalSavings}
-              previous={previousStats.totalSavings}
-              unit="dollars"
-              color="emerald"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Detailed Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
-              <Activity className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-              <span>Health Metrics</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <MetricRow
-              label="Average Water Intake"
-              value={`${currentStats.avgWater.toFixed(1)} glasses`}
-              progress={(currentStats.avgWater / 8) * 100}
-              target="8 glasses"
-            />
-            <MetricRow
-              label="Exercise Days"
-              value={`${currentStats.exerciseDays}/${currentPeriodDays.length} days`}
-              progress={currentStats.exercisePercentage}
-              target="Daily"
-            />
-            <MetricRow
-              label="Average Sleep"
-              value={`${currentStats.avgSleep.toFixed(1)} hours`}
-              progress={(currentStats.avgSleep / 8) * 100}
-              target="8 hours"
-            />
-            <MetricRow
-              label="Meal Consistency"
-              value={`${currentStats.avgMeals.toFixed(1)}/3 meals`}
-              progress={(currentStats.avgMeals / 3) * 100}
-              target="3 meals/day"
-            />
+      {/* Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Wellness Score</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {analyticsData.wellnessScore}%
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-red-400 to-pink-500 rounded-xl flex items-center justify-center">
+                <Heart className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="flex items-center mt-2">
+              {getTrendIcon(analyticsData.trend)}
+              <span className="text-sm text-muted-foreground dark:text-gray-400 ml-1">
+                vs last {reportPeriod}
+              </span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
-              <BarChart3 className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-              <span>Productivity & Finance</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <MetricRow
-              label="Work Hours"
-              value={`${currentStats.totalWorkHours.toFixed(1)} hours`}
-              progress={Math.min((currentStats.totalWorkHours / (currentPeriodDays.length * 8)) * 100, 100)}
-              target={`${currentPeriodDays.length * 8} hours`}
-            />
-            <MetricRow
-              label="Screen Time"
-              value={`${currentStats.avgScreenTime.toFixed(1)} hours/day`}
-              progress={(currentStats.avgScreenTime / 8) * 100}
-              target="<6 hours"
-              isReverse
-            />
-            <MetricRow
-              label="Total Savings"
-              value={`$${currentStats.totalSavings.toFixed(2)}`}
-              progress={Math.min((currentStats.totalSavings / 1000) * 100, 100)}
-              target="Goal: $1000"
-            />
-            <MetricRow
-              label="Days Tracked"
-              value={`${currentStats.daysWithData}/${currentPeriodDays.length} days`}
-              progress={(currentStats.daysWithData / currentPeriodDays.length) * 100}
-              target="Complete tracking"
-            />
+        <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Productivity Score</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  {analyticsData.productivityScore}%
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-violet-500 rounded-xl flex items-center justify-center">
+                <Zap className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="flex items-center mt-2">
+              {getTrendIcon(analyticsData.trend)}
+              <span className="text-sm text-muted-foreground dark:text-gray-400 ml-1">
+                vs last {reportPeriod}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-100 dark:border-green-800 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Habit Consistency</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {analyticsData.habitMetrics.overallCompletionRate}%
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                <CheckSquare className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="flex items-center mt-2">
+              <Flame className="h-4 w-4 text-orange-500" />
+              <span className="text-sm text-muted-foreground dark:text-gray-400 ml-1">
+                {analyticsData.habitMetrics.longestStreak} day streak
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Goals Progress</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                  {analyticsData.goalMetrics.averageProgress}%
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-amber-500 rounded-xl flex items-center justify-center">
+                <Target className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="flex items-center mt-2">
+              <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                {analyticsData.goalMetrics.onTrackGoals}/{analyticsData.goalMetrics.goalsInProgress} on track
+              </span>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Achievement Highlights */}
-      <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      {/* Detailed Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Health & Wellness Analytics */}
+        <Card className="border-red-100 dark:border-red-800 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-red-600 dark:text-red-400">
+              <Heart className="h-5 w-5" />
+              Health & Wellness
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/30 rounded-xl">
+                <Droplets className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Water Intake</p>
+                <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {analyticsData.healthMetrics.waterIntakeAvg}/8 glasses
+                </p>
+              </div>
+              <div className="text-center p-4 bg-green-50 dark:bg-green-950/30 rounded-xl">
+                <Dumbbell className="h-6 w-6 text-green-500 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Exercise Rate</p>
+                <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                  {analyticsData.healthMetrics.exerciseCompletionRate}%
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-muted-foreground dark:text-gray-400">Sleep Quality</span>
+                  <span className="font-medium">{analyticsData.healthMetrics.sleepQualityAvg}/10</span>
+                </div>
+                <Progress value={analyticsData.healthMetrics.sleepQualityAvg * 10} className="h-2" />
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-muted-foreground dark:text-gray-400">Meal Completion</span>
+                  <span className="font-medium">{analyticsData.healthMetrics.mealCompletionRate}%</span>
+                </div>
+                <Progress value={analyticsData.healthMetrics.mealCompletionRate} className="h-2" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Productivity Analytics */}
+        <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
+              <Clock className="h-5 w-5" />
+              Productivity & Focus
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 bg-purple-50 dark:bg-purple-950/30 rounded-xl">
+                <Clock className="h-6 w-6 text-purple-500 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Focus Hours</p>
+                <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                  {analyticsData.productivityMetrics.totalFocusHours}h
+                </p>
+              </div>
+              <div className="text-center p-4 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl">
+                <CheckSquare className="h-6 w-6 text-indigo-500 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Task Rate</p>
+                <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                  {analyticsData.productivityMetrics.taskCompletionRate}%
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-muted-foreground dark:text-gray-400">Focus Sessions</span>
+                  <span className="font-medium">{analyticsData.productivityMetrics.focusSessionsCompleted} completed</span>
+                </div>
+                <Progress value={(analyticsData.productivityMetrics.focusSessionsCompleted / 20) * 100} className="h-2" />
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-muted-foreground dark:text-gray-400">Average Work Hours</span>
+                  <span className="font-medium">{analyticsData.productivityMetrics.averageWorkHours}h/day</span>
+                </div>
+                <Progress value={(analyticsData.productivityMetrics.averageWorkHours / 10) * 100} className="h-2" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Weekly Habit Completion Chart */}
+      <Card className="border-green-100 dark:border-green-800 shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
-            <Award className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-            <span>Achievements This {reportPeriod === "week" ? "Week" : "Month"}</span>
+          <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
+            <Activity className="h-5 w-5" />
+            Weekly Habit Completion
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <AchievementList stats={currentStats} period={reportPeriod} />
+          <div className="grid grid-cols-7 gap-4">
+            {weeklyHabitData.map((day, index) => (
+              <div key={day.day} className="text-center">
+                <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">{day.day}</p>
+                <div className="relative">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-20 flex items-end justify-center">
+                    <div 
+                      className="bg-gradient-to-t from-green-400 to-emerald-500 rounded-full w-full transition-all duration-500"
+                      style={{ height: `${day.completion}%` }}
+                    />
+                  </div>
+                  <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
+                    {day.completion}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Goal Progress */}
+      <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
+            <Target className="h-5 w-5" />
+            Goal Progress Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {monthlyGoalProgress.map((goal, index) => (
+              <div key={index} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-gray-900 dark:text-white">{goal.goal}</h4>
+                  <Badge 
+                    variant="outline" 
+                    className={`bg-gradient-to-r ${getCategoryColor(goal.category)} text-white border-0`}
+                  >
+                    {goal.category}
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground dark:text-gray-400">Progress</span>
+                    <span className="font-medium">{goal.progress}%</span>
+                  </div>
+                  <Progress value={goal.progress} className="h-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Insights & Recommendations */}
+      <Card className="border-blue-100 dark:border-blue-800 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+            <Award className="h-5 w-5" />
+            AI Insights & Recommendations
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4 text-green-500" />
+                <h4 className="font-medium text-green-600 dark:text-green-400">Strength</h4>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Your exercise consistency has improved by 23% this month. Keep up the momentum!
+              </p>
+            </div>
+            
+            <div className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                <h4 className="font-medium text-yellow-600 dark:text-yellow-400">Opportunity</h4>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Consider increasing your water intake by 1-2 glasses daily to reach your hydration goals.
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
-}
-
-interface StatCardProps {
-  icon: any;
-  title: string;
-  current: number;
-  previous: number;
-  unit: string;
-  color: string;
-}
-
-function StatCard({ icon: Icon, title, current, previous, unit, color }: StatCardProps) {
-  const change = current - previous;
-  const percentChange = previous > 0 ? (change / previous) * 100 : 0;
-  const isPositive = change > 0;
-
-  const colorClasses = {
-    blue: "from-blue-400 to-cyan-400",
-    green: "from-green-400 to-emerald-400",
-    purple: "from-purple-400 to-pink-400",
-    emerald: "from-emerald-400 to-teal-400"
-  };
-
-  return (
-    <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 backdrop-blur-sm">
-      <div className="flex items-center space-x-2 mb-2">
-        <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${colorClasses[color]} flex items-center justify-center`}>
-          <Icon className="h-4 w-4 text-white" />
-        </div>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{title}</span>
-      </div>
-      <div className="space-y-1">
-        <div className="text-xl font-bold text-gray-900 dark:text-white">
-          {current.toFixed(1)}
-        </div>
-        <div className="text-xs text-muted-foreground dark:text-gray-400">{unit}</div>
-        {previous > 0 && (
-          <div className={`flex items-center space-x-1 text-xs ${
-            isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-          }`}>
-            {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-            <span>{Math.abs(percentChange).toFixed(0)}% vs last {reportPeriod === "week" ? "week" : "month"}</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-interface MetricRowProps {
-  label: string;
-  value: string;
-  progress: number;
-  target: string;
-  isReverse?: boolean;
-}
-
-function MetricRow({ label, value, progress, target, isReverse = false }: MetricRowProps) {
-  const clampedProgress = Math.max(0, Math.min(100, progress));
-  const progressColor = isReverse 
-    ? (progress > 75 ? "bg-red-400" : progress > 50 ? "bg-yellow-400" : "bg-green-400")
-    : (progress > 75 ? "bg-green-400" : progress > 50 ? "bg-yellow-400" : "bg-red-400");
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
-        <span className="text-sm font-bold text-gray-900 dark:text-white">{value}</span>
-      </div>
-      <div className="space-y-1">
-        <Progress value={clampedProgress} className="h-2" />
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground dark:text-gray-400">Target: {target}</span>
-          <span className="text-xs text-muted-foreground dark:text-gray-400">{clampedProgress.toFixed(0)}%</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AchievementList({ stats, period }: { stats: any; period: ReportPeriod }) {
-  const achievements = [];
-
-  if (stats.exercisePercentage >= 80) {
-    achievements.push({
-      title: "Fitness Champion",
-      description: `Completed exercise on ${stats.exerciseDays} days this ${period}`,
-      icon: "🏆",
-      color: "bg-gradient-to-r from-yellow-400 to-orange-400"
-    });
-  }
-
-  if (stats.avgWater >= 7) {
-    achievements.push({
-      title: "Hydration Hero",
-      description: `Maintained excellent water intake averaging ${stats.avgWater.toFixed(1)} glasses`,
-      icon: "💧",
-      color: "bg-gradient-to-r from-blue-400 to-cyan-400"
-    });
-  }
-
-  if (stats.avgSleep >= 7.5) {
-    achievements.push({
-      title: "Sleep Master",
-      description: `Consistent sleep schedule with ${stats.avgSleep.toFixed(1)} hours average`,
-      icon: "😴",
-      color: "bg-gradient-to-r from-purple-400 to-pink-400"
-    });
-  }
-
-  if (stats.daysWithData / (period === "week" ? 7 : 30) >= 0.9) {
-    achievements.push({
-      title: "Tracking Consistency",
-      description: `Logged data on ${stats.daysWithData} days - excellent consistency!`,
-      icon: "📊",
-      color: "bg-gradient-to-r from-green-400 to-emerald-400"
-    });
-  }
-
-  if (achievements.length === 0) {
-    achievements.push({
-      title: "Getting Started",
-      description: "Keep tracking your habits to unlock achievements!",
-      icon: "🌟",
-      color: "bg-gradient-to-r from-gray-400 to-gray-500"
-    });
-  }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {achievements.map((achievement, index) => (
-        <div key={index} className="flex items-center space-x-3 p-3 bg-white/60 dark:bg-gray-800/60 rounded-xl backdrop-blur-sm">
-          <div className={`w-10 h-10 rounded-lg ${achievement.color} flex items-center justify-center text-lg`}>
-            {achievement.icon}
-          </div>
-          <div>
-            <div className="font-medium text-gray-900 dark:text-white">{achievement.title}</div>
-            <div className="text-sm text-muted-foreground dark:text-gray-400">{achievement.description}</div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function calculatePeriodStats(days: Date[]) {
-  // This would normally fetch data for all days in the period
-  // For now, returning sample calculations
-  const daysWithData = days.length;
-  const avgWater = 6.5;
-  const exerciseDays = Math.floor(days.length * 0.7);
-  const exercisePercentage = (exerciseDays / days.length) * 100;
-  const avgSleep = 7.2;
-  const avgMeals = 2.8;
-  const totalWorkHours = days.length * 6.5;
-  const avgScreenTime = 4.2;
-  const totalSavings = 850;
-
-  return {
-    daysWithData,
-    avgWater,
-    exerciseDays,
-    exercisePercentage,
-    avgSleep,
-    avgMeals,
-    totalWorkHours,
-    avgScreenTime,
-    totalSavings
-  };
 }
