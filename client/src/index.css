@@ -30,28 +30,38 @@
 }
 
 .dark {
-  --background: 270 25% 8%; /* Dark purple background */
-  --foreground: 0 0% 98%; /* White text */
-  --muted: 270 20% 12%; /* Slightly lighter purple for muted areas */
-  --muted-foreground: 0 0% 70%; /* Light gray for muted text */
-  --popover: 270 25% 8%;
-  --popover-foreground: 0 0% 98%;
-  --card: 270 20% 10%; /* Card background slightly lighter */
-  --card-foreground: 0 0% 98%;
-  --border: 270 15% 18%; /* Purple border */
-  --input: 270 15% 18%;
-  --primary: 315 85% 55%; /* Pink primary color */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 280 35% 25%; /* Muted purple secondary */
-  --secondary-foreground: 0 0% 100%;
-  --accent: 330 82% 70%; /* Light pink accent */
-  --accent-foreground: 270 25% 8%;
-  --success: 155 75% 60%;
-  --success-foreground: 0 0% 100%;
-  --destructive: 0 84% 60%;
+  --background: 270 30% 5%; /* Deeper purple background */
+  --foreground: 315 25% 96%; /* Slightly warm white text */
+  --muted: 270 25% 9%; /* Muted areas with more depth */
+  --muted-foreground: 270 8% 65%; /* Softer muted text */
+  --popover: 270 25% 7%; /* Darker popover for depth */
+  --popover-foreground: 315 25% 96%;
+  --card: 270 22% 8%; /* Card with subtle purple tint */
+  --card-foreground: 315 25% 96%;
+  --border: 270 20% 15%; /* More defined borders */
+  --input: 270 20% 12%; /* Input fields slightly darker */
+  --primary: 315 90% 58%; /* More vibrant pink */
+  --primary-foreground: 270 30% 5%;
+  --secondary: 280 40% 20%; /* Richer purple secondary */
+  --secondary-foreground: 315 25% 96%;
+  --accent: 330 85% 65%; /* Brighter accent pink */
+  --accent-foreground: 270 30% 5%;
+  --success: 155 75% 55%;
+  --success-foreground: 270 30% 5%;
+  --destructive: 0 84% 65%;
   --destructive-foreground: 0 0% 100%;
-  --ring: 315 85% 55%;
+  --ring: 315 90% 58%;
   --radius: 0.75rem;
+  
+  /* Enhanced dark mode specific variables */
+  --sidebar-background: 270 28% 6%;
+  --sidebar-foreground: 315 25% 96%;
+  --sidebar-primary: 315 90% 58%;
+  --sidebar-primary-foreground: 270 30% 5%;
+  --sidebar-accent: 330 85% 65%;
+  --sidebar-accent-foreground: 270 30% 5%;
+  --sidebar-border: 270 20% 12%;
+  --sidebar-ring: 315 90% 58%;
 }
 
 @layer base {
@@ -123,5 +133,67 @@
 
 /* Smooth transitions for theme switching */
 * {
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced dark mode specific styles */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(270 25% 7%) 100%);
+  min-height: 100vh;
+}
+
+.dark .bg-card {
+  background: linear-gradient(145deg, hsl(var(--card)), hsl(270 18% 10%));
+  border: 1px solid hsl(270 25% 12%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dark .bg-primary {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(320 85% 55%));
+  box-shadow: 0 4px 20px hsla(var(--primary), 0.4);
+}
+
+.dark .bg-secondary {
+  background: linear-gradient(135deg, hsl(var(--secondary)), hsl(275 35% 22%));
+}
+
+.dark .bg-accent {
+  background: linear-gradient(135deg, hsl(var(--accent)), hsl(335 80% 62%));
+}
+
+/* Enhanced button hover effects in dark mode */
+.dark button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced sidebar in dark mode */
+.dark [data-sidebar] {
+  background: linear-gradient(180deg, hsl(var(--sidebar-background)), hsl(270 25% 7%));
+  border-right: 1px solid hsl(270 20% 12%);
+}
+
+/* Improved focus rings in dark mode */
+.dark *:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px hsla(var(--ring), 0.2);
+}
+
+/* Enhanced input styling in dark mode */
+.dark input, .dark textarea, .dark select {
+  background: linear-gradient(145deg, hsl(var(--input)), hsl(270 18% 14%));
+  border: 1px solid hsl(270 20% 18%);
+}
+
+.dark input:focus, .dark textarea:focus, .dark select:focus {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsla(var(--ring), 0.2);
 }
