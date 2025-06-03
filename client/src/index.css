@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 250 250% 98%; /* #FAFBFC */
+  --foreground: 210 14% 9%;
+  --muted: 210 12% 96%;
+  --muted-foreground: 215 8% 46%; /* #64748B */
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 14% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 14% 9%;
+  --border: 220 10% 87%;
+  --input: 220 10% 87%;
+  --primary: 224 76% 32%; /* #1E3A8A */
+  --primary-foreground: 220 100% 98%;
+  --secondary: 172 66% 30%; /* #0D9488 */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 38 92% 50%; /* #F59E0B */
+  --accent-foreground: 0 0% 100%;
+  --success: 160 84% 39%; /* #059669 */
+  --success-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 60 9% 98%;
+  --ring: 210 14% 9%;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+  --muted: 223 47% 11%;
+  --muted-foreground: 215 14% 65%;
+  --popover: 224 71% 4%;
+  --popover-foreground: 213 31% 91%;
+  --card: 224 71% 4%;
+  --card-foreground: 213 31% 91%;
+  --border: 216 34% 17%;
+  --input: 216 34% 17%;
+  --primary: 224 76% 32%;
+  --primary-foreground: 220 100% 98%;
+  --secondary: 172 66% 30%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 38 92% 50%;
+  --accent-foreground: 0 0% 100%;
+  --success: 160 84% 39%;
+  --success-foreground: 0 0% 100%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 213 31% 91%;
+  --ring: 216 34% 17%;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  }
+}
+
+@layer utilities {
+  .bg-primary {
+    background-color: hsl(var(--primary));
+  }
+  
+  .text-primary {
+    color: hsl(var(--primary));
+  }
+  
+  .bg-secondary {
+    background-color: hsl(var(--secondary));
+  }
+  
+  .text-secondary {
+    color: hsl(var(--secondary));
+  }
+  
+  .bg-accent {
+    background-color: hsl(var(--accent));
+  }
+  
+  .text-accent {
+    color: hsl(var(--accent));
+  }
+  
+  .bg-success {
+    background-color: hsl(var(--success));
+  }
+  
+  .text-success {
+    color: hsl(var(--success));
+  }
+  
+  .text-neutral-cool {
+    color: hsl(var(--muted-foreground));
+  }
+  
+  .bg-bg-light {
+    background-color: hsl(var(--background));
+  }
+}
