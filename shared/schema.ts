@@ -235,6 +235,37 @@ export const contentProgress = pgTable("content_progress", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Mini-Game Block Management
+export const miniGameBlocks = pgTable("mini_game_blocks", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  frequency: text("frequency").notNull(), // weekly, monthly, lunar_full, lunar_new, etc.
+  frequencyValue: integer("frequency_value").notNull(), // Number of times per year
+  color: text("color").default("#8B5CF6"),
+  category: text("category").default("engagement"), // engagement, astrological, wellness, etc.
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const miniGameDesigns = pgTable("mini_game_designs", {
+  id: serial("id").primaryKey(),
+  miniGameBlockId: integer("mini_game_block_id").notNull().references(() => miniGameBlocks.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  designNotes: text("design_notes"), // Visual elements, colors, interactions
+  status: text("status").default("designed"), // designed, reviewed, approved, archived
+  targetDate: date("target_date"),
+  designedDate: date("designed_date"),
+  reviewedDate: date("reviewed_date"),
+  approvedDate: date("approved_date"),
+  version: integer("version").default(1),
+  isTemplate: boolean("is_template").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // App Development Tables
 export const appProjects = pgTable("app_projects", {
   id: serial("id").primaryKey(),

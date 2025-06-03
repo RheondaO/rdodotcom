@@ -13,7 +13,7 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
+
   // Daily Entries
   app.get("/api/daily-entry/:date", async (req, res) => {
     try {
@@ -206,6 +206,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(piece);
     } catch (error) {
       res.status(500).json({ error: "Failed to update content piece" });
+    }
+  });
+
+  // Content Progress endpoints
+  app.get("/api/content-progress", async (req, res) => {
+    try {
+      const progress = await storage.getAllContentProgress();
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching content progress:", error);
+      res.status(500).json({ error: "Failed to fetch content progress" });
+    }
+  });
+
+  app.post("/api/content-progress", async (req, res) => {
+    try {
+      const data = insertContentProgressSchema.parse(req.body);
+      const progress = await storage.createContentProgress(data);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error creating content progress:", error);
+      res.status(500).json({ error: "Failed to create content progress" });
     }
   });
 
