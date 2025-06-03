@@ -28,11 +28,68 @@ export interface IStorage {
   createBillPayment(payment: InsertBillPayment): Promise<BillPayment>;
   updateBillPayment(id: number, isPaid: boolean): Promise<BillPayment>;
   
-  // Grocery Items
+  // Grocery Items & Lists
   getAllGroceryItems(): Promise<GroceryItem[]>;
   createGroceryItem(item: InsertGroceryItem): Promise<GroceryItem>;
   updateGroceryItem(id: number, updates: Partial<GroceryItem>): Promise<GroceryItem>;
   deleteGroceryItem(id: number): Promise<void>;
+  getAllGroceryLists(): Promise<GroceryList[]>;
+  createGroceryList(list: InsertGroceryList): Promise<GroceryList>;
+  deleteGroceryList(id: number): Promise<void>;
+  
+  // Goals
+  getAllGoals(): Promise<Goal[]>;
+  createGoal(goal: InsertGoal): Promise<Goal>;
+  updateGoal(id: number, updates: Partial<Goal>): Promise<Goal>;
+  deleteGoal(id: number): Promise<void>;
+  
+  // Habits & Habit Logs
+  getAllHabits(): Promise<Habit[]>;
+  createHabit(habit: InsertHabit): Promise<Habit>;
+  updateHabit(id: number, updates: Partial<Habit>): Promise<Habit>;
+  deleteHabit(id: number): Promise<void>;
+  getHabitLogs(habitId: number, startDate?: string, endDate?: string): Promise<HabitLog[]>;
+  createHabitLog(log: InsertHabitLog): Promise<HabitLog>;
+  updateHabitLog(id: number, updates: Partial<HabitLog>): Promise<HabitLog>;
+  
+  // Medications
+  getAllMedications(): Promise<Medication[]>;
+  createMedication(medication: InsertMedication): Promise<Medication>;
+  updateMedication(id: number, updates: Partial<Medication>): Promise<Medication>;
+  deleteMedication(id: number): Promise<void>;
+  
+  // Todos
+  getAllTodos(): Promise<Todo[]>;
+  getTodosByDate(date: string): Promise<Todo[]>;
+  createTodo(todo: InsertTodo): Promise<Todo>;
+  updateTodo(id: number, updates: Partial<Todo>): Promise<Todo>;
+  deleteTodo(id: number): Promise<void>;
+  
+  // Time Blocks
+  getTimeBlocksByDate(date: string): Promise<TimeBlock[]>;
+  createTimeBlock(timeBlock: InsertTimeBlock): Promise<TimeBlock>;
+  updateTimeBlock(id: number, updates: Partial<TimeBlock>): Promise<TimeBlock>;
+  deleteTimeBlock(id: number): Promise<void>;
+  
+  // Focus Sessions
+  getFocusSessionsByDate(date: string): Promise<FocusSession[]>;
+  createFocusSession(session: InsertFocusSession): Promise<FocusSession>;
+  updateFocusSession(id: number, updates: Partial<FocusSession>): Promise<FocusSession>;
+  
+  // Budget & Income
+  getBudgetsByMonth(month: string): Promise<Budget[]>;
+  createBudget(budget: InsertBudget): Promise<Budget>;
+  updateBudget(id: number, updates: Partial<Budget>): Promise<Budget>;
+  getIncomeEntriesByDateRange(startDate: string, endDate: string): Promise<IncomeEntry[]>;
+  createIncomeEntry(entry: InsertIncomeEntry): Promise<IncomeEntry>;
+  deleteIncomeEntry(id: number): Promise<void>;
+  
+  // Challenges
+  getAllChallenges(): Promise<Challenge[]>;
+  getActiveChallenges(): Promise<Challenge[]>;
+  createChallenge(challenge: InsertChallenge): Promise<Challenge>;
+  updateChallenge(id: number, updates: Partial<Challenge>): Promise<Challenge>;
+  deleteChallenge(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
