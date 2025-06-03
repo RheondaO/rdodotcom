@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, Calendar, Target, CheckSquare, Pill, Activity, Clock, Heart } from "lucide-react";
 import { 
   format, 
   startOfMonth, 
@@ -12,7 +13,10 @@ import {
   isSameDay, 
   isSameMonth,
   startOfWeek,
-  endOfWeek
+  endOfWeek,
+  isToday,
+  parseISO,
+  isWithinInterval
 } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
 import { useQuery } from "@tanstack/react-query";
@@ -44,6 +48,29 @@ export default function MonthView({ selectedDate, onDateChange }: MonthViewProps
     setCurrentMonth(startOfMonth(today));
     onDateChange(today);
   };
+
+  // Mock data for comprehensive month view
+  const mockGoals = [
+    { id: 1, title: "Drink 8 glasses of water daily", targetDate: "2025-06-15", category: "health", isCompleted: false },
+    { id: 2, title: "Complete React project", targetDate: "2025-06-20", category: "work", isCompleted: false },
+    { id: 3, title: "Save $500", targetDate: "2025-06-30", category: "finance", isCompleted: true }
+  ];
+
+  const mockTodos = [
+    { id: 1, title: "Doctor appointment", dueDate: "2025-06-05", priority: "high", isCompleted: false },
+    { id: 2, title: "Buy groceries", dueDate: "2025-06-03", priority: "medium", isCompleted: true },
+    { id: 3, title: "Submit report", dueDate: "2025-06-10", priority: "high", isCompleted: false }
+  ];
+
+  const mockMedications = [
+    { id: 1, name: "Vitamin D", nextDose: "2025-06-03T08:00:00", frequency: "daily" },
+    { id: 2, name: "Omega-3", nextDose: "2025-06-03T20:00:00", frequency: "daily" }
+  ];
+
+  const mockTimeBlocks = [
+    { id: 1, title: "Team Meeting", date: "2025-06-05", startTime: "10:00", endTime: "11:00" },
+    { id: 2, title: "Focus Session", date: "2025-06-07", startTime: "14:00", endTime: "16:00" }
+  ];
 
   // Calculate month statistics
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });

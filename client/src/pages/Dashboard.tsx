@@ -8,6 +8,7 @@ import HabitsSection from "@/components/HabitsSection";
 import ProductivitySection from "@/components/ProductivitySection";
 import GoalsSection from "@/components/GoalsSection";
 import ReportsSection from "@/components/ReportsSection";
+import DashboardHome from "@/components/DashboardHome";
 import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
@@ -135,12 +136,7 @@ export default function Dashboard() {
           ) : (
             <>
               {activeView === "dashboard" && (
-                <>
-                  <HealthSection selectedDate={selectedDate} />
-                  <WorkTimeSection selectedDate={selectedDate} />
-                  <FinanceSection selectedDate={selectedDate} />
-                  <GrocerySection />
-                </>
+                <DashboardHome selectedDate={selectedDate} onNavigate={setActiveView} />
               )}
               {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
               {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
