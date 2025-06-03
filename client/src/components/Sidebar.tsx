@@ -62,16 +62,30 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   ] as const;
 
   return (
-    <aside className="w-80 bg-gradient-to-b from-pink-50 to-purple-50 border-r border-pink-200 flex flex-col shadow-lg">
+    <aside className="w-80 bg-gradient-to-b from-pink-50 to-purple-50 dark:bg-gradient-to-b dark:from-purple-950 dark:to-pink-950 border-r border-pink-200 dark:border-purple-800 flex flex-col shadow-lg" data-sidebar>
       {/* Logo and Date */}
-      <div className="p-6 border-b border-pink-100">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-md">
-            <Sparkles className="text-white text-lg h-6 w-6" />
+      <div className="p-6 border-b border-pink-100 dark:border-purple-800">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-2xl flex items-center justify-center shadow-md">
+              <Sparkles className="text-white text-lg h-6 w-6" />
+            </div>
+            <h1 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+              Belle Journal
+            </h1>
           </div>
-          <h1 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-            Belle Journal
-          </h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="h-8 w-8 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
+          >
+            {theme === "light" ? (
+              <Moon className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+            ) : (
+              <Sun className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+            )}
+          </Button>
         </div>
         <div className="space-y-3">
           <div className="text-sm text-muted-foreground">

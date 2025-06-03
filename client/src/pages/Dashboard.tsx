@@ -59,7 +59,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 dark:bg-gradient-to-br dark:from-purple-950 dark:via-pink-950 dark:to-indigo-950">
       <Sidebar 
         activeView={activeView} 
         onViewChange={setActiveView}
@@ -70,29 +70,28 @@ export default function Dashboard() {
 
       <main className="flex-1 overflow-auto">
         {/* Header */}
-        <header className="bg-white/70 backdrop-blur-sm border-b border-pink-200 px-8 py-6 shadow-sm">
+        <header className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-b border-pink-200 dark:border-purple-800 px-8 py-6 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">{getViewTitle()}</h2>
-              <p className="text-muted-foreground mt-2 font-medium">{getViewDescription()}</p>
+              <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">{getViewTitle()}</h2>
+              <p className="text-muted-foreground dark:text-gray-300 mt-2 font-medium">{getViewDescription()}</p>
             </div>
             <div className="flex items-center space-x-4">
-              <ThemeToggle />
               <Button 
                 variant="outline" 
                 onClick={handleExportData}
-                className="px-6 py-3 text-sm border-pink-200 hover:bg-pink-50 rounded-xl shadow-sm"
+                className="px-6 py-3 text-sm border-pink-200 hover:bg-pink-50 dark:border-pink-700 dark:hover:bg-pink-900 rounded-xl shadow-sm"
               >
                 <Download className="mr-2 h-4 w-4" />
                 Export Data
               </Button>
-              <div className="flex items-center space-x-2 bg-white/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
+              <div className="flex items-center space-x-2 bg-white/60 dark:bg-gray-800/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
                 <button 
                   onClick={() => setTimeView("day")}
                   className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
                     timeView === "day" 
-                      ? "bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-sm" 
-                      : "text-muted-foreground hover:text-pink-600"
+                      ? "bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-sm" 
+                      : "text-muted-foreground hover:text-pink-600 dark:text-gray-300 dark:hover:text-pink-400"
                   }`}
                 >
                   Day
@@ -101,8 +100,8 @@ export default function Dashboard() {
                   onClick={() => setTimeView("week")}
                   className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
                     timeView === "week" 
-                      ? "bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-sm" 
-                      : "text-muted-foreground hover:text-pink-600"
+                      ? "bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-sm" 
+                      : "text-muted-foreground hover:text-pink-600 dark:text-gray-300 dark:hover:text-pink-400"
                   }`}
                 >
                   Week
@@ -111,8 +110,8 @@ export default function Dashboard() {
                   onClick={() => setTimeView("month")}
                   className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
                     timeView === "month" 
-                      ? "bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-sm" 
-                      : "text-muted-foreground hover:text-pink-600"
+                      ? "bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-sm" 
+                      : "text-muted-foreground hover:text-pink-600 dark:text-gray-300 dark:hover:text-pink-400"
                   }`}
                 >
                   Month
