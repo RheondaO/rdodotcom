@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content";
 type TimeViewType = "day" | "week" | "month";
 
 export default function Dashboard() {
@@ -40,7 +40,10 @@ export default function Dashboard() {
     }
     switch (activeView) {
       case "health": return "Health & Wellness";
-      case "work": return "Work & Time Tracking";
+      case "habits": return "Habits & Wellness";
+      case "productivity": return "Work & Time Tracking";
+      case "goals": return "Goals & Achievements";
+      case "reports": return "Reports & Analytics";
       case "finances": return "Financial Tracking";
       case "groceries": return "Grocery Management";
       case "content": return "Content Creation";
@@ -57,7 +60,10 @@ export default function Dashboard() {
     }
     switch (activeView) {
       case "health": return "Monitor your daily health habits and wellness goals";
-      case "work": return "Track your work hours and screen time usage";
+      case "habits": return "Build and maintain positive daily habits";
+      case "productivity": return "Track your work hours and screen time usage";
+      case "goals": return "Set and track your personal achievements";
+      case "reports": return "View analytics and progress reports";
       case "finances": return "Manage your finances, bills, and spending";
       case "groceries": return "Plan and track your grocery shopping";
       case "content": return "Manage your content planning, creation, and scheduling";
@@ -139,7 +145,7 @@ export default function Dashboard() {
           ) : (
             <>
               {activeView === "dashboard" && (
-                <DashboardHome selectedDate={selectedDate} onNavigate={setActiveView} />
+                <DashboardHome selectedDate={selectedDate} onNavigate={(section: string) => setActiveView(section as ViewType)} />
               )}
               {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
               {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}

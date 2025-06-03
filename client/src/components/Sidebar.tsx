@@ -1,7 +1,9 @@
 import { 
   Home, 
   Heart, 
+  Target,
   Briefcase, 
+  BarChart3,
   DollarSign, 
   ShoppingCart, 
   Plus,
@@ -11,7 +13,9 @@ import {
   Sun,
   Moon,
   Menu,
-  X
+  X,
+  Zap,
+  PenTool
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -19,7 +23,7 @@ import { format, addDays, subDays } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
 import { useTheme } from "@/hooks/use-theme";
 
-type ViewType = "dashboard" | "health" | "work" | "finances" | "groceries" | "content";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -48,8 +52,21 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     onDateChange(new Date());
   };
 
-  const waterProgress = dailyEntry?.waterIntake ? (dailyEntry.waterIntake / 8) * 100 : 0;
-  const waterCount = `${dailyEntry?.waterIntake || 0}/8`;
+  const navItems = [
+    { key: "dashboard" as ViewType, label: "Dashboard", icon: Home },
+    { key: "health" as ViewType, label: "Health", icon: Heart },
+    { key: "habits" as ViewType, label: "Habits", icon: Zap },
+    { key: "productivity" as ViewType, label: "Productivity", icon: Briefcase },
+    { key: "goals" as ViewType, label: "Goals", icon: Target },
+    { key: "reports" as ViewType, label: "Reports", icon: BarChart3 },
+    { key: "finances" as ViewType, label: "Finances", icon: DollarSign },
+    { key: "groceries" as ViewType, label: "Groceries", icon: ShoppingCart },
+    { key: "content" as ViewType, label: "Content", icon: PenTool },
+  ];
+
+  // Calculate progress metrics
+  const waterIntake = dailyEntry?.waterIntake || 0;
+  const waterProgress = Math.min((waterIntake / 8) * 100, 100);
   
   const mealCount = [
     dailyEntry?.breakfastCompleted,
@@ -57,27 +74,15 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     dailyEntry?.dinnerCompleted
   ].filter(Boolean).length;
 
-  const navItems = [
-    { key: "dashboard", icon: Home, label: "Dashboard" },
-    { key: "health", icon: Heart, label: "Health & Wellness" },
-    { key: "habits", icon: Sparkles, label: "Habits & Mood" },
-    { key: "productivity", icon: Briefcase, label: "Productivity" },
-    { key: "goals", icon: Plus, label: "Goals & Achievements" },
-    { key: "content", icon: Sparkles, label: "Content Creation" },
-    { key: "reports", icon: ChevronRight, label: "Progress Reports" },
-    { key: "finances", icon: DollarSign, label: "Finances" },
-    { key: "groceries", icon: ShoppingCart, label: "Groceries" },
-  ] as const;
-
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} bg-gradient-to-b from-pink-50 to-purple-50 dark:bg-gradient-to-b dark:from-purple-950 dark:to-pink-950 border-r border-pink-200 dark:border-purple-800 flex flex-col shadow-lg transition-all duration-300 ease-in-out`} data-sidebar>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl`}>
       {/* Toggle Button */}
-      <div className="p-4 border-b border-pink-200 dark:border-purple-800">
+      <div className="p-4 border-b border-pink-100 dark:border-purple-800">
         <Button
           onClick={onToggleCollapse}
           variant="ghost"
           size="sm"
-          className={`${isCollapsed ? 'w-full' : 'ml-auto'} hover:bg-pink-100 dark:hover:bg-purple-800`}
+          className="h-8 w-8 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
         >
           {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
         </Button>
@@ -149,76 +154,76 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </div>
       )}
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Hidden when collapsed */}
       {!isCollapsed && (
         <div className="p-6 border-b border-pink-100 dark:border-purple-800">
-        <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
-          Today's Progress ✨
-        </h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700 dark:text-white">Water</span>
+          <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
+            Today's Progress ✨
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">Water</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Progress value={waterProgress} className="w-16 h-2" />
+                <span className="text-xs text-muted-foreground dark:text-white font-medium">{waterIntake}/8</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Progress value={waterProgress} className="w-16 h-2" />
-              <span className="text-xs text-muted-foreground dark:text-white font-medium">{waterCount}</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700 dark:text-white">Exercise</span>
-            </div>
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
-              dailyEntry?.exerciseCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gray-200'
-            }`}>
-              {dailyEntry?.exerciseCompleted && (
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-              )}
-            </div>
-          </div>
 
-          <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700 dark:text-white">Meals</span>
+            <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-sm"></div>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">Exercise</span>
+              </div>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
+                dailyEntry?.exerciseCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gray-200'
+              }`}>
+                {dailyEntry?.exerciseCompleted && (
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                )}
+              </div>
             </div>
-            <span className="text-xs text-muted-foreground dark:text-white font-medium">{mealCount}/3</span>
+
+            <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">Meals</span>
+              </div>
+              <span className="text-xs text-muted-foreground dark:text-white font-medium">{mealCount}/3</span>
+            </div>
           </div>
-        </div>
         </div>
       )}
 
-      {/* Navigation */}
+      {/* Navigation - Full view when expanded */}
       {!isCollapsed && (
         <nav className="flex-1 p-6">
           <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
             Categories 💖
           </h3>
           <ul className="space-y-3">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeView === item.key;
-            
-            return (
-              <li key={item.key}>
-                <button
-                  onClick={() => onViewChange(item.key)}
-                  className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all duration-200 shadow-sm ${
-                    isActive
-                      ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white font-medium shadow-lg transform scale-105'
-                      : 'hover:bg-white/80 dark:hover:bg-gray-800/80 text-gray-700 dark:text-white hover:shadow-md hover:transform hover:scale-102'
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              </li>
-            );
-          })}
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeView === item.key;
+              
+              return (
+                <li key={item.key}>
+                  <button
+                    onClick={() => onViewChange(item.key)}
+                    className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all duration-200 shadow-sm ${
+                      isActive
+                        ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white font-medium shadow-lg transform scale-105'
+                        : 'hover:bg-pink-50 dark:hover:bg-purple-900 text-gray-600 dark:text-gray-300 hover:shadow-md'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </nav>
       )}
@@ -251,7 +256,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </nav>
       )}
 
-      {/* Quick Add Button */}
+      {/* Quick Add Button - Hidden when collapsed */}
       {!isCollapsed && (
         <div className="p-6 border-t border-pink-100">
           <Button 
