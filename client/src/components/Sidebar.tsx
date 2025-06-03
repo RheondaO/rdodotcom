@@ -69,11 +69,43 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
             Belle Journal
           </h1>
         </div>
-        <div className="text-sm text-muted-foreground">
-          <span className="font-script text-base">Today: </span>
-          <span className="font-medium text-pink-700">
-            {format(selectedDate, 'MMMM d, yyyy')}
-          </span>
+        <div className="space-y-3">
+          <div className="text-sm text-muted-foreground">
+            <span className="font-script text-base">Selected: </span>
+            <span className="font-medium text-pink-700">
+              {format(selectedDate, 'MMMM d, yyyy')}
+            </span>
+          </div>
+          
+          {/* Date Navigation */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={goToPreviousDay}
+              className="h-8 w-8 p-0 hover:bg-pink-100 rounded-xl"
+            >
+              <ChevronLeft className="h-4 w-4 text-pink-600" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={goToToday}
+              className="text-xs px-3 py-1 h-7 hover:bg-pink-100 rounded-lg text-pink-600 font-medium"
+            >
+              Today
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={goToNextDay}
+              className="h-8 w-8 p-0 hover:bg-pink-100 rounded-xl"
+            >
+              <ChevronRight className="h-4 w-4 text-pink-600" />
+            </Button>
+          </div>
         </div>
       </div>
 

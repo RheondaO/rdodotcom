@@ -57,6 +57,7 @@ export default function Dashboard() {
         onViewChange={setActiveView}
         onQuickAdd={() => setQuickAddOpen(true)}
         selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
       />
       
       <main className="flex-1 overflow-auto">
