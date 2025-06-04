@@ -133,14 +133,15 @@
   /* Custom tooltip styles to match Belle Journal UI */
   [title] {
     position: relative;
+    overflow: visible;
   }
 
   [title]:hover::after {
     content: attr(title);
     position: absolute;
-    left: calc(100% + 8px);
+    left: 100%;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) translateX(12px);
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
     color: white;
     padding: 6px 12px;
@@ -152,17 +153,20 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     backdrop-filter: blur(8px);
     animation: tooltip-fade-in 0.2s ease-out;
+    pointer-events: none;
+    min-width: max-content;
   }
 
   [title]:hover::before {
     content: '';
     position: absolute;
-    left: calc(100% + 2px);
+    left: 100%;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) translateX(6px);
     border: 6px solid transparent;
     border-right-color: hsl(var(--primary));
     z-index: 9999;
+    pointer-events: none;
   }
 
   @keyframes tooltip-fade-in {
