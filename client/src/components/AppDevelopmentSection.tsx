@@ -126,7 +126,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       name: "Really Obvious Media Lab",
       description: "Creative media laboratory website with interactive features and content management",
       status: "in_progress",
-      priority: "medium",
       projectType: "web",
       repositoryUrl: "https://github.com/yourusername/media-lab",
       deploymentUrl: "https://reallyobviousmedialab.net",
@@ -146,7 +145,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       name: "Belle Journal App",
       description: "Comprehensive life management application with habit tracking and analytics",
       status: "planning",
-      priority: "medium",
       projectType: "web",
       progress: 25,
       estimatedHours: 300,
@@ -183,7 +181,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       title: "Add project showcase section",
       description: "Design and implement a grid layout for showcasing portfolio projects",
       status: "in_progress",
-      priority: "high",
       category: "feature",
       estimatedHours: 12,
       actualHours: 8,
@@ -201,7 +198,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       title: "Set up content management system",
       description: "Implement CMS for managing media content and blog posts",
       status: "todo",
-      priority: "medium",
       category: "feature",
       estimatedHours: 20,
       actualHours: 0,
@@ -219,7 +215,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       title: "Test mobile navigation",
       description: "Verify navigation works correctly on all mobile devices",
       status: "testing",
-      priority: "high",
       category: "bug",
       estimatedHours: 4,
       actualHours: 2,
@@ -237,7 +232,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       title: "Test animation performance",
       description: "Ensure all animations run smoothly on different devices",
       status: "testing",
-      priority: "medium",
       category: "improvement",
       estimatedHours: 6,
       actualHours: 3,
@@ -265,15 +259,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     return colors[status as keyof typeof colors] || colors.planning;
   };
 
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      low: "text-gray-500",
-      medium: "text-blue-500",
-      high: "text-orange-500",
-      urgent: "text-red-500"
-    };
-    return colors[priority as keyof typeof colors] || colors.medium;
-  };
+
 
   const getProjectIcon = (type: string) => {
     const icons = {
