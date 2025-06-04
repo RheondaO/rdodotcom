@@ -22,6 +22,7 @@ import {
   Star
 } from "lucide-react";
 import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorrow } from "date-fns";
+import { useDailyData } from "@/hooks/use-daily-data";
 
 interface DashboardHomeProps {
   selectedDate: Date;
@@ -29,6 +30,9 @@ interface DashboardHomeProps {
 }
 
 export default function DashboardHome({ selectedDate, onNavigate }: DashboardHomeProps) {
+  const dateString = format(selectedDate, 'yyyy-MM-dd');
+  const { data: dailyEntry } = useDailyData(dateString);
+  
   const [activeTimer, setActiveTimer] = useState<{
     type: string;
     startTime: Date;
@@ -49,20 +53,26 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     }
   };
 
-  // Selected date's summary data
+  // Selected date's summary data using real daily entry data
   const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
+  
+  // Parse habit completions from daily entry
+  const completedHabitIds = dailyEntry?.habitCompletions 
+    ? JSON.parse(dailyEntry.habitCompletions) 
+    : [];
+
   const todaysHabits = [
-    { id: 1, name: "Morning Meditation", completed: true, streak: 7 },
-    { id: 2, name: "Drink 8 glasses of water", completed: false, streak: 3 },
-    { id: 3, name: "Exercise 30min", completed: true, streak: 12 },
-    { id: 4, name: "Read for 20min", completed: false, streak: 5 }
+    { id: 1, name: "Morning Meditation", completed: completedHabitIds.includes(1), streak: 7 },
+    { id: 2, name: "Drink 8 glasses of water", completed: completedHabitIds.includes(2), streak: 3 },
+    { id: 3, name: "Exercise 30min", completed: dailyEntry?.exerciseCompleted || false, streak: 12 },
+    { id: 4, name: "Read for 20min", completed: completedHabitIds.includes(4), streak: 5 }
   ];
 
   const todaysTodos = [
     { id: 1, title: "Team meeting", priority: "high", completed: false, dueTime: "10:00", date: selectedDateString },
     { id: 2, title: "Review project proposal", priority: "medium", completed: true, dueTime: "14:00", date: selectedDateString },
     { id: 3, title: "Call dentist", priority: "low", completed: false, dueTime: "16:00", date: selectedDateString }
-  ].filter(todo => todo.date === selectedDateString);
+  ];
 
   const upcomingGoals = [
     { id: 1, title: "Complete React course", progress: 75, dueDate: "Jun 15" },
