@@ -275,18 +275,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </nav>
       )}
 
-      {/* Quick Add Button - Hidden when collapsed */}
-      {!isCollapsed && (
-        <div className="p-6 border-t border-pink-100">
-          <Button 
-            onClick={onQuickAdd}
-            className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:from-pink-500 hover:to-purple-600 shadow-lg rounded-2xl font-medium py-3 transform hover:scale-105 transition-all duration-200"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Quick Add Entry ✨
-          </Button>
-        </div>
-      )}
+
     </aside>
   );
 }
