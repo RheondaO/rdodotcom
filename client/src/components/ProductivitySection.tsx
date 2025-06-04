@@ -94,12 +94,14 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
 
   // Handle todo completion toggle with strikethrough styling
   const toggleTodoCompletion = (todoId: number) => {
-    const todo = todos.find((t: any) => t.id === todoId);
-    if (todo) {
-      updateTodoMutation.mutate({
-        id: todoId,
-        isCompleted: !todo.isCompleted
-      });
+    if (Array.isArray(todos)) {
+      const todo = todos.find((t: any) => t.id === todoId);
+      if (todo) {
+        updateTodoMutation.mutate({
+          id: todoId,
+          isCompleted: !todo.isCompleted
+        });
+      }
     }
   };
 
@@ -107,9 +109,13 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
   const handleCreateTodo = () => {
     if (newTodo.title.trim()) {
       todoMutation.mutate({
-        ...newTodo,
+        title: newTodo.title,
+        description: newTodo.description,
+        category: newTodo.category,
+        estimatedDuration: newTodo.estimatedDuration,
         date: dateString,
-        isCompleted: false
+        isCompleted: false,
+        dueDate: null
       });
       setNewTodo({
         title: "",
@@ -263,14 +269,14 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
           </div>
         </CardHeader>
         <CardContent className="space-y-3 p-6">
-          {todos.length === 0 ? (
+          {Array.isArray(todos) && todos.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-30" />
               <p>No tasks for {getDateLabel().toLowerCase()}</p>
               <p className="text-sm">Add a task to get started!</p>
             </div>
           ) : (
-            todos.map((todo: any) => (
+            Array.isArray(todos) && todos.map((todo: any) => (
               <div key={todo.id} className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
                 <button
                   onClick={() => toggleTodoCompletion(todo.id)}
@@ -322,14 +328,14 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
           </div>
         </CardHeader>
         <CardContent className="space-y-3 p-6">
-          {timeBlocks.length === 0 ? (
+          {Array.isArray(timeBlocks) && timeBlocks.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
               <p>No scheduled blocks for {getDateLabel().toLowerCase()}</p>
               <p className="text-sm">Plan your day with time blocks!</p>
             </div>
           ) : (
-            timeBlocks.map((block: any) => (
+            Array.isArray(timeBlocks) && timeBlocks.map((block: any) => (
               <div key={block.id} className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
                 <div className="flex-shrink-0 text-center">
                   <div className="text-sm font-medium text-blue-600">{block.startTime}</div>

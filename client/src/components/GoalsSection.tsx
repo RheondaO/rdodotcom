@@ -344,7 +344,7 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: Goa
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <Badge className={`${categoryColors[goal.category]} text-white border-0`}>
+              <Badge className={`${categoryColors[goal.category as keyof typeof categoryColors] || 'bg-gray-500'} text-white border-0`}>
                 {goal.category}
               </Badge>
               {isCompleted && <Star className="h-4 w-4 text-yellow-500" />}
