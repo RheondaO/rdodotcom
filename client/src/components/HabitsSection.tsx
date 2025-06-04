@@ -25,7 +25,7 @@ import {
   Coffee,
   Moon
 } from "lucide-react";
-import { format, isToday, differenceInDays, startOfDay } from "date-fns";
+import { format, isToday, isYesterday, isTomorrow, differenceInDays, startOfDay } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -56,6 +56,13 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const queryClient = useQueryClient();
+
+  const getDateLabel = () => {
+    if (isToday(selectedDate)) return "Today";
+    if (isYesterday(selectedDate)) return "Yesterday";
+    if (isTomorrow(selectedDate)) return "Tomorrow";
+    return format(selectedDate, 'EEEE');
+  };
 
   const [habits, setHabits] = useState<Habit[]>([
     {
@@ -108,9 +115,9 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
   }));
 
   const [dailyMood, setDailyMood] = useState<DailyMood>({
-    mood: "happy",
-    energyLevel: 4,
-    stressLevel: 2
+    mood: dailyEntry?.mood || "happy",
+    energyLevel: dailyEntry?.energyLevel || 4,
+    stressLevel: dailyEntry?.stressLevel || 2
   });
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -339,7 +346,7 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
             <Smile className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-            <span>Today's Mood & Energy</span>
+            <span>{getDateLabel()}'s Mood & Energy</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -464,7 +471,7 @@ function HabitCard({ habit, onToggle }: HabitCardProps) {
     productivity: { icon: "⚡", color: "bg-gradient-to-r from-yellow-400 to-orange-400" }
   };
 
-  const category = categoryInfo[habit.category] || categoryInfo.health;
+  const category = categoryInfo[habit.category as keyof typeof categoryInfo] || categoryInfo.health;
 
   return (
     <div className={`bg-white/60 dark:bg-gray-800/60 rounded-xl p-4 backdrop-blur-sm border-l-4 ${
