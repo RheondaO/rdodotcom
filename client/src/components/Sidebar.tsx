@@ -21,12 +21,7 @@ import {
   Map,
   Code2
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -139,8 +134,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   };
 
   return (
-    <TooltipProvider>
-      <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
         {/* Toggle Button */}
         <div className="px-6 py-3 border-b border-pink-100 dark:border-purple-800">
           <Button
@@ -262,23 +256,17 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               
               return (
                 <li key={item.key}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => onViewChange(item.key)}
-                        className={`w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
-                          isActive
-                            ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-lg'
-                            : 'hover:bg-pink-50 dark:hover:bg-purple-900 text-gray-600 dark:text-gray-300'
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      <p>{item.label}</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <button
+                    onClick={() => onViewChange(item.key)}
+                    title={item.label}
+                    className={`w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-lg'
+                        : 'hover:bg-pink-50 dark:hover:bg-purple-900 text-gray-600 dark:text-gray-300'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </button>
                 </li>
               );
             })}
@@ -286,8 +274,6 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </nav>
       )}
 
-
-      </aside>
-    </TooltipProvider>
+    </aside>
   );
 }
