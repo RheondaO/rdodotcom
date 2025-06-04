@@ -32,3 +32,53 @@ export function useUpdateTodo() {
     }
   });
 }
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+export interface Todo {
+  id: number;
+  title: string;
+  description?: string;
+  dueDate: string;
+  dueTime?: string;
+  priority: 'low' | 'medium' | 'high';
+  isCompleted: boolean;
+  createdAt: Date;
+}
+
+export interface InsertTodo {
+  title: string;
+  description?: string;
+  dueDate: string;
+  dueTime?: string;
+  priority: 'low' | 'medium' | 'high';
+}
+
+export function useTodos(date: string) {
+  return useQuery({
+    queryKey: ['/api/todos', date],
+    queryFn: async () => {
+      const response = await fetch(`/api/todos/${date}`);
+      if (!response.ok) throw new Error('Failed to fetch todos');
+      return response.json() as Promise<Todo[]>;
+    }
+  });
+}
+
+export function useCreateTodo() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (data: InsertTodo) => {
+      const response = await fetch('/api/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to create todo');
+      return response.json() as Promise<Todo>;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/todos', variables.dueDate] });
+    }
+  });
+}

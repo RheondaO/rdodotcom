@@ -67,7 +67,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     ? JSON.parse(dailyEntry.habitCompletions) 
     : [];
 
-  // Use real habits data and check completion status
+  // Use real habits data and check completion status for the selected date
   const todaysHabits = habits.filter(habit => habit.isActive).map(habit => ({
     id: habit.id,
     name: habit.name,
@@ -75,8 +75,8 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     streak: habit.currentStreak || 0
   }));
 
-  // Use real todos data for the selected date
-  const todaysTodos = todos.map(todo => ({
+  // Use real todos data for the selected date - only todos for this specific date
+  const todaysTodos = todos.filter(todo => todo.dueDate === dateString).map(todo => ({
     id: todo.id,
     title: todo.title,
     priority: todo.priority,
@@ -107,11 +107,11 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
 
   const completedHabits = todaysHabits.filter(h => h.completed).length;
   const totalHabits = todaysHabits.length;
-  const habitProgress = (completedHabits / totalHabits) * 100;
+  const habitProgress = totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0;
 
   const completedTodos = todaysTodos.filter(t => t.completed).length;
   const totalTodos = todaysTodos.length;
-  const todoProgress = (completedTodos / totalTodos) * 100;
+  const todoProgress = totalTodos > 0 ? (completedTodos / totalTodos) * 100 : 0;
 
   const startFocusSession = (type: string, duration: number) => {
     setActiveTimer({
@@ -148,9 +148,16 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
 
   const getMotivationalText = () => {
     if (isToday(selectedDate)) return "Let's make today productive and fulfilling";
-    if (isYesterday(selectedDate)) return "Reflecting on yesterday's progress";
-    if (isTomorrow(selectedDate)) return "Planning for tomorrow's success";
-    return "Every day is a new opportunity";
+    if (isYesterday(selectedDate)) return "Reflecting on yesterday's achievements and learning";
+    if (isTomorrow(selectedDate)) return "Planning and preparing for tomorrow's success";
+    return "Every day is a new opportunity to grow";
+  };
+
+  const getContextualGreeting = () => {
+    if (isToday(selectedDate)) return getGreeting();
+    if (isYesterday(selectedDate)) return "Yesterday's Journey 📝";
+    if (isTomorrow(selectedDate)) return "Tomorrow's Plan 🚀";
+    return "Day Overview 📊";
   };
 
   return (
@@ -158,7 +165,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
       {/* Welcome Header */}
       <div className="text-center py-6">
         <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
-          {getGreeting()} - {getDateLabel()}
+          {getContextualGreeting()} - {getDateLabel()}
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300">
           {format(selectedDate, 'EEEE, MMMM d, yyyy')}
@@ -265,20 +272,29 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {todaysHabits.map(habit => (
-                <div key={habit.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-2 h-2 rounded-full ${habit.completed ? 'bg-green-500' : 'bg-gray-300'}`} />
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">{habit.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        🔥 {habit.streak} day streak
-                      </p>
+              {todaysHabits.length > 0 ? (
+                todaysHabits.map(habit => (
+                  <div key={habit.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 rounded-full ${habit.completed ? 'bg-green-500' : 'bg-gray-300'}`} />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{habit.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          🔥 {habit.streak} day streak
+                        </p>
+                      </div>
                     </div>
+                    {habit.completed && <CheckCircle className="h-5 w-5 text-green-500" />}
                   </div>
-                  {habit.completed && <CheckCircle className="h-5 w-5 text-green-500" />}
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  <p className="text-sm">No habits tracked for {getDateLabel().toLowerCase()}</p>
+                  {isToday(selectedDate) && (
+                    <p className="text-xs mt-1">Add some habits to get started!</p>
+                  )}
                 </div>
-              ))}
+              )}
               <Button 
                 onClick={() => onNavigate('habits')}
                 className="w-full mt-3 bg-gradient-to-r from-pink-400 to-purple-500 text-white"
@@ -298,25 +314,34 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {todaysTodos.map(todo => (
-                <div key={todo.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      todo.priority === 'high' ? 'bg-red-500' : 
-                      todo.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                    }`} />
-                    <div>
-                      <p className={`font-medium ${todo.completed ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>
-                        {todo.title}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Due: {todo.dueTime}
-                      </p>
+              {todaysTodos.length > 0 ? (
+                todaysTodos.map(todo => (
+                  <div key={todo.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        todo.priority === 'high' ? 'bg-red-500' : 
+                        todo.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                      }`} />
+                      <div>
+                        <p className={`font-medium ${todo.completed ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                          {todo.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Due: {todo.dueTime}
+                        </p>
+                      </div>
                     </div>
+                    {todo.completed && <CheckCircle className="h-5 w-5 text-green-500" />}
                   </div>
-                  {todo.completed && <CheckCircle className="h-5 w-5 text-green-500" />}
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  <p className="text-sm">No tasks scheduled for {getDateLabel().toLowerCase()}</p>
+                  {isToday(selectedDate) && (
+                    <p className="text-xs mt-1">Add some tasks to stay organized!</p>
+                  )}
                 </div>
-              ))}
+              )}
               <Button 
                 onClick={() => onNavigate('productivity')}
                 className="w-full mt-3 bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
@@ -370,19 +395,23 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
               )}
               
               <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Today's Schedule</h4>
-                {timeBlocks.map(block => (
-                  <div key={block.id} className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-gray-600 dark:text-gray-400">{block.time}</span>
-                    <span className={`px-2 py-1 rounded ${
-                      block.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      block.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {block.title}
-                    </span>
-                  </div>
-                ))}
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">{getDateLabel()}'s Schedule</h4>
+                {timeBlocks.length > 0 ? (
+                  timeBlocks.map(block => (
+                    <div key={block.id} className="flex items-center justify-between text-xs mb-1">
+                      <span className="text-gray-600 dark:text-gray-400">{block.time}</span>
+                      <span className={`px-2 py-1 rounded ${
+                        block.status === 'completed' ? 'bg-green-100 text-green-700' :
+                        block.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {block.title}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">No scheduled time blocks</p>
+                )}
               </div>
             </div>
           </CardContent>
