@@ -275,13 +275,8 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
                         <Icon className="h-5 w-5" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent 
-                      side="right" 
-                      className="bg-white dark:bg-gray-800 border border-pink-200 dark:border-purple-700 shadow-xl z-[9999] !important relative"
-                      sideOffset={10}
-                      style={{ zIndex: 9999, position: 'fixed' }}
-                    >
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{item.label}</p>
+                    <TooltipContent side="right">
+                      <p>{item.label}</p>
                     </TooltipContent>
                   </Tooltip>
                 </li>
