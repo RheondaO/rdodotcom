@@ -17,7 +17,7 @@ import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
 import { Button } from "@/components/ui/button";
 import { Download, Sun, Moon } from "lucide-react";
-import { format, addDays, subDays } from "date-fns";
+import { format, addDays, subDays, isSameDay } from "date-fns";
 import { useTheme } from "@/hooks/use-theme";
 
 type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "apps" | "sitemap";
@@ -30,6 +30,15 @@ export default function Dashboard() {
   const [timeView, setTimeView] = useState<TimeViewType>("day");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  // Date comparison helpers
+  const today = new Date();
+  const yesterday = subDays(today, 1);
+  const tomorrow = addDays(today, 1);
+  
+  const isYesterdaySelected = isSameDay(selectedDate, yesterday);
+  const isTodaySelected = isSameDay(selectedDate, today);
+  const isTomorrowSelected = isSameDay(selectedDate, tomorrow);
 
   const handleExportData = () => {
     // TODO: Implement data export functionality
@@ -125,21 +134,33 @@ export default function Dashboard() {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setSelectedDate(subDays(new Date(), 1))}
-                  className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium transition-colors"
+                  className={`text-xs px-3 py-1 h-7 rounded-lg font-medium transition-colors ${
+                    isYesterdaySelected
+                      ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-md'
+                      : 'hover:bg-pink-100 dark:hover:bg-pink-900 text-pink-600 dark:text-white'
+                  }`}
                 >
                   Yesterday
                 </button>
                 
                 <button
                   onClick={() => setSelectedDate(new Date())}
-                  className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium transition-colors"
+                  className={`text-xs px-3 py-1 h-7 rounded-lg font-medium transition-colors ${
+                    isTodaySelected
+                      ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-md'
+                      : 'hover:bg-pink-100 dark:hover:bg-pink-900 text-pink-600 dark:text-white'
+                  }`}
                 >
                   Today
                 </button>
                 
                 <button
                   onClick={() => setSelectedDate(addDays(new Date(), 1))}
-                  className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium transition-colors"
+                  className={`text-xs px-3 py-1 h-7 rounded-lg font-medium transition-colors ${
+                    isTomorrowSelected
+                      ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-md'
+                      : 'hover:bg-pink-100 dark:hover:bg-pink-900 text-pink-600 dark:text-white'
+                  }`}
                 >
                   Tomorrow
                 </button>
