@@ -96,16 +96,6 @@ export default function Dashboard() {
               <h2 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">{getViewTitle()}</h2>
               <p className="text-sm text-muted-foreground dark:text-gray-300 mt-1 font-medium">{getViewDescription()}</p>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="outline" 
-                onClick={handleExportData}
-                className="px-4 py-2 text-sm border-pink-200 hover:bg-pink-50 dark:border-pink-700 dark:hover:bg-pink-900 rounded-xl shadow-sm"
-              >
-                <Download className="mr-2 h-3 w-3" />
-                Export Data
-              </Button>
-            </div>
           </div>
         </header>
 

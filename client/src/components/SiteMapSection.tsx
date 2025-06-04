@@ -29,7 +29,8 @@ import {
   Dumbbell,
   Moon,
   Sun,
-  Code2
+  Code2,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +40,35 @@ interface SiteMapSectionProps {
 }
 
 export default function SiteMapSection({ onNavigate }: SiteMapSectionProps) {
+  const handleExportData = () => {
+    // Create sample data export
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      dataType: "Belle Journal Export",
+      sections: {
+        health: "Health tracking data",
+        habits: "Habit completion records",
+        productivity: "Work time and focus sessions",
+        goals: "Personal goals and achievements",
+        finances: "Financial tracking and budgets",
+        groceries: "Shopping lists and items",
+        content: "Content management records",
+        apps: "Development projects and tasks"
+      }
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `belle-journal-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const siteMapSections = [
     {
       category: "Main Dashboard",
@@ -114,9 +144,16 @@ export default function SiteMapSection({ onNavigate }: SiteMapSectionProps) {
           <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
             Site Map
           </h1>
-          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto mb-4">
             Quick access to all sections of Belle Journal. Click any item below to navigate directly to that page.
           </p>
+          <Button 
+            onClick={handleExportData}
+            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl px-6 py-2 shadow-md font-medium"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Export Data
+          </Button>
         </div>
       </div>
 
