@@ -21,6 +21,12 @@ import {
   Map,
   Code2
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -133,22 +139,21 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   };
 
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
-      {/* Toggle Button */}
-      <div className="px-6 py-3 border-b border-pink-100 dark:border-purple-800">
-        <Button
-          onClick={onToggleCollapse}
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
-        >
-          {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
-        </Button>
-      </div>
-      
+    <TooltipProvider>
+      <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
+        {/* Toggle Button */}
+        <div className="px-6 py-3 border-b border-pink-100 dark:border-purple-800">
+          <Button
+            onClick={onToggleCollapse}
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
+          >
+            {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+          </Button>
+        </div>
 
-
-      {/* Compact Progress Section - Hidden when collapsed */}
+        {/* Compact Progress Section - Hidden when collapsed */}
       {!isCollapsed && (
         <div className="px-3 py-2 border-b border-pink-100 dark:border-purple-800">
           <div className="flex items-center justify-between mb-2">
@@ -257,17 +262,23 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               
               return (
                 <li key={item.key}>
-                  <button
-                    onClick={() => onViewChange(item.key)}
-                    className={`w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
-                      isActive
-                        ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-lg'
-                        : 'hover:bg-pink-50 dark:hover:bg-purple-900 text-gray-600 dark:text-gray-300'
-                    }`}
-                    title={item.label}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => onViewChange(item.key)}
+                        className={`w-full flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
+                          isActive
+                            ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-lg'
+                            : 'hover:bg-pink-50 dark:hover:bg-purple-900 text-gray-600 dark:text-gray-300'
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="bg-white dark:bg-gray-800 border border-pink-200 dark:border-purple-700 shadow-lg">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{item.label}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </li>
               );
             })}
@@ -276,6 +287,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
       )}
 
 
-    </aside>
+      </aside>
+    </TooltipProvider>
   );
 }
