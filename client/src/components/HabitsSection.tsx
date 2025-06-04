@@ -53,6 +53,10 @@ interface HabitsSectionProps {
 }
 
 export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
+  const dateString = format(selectedDate, 'yyyy-MM-dd');
+  const { data: dailyEntry } = useDailyData(dateString);
+  const queryClient = useQueryClient();
+
   const [habits, setHabits] = useState<Habit[]>([
     {
       id: 1,
@@ -64,7 +68,7 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
       longestStreak: 21,
       isActive: true,
       createdAt: "2025-05-01",
-      completedToday: true
+      completedToday: false
     },
     {
       id: 2,
@@ -88,9 +92,20 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
       longestStreak: 15,
       isActive: true,
       createdAt: "2025-05-20",
-      completedToday: true
+      completedToday: false
     }
   ]);
+
+  // Parse habit completions from daily entry
+  const completedHabitIds = dailyEntry?.habitCompletions 
+    ? JSON.parse(dailyEntry.habitCompletions) 
+    : [];
+
+  // Update habits with completion status based on selected date
+  const habitsWithCompletion = habits.map(habit => ({
+    ...habit,
+    completedToday: completedHabitIds.includes(habit.id)
+  }));
 
   const [dailyMood, setDailyMood] = useState<DailyMood>({
     mood: "happy",
@@ -145,32 +160,41 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
     setShowCreateDialog(false);
   };
 
+  const updateDailyEntry = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/daily-entry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update daily entry');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/daily-entry', dateString] });
+    }
+  });
+
   const toggleHabitCompletion = (habitId: number) => {
-    setHabits(habits.map(habit => {
-      if (habit.id === habitId) {
-        const completed = !habit.completedToday;
-        let newCurrentStreak = habit.currentStreak;
-        let newLongestStreak = habit.longestStreak;
+    const currentCompletions = dailyEntry?.habitCompletions 
+      ? JSON.parse(dailyEntry.habitCompletions) 
+      : [];
+    
+    const isCompleted = currentCompletions.includes(habitId);
+    const newCompletions = isCompleted
+      ? currentCompletions.filter((id: number) => id !== habitId)
+      : [...currentCompletions, habitId];
 
-        if (completed) {
-          newCurrentStreak += 1;
-          newLongestStreak = Math.max(newLongestStreak, newCurrentStreak);
-        } else {
-          newCurrentStreak = Math.max(0, newCurrentStreak - 1);
-        }
+    const updatedEntry = {
+      date: dateString,
+      habitCompletions: JSON.stringify(newCompletions),
+      ...dailyEntry
+    };
 
-        return {
-          ...habit,
-          completedToday: completed,
-          currentStreak: newCurrentStreak,
-          longestStreak: newLongestStreak
-        };
-      }
-      return habit;
-    }));
+    updateDailyEntry.mutate(updatedEntry);
   };
 
-  const activeHabits = habits.filter(h => h.isActive);
+  const activeHabits = habitsWithCompletion.filter(h => h.isActive);
   const todayCompletedCount = activeHabits.filter(h => h.completedToday).length;
   const totalStreakDays = activeHabits.reduce((sum, h) => sum + h.currentStreak, 0);
 
