@@ -46,24 +46,36 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
   // Fetch real data from API
   const { data: todos = [] } = useQuery({
     queryKey: ['/api/todos', dateString],
-    queryFn: () => apiRequest(`/api/todos/${dateString}`, 'GET'),
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/todos/${dateString}`);
+      return response.json();
+    },
   });
 
   const { data: timeBlocks = [] } = useQuery({
     queryKey: ['/api/time-blocks', dateString],
-    queryFn: () => apiRequest(`/api/time-blocks/${dateString}`, 'GET'),
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/time-blocks/${dateString}`);
+      return response.json();
+    },
   });
 
   // Mutations for data updates
   const todoMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/todos', 'POST', data),
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/todos', data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/todos', dateString] });
     }
   });
 
   const updateTodoMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/todos/${id}`, 'PATCH', data),
+    mutationFn: async ({ id, ...data }: any) => {
+      const response = await apiRequest('PATCH', `/api/todos/${id}`, data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/todos', dateString] });
     }
