@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { useDailyData, useUpdateDailyEntry } from "@/hooks/use-daily-data";
 import { useQuery } from "@tanstack/react-query";
 import { format, isToday, isYesterday, isTomorrow } from "date-fns";
@@ -23,7 +23,6 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
   
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
   const [incomeAmount, setIncomeAmount] = useState("");
-  const [incomeSource, setIncomeSource] = useState("");
 
   const getDateLabel = () => {
     if (isToday(selectedDate)) return "Today";
@@ -46,7 +45,7 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
   const groceryProgress = (grocerySpent / groceryBudget) * 100;
 
   const handleAddIncome = async () => {
-    if (!incomeAmount || !incomeSource) return;
+    if (!incomeAmount) return;
     
     const currentSavings = parseFloat(dailyEntry?.cashSavings || "0");
     const newAmount = parseFloat(incomeAmount);
@@ -58,7 +57,6 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
     });
     
     setIncomeAmount("");
-    setIncomeSource("");
     setIsAddIncomeOpen(false);
   };
 
@@ -111,28 +109,10 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
                         className="mt-1 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="income-source" className="text-sm font-medium text-gray-700">
-                        Source
-                      </Label>
-                      <Select value={incomeSource} onValueChange={setIncomeSource}>
-                        <SelectTrigger className="mt-1 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500">
-                          <SelectValue placeholder="Select income source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="salary">Salary</SelectItem>
-                          <SelectItem value="freelance">Freelance</SelectItem>
-                          <SelectItem value="investment">Investment</SelectItem>
-                          <SelectItem value="bonus">Bonus</SelectItem>
-                          <SelectItem value="gift">Gift</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                     <div className="flex gap-3 pt-4">
                       <Button
                         onClick={handleAddIncome}
-                        disabled={!incomeAmount || !incomeSource || updateDailyEntry.isPending}
+                        disabled={!incomeAmount || updateDailyEntry.isPending}
                         className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl"
                       >
                         Add Income
