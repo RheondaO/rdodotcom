@@ -89,7 +89,50 @@ export default function Dashboard() {
       />
 
       <main className="flex-1 overflow-auto">
-
+        {/* Header with Belle Journal title and date navigation */}
+        <header className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-b border-pink-200 dark:border-purple-800 px-6 py-3 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                <span className="text-white text-lg">✨</span>
+              </div>
+              <h1 className="text-xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+                Belle Journal
+              </h1>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <div className="text-sm text-muted-foreground dark:text-white">
+                <span className="font-medium text-pink-700 dark:text-white">
+                  {format(selectedDate, 'MMM d, yyyy')}
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => setSelectedDate(subDays(selectedDate, 1))}
+                  className="h-7 w-7 p-0 hover:bg-pink-100 rounded-lg flex items-center justify-center transition-colors"
+                >
+                  <span className="text-pink-600 text-sm">‹</span>
+                </button>
+                
+                <button
+                  onClick={() => setSelectedDate(new Date())}
+                  className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium transition-colors"
+                >
+                  Today
+                </button>
+                
+                <button
+                  onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+                  className="h-7 w-7 p-0 hover:bg-pink-100 rounded-lg flex items-center justify-center transition-colors"
+                >
+                  <span className="text-pink-600 text-sm">›</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
 
         {/* Content */}
         <div className="p-4">
