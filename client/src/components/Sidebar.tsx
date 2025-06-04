@@ -96,15 +96,16 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </Button>
       </div>
       
-      {/* Logo and Date - Hidden when collapsed */}
+      {/* Compact Logo and Date - Hidden when collapsed */}
       {!isCollapsed && (
-        <div className="p-6 border-b border-pink-100 dark:border-purple-800">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-2xl flex items-center justify-center shadow-md">
-                <Sparkles className="text-white text-lg h-6 w-6" />
+        <div className="p-3 border-b border-pink-100 dark:border-purple-800">
+          {/* Title Row with Theme Toggle */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                <Sparkles className="text-white h-4 w-4" />
               </div>
-              <h1 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-lg font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
                 Belle Journal
               </h1>
             </div>
@@ -112,39 +113,39 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               variant="ghost"
               size="sm"
               onClick={toggleTheme}
-              className="h-8 w-8 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
+              className="h-6 w-6 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
             >
               {theme === "light" ? (
-                <Moon className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                <Moon className="h-3 w-3 text-pink-600 dark:text-pink-400" />
               ) : (
-                <Sun className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                <Sun className="h-3 w-3 text-pink-600 dark:text-pink-400" />
               )}
             </Button>
           </div>
-          <div className="space-y-3">
-            <div className="text-sm text-muted-foreground dark:text-white">
-              <span className="font-script text-base">Selected: </span>
+          
+          {/* Compact Date Display and Navigation */}
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-muted-foreground dark:text-white">
               <span className="font-medium text-pink-700 dark:text-white">
-                {format(selectedDate, 'MMMM d, yyyy')}
+                {format(selectedDate, 'MMM d, yyyy')}
               </span>
             </div>
             
-            {/* Date Navigation */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={goToPreviousDay}
-                className="h-8 w-8 p-0 hover:bg-pink-100 rounded-xl"
+                className="h-6 w-6 p-0 hover:bg-pink-100 rounded-lg"
               >
-                <ChevronLeft className="h-4 w-4 text-pink-600" />
+                <ChevronLeft className="h-3 w-3 text-pink-600" />
               </Button>
               
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={goToToday}
-                className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium"
+                className="text-xs px-2 py-1 h-6 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium"
               >
                 Today
               </Button>
@@ -153,32 +154,32 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
                 variant="ghost"
                 size="sm"
                 onClick={goToNextDay}
-                className="h-8 w-8 p-0 hover:bg-pink-100 rounded-xl"
+                className="h-6 w-6 p-0 hover:bg-pink-100 rounded-lg"
               >
-                <ChevronRight className="h-4 w-4 text-pink-600" />
+                <ChevronRight className="h-3 w-3 text-pink-600" />
               </Button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Quick Stats - Hidden when collapsed */}
+      {/* Compact Progress Section - Hidden when collapsed */}
       {!isCollapsed && (
-        <div className="p-6 border-b border-pink-100 dark:border-purple-800">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide">
+        <div className="px-3 py-2 border-b border-pink-100 dark:border-purple-800">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide">
               Today's Progress ✨
             </h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setProgressCollapsed(!progressCollapsed)}
-              className="h-6 w-6 p-0 hover:bg-pink-100 dark:hover:bg-purple-800 rounded-lg"
+              className="h-5 w-5 p-0 hover:bg-pink-100 dark:hover:bg-purple-800 rounded-lg"
             >
               {progressCollapsed ? (
-                <ChevronDown className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                <ChevronDown className="h-3 w-3 text-pink-600 dark:text-pink-400" />
               ) : (
-                <ChevronUp className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                <ChevronUp className="h-3 w-3 text-pink-600 dark:text-pink-400" />
               )}
             </Button>
           </div>
@@ -221,13 +222,13 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </div>
       )}
 
-      {/* Navigation - Full view when expanded */}
+      {/* Compact Navigation - Full view when expanded */}
       {!isCollapsed && (
-        <nav className="flex-1 p-6 overflow-y-auto">
-          <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
+        <nav className="flex-1 px-3 py-2 overflow-y-auto">
+          <h3 className="text-xs font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-2">
             Categories 💖
           </h3>
-          <ul className="space-y-3">
+          <ul className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeView === item.key;
@@ -236,13 +237,13 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
                 <li key={item.key}>
                   <button
                     onClick={() => onViewChange(item.key)}
-                    className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition-all duration-200 shadow-sm ${
+                    className={`w-full flex items-center space-x-2 p-2 rounded-xl transition-all duration-200 text-sm ${
                       isActive
-                        ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white font-medium shadow-lg transform scale-105'
-                        : 'hover:bg-pink-50 dark:hover:bg-purple-900 text-gray-600 dark:text-gray-300 hover:shadow-md'
+                        ? 'bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white font-medium shadow-md'
+                        : 'hover:bg-pink-50 dark:hover:bg-purple-900 text-gray-600 dark:text-gray-300'
                     }`}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-4 w-4" />
                     <span className="font-medium">{item.label}</span>
                   </button>
                 </li>
