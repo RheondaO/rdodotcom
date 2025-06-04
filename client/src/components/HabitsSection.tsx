@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { format, isToday, isYesterday, isTomorrow, differenceInDays, startOfDay } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
+import { useHabits, useCreateHabit } from "@/hooks/use-habits";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Habit {
@@ -55,6 +56,8 @@ interface HabitsSectionProps {
 export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
+  const { data: habits = [] } = useHabits();
+  const createHabit = useCreateHabit();
   const queryClient = useQueryClient();
 
   const getDateLabel = () => {
@@ -66,45 +69,6 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
 
   // Check if the selected date is editable (today or yesterday only)
   const isEditable = isToday(selectedDate) || isYesterday(selectedDate);
-
-  const [habits, setHabits] = useState<Habit[]>([
-    {
-      id: 1,
-      name: "Morning Meditation",
-      description: "10 minutes of mindfulness meditation",
-      category: "wellness",
-      targetFrequency: 1,
-      currentStreak: 7,
-      longestStreak: 21,
-      isActive: true,
-      createdAt: "2025-05-01",
-      completedToday: false
-    },
-    {
-      id: 2,
-      name: "Read for 30 Minutes",
-      description: "Read books or educational content",
-      category: "personal",
-      targetFrequency: 1,
-      currentStreak: 12,
-      longestStreak: 18,
-      isActive: true,
-      createdAt: "2025-04-15",
-      completedToday: false
-    },
-    {
-      id: 3,
-      name: "Daily Exercise",
-      description: "Any form of physical activity",
-      category: "health",
-      targetFrequency: 1,
-      currentStreak: 3,
-      longestStreak: 15,
-      isActive: true,
-      createdAt: "2025-05-20",
-      completedToday: false
-    }
-  ]);
 
   // Parse habit completions from daily entry
   const completedHabitIds = dailyEntry?.habitCompletions 
@@ -122,6 +86,58 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
     energyLevel: dailyEntry?.energyLevel || 4,
     stressLevel: dailyEntry?.stressLevel || 2
   });
+
+  // Update mood when dailyEntry changes
+  useEffect(() => {
+    if (dailyEntry) {
+      setDailyMood({
+        mood: dailyEntry.mood || "happy",
+        energyLevel: dailyEntry.energyLevel || 4,
+        stressLevel: dailyEntry.stressLevel || 2
+      });
+    }
+  }, [dailyEntry]);
+
+  const updateMood = (newMood: Partial<DailyMood>) => {
+    if (!isEditable) return;
+    
+    const updatedMood = { ...dailyMood, ...newMood };
+    setDailyMood(updatedMood);
+
+    const updatedEntry = {
+      date: dateString,
+      mood: updatedMood.mood,
+      energyLevel: updatedMood.energyLevel,
+      stressLevel: updatedMood.stressLevel,
+      habitCompletions: dailyEntry?.habitCompletions || "[]",
+      // Preserve other fields
+      waterIntake: dailyEntry?.waterIntake,
+      exerciseCompleted: dailyEntry?.exerciseCompleted,
+      exerciseNotes: dailyEntry?.exerciseNotes,
+      breakfastCompleted: dailyEntry?.breakfastCompleted,
+      lunchCompleted: dailyEntry?.lunchCompleted,
+      dinnerCompleted: dailyEntry?.dinnerCompleted,
+      napTaken: dailyEntry?.napTaken,
+      napDuration: dailyEntry?.napDuration,
+      wakeUpTime: dailyEntry?.wakeUpTime,
+      sleepHours: dailyEntry?.sleepHours,
+      sleepQuality: dailyEntry?.sleepQuality,
+      symptoms: dailyEntry?.symptoms,
+      medicationsTaken: dailyEntry?.medicationsTaken,
+      periodFlow: dailyEntry?.periodFlow,
+      periodSymptoms: dailyEntry?.periodSymptoms,
+      workHours: dailyEntry?.workHours,
+      tvHours: dailyEntry?.tvHours,
+      phoneHours: dailyEntry?.phoneHours,
+      socialMediaHours: dailyEntry?.socialMediaHours,
+      otherScreenHours: dailyEntry?.otherScreenHours,
+      journalEntry: dailyEntry?.journalEntry,
+      gratitudeEntry: dailyEntry?.gratitudeEntry,
+      notes: dailyEntry?.notes
+    };
+
+    updateDailyEntry.mutate(updatedEntry);
+  };
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newHabit, setNewHabit] = useState({
@@ -150,24 +166,22 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
   const handleCreateHabit = () => {
     if (!newHabit.name) return;
 
-    const habit: Habit = {
-      id: Date.now(),
+    createHabit.mutate({
       ...newHabit,
       currentStreak: 0,
       longestStreak: 0,
-      isActive: true,
-      createdAt: format(new Date(), 'yyyy-MM-dd'),
-      completedToday: false
-    };
-
-    setHabits([...habits, habit]);
-    setNewHabit({
-      name: "",
-      description: "",
-      category: "health",
-      targetFrequency: 1
+      isActive: true
+    }, {
+      onSuccess: () => {
+        setNewHabit({
+          name: "",
+          description: "",
+          category: "health",
+          targetFrequency: 1
+        });
+        setShowCreateDialog(false);
+      }
     });
-    setShowCreateDialog(false);
   };
 
   const updateDailyEntry = useMutation({
@@ -200,7 +214,33 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
     const updatedEntry = {
       date: dateString,
       habitCompletions: JSON.stringify(newCompletions),
-      ...dailyEntry
+      mood: dailyEntry?.mood || dailyMood.mood,
+      energyLevel: dailyEntry?.energyLevel || dailyMood.energyLevel,
+      stressLevel: dailyEntry?.stressLevel || dailyMood.stressLevel,
+      // Preserve other daily entry fields
+      waterIntake: dailyEntry?.waterIntake,
+      exerciseCompleted: dailyEntry?.exerciseCompleted,
+      exerciseNotes: dailyEntry?.exerciseNotes,
+      breakfastCompleted: dailyEntry?.breakfastCompleted,
+      lunchCompleted: dailyEntry?.lunchCompleted,
+      dinnerCompleted: dailyEntry?.dinnerCompleted,
+      napTaken: dailyEntry?.napTaken,
+      napDuration: dailyEntry?.napDuration,
+      wakeUpTime: dailyEntry?.wakeUpTime,
+      sleepHours: dailyEntry?.sleepHours,
+      sleepQuality: dailyEntry?.sleepQuality,
+      symptoms: dailyEntry?.symptoms,
+      medicationsTaken: dailyEntry?.medicationsTaken,
+      periodFlow: dailyEntry?.periodFlow,
+      periodSymptoms: dailyEntry?.periodSymptoms,
+      workHours: dailyEntry?.workHours,
+      tvHours: dailyEntry?.tvHours,
+      phoneHours: dailyEntry?.phoneHours,
+      socialMediaHours: dailyEntry?.socialMediaHours,
+      otherScreenHours: dailyEntry?.otherScreenHours,
+      journalEntry: dailyEntry?.journalEntry,
+      gratitudeEntry: dailyEntry?.gratitudeEntry,
+      notes: dailyEntry?.notes
     };
 
     updateDailyEntry.mutate(updatedEntry);
@@ -365,7 +405,7 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
                 {moods.map(mood => (
                   <button
                     key={mood.value}
-                    onClick={() => isEditable && setDailyMood({ ...dailyMood, mood: mood.value })}
+                    onClick={() => isEditable && updateMood({ mood: mood.value })}
                     disabled={!isEditable}
                     className={`p-3 rounded-xl text-center transition-all duration-200 ${
                       !isEditable
@@ -397,7 +437,7 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
                   min="1"
                   max="5"
                   value={dailyMood.energyLevel}
-                  onChange={(e) => isEditable && setDailyMood({ ...dailyMood, energyLevel: Number(e.target.value) })}
+                  onChange={(e) => isEditable && updateMood({ energyLevel: Number(e.target.value) })}
                   disabled={!isEditable}
                   className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
                     isEditable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
@@ -425,7 +465,7 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
                   min="1"
                   max="5"
                   value={dailyMood.stressLevel}
-                  onChange={(e) => isEditable && setDailyMood({ ...dailyMood, stressLevel: Number(e.target.value) })}
+                  onChange={(e) => isEditable && updateMood({ stressLevel: Number(e.target.value) })}
                   disabled={!isEditable}
                   className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
                     isEditable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'

@@ -47,17 +47,17 @@ export interface IStorage {
   // Daily Entries
   getDailyEntry(date: string): Promise<DailyEntry | undefined>;
   createOrUpdateDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry>;
-  
+
   // Bills
   getAllBills(): Promise<Bill[]>;
   createBill(bill: InsertBill): Promise<Bill>;
   deleteBill(id: number): Promise<void>;
-  
+
   // Bill Payments
   getBillPaymentsForDate(date: string): Promise<BillPayment[]>;
   createBillPayment(payment: InsertBillPayment): Promise<BillPayment>;
   updateBillPayment(id: number, isPaid: boolean): Promise<BillPayment>;
-  
+
   // Grocery Items & Lists
   getAllGroceryItems(): Promise<GroceryItem[]>;
   createGroceryItem(item: InsertGroceryItem): Promise<GroceryItem>;
@@ -66,13 +66,13 @@ export interface IStorage {
   getAllGroceryLists(): Promise<GroceryList[]>;
   createGroceryList(list: InsertGroceryList): Promise<GroceryList>;
   deleteGroceryList(id: number): Promise<void>;
-  
+
   // Goals
   getAllGoals(): Promise<Goal[]>;
   createGoal(goal: InsertGoal): Promise<Goal>;
   updateGoal(id: number, updates: Partial<Goal>): Promise<Goal>;
   deleteGoal(id: number): Promise<void>;
-  
+
   // Habits & Habit Logs
   getAllHabits(): Promise<Habit[]>;
   createHabit(habit: InsertHabit): Promise<Habit>;
@@ -81,31 +81,31 @@ export interface IStorage {
   getHabitLogs(habitId: number, startDate?: string, endDate?: string): Promise<HabitLog[]>;
   createHabitLog(log: InsertHabitLog): Promise<HabitLog>;
   updateHabitLog(id: number, updates: Partial<HabitLog>): Promise<HabitLog>;
-  
+
   // Medications
   getAllMedications(): Promise<Medication[]>;
   createMedication(medication: InsertMedication): Promise<Medication>;
   updateMedication(id: number, updates: Partial<Medication>): Promise<Medication>;
   deleteMedication(id: number): Promise<void>;
-  
+
   // Todos
   getAllTodos(): Promise<Todo[]>;
   getTodosByDate(date: string): Promise<Todo[]>;
   createTodo(todo: InsertTodo): Promise<Todo>;
   updateTodo(id: number, updates: Partial<Todo>): Promise<Todo>;
   deleteTodo(id: number): Promise<void>;
-  
+
   // Time Blocks
   getTimeBlocksByDate(date: string): Promise<TimeBlock[]>;
   createTimeBlock(timeBlock: InsertTimeBlock): Promise<TimeBlock>;
   updateTimeBlock(id: number, updates: Partial<TimeBlock>): Promise<TimeBlock>;
   deleteTimeBlock(id: number): Promise<void>;
-  
+
   // Focus Sessions
   getFocusSessionsByDate(date: string): Promise<FocusSession[]>;
   createFocusSession(session: InsertFocusSession): Promise<FocusSession>;
   updateFocusSession(id: number, updates: Partial<FocusSession>): Promise<FocusSession>;
-  
+
   // Budget & Income
   getBudgetsByMonth(month: string): Promise<Budget[]>;
   createBudget(budget: InsertBudget): Promise<Budget>;
@@ -113,32 +113,32 @@ export interface IStorage {
   getIncomeEntriesByDateRange(startDate: string, endDate: string): Promise<IncomeEntry[]>;
   createIncomeEntry(entry: InsertIncomeEntry): Promise<IncomeEntry>;
   deleteIncomeEntry(id: number): Promise<void>;
-  
+
   // Challenges
   getAllChallenges(): Promise<Challenge[]>;
   getActiveChallenges(): Promise<Challenge[]>;
   createChallenge(challenge: InsertChallenge): Promise<Challenge>;
   updateChallenge(id: number, updates: Partial<Challenge>): Promise<Challenge>;
   deleteChallenge(id: number): Promise<void>;
-  
+
   // App Development
   getAllAppProjects(): Promise<AppProject[]>;
   getAppProject(id: number): Promise<AppProject | undefined>;
   createAppProject(project: InsertAppProject): Promise<AppProject>;
   updateAppProject(id: number, updates: Partial<AppProject>): Promise<AppProject>;
   deleteAppProject(id: number): Promise<void>;
-  
+
   getAppTasksByProject(projectId: number): Promise<AppTask[]>;
   getAllAppTasks(): Promise<AppTask[]>;
   createAppTask(task: InsertAppTask): Promise<AppTask>;
   updateAppTask(id: number, updates: Partial<AppTask>): Promise<AppTask>;
   deleteAppTask(id: number): Promise<void>;
-  
+
   getAppSprintsByProject(projectId: number): Promise<AppSprint[]>;
   createAppSprint(sprint: InsertAppSprint): Promise<AppSprint>;
   updateAppSprint(id: number, updates: Partial<AppSprint>): Promise<AppSprint>;
   deleteAppSprint(id: number): Promise<void>;
-  
+
   getAppTimeEntriesByProject(projectId: number, startDate?: string, endDate?: string): Promise<AppTimeEntry[]>;
   createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry>;
   updateAppTimeEntry(id: number, updates: Partial<AppTimeEntry>): Promise<AppTimeEntry>;
@@ -226,7 +226,7 @@ export class MemStorage implements IStorage {
 
   async createOrUpdateDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
     const existing = this.dailyEntries.get(entry.date);
-    
+
     if (existing) {
       const updated: DailyEntry = {
         ...existing,
@@ -295,7 +295,7 @@ export class MemStorage implements IStorage {
     if (!payment) {
       throw new Error("Bill payment not found");
     }
-    
+
     const updated = { ...payment, isPaid };
     this.billPayments.set(id, updated);
     return updated;
@@ -321,7 +321,7 @@ export class MemStorage implements IStorage {
     if (!item) {
       throw new Error("Grocery item not found");
     }
-    
+
     const updated = { ...item, ...updates };
     this.groceryItems.set(id, updated);
     return updated;
@@ -355,7 +355,7 @@ export class MemStorage implements IStorage {
     if (!todo) {
       throw new Error("Todo not found");
     }
-    
+
     const updated = { ...todo, ...updates };
     this.todos.set(id, updated);
     return updated;
@@ -385,7 +385,7 @@ export class MemStorage implements IStorage {
     if (!timeBlock) {
       throw new Error("Time block not found");
     }
-    
+
     const updated = { ...timeBlock, ...updates };
     this.timeBlocks.set(id, updated);
     return updated;
@@ -415,7 +415,7 @@ export class MemStorage implements IStorage {
     if (!habit) {
       throw new Error("Habit not found");
     }
-    
+
     const updated = { ...habit, ...updates };
     this.habits.set(id, updated);
     return updated;
@@ -427,11 +427,11 @@ export class MemStorage implements IStorage {
 
   async getHabitLogs(habitId: number, startDate?: string, endDate?: string): Promise<HabitLog[]> {
     const logs = Array.from(this.habitLogs.values()).filter(log => log.habitId === habitId);
-    
+
     if (startDate && endDate) {
       return logs.filter(log => log.date >= startDate && log.date <= endDate);
     }
-    
+
     return logs;
   }
 
@@ -450,7 +450,7 @@ export class MemStorage implements IStorage {
     if (!log) {
       throw new Error("Habit log not found");
     }
-    
+
     const updated = { ...log, ...updates };
     this.habitLogs.set(id, updated);
     return updated;
@@ -476,7 +476,7 @@ export class MemStorage implements IStorage {
     if (!session) {
       throw new Error("Focus session not found");
     }
-    
+
     const updated = { ...session, ...updates };
     this.focusSessions.set(id, updated);
     return updated;
@@ -502,7 +502,7 @@ export class MemStorage implements IStorage {
     if (!budget) {
       throw new Error("Budget not found");
     }
-    
+
     const updated = { ...budget, ...updates };
     this.budgets.set(id, updated);
     return updated;
@@ -553,7 +553,7 @@ export class MemStorage implements IStorage {
     if (!challenge) {
       throw new Error("Challenge not found");
     }
-    
+
     const updated = { ...challenge, ...updates };
     this.challenges.set(id, updated);
     return updated;
@@ -587,7 +587,7 @@ export class MemStorage implements IStorage {
     if (!project) {
       throw new Error("App project not found");
     }
-    
+
     const updated = { ...project, ...updates };
     this.appProjects.set(id, updated);
     return updated;
@@ -620,7 +620,7 @@ export class MemStorage implements IStorage {
     if (!task) {
       throw new Error("App task not found");
     }
-    
+
     const updated = { ...task, ...updates };
     this.appTasks.set(id, updated);
     return updated;
@@ -649,7 +649,7 @@ export class MemStorage implements IStorage {
     if (!sprint) {
       throw new Error("App sprint not found");
     }
-    
+
     const updated = { ...sprint, ...updates };
     this.appSprints.set(id, updated);
     return updated;
@@ -661,11 +661,11 @@ export class MemStorage implements IStorage {
 
   async getAppTimeEntriesByProject(projectId: number, startDate?: string, endDate?: string): Promise<AppTimeEntry[]> {
     const entries = Array.from(this.appTimeEntries.values()).filter(entry => entry.projectId === projectId);
-    
+
     if (startDate && endDate) {
       return entries.filter(entry => entry.startTime >= startDate && entry.endTime <= endDate);
     }
-    
+
     return entries;
   }
 
@@ -684,7 +684,7 @@ export class MemStorage implements IStorage {
     if (!entry) {
       throw new Error("App time entry not found");
     }
-    
+
     const updated = { ...entry, ...updates };
     this.appTimeEntries.set(id, updated);
     return updated;
@@ -714,7 +714,7 @@ export class MemStorage implements IStorage {
     if (!goal) {
       throw new Error("Goal not found");
     }
-    
+
     const updated = { ...goal, ...updates };
     this.goals.set(id, updated);
     return updated;
@@ -744,7 +744,7 @@ export class MemStorage implements IStorage {
     if (!medication) {
       throw new Error("Medication not found");
     }
-    
+
     const updated = { ...medication, ...updates };
     this.medications.set(id, updated);
     return updated;
