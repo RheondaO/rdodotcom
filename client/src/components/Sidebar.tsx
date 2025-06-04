@@ -135,7 +135,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   return (
     <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
       {/* Toggle Button */}
-      <div className="p-4 border-b border-pink-100 dark:border-purple-800">
+      <div className="px-6 py-3 border-b border-pink-100 dark:border-purple-800">
         <Button
           onClick={onToggleCollapse}
           variant="ghost"
