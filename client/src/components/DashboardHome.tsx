@@ -146,6 +146,16 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     return format(selectedDate, 'EEEE');
   };
 
+  const getFullDateLabel = () => {
+    const dayName = format(selectedDate, 'EEEE');
+    const fullDate = format(selectedDate, 'MMMM d, yyyy');
+    
+    if (isToday(selectedDate)) return `Today is ${dayName} ${fullDate}`;
+    if (isYesterday(selectedDate)) return `Yesterday was ${dayName} ${fullDate}`;
+    if (isTomorrow(selectedDate)) return `Tomorrow is ${dayName} ${fullDate}`;
+    return `${dayName} ${fullDate}`;
+  };
+
   const getMotivationalText = () => {
     if (isToday(selectedDate)) return "Let's make today productive and fulfilling";
     if (isYesterday(selectedDate)) return "Reflecting on yesterday's achievements and learning";
@@ -165,10 +175,10 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
       {/* Welcome Header */}
       <div className="text-center py-6">
         <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
-          {getContextualGreeting()} - {getDateLabel()}
+          {getContextualGreeting()}
         </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-300">
-          {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+        <p className="text-lg text-gray-600 dark:text-gray-300 mb-1">
+          {getFullDateLabel()}
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           {getMotivationalText()}
