@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
+import { useHabits } from "@/hooks/use-habits";
+import { useTodos } from "@/hooks/use-todos";
+import { useTimeBlocks } from "@/hooks/use-time-blocks";
 
 interface DashboardHomeProps {
   selectedDate: Date;
@@ -32,6 +35,9 @@ interface DashboardHomeProps {
 export default function DashboardHome({ selectedDate, onNavigate }: DashboardHomeProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
+  const { data: habits = [] } = useHabits();
+  const { data: todos = [] } = useTodos(dateString);
+  const { data: timeBlocksData = [] } = useTimeBlocks(dateString);
   
   const [activeTimer, setActiveTimer] = useState<{
     type: string;
@@ -61,18 +67,23 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     ? JSON.parse(dailyEntry.habitCompletions) 
     : [];
 
-  const todaysHabits = [
-    { id: 1, name: "Morning Meditation", completed: completedHabitIds.includes(1), streak: 7 },
-    { id: 2, name: "Drink 8 glasses of water", completed: completedHabitIds.includes(2), streak: 3 },
-    { id: 3, name: "Exercise 30min", completed: dailyEntry?.exerciseCompleted || false, streak: 12 },
-    { id: 4, name: "Read for 20min", completed: completedHabitIds.includes(4), streak: 5 }
-  ];
+  // Use real habits data and check completion status
+  const todaysHabits = habits.filter(habit => habit.isActive).map(habit => ({
+    id: habit.id,
+    name: habit.name,
+    completed: completedHabitIds.includes(habit.id),
+    streak: habit.currentStreak || 0
+  }));
 
-  const todaysTodos = [
-    { id: 1, title: "Team meeting", priority: "high", completed: false, dueTime: "10:00", date: selectedDateString },
-    { id: 2, title: "Review project proposal", priority: "medium", completed: true, dueTime: "14:00", date: selectedDateString },
-    { id: 3, title: "Call dentist", priority: "low", completed: false, dueTime: "16:00", date: selectedDateString }
-  ];
+  // Use real todos data for the selected date
+  const todaysTodos = todos.map(todo => ({
+    id: todo.id,
+    title: todo.title,
+    priority: todo.priority,
+    completed: todo.isCompleted || false,
+    dueTime: todo.dueTime || "00:00",
+    date: todo.dueDate
+  }));
 
   const upcomingGoals = [
     { id: 1, title: "Complete React course", progress: 75, dueDate: "Jun 15" },
@@ -85,11 +96,14 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     { id: 2, name: "Omega-3", time: "20:00", taken: false }
   ];
 
-  const timeBlocks = [
-    { id: 1, title: "Focus Session", time: "09:00-11:00", status: "completed", date: selectedDateString },
-    { id: 2, title: "Deep Work", time: "14:00-16:00", status: "upcoming", date: selectedDateString },
-    { id: 3, title: "Admin Tasks", time: "16:30-17:30", status: "pending", date: selectedDateString }
-  ].filter(block => block.date === selectedDateString);
+  // Use real time blocks data, with formatted time display
+  const timeBlocks = timeBlocksData.map(block => ({
+    id: block.id,
+    title: block.title,
+    time: `${block.startTime}-${block.endTime}`,
+    status: block.status,
+    date: block.date
+  }));
 
   const completedHabits = todaysHabits.filter(h => h.completed).length;
   const totalHabits = todaysHabits.length;
