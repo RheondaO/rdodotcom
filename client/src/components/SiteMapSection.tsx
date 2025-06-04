@@ -144,16 +144,9 @@ export default function SiteMapSection({ onNavigate }: SiteMapSectionProps) {
           <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
             Site Map
           </h1>
-          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto mb-4">
+          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
             Quick access to all sections of Belle Journal. Click any item below to navigate directly to that page.
           </p>
-          <Button 
-            onClick={handleExportData}
-            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl px-6 py-2 shadow-md font-medium"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export Data
-          </Button>
         </div>
       </div>
 
@@ -260,6 +253,17 @@ export default function SiteMapSection({ onNavigate }: SiteMapSectionProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Export Data Button - Bottom Right */}
+      <div className="flex justify-end mt-8">
+        <Button 
+          onClick={handleExportData}
+          className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl px-6 py-3 shadow-lg font-medium"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Export Data
+        </Button>
+      </div>
     </div>
   );
 }
