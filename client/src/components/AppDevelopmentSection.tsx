@@ -651,9 +651,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <span className="ml-1 font-medium">{project.actualHours}/{project.estimatedHours || 'N/A'}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Priority:</span>
-                      <Badge variant="outline" className={`ml-1 ${getPriorityColor(project.priority)}`}>
-                        {project.priority}
+                      <span className="text-muted-foreground dark:text-gray-400">Type:</span>
+                      <Badge variant="outline" className="ml-1 capitalize">
+                        {project.projectType}
                       </Badge>
                     </div>
                   </div>
@@ -743,8 +743,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <Badge className={getStatusColor(task.status)}>
                         {task.status.replace('_', ' ')}
                       </Badge>
-                      <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                        {task.priority}
+                      <Badge variant="outline" className="capitalize">
+                        {task.category}
                       </Badge>
                     </div>
                   </div>
@@ -837,8 +837,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           <Badge className={getStatusColor(task.status)}>
                             {task.status}
                           </Badge>
-                          <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                            {task.priority}
+                          <Badge variant="outline" className="capitalize">
+                            {task.category}
                           </Badge>
                         </div>
                       </div>
