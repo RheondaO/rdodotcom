@@ -38,7 +38,8 @@ import { format, addDays, addWeeks, isBefore, isAfter, startOfYear, endOfYear } 
 interface MiniGameBlock {
   id: number;
   name: string;
-  description: string;
+  dateOfPost: string;
+  astrologicalSign: string;
   frequency: string;
   frequencyValue: number; // How many times per year
   color: string;
@@ -116,8 +117,9 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     {
       id: 1,
       name: "Vibe Check-In",
-      description: "Weekly Friday mood and energy assessment",
-      frequency: "weekly",
+      dateOfPost: "2025-06-06",
+      astrologicalSign: "gemini",
+      frequency: "every_friday",
       frequencyValue: 52, // 52 Fridays per year
       color: "#8B5CF6",
       category: "engagement",
@@ -127,9 +129,10 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     {
       id: 2,
       name: "Written Realms",
-      description: "Waning Crescent creative writing prompts",
-      frequency: "lunar_waning_crescent",
-      frequencyValue: 12, // 12 Waning Crescents per year
+      dateOfPost: "2025-06-11",
+      astrologicalSign: "cancer",
+      frequency: "every_2nd_wednesday",
+      frequencyValue: 12, // 12 Second Wednesdays per year
       color: "#3B82F6",
       category: "astrological",
       isActive: true,
@@ -138,32 +141,11 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     {
       id: 3,
       name: "Sun Sign Spotlight",
-      description: "Monthly zodiac sign deep dive",
-      frequency: "monthly",
-      frequencyValue: 12, // 12 months per year
+      dateOfPost: "2025-06-07",
+      astrologicalSign: "leo",
+      frequency: "every_1st_friday",
+      frequencyValue: 12, // 12 First Fridays per year
       color: "#F59E0B",
-      category: "astrological",
-      isActive: true,
-      createdAt: format(new Date(), 'yyyy-MM-dd')
-    },
-    {
-      id: 4,
-      name: "Full Moon Rituals",
-      description: "Full moon ceremonial content",
-      frequency: "lunar_full",
-      frequencyValue: 12, // 12 Full Moons per year
-      color: "#EC4899",
-      category: "astrological",
-      isActive: true,
-      createdAt: format(new Date(), 'yyyy-MM-dd')
-    },
-    {
-      id: 5,
-      name: "New Moon Intentions",
-      description: "New moon manifestation prompts",
-      frequency: "lunar_new",
-      frequencyValue: 12, // 12 New Moons per year
-      color: "#10B981",
       category: "astrological",
       isActive: true,
       createdAt: format(new Date(), 'yyyy-MM-dd')
@@ -215,8 +197,9 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
   const [newMiniGame, setNewMiniGame] = useState({
     name: "",
-    description: "",
-    frequency: "weekly",
+    dateOfPost: "",
+    astrologicalSign: "",
+    frequency: "every_friday",
     frequencyValue: 52,
     color: "#8B5CF6",
     category: "engagement"
@@ -231,15 +214,9 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   });
 
   const frequencyOptions = [
-    { value: "weekly", label: "Weekly (52/year)", count: 52 },
-    { value: "monthly", label: "Monthly (12/year)", count: 12 },
-    { value: "lunar_full", label: "Full Moon (12/year)", count: 12 },
-    { value: "lunar_new", label: "New Moon (12/year)", count: 12 },
-    { value: "lunar_waning_crescent", label: "Waning Crescent (12/year)", count: 12 },
-    { value: "lunar_waxing_crescent", label: "Waxing Crescent (12/year)", count: 12 },
-    { value: "seasonal", label: "Seasonal (4/year)", count: 4 },
-    { value: "bi_weekly", label: "Bi-weekly (26/year)", count: 26 },
-    { value: "custom", label: "Custom Frequency", count: 0 }
+    { value: "every_friday", label: "Every Friday (52/year)", count: 52 },
+    { value: "every_1st_friday", label: "Every 1st Friday (12/year)", count: 12 },
+    { value: "every_2nd_wednesday", label: "Every 2nd Wednesday (12/year)", count: 12 }
   ];
 
   const categoryOptions = [
@@ -248,6 +225,22 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     { value: "wellness", label: "Wellness", icon: "🧘", color: "#10B981" },
     { value: "creative", label: "Creative", icon: "🎨", color: "#F59E0B" },
     { value: "educational", label: "Educational", icon: "📚", color: "#EF4444" }
+  ];
+
+  const astrologicalSignOptions = [
+    { value: "", label: "None" },
+    { value: "aries", label: "Aries ♈" },
+    { value: "taurus", label: "Taurus ♉" },
+    { value: "gemini", label: "Gemini ♊" },
+    { value: "cancer", label: "Cancer ♋" },
+    { value: "leo", label: "Leo ♌" },
+    { value: "virgo", label: "Virgo ♍" },
+    { value: "libra", label: "Libra ♎" },
+    { value: "scorpio", label: "Scorpio ♏" },
+    { value: "sagittarius", label: "Sagittarius ♐" },
+    { value: "capricorn", label: "Capricorn ♑" },
+    { value: "aquarius", label: "Aquarius ♒" },
+    { value: "pisces", label: "Pisces ♓" }
   ];
 
   const statusColors = {
@@ -374,13 +367,31 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   />
                 </div>
                 <div>
-                  <Label htmlFor="miniGameDescription">Description</Label>
-                  <Textarea
-                    id="miniGameDescription"
-                    value={newMiniGame.description}
-                    onChange={(e) => setNewMiniGame({...newMiniGame, description: e.target.value})}
-                    placeholder="Describe this mini-game..."
+                  <Label htmlFor="dateOfPost">Date of Post</Label>
+                  <Input
+                    id="dateOfPost"
+                    type="date"
+                    value={newMiniGame.dateOfPost}
+                    onChange={(e) => setNewMiniGame({...newMiniGame, dateOfPost: e.target.value})}
                   />
+                </div>
+                <div>
+                  <Label htmlFor="astrologicalSign">Astrological Sign</Label>
+                  <Select 
+                    value={newMiniGame.astrologicalSign} 
+                    onValueChange={(value) => setNewMiniGame({...newMiniGame, astrologicalSign: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select astrological sign" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {astrologicalSignOptions.map(sign => (
+                        <SelectItem key={sign.value} value={sign.value}>
+                          {sign.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -456,8 +467,9 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     setMiniGameBlocks([...miniGameBlocks, miniGame]);
                     setNewMiniGame({
                       name: "",
-                      description: "",
-                      frequency: "weekly",
+                      dateOfPost: "",
+                      astrologicalSign: "",
+                      frequency: "every_friday",
                       frequencyValue: 52,
                       color: "#8B5CF6",
                       category: "engagement"
