@@ -278,15 +278,7 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
     return colors[status as keyof typeof colors] || colors.idea;
   };
 
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      low: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
-      medium: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-      high: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-      urgent: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-    };
-    return colors[priority as keyof typeof colors] || colors.medium;
-  };
+
 
   const createContent = () => {
     const content: ContentPiece = {
@@ -542,9 +534,6 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
                     <div className="flex items-center gap-2">
                       <Badge className={getStatusColor(content.status)}>
                         {content.status}
-                      </Badge>
-                      <Badge variant="outline" className={getPriorityColor(content.priority)}>
-                        {content.priority}
                       </Badge>
                     </div>
                   </div>
