@@ -83,7 +83,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   ].filter(Boolean).length;
 
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl`}>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
       {/* Toggle Button */}
       <div className="p-4 border-b border-pink-100 dark:border-purple-800">
         <Button
@@ -223,7 +223,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
       {/* Navigation - Full view when expanded */}
       {!isCollapsed && (
-        <nav className="flex-1 p-6">
+        <nav className="flex-1 p-6 overflow-y-auto">
           <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
             Categories 💖
           </h3>
@@ -254,7 +254,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
       {/* Collapsed Navigation - Icons Only */}
       {isCollapsed && (
-        <nav className="flex-1 p-2">
+        <nav className="flex-1 p-2 overflow-y-auto">
           <ul className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
