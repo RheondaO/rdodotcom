@@ -184,37 +184,38 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
           </div>
           {!progressCollapsed && (
             <div className="space-y-4">
-            <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
-                <span className="text-sm font-medium text-gray-700 dark:text-white">Water</span>
+              <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-white">Water</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Progress value={waterProgress} className="w-16 h-2" />
+                  <span className="text-xs text-muted-foreground dark:text-white font-medium">{waterIntake}/8</span>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Progress value={waterProgress} className="w-16 h-2" />
-                <span className="text-xs text-muted-foreground dark:text-white font-medium">{waterIntake}/8</span>
-              </div>
-            </div>
 
-            <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-sm"></div>
-                <span className="text-sm font-medium text-gray-700 dark:text-white">Exercise</span>
+              <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-sm"></div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-white">Exercise</span>
+                </div>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
+                  dailyEntry?.exerciseCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gray-200'
+                }`}>
+                  {dailyEntry?.exerciseCompleted && (
+                    <div className="w-3 h-3 bg-white rounded-full"></div>
+                  )}
+                </div>
               </div>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
-                dailyEntry?.exerciseCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-gray-200'
-              }`}>
-                {dailyEntry?.exerciseCompleted && (
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
-                )}
-              </div>
-            </div>
 
-            <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
-                <span className="text-sm font-medium text-gray-700 dark:text-white">Meals</span>
+              <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-white">Meals</span>
+                </div>
+                <span className="text-xs text-muted-foreground dark:text-white font-medium">{mealCount}/3</span>
               </div>
-              <span className="text-xs text-muted-foreground dark:text-white font-medium">{mealCount}/3</span>
             </div>
           )}
         </div>
