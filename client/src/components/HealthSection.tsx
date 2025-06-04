@@ -13,6 +13,13 @@ export default function HealthSection({ selectedDate }: HealthSectionProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
 
+  const getDateLabel = () => {
+    if (isToday(selectedDate)) return "Today";
+    if (isYesterday(selectedDate)) return "Yesterday";
+    if (isTomorrow(selectedDate)) return "Tomorrow";
+    return format(selectedDate, 'EEEE');
+  };
+
   return (
     <section className="mb-8">
       <h3 className="text-2xl font-heading font-bold text-pink-600 mb-6 flex items-center">

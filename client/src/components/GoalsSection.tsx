@@ -21,7 +21,7 @@ import {
   Trash2,
   Star
 } from "lucide-react";
-import { format, differenceInDays, isAfter, isBefore } from "date-fns";
+import { format, differenceInDays, isAfter, isBefore, isToday, isYesterday, isTomorrow } from "date-fns";
 
 interface Goal {
   id: number;
@@ -41,6 +41,13 @@ interface GoalsSectionProps {
 }
 
 export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
+  const getDateLabel = () => {
+    if (isToday(selectedDate)) return "Today";
+    if (isYesterday(selectedDate)) return "Yesterday";
+    if (isTomorrow(selectedDate)) return "Tomorrow";
+    return format(selectedDate, 'EEEE');
+  };
+
   const [goals, setGoals] = useState<Goal[]>([
     {
       id: 1,

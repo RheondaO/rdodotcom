@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useDailyData } from "@/hooks/use-daily-data";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isToday, isYesterday, isTomorrow } from "date-fns";
 
 interface FinanceSectionProps {
   selectedDate: Date;
@@ -14,6 +14,13 @@ interface FinanceSectionProps {
 export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
+
+  const getDateLabel = () => {
+    if (isToday(selectedDate)) return "Today";
+    if (isYesterday(selectedDate)) return "Yesterday";
+    if (isTomorrow(selectedDate)) return "Tomorrow";
+    return format(selectedDate, 'EEEE');
+  };
 
   const { data: bills = [] } = useQuery({
     queryKey: ['/api/bills'],
