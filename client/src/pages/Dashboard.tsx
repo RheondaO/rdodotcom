@@ -12,6 +12,7 @@ import DashboardHome from "@/components/DashboardHome";
 import SiteMapSection from "@/components/SiteMapSection";
 import AppDevelopmentSection from "@/components/AppDevelopmentSection";
 import ContentManagementSuite from "@/components/ContentManagementSuite";
+import ContentCreationSection from "@/components/ContentCreationSection";
 import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
@@ -20,7 +21,7 @@ import { Download, Sun, Moon } from "lucide-react";
 import { format, addDays, subDays, isSameDay, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useTheme } from "@/hooks/use-theme";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "apps" | "sitemap";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
 
 export default function Dashboard() {
@@ -197,6 +198,7 @@ export default function Dashboard() {
           {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
           {activeView === "groceries" && <GrocerySection />}
           {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
+          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} />}
           {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
           {activeView === "sitemap" && (
             <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} />

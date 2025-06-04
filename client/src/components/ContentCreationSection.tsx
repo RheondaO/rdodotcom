@@ -64,7 +64,11 @@ interface MiniGameDesign {
   updatedAt: string;
 }
 
-export default function ContentCreationSection() {
+interface ContentCreationSectionProps {
+  selectedDate: Date;
+}
+
+export default function ContentCreationSection({ selectedDate }: ContentCreationSectionProps) {
   const [activeBrand, setActiveBrand] = useState<string>("rotationONLY");
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedMiniGame, setSelectedMiniGame] = useState<number | null>(null);

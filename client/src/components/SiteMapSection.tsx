@@ -115,6 +115,14 @@ export default function SiteMapSection({ onNavigate }: SiteMapSectionProps) {
       ]
     },
     {
+      category: "Brand Management",
+      icon: Moon,
+      color: "from-purple-400 to-indigo-500",
+      items: [
+        { key: "rotationonly", label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine", icon: Moon, description: "Astrological content and mini-game design studio" }
+      ]
+    },
+    {
       category: "Development & Projects",
       icon: Code2,
       color: "from-purple-400 to-indigo-500",
@@ -130,7 +138,8 @@ export default function SiteMapSection({ onNavigate }: SiteMapSectionProps) {
     { key: "productivity", label: "Start Focus Timer", icon: Timer, description: "Begin a focused work session" },
     { key: "finances", label: "Add Expense", icon: Receipt, description: "Log a new expense or transaction" },
     { key: "groceries", label: "Create Shopping List", icon: List, description: "Plan your next grocery trip" },
-    { key: "goals", label: "Update Goals", icon: TrendingUp, description: "Track progress on your goals" }
+    { key: "goals", label: "Update Goals", icon: TrendingUp, description: "Track progress on your goals" },
+    { key: "rotationonly", label: "Design Mini-Game", icon: Moon, description: "Create content for 𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine" }
   ];
 
   return (
