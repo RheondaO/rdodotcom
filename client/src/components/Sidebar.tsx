@@ -25,7 +25,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { format, addDays, subDays } from "date-fns";
-import { useDailyData } from "@/hooks/use-daily-data";
+import { useDailyData, useUpdateDailyEntry } from "@/hooks/use-daily-data";
 import { useTheme } from "@/hooks/use-theme";
 
 type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "apps" | "sitemap";
@@ -45,6 +45,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const { theme, toggleTheme } = useTheme();
+  const updateDailyEntry = useUpdateDailyEntry();
 
   const goToPreviousDay = () => {
     onDateChange(subDays(selectedDate, 1));
@@ -81,6 +82,55 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     dailyEntry?.lunchCompleted,
     dailyEntry?.dinnerCompleted
   ].filter(Boolean).length;
+
+  // Click handlers for progress items
+  const handleWaterClick = () => {
+    updateDailyEntry.mutate({
+      ...dailyEntry,
+      date: dateString,
+      waterIntake: waterIntake + 1
+    });
+  };
+
+  const handleExerciseClick = () => {
+    updateDailyEntry.mutate({
+      ...dailyEntry,
+      date: dateString,
+      exerciseCompleted: !dailyEntry?.exerciseCompleted
+    });
+  };
+
+  const handleMealsClick = () => {
+    // Cycle through meal completion: breakfast -> lunch -> dinner -> reset
+    if (!dailyEntry?.breakfastCompleted) {
+      updateDailyEntry.mutate({
+        ...dailyEntry,
+        date: dateString,
+        breakfastCompleted: true
+      });
+    } else if (!dailyEntry?.lunchCompleted) {
+      updateDailyEntry.mutate({
+        ...dailyEntry,
+        date: dateString,
+        lunchCompleted: true
+      });
+    } else if (!dailyEntry?.dinnerCompleted) {
+      updateDailyEntry.mutate({
+        ...dailyEntry,
+        date: dateString,
+        dinnerCompleted: true
+      });
+    } else {
+      // Reset all meals
+      updateDailyEntry.mutate({
+        ...dailyEntry,
+        date: dateString,
+        breakfastCompleted: false,
+        lunchCompleted: false,
+        dinnerCompleted: false
+      });
+    }
+  };
 
   return (
     <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
@@ -120,7 +170,10 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
           </div>
           {!progressCollapsed && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+              <div 
+                onClick={handleWaterClick}
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors"
+              >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
                   <span className="text-sm font-medium text-gray-700 dark:text-white">Water</span>
@@ -131,7 +184,10 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
                 </div>
               </div>
 
-              <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+              <div 
+                onClick={handleExerciseClick}
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors"
+              >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-sm"></div>
                   <span className="text-sm font-medium text-gray-700 dark:text-white">Exercise</span>
@@ -145,7 +201,10 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
                 </div>
               </div>
 
-              <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
+              <div 
+                onClick={handleMealsClick}
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors"
+              >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
                   <span className="text-sm font-medium text-gray-700 dark:text-white">Meals</span>
