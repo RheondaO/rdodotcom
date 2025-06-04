@@ -33,6 +33,10 @@ export const dailyEntries = pgTable("daily_entries", {
   cashSavings: decimal("cash_savings", { precision: 10, scale: 2 }).default("0"),
   grocerySpent: decimal("grocery_spent", { precision: 8, scale: 2 }).default("0"),
   dailyIncome: decimal("daily_income", { precision: 8, scale: 2 }).default("0"),
+  // Habits (date-specific completion tracking)
+  habitCompletions: text("habit_completions"), // JSON string of habit IDs that were completed
+  // Tasks (date-specific todo items)
+  todoItems: text("todo_items"), // JSON string of todo items for this date
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

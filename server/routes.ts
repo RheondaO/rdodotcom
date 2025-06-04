@@ -9,7 +9,10 @@ import {
   insertContentCategorySchema,
   insertContentTypeSchema,
   insertContentPieceSchema,
-  insertContentProgressSchema
+  insertContentProgressSchema,
+  insertHabitSchema,
+  insertHabitLogSchema,
+  insertTodoSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -228,6 +231,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating content progress:", error);
       res.status(500).json({ error: "Failed to create content progress" });
+    }
+  });
+
+  // Habits
+  app.get("/api/habits", async (req, res) => {
+    try {
+      const habits = await storage.getAllHabits();
+      res.json(habits);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch habits" });
+    }
+  });
+
+  app.post("/api/habits", async (req, res) => {
+    try {
+      const data = insertHabitSchema.parse(req.body);
+      const habit = await storage.createHabit(data);
+      res.json(habit);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid habit data" });
+    }
+  });
+
+  // Habit Logs (date-specific completion tracking)
+  app.get("/api/habit-logs/:habitId/:date", async (req, res) => {
+    try {
+      const habitId = parseInt(req.params.habitId);
+      const date = req.params.date;
+      const logs = await storage.getHabitLogs(habitId, date, date);
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch habit logs" });
+    }
+  });
+
+  app.post("/api/habit-logs", async (req, res) => {
+    try {
+      const data = insertHabitLogSchema.parse(req.body);
+      const log = await storage.createHabitLog(data);
+      res.json(log);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid habit log data" });
+    }
+  });
+
+  // Todos (date-specific)
+  app.get("/api/todos/:date", async (req, res) => {
+    try {
+      const date = req.params.date;
+      const todos = await storage.getTodosByDate(date);
+      res.json(todos);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch todos" });
+    }
+  });
+
+  app.post("/api/todos", async (req, res) => {
+    try {
+      const data = insertTodoSchema.parse(req.body);
+      const todo = await storage.createTodo(data);
+      res.json(todo);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid todo data" });
+    }
+  });
+
+  app.patch("/api/todos/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const todo = await storage.updateTodo(id, updates);
+      res.json(todo);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update todo" });
     }
   });
 

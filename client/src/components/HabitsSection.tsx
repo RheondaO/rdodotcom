@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,8 @@ import {
   Moon
 } from "lucide-react";
 import { format, isToday, differenceInDays, startOfDay } from "date-fns";
+import { useDailyData } from "@/hooks/use-daily-data";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Habit {
   id: number;
