@@ -263,7 +263,12 @@ export default function ContentCreationSection() {
     if (!miniGame) return 0;
     
     const approvedDesigns = designs.filter(d => d.status === 'approved').length;
-    return Math.round((approvedDesigns / miniGame.frequencyValue) * 100);
+    const totalNeeded = miniGame.frequencyValue;
+    
+    // Each approved design represents one unit of progress
+    // Progress = (approved designs / total needed) * 100
+    const progress = totalNeeded > 0 ? (approvedDesigns / totalNeeded) * 100 : 0;
+    return Math.min(Math.round(progress), 100); // Cap at 100%
   };
 
   const getStatusCountForMiniGame = (miniGameId: number, status: string) => {
@@ -601,9 +606,13 @@ export default function ContentCreationSection() {
                       <div>
                         <div className="flex justify-between text-sm mb-1">
                           <span>Annual Progress</span>
+                          <span className="font-medium">{getStatusCountForMiniGame(miniGame.id, 'approved')}/{miniGame.frequencyValue}</span>
+                        </div>
+                        <div className="flex justify-between text-xs mb-2 text-gray-500">
+                          <span>Completion Rate</span>
                           <span>{progress}%</span>
                         </div>
-                        <Progress value={progress} className="h-2" />
+                        <Progress value={progress} className="h-3" />
                       </div>
                       
                       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -612,8 +621,8 @@ export default function ContentCreationSection() {
                           <span className="font-medium">{getStatusCountForMiniGame(miniGame.id, 'designed')}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-500">Approved:</span>
-                          <span className="font-medium">{getStatusCountForMiniGame(miniGame.id, 'approved')}</span>
+                          <span className="text-gray-500">Remaining:</span>
+                          <span className="font-medium text-orange-600">{miniGame.frequencyValue - getStatusCountForMiniGame(miniGame.id, 'approved')}</span>
                         </div>
                       </div>
                       
@@ -653,25 +662,48 @@ export default function ContentCreationSection() {
                         </p>
                       </div>
                       
-                      {/* Vertical Progress Bar */}
-                      <div className="relative mx-auto w-8 h-48 bg-gray-200 rounded-full overflow-hidden">
+                      {/* Vertical Progress Bar with Notches */}
+                      <div className="relative mx-auto w-10 h-48 bg-gray-200 rounded-full overflow-hidden border-2 border-gray-300">
+                        {/* Progress Fill */}
                         <div 
-                          className="absolute bottom-0 w-full rounded-full transition-all duration-300 ease-in-out"
+                          className="absolute bottom-0 w-full transition-all duration-500 ease-in-out"
                           style={{ 
                             height: `${progress}%`,
-                            backgroundColor: miniGame.color
+                            background: `linear-gradient(to top, ${miniGame.color}, ${miniGame.color}99)`
                           }}
                         />
-                        <div className="absolute inset-0 flex items-end justify-center pb-2">
-                          <span className="text-xs font-bold text-white drop-shadow-lg">
-                            {progress}%
-                          </span>
+                        
+                        {/* Notch Markers - Show every 10% or key milestones */}
+                        {Array.from({ length: Math.min(10, targetCount) }, (_, i) => {
+                          const notchProgress = ((i + 1) / Math.min(10, targetCount)) * 100;
+                          return (
+                            <div
+                              key={i}
+                              className="absolute w-full h-0.5 bg-white/40"
+                              style={{ bottom: `${notchProgress}%` }}
+                            />
+                          );
+                        })}
+                        
+                        {/* Progress Text */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="text-xs font-bold text-white drop-shadow-lg">
+                              {approvedCount}
+                            </div>
+                            <div className="text-xs text-white/80 drop-shadow-lg">
+                              of {targetCount}
+                            </div>
+                          </div>
                         </div>
                       </div>
                       
                       <div className="mt-3 space-y-1">
-                        <div className="text-xs text-gray-600">
-                          Remaining: {targetCount - approvedCount}
+                        <div className="text-xs text-gray-600 font-medium">
+                          {targetCount - approvedCount} remaining
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {progress}% complete
                         </div>
                         <Badge 
                           className="text-xs" 
