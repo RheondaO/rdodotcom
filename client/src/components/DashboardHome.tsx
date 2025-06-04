@@ -267,7 +267,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Flame className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-              <span>Today's Habits</span>
+              <span>{getDateLabel()}'s Habits</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -309,7 +309,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <CheckSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <span>Today's Tasks</span>
+              <span>{getDateLabel()}'s Tasks</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
