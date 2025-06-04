@@ -64,6 +64,9 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
     return format(selectedDate, 'EEEE');
   };
 
+  // Check if the selected date is editable (today or yesterday only)
+  const isEditable = isToday(selectedDate) || isYesterday(selectedDate);
+
   const [habits, setHabits] = useState<Habit[]>([
     {
       id: 1,
@@ -183,6 +186,8 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
   });
 
   const toggleHabitCompletion = (habitId: number) => {
+    if (!isEditable) return;
+    
     const currentCompletions = dailyEntry?.habitCompletions 
       ? JSON.parse(dailyEntry.habitCompletions) 
       : [];
@@ -360,9 +365,12 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
                 {moods.map(mood => (
                   <button
                     key={mood.value}
-                    onClick={() => setDailyMood({ ...dailyMood, mood: mood.value })}
+                    onClick={() => isEditable && setDailyMood({ ...dailyMood, mood: mood.value })}
+                    disabled={!isEditable}
                     className={`p-3 rounded-xl text-center transition-all duration-200 ${
-                      dailyMood.mood === mood.value
+                      !isEditable
+                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+                        : dailyMood.mood === mood.value
                         ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-lg scale-105'
                         : 'bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-700'
                     }`}
@@ -389,8 +397,11 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
                   min="1"
                   max="5"
                   value={dailyMood.energyLevel}
-                  onChange={(e) => setDailyMood({ ...dailyMood, energyLevel: Number(e.target.value) })}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  onChange={(e) => isEditable && setDailyMood({ ...dailyMood, energyLevel: Number(e.target.value) })}
+                  disabled={!isEditable}
+                  className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
+                    isEditable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                  }`}
                 />
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>Low</span>
@@ -414,8 +425,11 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
                   min="1"
                   max="5"
                   value={dailyMood.stressLevel}
-                  onChange={(e) => setDailyMood({ ...dailyMood, stressLevel: Number(e.target.value) })}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  onChange={(e) => isEditable && setDailyMood({ ...dailyMood, stressLevel: Number(e.target.value) })}
+                  disabled={!isEditable}
+                  className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
+                    isEditable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                  }`}
                 />
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>Low</span>
@@ -448,6 +462,7 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
                   key={habit.id}
                   habit={habit}
                   onToggle={toggleHabitCompletion}
+                  isEditable={isEditable}
                 />
               ))}
             </div>
@@ -461,9 +476,10 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
 interface HabitCardProps {
   habit: Habit;
   onToggle: (habitId: number) => void;
+  isEditable: boolean;
 }
 
-function HabitCard({ habit, onToggle }: HabitCardProps) {
+function HabitCard({ habit, onToggle, isEditable }: HabitCardProps) {
   const categoryInfo = {
     health: { icon: "💪", color: "bg-gradient-to-r from-green-400 to-emerald-400" },
     wellness: { icon: "🧘", color: "bg-gradient-to-r from-purple-400 to-pink-400" },
@@ -516,8 +532,11 @@ function HabitCard({ habit, onToggle }: HabitCardProps) {
           onClick={() => onToggle(habit.id)}
           variant={habit.completedToday ? "default" : "outline"}
           size="sm"
+          disabled={!isEditable}
           className={`w-12 h-12 rounded-xl ${
-            habit.completedToday
+            !isEditable
+              ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+              : habit.completedToday
               ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
               : 'border-gray-300 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900'
           }`}

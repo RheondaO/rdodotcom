@@ -20,6 +20,9 @@ export default function HealthSection({ selectedDate }: HealthSectionProps) {
     return format(selectedDate, 'EEEE');
   };
 
+  // Check if the selected date is editable (today or yesterday only)
+  const isEditable = isToday(selectedDate) || isYesterday(selectedDate);
+
   return (
     <section className="mb-8">
       <h3 className="text-2xl font-heading font-bold text-pink-600 mb-6 flex items-center">
@@ -30,16 +33,23 @@ export default function HealthSection({ selectedDate }: HealthSectionProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Water Intake Card */}
-        <WaterIntakeCard selectedDate={selectedDate} />
+        <WaterIntakeCard selectedDate={selectedDate} isEditable={isEditable} />
 
         {/* Exercise Card */}
-        <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
+        <Card className={`bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
+          !isEditable ? 'opacity-60' : ''
+        }`}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full shadow-sm"></div>
                 <h4 className="font-heading font-semibold text-gray-800">Exercise</h4>
               </div>
+              {!isEditable && (
+                <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  View Only
+                </div>
+              )}
             </div>
             
             <div className="text-center mb-4">
@@ -72,16 +82,24 @@ export default function HealthSection({ selectedDate }: HealthSectionProps) {
         </Card>
 
         {/* Sleep Card */}
-        <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
+        <Card className={`bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
+          !isEditable ? 'opacity-60' : ''
+        }`}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <Moon className="text-purple-500 h-5 w-5" />
                 <h4 className="font-heading font-semibold text-gray-800">Sleep</h4>
               </div>
-              <Button variant="ghost" size="sm" className="hover:bg-purple-50 rounded-xl">
-                <Edit className="h-4 w-4 text-purple-500" />
-              </Button>
+              {isEditable ? (
+                <Button variant="ghost" size="sm" className="hover:bg-purple-50 rounded-xl">
+                  <Edit className="h-4 w-4 text-purple-500" />
+                </Button>
+              ) : (
+                <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  View Only
+                </div>
+              )}
             </div>
             
             <div className="text-center">
@@ -105,16 +123,24 @@ export default function HealthSection({ selectedDate }: HealthSectionProps) {
         </Card>
 
         {/* Meals Card */}
-        <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
+        <Card className={`bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
+          !isEditable ? 'opacity-60' : ''
+        }`}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <Utensils className="text-orange-500 h-5 w-5" />
                 <h4 className="font-heading font-semibold text-gray-800">Meals</h4>
               </div>
-              <Button variant="ghost" size="sm" className="hover:bg-orange-50 rounded-xl">
-                <Plus className="h-4 w-4 text-orange-500" />
-              </Button>
+              {isEditable ? (
+                <Button variant="ghost" size="sm" className="hover:bg-orange-50 rounded-xl">
+                  <Plus className="h-4 w-4 text-orange-500" />
+                </Button>
+              ) : (
+                <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  View Only
+                </div>
+              )}
             </div>
             
             <div className="space-y-3">

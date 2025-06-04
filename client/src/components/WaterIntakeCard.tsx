@@ -46,7 +46,7 @@ export default function WaterIntakeCard({ selectedDate }: WaterIntakeCardProps) 
             <Plus className="h-4 w-4 text-blue-500" />
           </Button>
         </div>
-        
+
         {/* Water Progress Ring */}
         <div className="relative w-20 h-20 mx-auto mb-4">
           <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 100 100">
@@ -75,7 +75,7 @@ export default function WaterIntakeCard({ selectedDate }: WaterIntakeCardProps) 
             <span className="text-lg font-bold text-secondary">{waterIntake}</span>
           </div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-2xl font-heading font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-1">
             {waterIntake * 8}oz
