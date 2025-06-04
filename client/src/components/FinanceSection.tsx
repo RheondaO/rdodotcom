@@ -3,9 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { useDailyData } from "@/hooks/use-daily-data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDailyData, useUpdateDailyEntry } from "@/hooks/use-daily-data";
 import { useQuery } from "@tanstack/react-query";
 import { format, isToday, isYesterday, isTomorrow } from "date-fns";
+import { useState } from "react";
 
 interface FinanceSectionProps {
   selectedDate: Date;
@@ -14,6 +19,11 @@ interface FinanceSectionProps {
 export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
+  const updateDailyEntry = useUpdateDailyEntry();
+  
+  const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
+  const [incomeAmount, setIncomeAmount] = useState("");
+  const [incomeSource, setIncomeSource] = useState("");
 
   const getDateLabel = () => {
     if (isToday(selectedDate)) return "Today";
@@ -35,6 +45,23 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
   const groceryBudget = 200; // Weekly budget
   const groceryProgress = (grocerySpent / groceryBudget) * 100;
 
+  const handleAddIncome = async () => {
+    if (!incomeAmount || !incomeSource) return;
+    
+    const currentSavings = parseFloat(dailyEntry?.cashSavings || "0");
+    const newAmount = parseFloat(incomeAmount);
+    const updatedSavings = currentSavings + newAmount;
+    
+    await updateDailyEntry.mutateAsync({
+      date: dateString,
+      cashSavings: updatedSavings.toString()
+    });
+    
+    setIncomeAmount("");
+    setIncomeSource("");
+    setIsAddIncomeOpen(false);
+  };
+
   return (
     <section className="mb-8">
       <h3 className="text-2xl font-heading font-bold text-green-600 mb-6 flex items-center">
@@ -49,9 +76,68 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-heading font-semibold text-gray-800">Cash Savings</h4>
-              <Button variant="ghost" size="sm" className="hover:bg-green-50 rounded-xl">
-                <Plus className="h-4 w-4 text-green-500" />
-              </Button>
+              <Dialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="hover:bg-green-50 rounded-xl">
+                    <Plus className="h-4 w-4 text-green-500" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="font-heading text-xl text-gray-800">Add Income</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div>
+                      <Label htmlFor="income-amount" className="text-sm font-medium text-gray-700">
+                        Amount ($)
+                      </Label>
+                      <Input
+                        id="income-amount"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={incomeAmount}
+                        onChange={(e) => setIncomeAmount(e.target.value)}
+                        className="mt-1 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="income-source" className="text-sm font-medium text-gray-700">
+                        Source
+                      </Label>
+                      <Select value={incomeSource} onValueChange={setIncomeSource}>
+                        <SelectTrigger className="mt-1 rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500">
+                          <SelectValue placeholder="Select income source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="salary">Salary</SelectItem>
+                          <SelectItem value="freelance">Freelance</SelectItem>
+                          <SelectItem value="investment">Investment</SelectItem>
+                          <SelectItem value="bonus">Bonus</SelectItem>
+                          <SelectItem value="gift">Gift</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                      <Button
+                        onClick={handleAddIncome}
+                        disabled={!incomeAmount || !incomeSource || updateDailyEntry.isPending}
+                        className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl"
+                      >
+                        Add Income
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsAddIncomeOpen(false)}
+                        className="flex-1 rounded-xl border-gray-200 hover:bg-gray-50"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
             
             <div className="text-center">
