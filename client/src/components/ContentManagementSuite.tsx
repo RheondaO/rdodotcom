@@ -725,9 +725,7 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
                       <Badge className={getStatusColor(content.status)}>
                         {content.status}
                       </Badge>
-                      <Badge variant="outline" className={getPriorityColor(content.priority)}>
-                        {content.priority}
-                      </Badge>
+
                     </div>
                   </div>
                   

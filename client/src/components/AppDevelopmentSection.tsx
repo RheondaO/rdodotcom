@@ -39,7 +39,6 @@ interface AppProject {
   name: string;
   description: string;
   status: "planning" | "in_progress" | "testing" | "deployed" | "on_hold";
-  priority: "low" | "medium" | "high" | "urgent";
   projectType: "web" | "mobile" | "desktop" | "api";
   repositoryUrl?: string;
   deploymentUrl?: string;
@@ -62,7 +61,6 @@ interface AppTask {
   title: string;
   description: string;
   status: "todo" | "in_progress" | "review" | "testing" | "done";
-  priority: "low" | "medium" | "high" | "urgent";
   category: "feature" | "bug" | "improvement" | "documentation";
   assignee?: string;
   estimatedHours?: number;
@@ -109,7 +107,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       name: "Professional Portfolio",
       description: "Personal portfolio website showcasing my development skills and projects",
       status: "in_progress",
-      priority: "high",
       projectType: "web",
       repositoryUrl: "https://github.com/yourusername/portfolio",
       deploymentUrl: "https://yourportfolio.com",
@@ -169,7 +166,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       title: "Implement responsive navigation",
       description: "Create a mobile-friendly navigation menu with smooth animations",
       status: "done",
-      priority: "high",
       category: "feature",
       estimatedHours: 8,
       actualHours: 6,
