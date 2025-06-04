@@ -17,7 +17,7 @@ import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
 import { Button } from "@/components/ui/button";
 import { Download, Sun, Moon } from "lucide-react";
-import { format, addDays, subDays, isSameDay } from "date-fns";
+import { format, addDays, subDays, isSameDay, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useTheme } from "@/hooks/use-theme";
 
 type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "apps" | "sitemap";
@@ -43,6 +43,16 @@ export default function Dashboard() {
   const handleExportData = () => {
     // TODO: Implement data export functionality
     console.log("Exporting data...");
+  };
+
+  const getFullDateLabel = () => {
+    const dayName = format(selectedDate, 'EEEE');
+    const fullDate = format(selectedDate, 'MMMM d, yyyy');
+    
+    if (isToday(selectedDate)) return `Today is ${dayName} ${fullDate}`;
+    if (isYesterday(selectedDate)) return `Yesterday was ${dayName} ${fullDate}`;
+    if (isTomorrow(selectedDate)) return `Tomorrow is ${dayName} ${fullDate}`;
+    return `${dayName} ${fullDate}`;
   };
 
   const getViewTitle = () => {
@@ -107,9 +117,14 @@ export default function Dashboard() {
               <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-xl flex items-center justify-center shadow-md">
                 <span className="text-white text-lg">✨</span>
               </div>
-              <h1 className="text-xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
-                Belle Journal
-              </h1>
+              <div>
+                <h1 className="text-xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+                  Belle Journal
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-gray-300 -mt-1">
+                  {getFullDateLabel()}
+                </p>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
