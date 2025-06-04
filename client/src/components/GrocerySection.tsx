@@ -6,10 +6,9 @@ import { Input } from "@/components/ui/input";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+
 
 export default function GrocerySection() {
-  const { toast } = useToast();
   const [newItemName, setNewItemName] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
 
@@ -25,17 +24,6 @@ export default function GrocerySection() {
       queryClient.invalidateQueries({ queryKey: ['/api/grocery-items'] });
       setNewItemName("");
       setNewItemPrice("");
-      toast({
-        title: "Success",
-        description: "Grocery item added successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to add grocery item",
-        variant: "destructive",
-      });
     },
   });
 
@@ -54,10 +42,6 @@ export default function GrocerySection() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/grocery-items'] });
-      toast({
-        title: "Success",
-        description: "Grocery item deleted successfully",
-      });
     },
   });
 

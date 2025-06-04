@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+
 import type { DailyEntry, InsertDailyEntry } from "@shared/schema";
 
 export function useDailyData(date: string) {
@@ -21,8 +21,6 @@ export function useDailyData(date: string) {
 }
 
 export function useUpdateDailyEntry() {
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (data: InsertDailyEntry) => {
       return apiRequest('POST', '/api/daily-entry', data);
