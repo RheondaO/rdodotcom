@@ -21,7 +21,7 @@ import {
   CheckCircle,
   Star
 } from "lucide-react";
-import { format, addMinutes, differenceInMinutes } from "date-fns";
+import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorrow } from "date-fns";
 
 interface DashboardHomeProps {
   selectedDate: Date;
@@ -49,7 +49,8 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     }
   };
 
-  // Today's summary data
+  // Selected date's summary data
+  const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
   const todaysHabits = [
     { id: 1, name: "Morning Meditation", completed: true, streak: 7 },
     { id: 2, name: "Drink 8 glasses of water", completed: false, streak: 3 },
@@ -58,10 +59,10 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
   ];
 
   const todaysTodos = [
-    { id: 1, title: "Team meeting", priority: "high", completed: false, dueTime: "10:00" },
-    { id: 2, title: "Review project proposal", priority: "medium", completed: true, dueTime: "14:00" },
-    { id: 3, title: "Call dentist", priority: "low", completed: false, dueTime: "16:00" }
-  ];
+    { id: 1, title: "Team meeting", priority: "high", completed: false, dueTime: "10:00", date: selectedDateString },
+    { id: 2, title: "Review project proposal", priority: "medium", completed: true, dueTime: "14:00", date: selectedDateString },
+    { id: 3, title: "Call dentist", priority: "low", completed: false, dueTime: "16:00", date: selectedDateString }
+  ].filter(todo => todo.date === selectedDateString);
 
   const upcomingGoals = [
     { id: 1, title: "Complete React course", progress: 75, dueDate: "Jun 15" },
@@ -75,10 +76,10 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
   ];
 
   const timeBlocks = [
-    { id: 1, title: "Focus Session", time: "09:00-11:00", status: "completed" },
-    { id: 2, title: "Deep Work", time: "14:00-16:00", status: "upcoming" },
-    { id: 3, title: "Admin Tasks", time: "16:30-17:30", status: "pending" }
-  ];
+    { id: 1, title: "Focus Session", time: "09:00-11:00", status: "completed", date: selectedDateString },
+    { id: 2, title: "Deep Work", time: "14:00-16:00", status: "upcoming", date: selectedDateString },
+    { id: 3, title: "Admin Tasks", time: "16:30-17:30", status: "pending", date: selectedDateString }
+  ].filter(block => block.date === selectedDateString);
 
   const completedHabits = todaysHabits.filter(h => h.completed).length;
   const totalHabits = todaysHabits.length;
@@ -114,18 +115,32 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     return `${Math.floor(remaining / 60)}h ${remaining % 60}m left`;
   };
 
+  const getDateLabel = () => {
+    if (isToday(selectedDate)) return "Today";
+    if (isYesterday(selectedDate)) return "Yesterday";
+    if (isTomorrow(selectedDate)) return "Tomorrow";
+    return format(selectedDate, 'EEEE');
+  };
+
+  const getMotivationalText = () => {
+    if (isToday(selectedDate)) return "Let's make today productive and fulfilling";
+    if (isYesterday(selectedDate)) return "Reflecting on yesterday's progress";
+    if (isTomorrow(selectedDate)) return "Planning for tomorrow's success";
+    return "Every day is a new opportunity";
+  };
+
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="text-center py-6">
         <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
-          {getGreeting()}
+          {getGreeting()} - {getDateLabel()}
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300">
           {format(selectedDate, 'EEEE, MMMM d, yyyy')}
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Let's make today productive and fulfilling
+          {getMotivationalText()}
         </p>
       </div>
 

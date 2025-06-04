@@ -275,8 +275,9 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const todaysTodos = todos.filter(todo => !todo.isCompleted);
-  const completedTodos = todos.filter(todo => todo.isCompleted);
+  const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
+  const todaysTodos = todos.filter(todo => !todo.isCompleted && (!todo.dueDate || todo.dueDate === selectedDateString));
+  const completedTodos = todos.filter(todo => todo.isCompleted && (!todo.dueDate || todo.dueDate === selectedDateString));
   const todaysTimeBlocks = timeBlocks.filter(block => block.date === format(selectedDate, 'yyyy-MM-dd'));
   const activeChallenges = challenges.filter(challenge => challenge.isActive);
 
