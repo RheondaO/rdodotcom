@@ -299,6 +299,70 @@ export class MemStorage implements IStorage {
   async deleteGroceryItem(id: number): Promise<void> {
     this.groceryItems.delete(id);
   }
+
+  // Todos
+  async getAllTodos(): Promise<Todo[]> {
+    return Array.from(this.todos.values());
+  }
+
+  async getTodosByDate(date: string): Promise<Todo[]> {
+    return Array.from(this.todos.values()).filter(todo => todo.dueDate === date);
+  }
+
+  async createTodo(todo: InsertTodo): Promise<Todo> {
+    const newTodo: Todo = {
+      id: this.currentId++,
+      ...todo,
+      createdAt: new Date()
+    };
+    this.todos.set(newTodo.id, newTodo);
+    return newTodo;
+  }
+
+  async updateTodo(id: number, updates: Partial<Todo>): Promise<Todo> {
+    const todo = this.todos.get(id);
+    if (!todo) {
+      throw new Error("Todo not found");
+    }
+    
+    const updated = { ...todo, ...updates };
+    this.todos.set(id, updated);
+    return updated;
+  }
+
+  async deleteTodo(id: number): Promise<void> {
+    this.todos.delete(id);
+  }
+
+  // Time Blocks
+  async getTimeBlocksByDate(date: string): Promise<TimeBlock[]> {
+    return Array.from(this.timeBlocks.values()).filter(block => block.date === date);
+  }
+
+  async createTimeBlock(timeBlock: InsertTimeBlock): Promise<TimeBlock> {
+    const newTimeBlock: TimeBlock = {
+      id: this.currentId++,
+      ...timeBlock,
+      createdAt: new Date()
+    };
+    this.timeBlocks.set(newTimeBlock.id, newTimeBlock);
+    return newTimeBlock;
+  }
+
+  async updateTimeBlock(id: number, updates: Partial<TimeBlock>): Promise<TimeBlock> {
+    const timeBlock = this.timeBlocks.get(id);
+    if (!timeBlock) {
+      throw new Error("Time block not found");
+    }
+    
+    const updated = { ...timeBlock, ...updates };
+    this.timeBlocks.set(id, updated);
+    return updated;
+  }
+
+  async deleteTimeBlock(id: number): Promise<void> {
+    this.timeBlocks.delete(id);
+  }
 }
 
 export const storage = new MemStorage();
