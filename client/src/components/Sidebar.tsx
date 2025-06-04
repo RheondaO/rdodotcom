@@ -96,19 +96,10 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </Button>
       </div>
       
-      {/* Compact Logo and Date - Hidden when collapsed */}
+      {/* Theme Toggle Only - Hidden when collapsed */}
       {!isCollapsed && (
         <div className="p-3 border-b border-pink-100 dark:border-purple-800">
-          {/* Title Row with Theme Toggle */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                <Sparkles className="text-white h-4 w-4" />
-              </div>
-              <h1 className="text-lg font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
-                Belle Journal
-              </h1>
-            </div>
+          <div className="flex justify-end">
             <Button
               variant="ghost"
               size="sm"
@@ -121,44 +112,6 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
                 <Sun className="h-3 w-3 text-pink-600 dark:text-pink-400" />
               )}
             </Button>
-          </div>
-          
-          {/* Compact Date Display and Navigation */}
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-muted-foreground dark:text-white">
-              <span className="font-medium text-pink-700 dark:text-white">
-                {format(selectedDate, 'MMM d, yyyy')}
-              </span>
-            </div>
-            
-            <div className="flex items-center space-x-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={goToPreviousDay}
-                className="h-6 w-6 p-0 hover:bg-pink-100 rounded-lg"
-              >
-                <ChevronLeft className="h-3 w-3 text-pink-600" />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={goToToday}
-                className="text-xs px-2 py-1 h-6 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium"
-              >
-                Today
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={goToNextDay}
-                className="h-6 w-6 p-0 hover:bg-pink-100 rounded-lg"
-              >
-                <ChevronRight className="h-3 w-3 text-pink-600" />
-              </Button>
-            </div>
           </div>
         </div>
       )}
