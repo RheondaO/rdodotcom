@@ -62,11 +62,11 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
   const navItems = [
     { key: "dashboard" as ViewType, label: "Dashboard", icon: Home },
+    { key: "rotationonly" as ViewType, label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Studio", icon: Moon },
     { key: "goals" as ViewType, label: "Goals", icon: Target },
     { key: "groceries" as ViewType, label: "Groceries", icon: ShoppingCart },
     { key: "finances" as ViewType, label: "Finances", icon: DollarSign },
-    { key: "content" as ViewType, label: "Content", icon: PenTool },
-    { key: "rotationonly" as ViewType, label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘", icon: Moon },
+    { key: "content" as ViewType, label: "Social Media", icon: PenTool },
     { key: "habits" as ViewType, label: "Habits", icon: Zap },
     { key: "health" as ViewType, label: "Health", icon: Heart },
     { key: "productivity" as ViewType, label: "Productivity", icon: Briefcase },
