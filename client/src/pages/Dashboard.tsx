@@ -89,15 +89,7 @@ export default function Dashboard() {
       />
 
       <main className="flex-1 overflow-auto">
-        {/* Header */}
-        <header className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-b border-pink-200 dark:border-purple-800 px-6 py-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">{getViewTitle()}</h2>
-              <p className="text-sm text-muted-foreground dark:text-gray-300 mt-1 font-medium">{getViewDescription()}</p>
-            </div>
-          </div>
-        </header>
+
 
         {/* Content */}
         <div className="p-4">
