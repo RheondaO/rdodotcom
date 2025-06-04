@@ -122,12 +122,12 @@ export default function Dashboard() {
                 </span>
               </div>
               
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setSelectedDate(subDays(selectedDate, 1))}
-                  className="h-7 w-7 p-0 hover:bg-pink-100 rounded-lg flex items-center justify-center transition-colors"
+                  className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium transition-colors"
                 >
-                  <span className="text-pink-600 text-sm">‹</span>
+                  Yesterday
                 </button>
                 
                 <button
@@ -139,9 +139,9 @@ export default function Dashboard() {
                 
                 <button
                   onClick={() => setSelectedDate(addDays(selectedDate, 1))}
-                  className="h-7 w-7 p-0 hover:bg-pink-100 rounded-lg flex items-center justify-center transition-colors"
+                  className="text-xs px-3 py-1 h-7 hover:bg-pink-100 dark:hover:bg-pink-900 rounded-lg text-pink-600 dark:text-white font-medium transition-colors"
                 >
-                  <span className="text-pink-600 text-sm">›</span>
+                  Tomorrow
                 </button>
               </div>
             </div>
