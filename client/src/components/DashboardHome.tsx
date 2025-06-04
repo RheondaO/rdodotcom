@@ -81,7 +81,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     title: todo.title,
     priority: todo.priority,
     completed: todo.isCompleted || false,
-    dueTime: todo.dueTime || "00:00",
+    dueTime: todo.dueDate ? format(new Date(todo.dueDate), 'HH:mm') : "00:00",
     date: todo.dueDate
   }));
 

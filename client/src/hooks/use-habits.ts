@@ -1,26 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { Habit, HabitLog, InsertHabit, InsertHabitLog } from "@shared/schema";
+import type { Habit, InsertHabit } from "@shared/schema";
 
 export function useHabits() {
-  return useQuery({
-    queryKey: ['/api/habits'],
-    queryFn: async () => {
-      const response = await fetch('/api/habits');
-      if (!response.ok) throw new Error('Failed to fetch habits');
-      return response.json() as Promise<Habit[]>;
-    }
-  });
-}
-
-export function useHabitLog(habitId: number, date: string) {
-  return useQuery({
-    queryKey: ['/api/habit-logs', habitId, date],
-    queryFn: async () => {
-      const response = await fetch(`/api/habit-logs/${habitId}/${date}`);
-      if (!response.ok) throw new Error('Failed to fetch habit logs');
-      return response.json() as Promise<HabitLog[]>;
-    }
+  return useQuery<Habit[]>({
+    queryKey: ["/api/habits"],
   });
 }
 
@@ -28,38 +12,32 @@ export function useCreateHabit() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: InsertHabit) => {
-      const response = await fetch('/api/habits', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to create habit');
-      return response.json() as Promise<Habit>;
-    },
+    mutationFn: (habit: InsertHabit) => apiRequest("POST", "/api/habits", habit),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/habits'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ["/api/habits"] });
+    },
   });
 }
 
-export function useCreateHabitLog() {
+export function useUpdateHabit() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: InsertHabitLog) => {
-      const response = await fetch('/api/habit-logs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Failed to create habit log');
-      return response.json() as Promise<HabitLog>;
+    mutationFn: ({ id, updates }: { id: number; updates: Partial<Habit> }) =>
+      apiRequest("PATCH", `/api/habits/${id}`, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/habits"] });
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ 
-        queryKey: ['/api/habit-logs', variables.habitId, variables.date] 
-      });
-    }
+  });
+}
+
+export function useDeleteHabit() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/habits/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/habits"] });
+    },
   });
 }

@@ -187,6 +187,37 @@ export class MemStorage implements IStorage {
       isAutoPay: false,
       dueDate: 20
     });
+
+    // Initialize with sample habits
+    this.createHabit({
+      name: "Morning Meditation",
+      description: "10 minutes of mindfulness meditation",
+      category: "wellness",
+      targetFrequency: 1,
+      currentStreak: 7,
+      longestStreak: 21,
+      isActive: true
+    });
+
+    this.createHabit({
+      name: "Read for 30 Minutes",
+      description: "Read books or educational content",
+      category: "personal",
+      targetFrequency: 1,
+      currentStreak: 12,
+      longestStreak: 18,
+      isActive: true
+    });
+
+    this.createHabit({
+      name: "Daily Exercise",
+      description: "Any form of physical activity",
+      category: "health",
+      targetFrequency: 1,
+      currentStreak: 5,
+      longestStreak: 30,
+      isActive: true
+    });
   }
 
   async getDailyEntry(date: string): Promise<DailyEntry | undefined> {
@@ -362,6 +393,384 @@ export class MemStorage implements IStorage {
 
   async deleteTimeBlock(id: number): Promise<void> {
     this.timeBlocks.delete(id);
+  }
+
+  // Habits methods
+  async getAllHabits(): Promise<Habit[]> {
+    return Array.from(this.habits.values());
+  }
+
+  async createHabit(habit: InsertHabit): Promise<Habit> {
+    const newHabit: Habit = {
+      id: this.currentId++,
+      ...habit,
+      createdAt: new Date()
+    };
+    this.habits.set(newHabit.id, newHabit);
+    return newHabit;
+  }
+
+  async updateHabit(id: number, updates: Partial<Habit>): Promise<Habit> {
+    const habit = this.habits.get(id);
+    if (!habit) {
+      throw new Error("Habit not found");
+    }
+    
+    const updated = { ...habit, ...updates };
+    this.habits.set(id, updated);
+    return updated;
+  }
+
+  async deleteHabit(id: number): Promise<void> {
+    this.habits.delete(id);
+  }
+
+  async getHabitLogs(habitId: number, startDate?: string, endDate?: string): Promise<HabitLog[]> {
+    const logs = Array.from(this.habitLogs.values()).filter(log => log.habitId === habitId);
+    
+    if (startDate && endDate) {
+      return logs.filter(log => log.date >= startDate && log.date <= endDate);
+    }
+    
+    return logs;
+  }
+
+  async createHabitLog(log: InsertHabitLog): Promise<HabitLog> {
+    const newLog: HabitLog = {
+      id: this.currentId++,
+      ...log,
+      createdAt: new Date()
+    };
+    this.habitLogs.set(newLog.id, newLog);
+    return newLog;
+  }
+
+  async updateHabitLog(id: number, updates: Partial<HabitLog>): Promise<HabitLog> {
+    const log = this.habitLogs.get(id);
+    if (!log) {
+      throw new Error("Habit log not found");
+    }
+    
+    const updated = { ...log, ...updates };
+    this.habitLogs.set(id, updated);
+    return updated;
+  }
+
+  // Focus Sessions methods
+  async getFocusSessionsByDate(date: string): Promise<FocusSession[]> {
+    return Array.from(this.focusSessions.values()).filter(session => session.date === date);
+  }
+
+  async createFocusSession(session: InsertFocusSession): Promise<FocusSession> {
+    const newSession: FocusSession = {
+      id: this.currentId++,
+      ...session,
+      createdAt: new Date()
+    };
+    this.focusSessions.set(newSession.id, newSession);
+    return newSession;
+  }
+
+  async updateFocusSession(id: number, updates: Partial<FocusSession>): Promise<FocusSession> {
+    const session = this.focusSessions.get(id);
+    if (!session) {
+      throw new Error("Focus session not found");
+    }
+    
+    const updated = { ...session, ...updates };
+    this.focusSessions.set(id, updated);
+    return updated;
+  }
+
+  // Budget methods
+  async getBudgetsByMonth(month: string): Promise<Budget[]> {
+    return Array.from(this.budgets.values()).filter(budget => budget.month === month);
+  }
+
+  async createBudget(budget: InsertBudget): Promise<Budget> {
+    const newBudget: Budget = {
+      id: this.currentId++,
+      ...budget,
+      createdAt: new Date()
+    };
+    this.budgets.set(newBudget.id, newBudget);
+    return newBudget;
+  }
+
+  async updateBudget(id: number, updates: Partial<Budget>): Promise<Budget> {
+    const budget = this.budgets.get(id);
+    if (!budget) {
+      throw new Error("Budget not found");
+    }
+    
+    const updated = { ...budget, ...updates };
+    this.budgets.set(id, updated);
+    return updated;
+  }
+
+  // Income methods
+  async getIncomeEntriesByDateRange(startDate: string, endDate: string): Promise<IncomeEntry[]> {
+    return Array.from(this.incomeEntries.values()).filter(entry => 
+      entry.date >= startDate && entry.date <= endDate
+    );
+  }
+
+  async createIncomeEntry(entry: InsertIncomeEntry): Promise<IncomeEntry> {
+    const newEntry: IncomeEntry = {
+      id: this.currentId++,
+      ...entry,
+      createdAt: new Date()
+    };
+    this.incomeEntries.set(newEntry.id, newEntry);
+    return newEntry;
+  }
+
+  async deleteIncomeEntry(id: number): Promise<void> {
+    this.incomeEntries.delete(id);
+  }
+
+  // Challenges methods
+  async getAllChallenges(): Promise<Challenge[]> {
+    return Array.from(this.challenges.values());
+  }
+
+  async getActiveChallenges(): Promise<Challenge[]> {
+    return Array.from(this.challenges.values()).filter(challenge => challenge.isActive);
+  }
+
+  async createChallenge(challenge: InsertChallenge): Promise<Challenge> {
+    const newChallenge: Challenge = {
+      id: this.currentId++,
+      ...challenge,
+      createdAt: new Date()
+    };
+    this.challenges.set(newChallenge.id, newChallenge);
+    return newChallenge;
+  }
+
+  async updateChallenge(id: number, updates: Partial<Challenge>): Promise<Challenge> {
+    const challenge = this.challenges.get(id);
+    if (!challenge) {
+      throw new Error("Challenge not found");
+    }
+    
+    const updated = { ...challenge, ...updates };
+    this.challenges.set(id, updated);
+    return updated;
+  }
+
+  async deleteChallenge(id: number): Promise<void> {
+    this.challenges.delete(id);
+  }
+
+  // App Development methods
+  async getAllAppProjects(): Promise<AppProject[]> {
+    return Array.from(this.appProjects.values());
+  }
+
+  async getAppProject(id: number): Promise<AppProject | undefined> {
+    return this.appProjects.get(id);
+  }
+
+  async createAppProject(project: InsertAppProject): Promise<AppProject> {
+    const newProject: AppProject = {
+      id: this.currentId++,
+      ...project,
+      createdAt: new Date()
+    };
+    this.appProjects.set(newProject.id, newProject);
+    return newProject;
+  }
+
+  async updateAppProject(id: number, updates: Partial<AppProject>): Promise<AppProject> {
+    const project = this.appProjects.get(id);
+    if (!project) {
+      throw new Error("App project not found");
+    }
+    
+    const updated = { ...project, ...updates };
+    this.appProjects.set(id, updated);
+    return updated;
+  }
+
+  async deleteAppProject(id: number): Promise<void> {
+    this.appProjects.delete(id);
+  }
+
+  async getAppTasksByProject(projectId: number): Promise<AppTask[]> {
+    return Array.from(this.appTasks.values()).filter(task => task.projectId === projectId);
+  }
+
+  async getAllAppTasks(): Promise<AppTask[]> {
+    return Array.from(this.appTasks.values());
+  }
+
+  async createAppTask(task: InsertAppTask): Promise<AppTask> {
+    const newTask: AppTask = {
+      id: this.currentId++,
+      ...task,
+      createdAt: new Date()
+    };
+    this.appTasks.set(newTask.id, newTask);
+    return newTask;
+  }
+
+  async updateAppTask(id: number, updates: Partial<AppTask>): Promise<AppTask> {
+    const task = this.appTasks.get(id);
+    if (!task) {
+      throw new Error("App task not found");
+    }
+    
+    const updated = { ...task, ...updates };
+    this.appTasks.set(id, updated);
+    return updated;
+  }
+
+  async deleteAppTask(id: number): Promise<void> {
+    this.appTasks.delete(id);
+  }
+
+  async getAppSprintsByProject(projectId: number): Promise<AppSprint[]> {
+    return Array.from(this.appSprints.values()).filter(sprint => sprint.projectId === projectId);
+  }
+
+  async createAppSprint(sprint: InsertAppSprint): Promise<AppSprint> {
+    const newSprint: AppSprint = {
+      id: this.currentId++,
+      ...sprint,
+      createdAt: new Date()
+    };
+    this.appSprints.set(newSprint.id, newSprint);
+    return newSprint;
+  }
+
+  async updateAppSprint(id: number, updates: Partial<AppSprint>): Promise<AppSprint> {
+    const sprint = this.appSprints.get(id);
+    if (!sprint) {
+      throw new Error("App sprint not found");
+    }
+    
+    const updated = { ...sprint, ...updates };
+    this.appSprints.set(id, updated);
+    return updated;
+  }
+
+  async deleteAppSprint(id: number): Promise<void> {
+    this.appSprints.delete(id);
+  }
+
+  async getAppTimeEntriesByProject(projectId: number, startDate?: string, endDate?: string): Promise<AppTimeEntry[]> {
+    const entries = Array.from(this.appTimeEntries.values()).filter(entry => entry.projectId === projectId);
+    
+    if (startDate && endDate) {
+      return entries.filter(entry => entry.startTime >= startDate && entry.endTime <= endDate);
+    }
+    
+    return entries;
+  }
+
+  async createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry> {
+    const newEntry: AppTimeEntry = {
+      id: this.currentId++,
+      ...entry,
+      createdAt: new Date()
+    };
+    this.appTimeEntries.set(newEntry.id, newEntry);
+    return newEntry;
+  }
+
+  async updateAppTimeEntry(id: number, updates: Partial<AppTimeEntry>): Promise<AppTimeEntry> {
+    const entry = this.appTimeEntries.get(id);
+    if (!entry) {
+      throw new Error("App time entry not found");
+    }
+    
+    const updated = { ...entry, ...updates };
+    this.appTimeEntries.set(id, updated);
+    return updated;
+  }
+
+  async deleteAppTimeEntry(id: number): Promise<void> {
+    this.appTimeEntries.delete(id);
+  }
+
+  // Goals methods (needed for goals section)
+  async getAllGoals(): Promise<Goal[]> {
+    return Array.from(this.goals.values());
+  }
+
+  async createGoal(goal: InsertGoal): Promise<Goal> {
+    const newGoal: Goal = {
+      id: this.currentId++,
+      ...goal,
+      createdAt: new Date()
+    };
+    this.goals.set(newGoal.id, newGoal);
+    return newGoal;
+  }
+
+  async updateGoal(id: number, updates: Partial<Goal>): Promise<Goal> {
+    const goal = this.goals.get(id);
+    if (!goal) {
+      throw new Error("Goal not found");
+    }
+    
+    const updated = { ...goal, ...updates };
+    this.goals.set(id, updated);
+    return updated;
+  }
+
+  async deleteGoal(id: number): Promise<void> {
+    this.goals.delete(id);
+  }
+
+  // Medications methods
+  async getAllMedications(): Promise<Medication[]> {
+    return Array.from(this.medications.values());
+  }
+
+  async createMedication(medication: InsertMedication): Promise<Medication> {
+    const newMedication: Medication = {
+      id: this.currentId++,
+      ...medication,
+      createdAt: new Date()
+    };
+    this.medications.set(newMedication.id, newMedication);
+    return newMedication;
+  }
+
+  async updateMedication(id: number, updates: Partial<Medication>): Promise<Medication> {
+    const medication = this.medications.get(id);
+    if (!medication) {
+      throw new Error("Medication not found");
+    }
+    
+    const updated = { ...medication, ...updates };
+    this.medications.set(id, updated);
+    return updated;
+  }
+
+  async deleteMedication(id: number): Promise<void> {
+    this.medications.delete(id);
+  }
+
+  // Grocery Lists methods
+  async getAllGroceryLists(): Promise<GroceryList[]> {
+    return Array.from(this.groceryLists.values());
+  }
+
+  async createGroceryList(list: InsertGroceryList): Promise<GroceryList> {
+    const newList: GroceryList = {
+      id: this.currentId++,
+      ...list,
+      createdAt: new Date()
+    };
+    this.groceryLists.set(newList.id, newList);
+    return newList;
+  }
+
+  async deleteGroceryList(id: number): Promise<void> {
+    this.groceryLists.delete(id);
   }
 }
 
