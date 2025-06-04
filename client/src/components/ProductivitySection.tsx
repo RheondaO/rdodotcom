@@ -115,9 +115,8 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
         description: newTodo.description,
         category: newTodo.category,
         estimatedDuration: newTodo.estimatedDuration,
-        date: dateString,
-        isCompleted: false,
-        dueDate: null
+        dueDate: dateString,
+        isCompleted: false
       });
       setNewTodo({
         title: "",
