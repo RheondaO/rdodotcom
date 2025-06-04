@@ -45,6 +45,7 @@ interface ContentCategory {
   description: string;
   color: string;
   icon: string;
+  brand?: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -102,42 +103,65 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewContentDialog, setShowNewContentDialog] = useState(false);
   const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState<string>("all");
+
+  // Brand definitions matching ContentCreationSection
+  const brands = [
+    { id: "rotationONLY", name: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine", icon: "🌙", color: "#8B5CF6" },
+    { id: "reallyObvi", name: "Really Obvi Media Lab", icon: "🧪", color: "#3B82F6" },
+    { id: "personal", name: "Personal Brand", icon: "✨", color: "#EC4899" },
+    { id: "misc", name: "Misc", icon: "📦", color: "#10B981" }
+  ];
 
   // Mock data - in real app would come from API
   const [categories, setCategories] = useState<ContentCategory[]>([
     {
       id: 1,
-      name: "Blog Posts",
-      description: "Long-form written content for website and SEO",
-      color: "#3B82F6",
-      icon: "📝",
+      name: "Mini-Game Blocks",
+      description: "Interactive social media games and prompts",
+      color: "#8B5CF6",
+      icon: "🎮",
+      brand: "rotationONLY",
       isActive: true,
       createdAt: "2025-06-01"
     },
     {
       id: 2,
-      name: "Social Media",
-      description: "Short-form content for social platforms",
-      color: "#EC4899",
-      icon: "📱",
+      name: "Astrological Content",
+      description: "Moon phases, sun signs, and cosmic insights",
+      color: "#3B82F6",
+      icon: "🌙",
+      brand: "rotationONLY",
       isActive: true,
       createdAt: "2025-06-01"
     },
     {
       id: 3,
-      name: "Video Content",
-      description: "YouTube videos, reels, and video tutorials",
+      name: "Media Experiments",
+      description: "Creative projects and experimental content",
       color: "#EF4444",
-      icon: "🎥",
+      icon: "🧪",
+      brand: "reallyObvi",
       isActive: true,
       createdAt: "2025-06-01"
     },
     {
       id: 4,
-      name: "Email Marketing",
-      description: "Newsletter and email campaign content",
+      name: "Personal Insights",
+      description: "Thought leadership and personal experiences",
+      color: "#EC4899",
+      icon: "✨",
+      brand: "personal",
+      isActive: true,
+      createdAt: "2025-06-01"
+    },
+    {
+      id: 5,
+      name: "Collaborations",
+      description: "Partnership content and miscellaneous projects",
       color: "#10B981",
-      icon: "📧",
+      icon: "📦",
+      brand: "misc",
       isActive: true,
       createdAt: "2025-06-01"
     }
@@ -655,6 +679,20 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
                 />
               </div>
             </div>
+
+            <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+              <SelectTrigger className="w-56 dark:bg-gray-700 dark:text-white">
+                <SelectValue placeholder="All Brands" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Brands</SelectItem>
+                {brands.map(brand => (
+                  <SelectItem key={brand.id} value={brand.id}>
+                    {brand.icon} {brand.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             
             <Select value={selectedCategory?.toString() || ""} onValueChange={(value) => setSelectedCategory(value ? Number(value) : null)}>
               <SelectTrigger className="w-48 dark:bg-gray-700 dark:text-white">
@@ -662,11 +700,13 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">All Categories</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category.id} value={category.id.toString()}>
-                    {category.icon} {category.name}
-                  </SelectItem>
-                ))}
+                {categories
+                  .filter(category => selectedBrand === "all" || category.brand === selectedBrand)
+                  .map(category => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.icon} {category.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             

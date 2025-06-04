@@ -65,13 +65,49 @@ interface MiniGameDesign {
 }
 
 export default function ContentCreationSection() {
-  const [activeView, setActiveView] = useState<"overview" | "categories" | "content" | "calendar" | "analytics">("overview");
+  const [activeBrand, setActiveBrand] = useState<string>("rotationONLY");
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedMiniGame, setSelectedMiniGame] = useState<number | null>(null);
   const [showCreateMiniGameDialog, setShowCreateMiniGameDialog] = useState(false);
   const [showCreateDesignDialog, setShowCreateDesignDialog] = useState(false);
 
-  // Mini-Game Block types based on your social media platform
+  // Brand definitions
+  const brands = [
+    {
+      id: "rotationONLY",
+      name: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine",
+      icon: "🌙",
+      color: "#8B5CF6",
+      description: "Astrological content and mini-game blocks",
+      hasMiniGames: true
+    },
+    {
+      id: "reallyObvi",
+      name: "Really Obvi Media Lab",
+      icon: "🧪",
+      color: "#3B82F6",
+      description: "Media experiments and creative projects",
+      hasMiniGames: false
+    },
+    {
+      id: "personal",
+      name: "Personal Brand",
+      icon: "✨",
+      color: "#EC4899",
+      description: "Personal content and thought leadership",
+      hasMiniGames: false
+    },
+    {
+      id: "misc",
+      name: "Misc",
+      icon: "📦",
+      color: "#10B981",
+      description: "Miscellaneous content and collaborations",
+      hasMiniGames: false
+    }
+  ];
+
+  // Mini-Game Block types for 𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine
   const [miniGameBlocks, setMiniGameBlocks] = useState<MiniGameBlock[]>([
     {
       id: 1,
@@ -129,6 +165,13 @@ export default function ContentCreationSection() {
       createdAt: format(new Date(), 'yyyy-MM-dd')
     }
   ]);
+
+  // Content for other brands (without mini-games)
+  const [brandContent, setBrandContent] = useState({
+    reallyObvi: [],
+    personal: [],
+    misc: []
+  });
 
   const [miniGameDesigns, setMiniGameDesigns] = useState<MiniGameDesign[]>([
     // Sample designs for Vibe Check-In
@@ -232,14 +275,67 @@ export default function ContentCreationSection() {
     return categoryData?.icon || "🎮";
   };
 
+  const currentBrand = brands.find(b => b.id === activeBrand);
+
   return (
     <section className="mb-8">
+      {/* Brand Selection */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-heading font-bold text-purple-600 flex items-center">
-          <Gamepad2 className="text-purple-500 mr-3 h-6 w-6" />
-          Mini-Game Block Studio ✨
-        </h3>
-        <div className="flex gap-2">
+        <div>
+          <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent flex items-center">
+            <Briefcase className="text-purple-500 mr-3 h-6 w-6" />
+            Content Management Suite
+          </h3>
+          <p className="text-muted-foreground dark:text-gray-300 mt-1">
+            Manage content across all your brands
+          </p>
+        </div>
+      </div>
+
+      {/* Brand Navigation */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
+          {brands.map(brand => (
+            <button
+              key={brand.id}
+              onClick={() => setActiveBrand(brand.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                activeBrand === brand.id
+                  ? 'bg-white dark:bg-gray-700 shadow-md text-gray-900 dark:text-white'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <span className="text-lg">{brand.icon}</span>
+              <span className="font-medium text-sm">{brand.name}</span>
+            </button>
+          ))}
+        </div>
+        
+        {currentBrand && (
+          <div className="mt-3 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: currentBrand.color }}
+              />
+              <div>
+                <h4 className="font-semibold text-gray-900 dark:text-white">{currentBrand.name}</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{currentBrand.description}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Content Based on Selected Brand */}
+      {activeBrand === "rotationONLY" ? (
+        <>
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="text-xl font-heading font-bold text-purple-600 flex items-center">
+              <Gamepad2 className="text-purple-500 mr-3 h-5 w-5" />
+              Mini-Game Block Studio ✨
+            </h4>
+            <div className="flex gap-2">
           <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="rounded-xl">
@@ -727,6 +823,69 @@ export default function ContentCreationSection() {
           </Card>
         </TabsContent>
       </Tabs>
+        </>
+      ) : (
+        <div className="space-y-6">
+          {/* Other Brand Content Management */}
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <span className="text-2xl">{currentBrand?.icon}</span>
+                <div>
+                  <h4 className="text-lg">{currentBrand?.name}</h4>
+                  <p className="text-sm text-muted-foreground font-normal">Content Pipeline & Strategy</p>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="content" className="w-full">
+                <TabsList className="grid w-full grid-cols-4 rounded-xl">
+                  <TabsTrigger value="content" className="rounded-lg">Content Pipeline</TabsTrigger>
+                  <TabsTrigger value="calendar" className="rounded-lg">Content Calendar</TabsTrigger>
+                  <TabsTrigger value="strategy" className="rounded-lg">Strategy & Goals</TabsTrigger>
+                  <TabsTrigger value="analytics" className="rounded-lg">Performance</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="content" className="mt-6">
+                  <div className="text-center py-12 text-gray-500">
+                    <PenTool className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium mb-2">Content Pipeline Coming Soon</h3>
+                    <p className="text-sm">Traditional content management for {currentBrand?.name}</p>
+                    <Button className="mt-4" variant="outline">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Content Piece
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="calendar" className="mt-6">
+                  <div className="text-center py-12 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium mb-2">Editorial Calendar</h3>
+                    <p className="text-sm">Schedule and plan content releases</p>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="strategy" className="mt-6">
+                  <div className="text-center py-12 text-gray-500">
+                    <Target className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium mb-2">Content Strategy</h3>
+                    <p className="text-sm">Define goals and messaging for {currentBrand?.name}</p>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="analytics" className="mt-6">
+                  <div className="text-center py-12 text-gray-500">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium mb-2">Performance Analytics</h3>
+                    <p className="text-sm">Track engagement and reach metrics</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </section>
   );
 }
