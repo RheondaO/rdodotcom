@@ -290,7 +290,7 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
       scheduledDate: null,
       publishedDate: null,
       platforms: newContent.platforms,
-      tags: newContent.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      tags: [],
       notes: "",
       estimatedDuration: contentTypes.find(type => type.id === Number(newContent.contentTypeId))?.estimatedDuration || null,
       actualDuration: null,
@@ -305,8 +305,7 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
       title: "",
       description: "",
       targetDate: "",
-      platforms: [],
-      tags: ""
+      platforms: []
     });
     setShowNewContentDialog(false);
   };
