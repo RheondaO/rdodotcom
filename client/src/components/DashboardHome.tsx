@@ -35,6 +35,18 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     duration: number;
   } | null>(null);
 
+  // Dynamic greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      return "Good Morning! ✨";
+    } else if (hour < 17) {
+      return "Good Afternoon! ☀️";
+    } else {
+      return "Good Evening! 🌙";
+    }
+  };
+
   // Today's summary data
   const todaysHabits = [
     { id: 1, name: "Morning Meditation", completed: true, streak: 7 },
@@ -105,7 +117,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
       {/* Welcome Header */}
       <div className="text-center py-6">
         <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
-          Good Morning! ✨
+          {getGreeting()}
         </h2>
         <p className="text-lg text-gray-600 dark:text-gray-300">
           {format(selectedDate, 'EEEE, MMMM d, yyyy')}
