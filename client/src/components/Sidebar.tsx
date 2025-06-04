@@ -172,7 +172,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
             <div className="space-y-4">
               <div 
                 onClick={handleWaterClick}
-                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors"
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
               >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
@@ -186,7 +186,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
               <div 
                 onClick={handleExerciseClick}
-                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors"
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
               >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-sm"></div>
@@ -203,7 +203,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
               <div 
                 onClick={handleMealsClick}
-                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors"
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
               >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
