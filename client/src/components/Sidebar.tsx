@@ -10,6 +10,8 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Sun,
   Moon,
   Menu,
@@ -19,6 +21,7 @@ import {
   Map,
   Code2
 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { format, addDays, subDays } from "date-fns";
@@ -38,6 +41,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeView, onViewChange, onQuickAdd, selectedDate, onDateChange, isCollapsed, onToggleCollapse }: SidebarProps) {
+  const [progressCollapsed, setProgressCollapsed] = useState(false);
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const { theme, toggleTheme } = useTheme();
@@ -161,10 +165,25 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
       {/* Quick Stats - Hidden when collapsed */}
       {!isCollapsed && (
         <div className="p-6 border-b border-pink-100 dark:border-purple-800">
-          <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide mb-4">
-            Today's Progress ✨
-          </h3>
-          <div className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-heading font-semibold text-pink-600 dark:text-white uppercase tracking-wide">
+              Today's Progress ✨
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setProgressCollapsed(!progressCollapsed)}
+              className="h-6 w-6 p-0 hover:bg-pink-100 dark:hover:bg-purple-800 rounded-lg"
+            >
+              {progressCollapsed ? (
+                <ChevronDown className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+              ) : (
+                <ChevronUp className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+              )}
+            </Button>
+          </div>
+          {!progressCollapsed && (
+            <div className="space-y-4">
             <div className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
@@ -197,7 +216,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
               </div>
               <span className="text-xs text-muted-foreground dark:text-white font-medium">{mealCount}/3</span>
             </div>
-          </div>
+          )}
         </div>
       )}
 
