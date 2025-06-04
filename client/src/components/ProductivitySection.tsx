@@ -193,7 +193,6 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
   const [newTodo, setNewTodo] = useState({
     title: "",
     description: "",
-    priority: "medium",
     category: "work",
     dueDate: "",
     estimatedDuration: 60
@@ -216,12 +215,7 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
     endDate: ""
   });
 
-  const priorities = [
-    { value: "low", label: "Low", color: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" },
-    { value: "medium", label: "Medium", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300" },
-    { value: "high", label: "High", color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300" },
-    { value: "urgent", label: "Urgent", color: "bg-red-200 text-red-900 dark:bg-red-800 dark:text-red-200" }
-  ];
+
 
   const categories = [
     { value: "work", label: "Work", icon: "💼" },
@@ -350,7 +344,6 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
     setNewTodo({
       title: "",
       description: "",
-      priority: "medium",
       category: "work",
       dueDate: "",
       estimatedDuration: 60
@@ -434,36 +427,20 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Priority</Label>
-                    <Select value={newTodo.priority} onValueChange={(value) => setNewTodo({ ...newTodo, priority: value })}>
-                      <SelectTrigger className="dark:bg-gray-800 dark:text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {priorities.map(p => (
-                          <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>Category</Label>
-                    <Select value={newTodo.category} onValueChange={(value) => setNewTodo({ ...newTodo, category: value })}>
-                      <SelectTrigger className="dark:bg-gray-800 dark:text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map(c => (
-                          <SelectItem key={c.value} value={c.value}>
-                            {c.icon} {c.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label>Category</Label>
+                  <Select value={newTodo.category} onValueChange={(value) => setNewTodo({ ...newTodo, category: value })}>
+                    <SelectTrigger className="dark:bg-gray-800 dark:text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(c => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.icon} {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
