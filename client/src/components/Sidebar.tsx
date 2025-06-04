@@ -275,7 +275,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
                         <Icon className="h-5 w-5" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="right" className="bg-white dark:bg-gray-800 border border-pink-200 dark:border-purple-700 shadow-lg">
+                    <TooltipContent side="right" className="bg-white dark:bg-gray-800 border border-pink-200 dark:border-purple-700 shadow-lg z-50">
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{item.label}</p>
                     </TooltipContent>
                   </Tooltip>
