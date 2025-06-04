@@ -90,81 +90,41 @@ export default function Dashboard() {
 
       <main className="flex-1 overflow-auto">
         {/* Header */}
-        <header className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-b border-pink-200 dark:border-purple-800 px-8 py-6 shadow-sm">
+        <header className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-b border-pink-200 dark:border-purple-800 px-6 py-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">{getViewTitle()}</h2>
-              <p className="text-muted-foreground dark:text-gray-300 mt-2 font-medium">{getViewDescription()}</p>
+              <h2 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">{getViewTitle()}</h2>
+              <p className="text-sm text-muted-foreground dark:text-gray-300 mt-1 font-medium">{getViewDescription()}</p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <Button 
                 variant="outline" 
                 onClick={handleExportData}
-                className="px-6 py-3 text-sm border-pink-200 hover:bg-pink-50 dark:border-pink-700 dark:hover:bg-pink-900 rounded-xl shadow-sm"
+                className="px-4 py-2 text-sm border-pink-200 hover:bg-pink-50 dark:border-pink-700 dark:hover:bg-pink-900 rounded-xl shadow-sm"
               >
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="mr-2 h-3 w-3" />
                 Export Data
               </Button>
-              <div className="flex items-center space-x-2 bg-white/60 dark:bg-gray-800/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
-                <button 
-                  onClick={() => setTimeView("day")}
-                  className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
-                    timeView === "day" 
-                      ? "bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-sm" 
-                      : "text-muted-foreground hover:text-pink-600 dark:text-gray-300 dark:hover:text-pink-400"
-                  }`}
-                >
-                  Day
-                </button>
-                <button 
-                  onClick={() => setTimeView("week")}
-                  className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
-                    timeView === "week" 
-                      ? "bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-sm" 
-                      : "text-muted-foreground hover:text-pink-600 dark:text-gray-300 dark:hover:text-pink-400"
-                  }`}
-                >
-                  Week
-                </button>
-                <button 
-                  onClick={() => setTimeView("month")}
-                  className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 ${
-                    timeView === "month" 
-                      ? "bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 text-white shadow-sm" 
-                      : "text-muted-foreground hover:text-pink-600 dark:text-gray-300 dark:hover:text-pink-400"
-                  }`}
-                >
-                  Month
-                </button>
-              </div>
             </div>
           </div>
         </header>
 
         {/* Content */}
-        <div className="p-8">
-          {timeView === "week" ? (
-            <WeekView selectedDate={selectedDate} onDateChange={setSelectedDate} />
-          ) : timeView === "month" ? (
-            <MonthView selectedDate={selectedDate} onDateChange={setSelectedDate} />
-          ) : (
-            <>
-              {activeView === "dashboard" && (
-                <DashboardHome selectedDate={selectedDate} onNavigate={(section: string) => setActiveView(section as ViewType)} />
-              )}
-              {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
-              {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
-              {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} />}
-              {activeView === "goals" && <GoalsSection selectedDate={selectedDate} />}
-              {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
-              {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
-              {activeView === "groceries" && <GrocerySection />}
-              {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
-              {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
-              {activeView === "sitemap" && (
-                <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} />
-              )}
-            </>
+        <div className="p-4">
+          {activeView === "dashboard" && (
+            <DashboardHome selectedDate={selectedDate} onNavigate={(section: string) => setActiveView(section as ViewType)} />
+          )}
+          {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
+          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
+          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} />}
+          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} />}
+          {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
+          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
+          {activeView === "groceries" && <GrocerySection />}
+          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
+          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
+          {activeView === "sitemap" && (
+            <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} />
           )}
         </div>
       </main>
