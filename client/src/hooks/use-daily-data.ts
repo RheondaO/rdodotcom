@@ -29,17 +29,6 @@ export function useUpdateDailyEntry() {
       queryClient.invalidateQueries({ 
         queryKey: ['/api/daily-entry', variables.date] 
       });
-      toast({
-        title: "Success",
-        description: "Entry updated successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update entry",
-        variant: "destructive",
-      });
     },
   });
 }
