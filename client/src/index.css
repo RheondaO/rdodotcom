@@ -129,6 +129,62 @@
   .bg-bg-light {
     background-color: hsl(var(--background));
   }
+
+  /* Custom tooltip styles to match Belle Journal UI */
+  [title] {
+    position: relative;
+  }
+
+  [title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 9999;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(8px);
+    animation: tooltip-fade-in 0.2s ease-out;
+  }
+
+  [title]:hover::before {
+    content: '';
+    position: absolute;
+    left: calc(100% + 2px);
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: hsl(var(--primary));
+    z-index: 9999;
+  }
+
+  @keyframes tooltip-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) translateX(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+  }
+
+  /* Dark mode tooltip adjustments */
+  .dark [title]:hover::after {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark [title]:hover::before {
+    border-right-color: hsl(var(--primary));
+  }
 }
 
 /* Smooth transitions for theme switching */
