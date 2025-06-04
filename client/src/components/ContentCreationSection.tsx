@@ -260,15 +260,22 @@ export default function ContentCreationSection() {
   const getProgressForMiniGame = (miniGameId: number) => {
     const designs = getDesignsByMiniGame(miniGameId);
     const miniGame = miniGameBlocks.find(mg => mg.id === miniGameId);
-    if (!miniGame) return 0;
+    if (!miniGame) return { progress: 0, completed: 0, total: 0, remaining: 0 };
     
     const approvedDesigns = designs.filter(d => d.status === 'approved').length;
     const totalNeeded = miniGame.frequencyValue;
+    const remaining = Math.max(0, totalNeeded - approvedDesigns);
     
     // Each approved design represents one unit of progress
     // Progress = (approved designs / total needed) * 100
     const progress = totalNeeded > 0 ? (approvedDesigns / totalNeeded) * 100 : 0;
-    return Math.min(Math.round(progress), 100); // Cap at 100%
+    
+    return {
+      progress: Math.min(Math.round(progress), 100), // Cap at 100%
+      completed: approvedDesigns,
+      total: totalNeeded,
+      remaining: remaining
+    };
   };
 
   const getStatusCountForMiniGame = (miniGameId: number, status: string) => {
@@ -570,7 +577,7 @@ export default function ContentCreationSection() {
           {/* Mini-Game Blocks Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {miniGameBlocks.map(miniGame => {
-              const progress = getProgressForMiniGame(miniGame.id);
+              const progressData = getProgressForMiniGame(miniGame.id);
               const designs = getDesignsByMiniGame(miniGame.id);
               
               return (
@@ -606,13 +613,13 @@ export default function ContentCreationSection() {
                       <div>
                         <div className="flex justify-between text-sm mb-1">
                           <span>Annual Progress</span>
-                          <span className="font-medium">{getStatusCountForMiniGame(miniGame.id, 'approved')}/{miniGame.frequencyValue}</span>
+                          <span className="font-medium">{progressData.completed}/{progressData.total}</span>
                         </div>
                         <div className="flex justify-between text-xs mb-2 text-gray-500">
                           <span>Completion Rate</span>
-                          <span>{progress}%</span>
+                          <span>{progressData.progress}%</span>
                         </div>
-                        <Progress value={progress} className="h-3" />
+                        <Progress value={progressData.progress} className="h-3" />
                       </div>
                       
                       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -622,7 +629,7 @@ export default function ContentCreationSection() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Remaining:</span>
-                          <span className="font-medium text-orange-600">{miniGame.frequencyValue - getStatusCountForMiniGame(miniGame.id, 'approved')}</span>
+                          <span className="font-medium text-orange-600">{progressData.remaining}</span>
                         </div>
                       </div>
                       
@@ -649,61 +656,74 @@ export default function ContentCreationSection() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {miniGameBlocks.map(miniGame => {
-                  const progress = getProgressForMiniGame(miniGame.id);
-                  const approvedCount = getStatusCountForMiniGame(miniGame.id, 'approved');
-                  const targetCount = miniGame.frequencyValue;
+                  const progressData = getProgressForMiniGame(miniGame.id);
                   
                   return (
                     <div key={miniGame.id} className="text-center">
                       <div className="mb-3">
                         <h4 className="font-medium text-sm text-gray-800 mb-1">{miniGame.name}</h4>
                         <p className="text-xs text-gray-500">
-                          {approvedCount}/{targetCount} designs
+                          {progressData.completed}/{progressData.total} designs
                         </p>
                       </div>
                       
-                      {/* Vertical Progress Bar with Notches */}
-                      <div className="relative mx-auto w-10 h-48 bg-gray-200 rounded-full overflow-hidden border-2 border-gray-300">
+                      {/* Vertical Progress Bar with Individual Design Notches */}
+                      <div className="relative mx-auto w-12 h-48 bg-gray-200 rounded-full overflow-hidden border-2 border-gray-300">
                         {/* Progress Fill */}
                         <div 
-                          className="absolute bottom-0 w-full transition-all duration-500 ease-in-out"
+                          className="absolute bottom-0 w-full transition-all duration-700 ease-in-out"
                           style={{ 
-                            height: `${progress}%`,
+                            height: `${progressData.progress}%`,
                             background: `linear-gradient(to top, ${miniGame.color}, ${miniGame.color}99)`
                           }}
                         />
                         
-                        {/* Notch Markers - Show every 10% or key milestones */}
-                        {Array.from({ length: Math.min(10, targetCount) }, (_, i) => {
-                          const notchProgress = ((i + 1) / Math.min(10, targetCount)) * 100;
+                        {/* Individual Design Notches - Each represents one design needed */}
+                        {Array.from({ length: progressData.total }, (_, i) => {
+                          const notchPosition = ((i + 1) / progressData.total) * 100;
+                          const isCompleted = i < progressData.completed;
+                          
                           return (
                             <div
                               key={i}
-                              className="absolute w-full h-0.5 bg-white/40"
-                              style={{ bottom: `${notchProgress}%` }}
+                              className={`absolute w-full h-0.5 transition-all duration-300 ${
+                                isCompleted 
+                                  ? 'bg-white/60 shadow-sm' 
+                                  : 'bg-gray-400/60'
+                              }`}
+                              style={{ bottom: `${notchPosition}%` }}
                             />
                           );
                         })}
+                        
+                        {/* Quarter markers for visual reference */}
+                        {[25, 50, 75].map(quarter => (
+                          <div
+                            key={quarter}
+                            className="absolute w-full h-1 bg-gray-300/80"
+                            style={{ bottom: `${quarter}%` }}
+                          />
+                        ))}
                         
                         {/* Progress Text */}
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="text-center">
                             <div className="text-xs font-bold text-white drop-shadow-lg">
-                              {approvedCount}
+                              {progressData.completed}
                             </div>
                             <div className="text-xs text-white/80 drop-shadow-lg">
-                              of {targetCount}
+                              of {progressData.total}
                             </div>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="mt-3 space-y-1">
+                      <div className="mt-3 space-y-2">
                         <div className="text-xs text-gray-600 font-medium">
-                          {targetCount - approvedCount} remaining
+                          {progressData.remaining} remaining
                         </div>
                         <div className="text-xs text-gray-500">
-                          {progress}% complete
+                          {progressData.progress}% complete
                         </div>
                         <Badge 
                           className="text-xs" 
@@ -711,6 +731,23 @@ export default function ContentCreationSection() {
                         >
                           {getCategoryIcon(miniGame.category)} {miniGame.category}
                         </Badge>
+                        
+                        {/* Quick Action Button */}
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="w-full text-xs h-7"
+                          onClick={() => {
+                            setNewDesign({
+                              ...newDesign,
+                              miniGameBlockId: miniGame.id
+                            });
+                            setShowCreateDesignDialog(true);
+                          }}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Add Design
+                        </Button>
                       </div>
                     </div>
                   );
@@ -757,6 +794,23 @@ export default function ContentCreationSection() {
                           </div>
                         </div>
                         <div className="flex gap-2">
+                          {design.status === 'designed' && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                const updatedDesigns = miniGameDesigns.map(d => 
+                                  d.id === design.id 
+                                    ? { ...d, status: 'approved', approvedDate: format(new Date(), 'yyyy-MM-dd') }
+                                    : d
+                                );
+                                setMiniGameDesigns(updatedDesigns);
+                              }}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Approve
+                            </Button>
+                          )}
                           <Button variant="ghost" size="sm">
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -828,24 +882,35 @@ export default function ContentCreationSection() {
                   );
                   const approvedDesigns = categoryDesigns.filter(d => d.status === 'approved').length;
                   const totalNeeded = categoryMiniGames.reduce((sum, mg) => sum + mg.frequencyValue, 0);
+                  const designedNotApproved = categoryDesigns.filter(d => d.status === 'designed').length;
                   const progress = totalNeeded > 0 ? Math.round((approvedDesigns / totalNeeded) * 100) : 0;
                   
+                  if (categoryMiniGames.length === 0) return null;
+                  
                   return (
-                    <div key={category.value} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={category.value} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center">
                         <span className="text-2xl mr-3">{category.icon}</span>
                         <div>
                           <h4 className="font-medium">{category.label}</h4>
                           <p className="text-sm text-gray-600">
-                            {categoryMiniGames.length} mini-games, {approvedDesigns}/{totalNeeded} designs
+                            {categoryMiniGames.length} mini-games • {approvedDesigns}/{totalNeeded} approved
                           </p>
+                          {designedNotApproved > 0 && (
+                            <p className="text-xs text-orange-600">
+                              {designedNotApproved} awaiting approval
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold" style={{ color: category.color }}>
                           {progress}%
                         </div>
-                        <Progress value={progress} className="w-20 h-2" />
+                        <Progress value={progress} className="w-24 h-3" />
+                        <div className="text-xs text-gray-500 mt-1">
+                          {totalNeeded - approvedDesigns} remaining
+                        </div>
                       </div>
                     </div>
                   );
