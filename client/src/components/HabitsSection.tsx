@@ -446,7 +446,7 @@ export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
             <Target className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-            <span>Today's Habits ({activeHabits.length})</span>
+            <span>{getDateLabel()}'s Habits ({activeHabits.length})</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
