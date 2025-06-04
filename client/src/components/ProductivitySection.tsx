@@ -25,7 +25,7 @@ import {
   BarChart3,
   Focus
 } from "lucide-react";
-import { format, addMinutes, differenceInMinutes } from "date-fns";
+import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorrow } from "date-fns";
 
 interface Todo {
   id: number;
@@ -82,6 +82,13 @@ interface ProductivitySectionProps {
 }
 
 export default function ProductivitySection({ selectedDate }: ProductivitySectionProps) {
+  const getDateLabel = () => {
+    if (isToday(selectedDate)) return "Today";
+    if (isYesterday(selectedDate)) return "Yesterday";
+    if (isTomorrow(selectedDate)) return "Tomorrow";
+    return format(selectedDate, 'EEEE');
+  };
+
   // Time tracking state
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -653,7 +660,7 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <CheckSquare className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-              <span>Today's Tasks ({todaysTodos.length})</span>
+              <span>{getDateLabel()}'s Tasks ({todaysTodos.length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -675,7 +682,7 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Clock className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-              <span>Today's Schedule ({todaysTimeBlocks.length})</span>
+              <span>{getDateLabel()}'s Schedule ({todaysTimeBlocks.length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -728,7 +735,7 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
                 ))}
                 <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
                   <div className="font-semibold text-green-700 dark:text-green-400">
-                    Total today: {timeEntries.reduce((sum, entry) => sum + entry.duration, 0)} minutes
+                    Total {getDateLabel().toLowerCase()}: {timeEntries.reduce((sum, entry) => sum + entry.duration, 0)} minutes
                   </div>
                 </div>
               </div>

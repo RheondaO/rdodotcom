@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import WaterIntakeCard from "./WaterIntakeCard";
 import { useDailyData } from "@/hooks/use-daily-data";
-import { format } from "date-fns";
+import { format, isToday, isYesterday, isTomorrow } from "date-fns";
 
 interface HealthSectionProps {
   selectedDate: Date;
