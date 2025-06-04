@@ -241,8 +241,7 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
     title: "",
     description: "",
     targetDate: "",
-    platforms: [] as string[],
-    tags: ""
+    platforms: [] as string[]
   });
 
   const [newCategory, setNewCategory] = useState({
@@ -405,15 +404,7 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
                   />
                 </div>
                 
-                <div>
-                  <Label>Tags (comma separated)</Label>
-                  <Input
-                    value={newContent.tags}
-                    onChange={(e) => setNewContent({...newContent, tags: e.target.value})}
-                    placeholder="tag1, tag2, tag3"
-                    className="dark:bg-gray-800 dark:text-white"
-                  />
-                </div>
+
                 
                 <Button onClick={createContent} className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white">
                   Create Content

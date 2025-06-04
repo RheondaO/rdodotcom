@@ -49,7 +49,6 @@ interface AppProject {
   estimatedHours?: number;
   actualHours: number;
   techStack: string[];
-  tags: string[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -68,7 +67,6 @@ interface AppTask {
   dueDate?: string;
   completedDate?: string;
   dependencies: string[];
-  tags: string[];
   attachments: string[];
   comments: string;
   createdAt: string;
@@ -116,7 +114,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       estimatedHours: 120,
       actualHours: 85,
       techStack: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Framer Motion"],
-      tags: ["portfolio", "frontend", "responsive"],
       isActive: true,
       createdAt: "2025-05-01T00:00:00Z",
       updatedAt: "2025-06-03T10:30:00Z"
@@ -135,7 +132,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       estimatedHours: 200,
       actualHours: 110,
       techStack: ["Vue.js", "Node.js", "PostgreSQL", "Express", "GSAP"],
-      tags: ["media", "creative", "cms", "animation"],
       isActive: true,
       createdAt: "2025-04-15T00:00:00Z",
       updatedAt: "2025-06-03T09:15:00Z"
@@ -150,7 +146,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       estimatedHours: 300,
       actualHours: 45,
       techStack: ["React", "TypeScript", "Vite", "Tailwind CSS", "Drizzle ORM"],
-      tags: ["productivity", "health", "habits", "analytics"],
       isActive: true,
       createdAt: "2025-06-01T00:00:00Z",
       updatedAt: "2025-06-03T12:00:00Z"
