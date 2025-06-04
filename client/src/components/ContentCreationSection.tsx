@@ -134,7 +134,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       frequency: "every_2nd_wednesday",
       frequencyValue: 12, // 12 Second Wednesdays per year
       color: "#3B82F6",
-      category: "astrological",
+      category: "definition_introductions",
       isActive: true,
       createdAt: format(new Date(), 'yyyy-MM-dd')
     },
@@ -146,7 +146,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       frequency: "every_1st_friday",
       frequencyValue: 12, // 12 First Fridays per year
       color: "#F59E0B",
-      category: "astrological",
+      category: "apple_music",
       isActive: true,
       createdAt: format(new Date(), 'yyyy-MM-dd')
     }
@@ -220,11 +220,11 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   ];
 
   const categoryOptions = [
+    { value: "administration", label: "Administration", icon: "⚙️", color: "#6B7280" },
+    { value: "definition_introductions", label: "Definition & Introductions", icon: "📖", color: "#3B82F6" },
     { value: "engagement", label: "Engagement", icon: "💬", color: "#8B5CF6" },
-    { value: "astrological", label: "Astrological", icon: "🌙", color: "#3B82F6" },
-    { value: "wellness", label: "Wellness", icon: "🧘", color: "#10B981" },
-    { value: "creative", label: "Creative", icon: "🎨", color: "#F59E0B" },
-    { value: "educational", label: "Educational", icon: "📚", color: "#EF4444" }
+    { value: "apple_music", label: "Apple Music", icon: "🎵", color: "#F59E0B" },
+    { value: "other", label: "Other", icon: "📦", color: "#10B981" }
   ];
 
   const astrologicalSignOptions = [
@@ -623,7 +623,13 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 text-sm mb-4">{miniGame.description}</p>
+                    <div className="text-gray-600 text-sm mb-4 space-y-1">
+                      <div>📅 {miniGame.dateOfPost && format(new Date(miniGame.dateOfPost), 'MMMM d, yyyy')}</div>
+                      {miniGame.astrologicalSign && (
+                        <div>✨ {astrologicalSignOptions.find(sign => sign.value === miniGame.astrologicalSign)?.label}</div>
+                      )}
+                      <div>🔄 {frequencyOptions.find(freq => freq.value === miniGame.frequency)?.label}</div>
+                    </div>
                     
                     <div className="space-y-3">
                       <div>
