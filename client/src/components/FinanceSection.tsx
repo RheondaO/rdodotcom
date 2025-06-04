@@ -62,6 +62,16 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
     setIsAddIncomeOpen(false);
   };
 
+  const handleQuickAdd = async (amount: number) => {
+    const currentSavings = parseFloat(dailyEntry?.cashSavings || "0");
+    const updatedSavings = currentSavings + amount;
+    
+    await updateDailyEntry.mutateAsync({
+      date: dateString,
+      cashSavings: updatedSavings.toString()
+    });
+  };
+
   return (
     <section className="mb-8">
       <h3 className="text-2xl font-heading font-bold text-green-600 mb-6 flex items-center">
@@ -144,7 +154,38 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
               <div className="text-3xl font-heading font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-3">
                 ${cashSavings.toFixed(0)}
               </div>
-              <div className="text-sm text-muted-foreground bg-green-50 rounded-lg px-3 py-1">Monthly Goal: $500</div>
+              <div className="text-sm text-muted-foreground bg-green-50 rounded-lg px-3 py-1 mb-3">Monthly Goal: $500</div>
+              
+              {/* Quick Add Buttons */}
+              <div className="flex gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleQuickAdd(20)}
+                  disabled={updateDailyEntry.isPending}
+                  className="text-xs bg-green-50 hover:bg-green-100 border-green-200 text-green-700 rounded-lg"
+                >
+                  +$20
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleQuickAdd(50)}
+                  disabled={updateDailyEntry.isPending}
+                  className="text-xs bg-green-50 hover:bg-green-100 border-green-200 text-green-700 rounded-lg"
+                >
+                  +$50
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleQuickAdd(100)}
+                  disabled={updateDailyEntry.isPending}
+                  className="text-xs bg-green-50 hover:bg-green-100 border-green-200 text-green-700 rounded-lg"
+                >
+                  +$100
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
