@@ -46,10 +46,12 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
   // Fetch real data from API
   const { data: todos = [] } = useQuery({
     queryKey: ['/api/todos', dateString],
+    queryFn: () => apiRequest(`/api/todos/${dateString}`, 'GET'),
   });
 
   const { data: timeBlocks = [] } = useQuery({
     queryKey: ['/api/time-blocks', dateString],
+    queryFn: () => apiRequest(`/api/time-blocks/${dateString}`, 'GET'),
   });
 
   // Mutations for data updates

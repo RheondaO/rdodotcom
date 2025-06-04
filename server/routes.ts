@@ -289,11 +289,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/todos", async (req, res) => {
     try {
+      console.log("Received todo data:", req.body);
       const data = insertTodoSchema.parse(req.body);
+      console.log("Parsed todo data:", data);
       const todo = await storage.createTodo(data);
       res.json(todo);
     } catch (error) {
-      res.status(400).json({ error: "Invalid todo data" });
+      console.error("Todo creation error:", error);
+      res.status(400).json({ error: error.message || "Invalid todo data" });
     }
   });
 
@@ -305,6 +308,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(todo);
     } catch (error) {
       res.status(500).json({ error: "Failed to update todo" });
+    }
+  });
+
+  // Time Blocks (date-specific)
+  app.get("/api/time-blocks/:date", async (req, res) => {
+    try {
+      const date = req.params.date;
+      const timeBlocks = await storage.getTimeBlocksByDate(date);
+      res.json(timeBlocks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch time blocks" });
+    }
+  });
+
+  app.post("/api/time-blocks", async (req, res) => {
+    try {
+      const data = req.body; // Will need proper schema validation
+      const timeBlock = await storage.createTimeBlock(data);
+      res.json(timeBlock);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid time block data" });
     }
   });
 
