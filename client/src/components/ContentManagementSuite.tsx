@@ -67,7 +67,6 @@ interface ContentPiece {
   title: string;
   description: string;
   status: "idea" | "planning" | "draft" | "review" | "approved" | "scheduled" | "published" | "archived";
-  priority: "low" | "medium" | "high" | "urgent";
   targetDate: string | null;
   scheduledDate: string | null;
   publishedDate: string | null;
@@ -187,7 +186,6 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
       title: "Ultimate Guide to Content Planning",
       description: "Comprehensive guide on planning content calendars",
       status: "draft",
-      priority: "high",
       targetDate: "2025-06-10",
       scheduledDate: null,
       publishedDate: null,
@@ -206,7 +204,6 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
       title: "Morning Motivation Monday",
       description: "Inspirational quote post for Monday motivation",
       status: "scheduled",
-      priority: "medium",
       targetDate: "2025-06-09",
       scheduledDate: "2025-06-09T09:00:00",
       publishedDate: null,
@@ -225,7 +222,6 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
       title: "Content Creation Workflow Tutorial",
       description: "Video showing my content creation process",
       status: "planning",
-      priority: "high",
       targetDate: "2025-06-15",
       scheduledDate: null,
       publishedDate: null,
@@ -244,7 +240,6 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
     contentTypeId: "",
     title: "",
     description: "",
-    priority: "medium",
     targetDate: "",
     platforms: [] as string[],
     tags: ""
@@ -300,7 +295,6 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
       title: newContent.title,
       description: newContent.description,
       status: "idea",
-      priority: newContent.priority as any,
       targetDate: newContent.targetDate || null,
       scheduledDate: null,
       publishedDate: null,
@@ -319,7 +313,6 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
       contentTypeId: "",
       title: "",
       description: "",
-      priority: "medium",
       targetDate: "",
       platforms: [],
       tags: ""
@@ -410,31 +403,14 @@ export default function ContentManagementSuite({ selectedDate }: ContentManageme
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Priority</Label>
-                    <Select value={newContent.priority} onValueChange={(value) => setNewContent({...newContent, priority: value})}>
-                      <SelectTrigger className="dark:bg-gray-800 dark:text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label>Target Date</Label>
-                    <Input
-                      type="date"
-                      value={newContent.targetDate}
-                      onChange={(e) => setNewContent({...newContent, targetDate: e.target.value})}
-                      className="dark:bg-gray-800 dark:text-white"
-                    />
-                  </div>
+                <div>
+                  <Label>Target Date</Label>
+                  <Input
+                    type="date"
+                    value={newContent.targetDate}
+                    onChange={(e) => setNewContent({...newContent, targetDate: e.target.value})}
+                    className="dark:bg-gray-800 dark:text-white"
+                  />
                 </div>
                 
                 <div>
