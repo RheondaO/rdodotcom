@@ -31,7 +31,6 @@ interface Todo {
   id: number;
   title: string;
   description: string;
-  priority: string;
   category: string;
   dueDate: string | null;
   isCompleted: boolean;
@@ -103,7 +102,6 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
       id: 1,
       title: "Complete project proposal",
       description: "Finalize the Q3 project proposal document",
-      priority: "high",
       category: "work",
       dueDate: "2025-06-05",
       isCompleted: false,
@@ -115,7 +113,6 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
       id: 2,
       title: "Review team feedback",
       description: "Go through the feedback from last week's presentation",
-      priority: "medium",
       category: "work",
       dueDate: "2025-06-04",
       isCompleted: true,
@@ -127,7 +124,6 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
       id: 3,
       title: "Plan weekend trip",
       description: "Research and book accommodation for the weekend getaway",
-      priority: "low",
       category: "personal",
       dueDate: "2025-06-10",
       isCompleted: false,
@@ -767,20 +763,12 @@ export default function ProductivitySection({ selectedDate }: ProductivitySectio
 }
 
 function TodoCard({ todo, onToggle }: { todo: Todo; onToggle: (id: number) => void }) {
-  const priorityColors = {
-    low: "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800",
-    medium: "border-yellow-300 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900/20",
-    high: "border-red-300 bg-red-50 dark:border-red-600 dark:bg-red-900/20",
-    urgent: "border-red-500 bg-red-100 dark:border-red-500 dark:bg-red-900/30"
-  };
-
   return (
-    <div className={`p-3 rounded-lg border-l-4 ${priorityColors[todo.priority as keyof typeof priorityColors]}`}>
+    <div className="p-3 rounded-lg border-l-4 border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-1">
             <h5 className="font-medium text-gray-900 dark:text-white">{todo.title}</h5>
-            <Badge className="text-xs">{todo.priority}</Badge>
           </div>
           {todo.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{todo.description}</p>

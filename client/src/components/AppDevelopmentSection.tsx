@@ -537,9 +537,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         <Badge className={getStatusColor(project.status)}>
                           {project.status.replace('_', ' ')}
                         </Badge>
-                        <Badge variant="outline" className={getPriorityColor(project.priority)}>
-                          {project.priority}
-                        </Badge>
+
                       </div>
                     </div>
                     
