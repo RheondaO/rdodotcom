@@ -96,25 +96,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
         </Button>
       </div>
       
-      {/* Theme Toggle Only - Hidden when collapsed */}
-      {!isCollapsed && (
-        <div className="p-3 border-b border-pink-100 dark:border-purple-800">
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-              className="h-6 w-6 p-0 hover:bg-pink-100 dark:hover:bg-purple-800"
-            >
-              {theme === "light" ? (
-                <Moon className="h-3 w-3 text-pink-600 dark:text-pink-400" />
-              ) : (
-                <Sun className="h-3 w-3 text-pink-600 dark:text-pink-400" />
-              )}
-            </Button>
-          </div>
-        </div>
-      )}
+
 
       {/* Compact Progress Section - Hidden when collapsed */}
       {!isCollapsed && (

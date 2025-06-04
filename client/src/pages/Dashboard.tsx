@@ -16,8 +16,9 @@ import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Sun, Moon } from "lucide-react";
 import { format, addDays, subDays } from "date-fns";
+import { useTheme } from "@/hooks/use-theme";
 
 type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "apps" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [timeView, setTimeView] = useState<TimeViewType>("day");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const handleExportData = () => {
     // TODO: Implement data export functionality
@@ -99,6 +101,18 @@ export default function Dashboard() {
               <h1 className="text-xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
                 Belle Journal
               </h1>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className="h-8 w-8 p-0 hover:bg-pink-100 dark:hover:bg-purple-800 rounded-lg"
+              >
+                {theme === "light" ? (
+                  <Moon className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                ) : (
+                  <Sun className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                )}
+              </Button>
             </div>
             
             <div className="flex items-center space-x-3">
