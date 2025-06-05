@@ -72,7 +72,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       name: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine",
       icon: "🌙",
       color: "#8B5CF6",
-      description: "Astrological content and mini-game blocks",
+      description: "",
       hasMiniGames: true
     },
     {
