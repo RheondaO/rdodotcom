@@ -341,6 +341,60 @@ export const appTimeEntries = pgTable("app_time_entries", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Social Media Posts Table
+export const socialMediaPosts = pgTable("social_media_posts", {
+  id: serial("id").primaryKey(),
+  miniGameDesignId: integer("mini_game_design_id").notNull().references(() => miniGameDesigns.id),
+  platform: text("platform").notNull(), // 'instagram', 'tiktok', 'facebook', 'twitter', etc.
+  postUrl: text("post_url"),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  publishedDate: timestamp("published_date"),
+  dayOfWeek: text("day_of_week").notNull(), // 'monday', 'tuesday', etc.
+  timeSlot: text("time_slot").notNull(), // 'morning', 'afternoon', 'evening'
+  postType: text("post_type").notNull(), // 'image', 'video', 'carousel', 'reel', 'story'
+  caption: text("caption"),
+  hashtags: text("hashtags").array().default([]),
+  status: text("status").notNull().default("scheduled"), // 'scheduled', 'published', 'failed', 'archived'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Social Media Analytics Table
+export const socialMediaAnalytics = pgTable("social_media_analytics", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => socialMediaPosts.id),
+  impressions: integer("impressions").notNull().default(0),
+  reach: integer("reach").notNull().default(0),
+  likes: integer("likes").notNull().default(0),
+  comments: integer("comments").notNull().default(0),
+  shares: integer("shares").notNull().default(0),
+  saves: integer("saves").notNull().default(0),
+  clicks: integer("clicks").notNull().default(0),
+  profileViews: integer("profile_views").notNull().default(0),
+  engagementRate: integer("engagement_rate").notNull().default(0), // stored as percentage * 100
+  recordedAt: timestamp("recorded_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Performance Insights Table for aggregated analytics
+export const performanceInsights = pgTable("performance_insights", {
+  id: serial("id").primaryKey(),
+  miniGameBlockId: integer("mini_game_block_id").notNull().references(() => miniGameBlocks.id),
+  platform: text("platform").notNull(),
+  dayOfWeek: text("day_of_week").notNull(),
+  timeSlot: text("time_slot").notNull(),
+  postType: text("post_type").notNull(),
+  avgImpressions: integer("avg_impressions").notNull().default(0),
+  avgReach: integer("avg_reach").notNull().default(0),
+  avgLikes: integer("avg_likes").notNull().default(0),
+  avgComments: integer("avg_comments").notNull().default(0),
+  avgShares: integer("avg_shares").notNull().default(0),
+  avgEngagementRate: integer("avg_engagement_rate").notNull().default(0), // stored as percentage * 100
+  totalPosts: integer("total_posts").notNull().default(0),
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+});
+
 // Insert schemas
 export const insertDailyEntrySchema = createInsertSchema(dailyEntries).omit({
   id: true,
@@ -472,6 +526,22 @@ export const insertAppSprintSchema = createInsertSchema(appSprints).omit({
 export const insertAppTimeEntrySchema = createInsertSchema(appTimeEntries).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertSocialMediaPostSchema = createInsertSchema(socialMediaPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSocialMediaAnalyticsSchema = createInsertSchema(socialMediaAnalytics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPerformanceInsightsSchema = createInsertSchema(performanceInsights).omit({
+  id: true,
 });
 
 // Type exports
