@@ -1638,7 +1638,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   Content Calendar - Approved Designs
                 </CardTitle>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Schedule and manage your approved content designs
+                  Schedule and manage approved content designs from all brands
                 </p>
               </CardHeader>
               <CardContent>
@@ -1652,7 +1652,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                       <div className="text-center py-12 text-gray-500">
                         <CalendarDays className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                         <h3 className="text-lg font-medium mb-2">No Approved Designs</h3>
-                        <p className="text-sm">Approved designs from rotationONLY will appear here</p>
+                        <p className="text-sm">Approved designs from all brands will appear here</p>
                       </div>
                     );
                   }
