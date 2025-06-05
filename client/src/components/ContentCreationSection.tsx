@@ -2024,14 +2024,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                     );
                                   })}
                                   
-                                  {/* Enhanced overflow indicator */}
-                                  {miniGame.frequencyValue > 18 && (
-                                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                                      <div className="text-xs font-semibold text-white bg-gradient-to-r from-gray-600 to-gray-700 px-2 py-1 rounded-full shadow-lg border border-gray-500">
-                                        +{miniGame.frequencyValue - 18}
-                                      </div>
-                                    </div>
-                                  )}
+
                                 </div>
                                 
                                 {/* Cute progress ratio overlay */}
