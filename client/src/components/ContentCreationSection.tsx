@@ -78,14 +78,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       color: "#8B5CF6",
       description: "",
       hasMiniGames: true
-    },
-    {
-      id: "contentCalendar",
-      name: "Content Calendar",
-      icon: "📅",
-      color: "#10B981",
-      description: "Schedule and manage approved content designs",
-      hasMiniGames: false
     }
   ];
 
@@ -465,10 +457,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     }
   ]);
 
-  // Content for other brands (without mini-games)
-  const [brandContent, setBrandContent] = useState({
-    contentCalendar: []
-  });
+
 
   // Sample mini-game designs
   const [miniGameDesigns, setMiniGameDesigns] = useState<MiniGameDesign[]>([
@@ -740,35 +729,11 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
   return (
     <section className="mb-8">
-      {/* Direct Brand Navigation */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
-          {brands.map(brand => (
-            <button
-              key={brand.id}
-              onClick={() => setActiveBrand(brand.id)}
-              className={`flex-1 flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg transition-all duration-200 ${
-                activeBrand === brand.id
-                  ? 'bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400'
-              }`}
-            >
-              <span className="text-lg mr-1 sm:mr-2">{brand.icon}</span>
-              <span className="text-xs sm:text-sm font-medium hidden sm:block whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px] lg:max-w-none">{brand.name}</span>
-              <span className="text-xs font-medium sm:hidden">{brand.id === "rotationONLY" ? "rotation" : brand.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Content Based on Selected Brand */}
-      {activeBrand === "rotationONLY" ? (
-        <>
-          <div className="flex items-center justify-between mb-6">
-            <h4 className="text-xl font-heading font-bold text-purple-600 flex items-center">
-              <Gamepad2 className="text-purple-500 mr-3 h-5 w-5" />
-              Mini-Game Block Studio ✨
-            </h4>
+      <div className="flex items-center justify-between mb-6">
+        <h4 className="text-xl font-heading font-bold text-purple-600 flex items-center">
+          <Gamepad2 className="text-purple-500 mr-3 h-5 w-5" />
+          Mini-Game Block Studio ✨
+        </h4>
             <div className="flex gap-2">
               <Dialog open={showCreateDesignDialog} onOpenChange={setShowCreateDesignDialog}>
                 <DialogTrigger asChild>
@@ -1655,10 +1620,307 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
               </Card>
             </TabsContent>
           </Tabs>
-        </>
-      ) : (
-        <div className="space-y-6">
-          {activeBrand === "contentCalendar" ? (
+    </section>
+  );
+}
+
+// Content Calendar Component
+export function ContentCalendarView() {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarView, setCalendarView] = useState<'month' | 'week'>('month');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Sample data for calendar (would come from storage in real implementation)
+  const [approvedDesigns] = useState([]);
+
+  const getDesignsByDate = (designs: any[]) => {
+    const designsByDate: { [date: string]: any[] } = {};
+    designs.forEach(design => {
+      if (design.targetDate) {
+        if (!designsByDate[design.targetDate]) {
+          designsByDate[design.targetDate] = [];
+        }
+        designsByDate[design.targetDate].push(design);
+      }
+    });
+    return designsByDate;
+  };
+
+  const getMonthCalendarDates = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+    
+    const endDate = new Date(lastDay);
+    endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+    
+    const dates = [];
+    const current = new Date(startDate);
+    
+    while (current <= endDate) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return dates;
+  };
+
+  const getWeekCalendarDates = (date: Date) => {
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - date.getDay());
+    
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      dates.push(day);
+    }
+    
+    return dates;
+  };
+
+  const navigateCalendar = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (calendarView === 'month') {
+      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+    } else {
+      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+    }
+    setCurrentDate(newDate);
+  };
+
+  return (
+    <section className="mb-8">
+      <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <CalendarDays className="text-purple-500 mr-3 h-5 w-5" />
+            Content Calendar - Approved Designs
+          </CardTitle>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Schedule and manage approved content designs from rotationONLY Magazine
+          </p>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const designsByDate = getDesignsByDate(approvedDesigns);
+            const calendarDates = calendarView === 'month' 
+              ? getMonthCalendarDates(currentDate) 
+              : getWeekCalendarDates(currentDate);
+            
+            return (
+              <div className="space-y-4">
+                {/* Calendar Navigation */}
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigateCalendar('prev')}
+                        className="h-8 w-8 p-0"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigateCalendar('next')}
+                        className="h-8 w-8 p-0"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <Button
+                      variant="ghost"
+                      onClick={() => setShowDatePicker(!showDatePicker)}
+                      className="text-lg font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-1 h-auto"
+                    >
+                      {calendarView === 'month' 
+                        ? format(currentDate, 'MMMM yyyy')
+                        : `${format(getWeekCalendarDates(currentDate)[0], 'MMM d')} - ${format(getWeekCalendarDates(currentDate)[6], 'MMM d, yyyy')}`
+                      }
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentDate(new Date())}
+                      className="text-xs"
+                    >
+                      Today
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      {approvedDesigns.length} Approved
+                    </Badge>
+                    
+                    <div className="flex bg-white dark:bg-gray-700 rounded-lg p-1">
+                      <Button
+                        variant={calendarView === 'month' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setCalendarView('month')}
+                        className="text-xs px-3 py-1"
+                      >
+                        Month
+                      </Button>
+                      <Button
+                        variant={calendarView === 'week' ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() => setCalendarView('week')}
+                        className="text-xs px-3 py-1"
+                      >
+                        Week
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Month Year Selector */}
+                {showDatePicker && (
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-lg">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                          Month
+                        </Label>
+                        <Select 
+                          value={currentDate.getMonth().toString()}
+                          onValueChange={(value) => {
+                            const newDate = new Date(currentDate);
+                            newDate.setMonth(parseInt(value));
+                            setCurrentDate(newDate);
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 12 }, (_, i) => (
+                              <SelectItem key={i} value={i.toString()}>
+                                {format(new Date(2024, i, 1), 'MMMM')}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                          Year
+                        </Label>
+                        <Select 
+                          value={currentDate.getFullYear().toString()}
+                          onValueChange={(value) => {
+                            const newDate = new Date(currentDate);
+                            newDate.setFullYear(parseInt(value));
+                            setCurrentDate(newDate);
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                          <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 10 }, (_, i) => {
+                              const year = new Date().getFullYear() - 2 + i;
+                              return (
+                                <SelectItem key={year} value={year.toString()}>
+                                  {year}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowDatePicker(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setShowDatePicker(false)}
+                        className="bg-purple-500 hover:bg-purple-600 text-white"
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Calendar Grid */}
+                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                  <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                      <div key={day} className="p-3 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-7">
+                    {calendarDates.map((date, index) => {
+                      const dateStr = format(date, 'yyyy-MM-dd');
+                      const dayDesigns = designsByDate[dateStr] || [];
+                      const isCurrentMonth = calendarView === 'month' ? date.getMonth() === currentDate.getMonth() : true;
+                      const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+                      
+                      return (
+                        <div
+                          key={index}
+                          className={`min-h-[120px] p-2 border-b border-r border-gray-200 dark:border-gray-700 ${
+                            !isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800/50' : 'bg-white dark:bg-gray-900'
+                          } ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                        >
+                          <div className={`text-sm font-medium mb-1 ${
+                            !isCurrentMonth 
+                              ? 'text-gray-400 dark:text-gray-600' 
+                              : isToday 
+                                ? 'text-blue-600 dark:text-blue-400' 
+                                : 'text-gray-900 dark:text-white'
+                          }`}>
+                            {format(date, 'd')}
+                          </div>
+                          
+                          <div className="space-y-1">
+                            {dayDesigns.slice(0, 3).map((design) => (
+                              <div
+                                key={design.id}
+                                className="text-xs p-1 rounded bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 truncate"
+                                title={design.designTitle}
+                              >
+                                {design.designTitle}
+                              </div>
+                            ))}
+                            {dayDesigns.length > 3 && (
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                +{dayDesigns.length - 3} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
             /* Content Calendar View */
             <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardHeader>
@@ -1966,9 +2228,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
             </Card>
           )}
         </div>
-      )}
-
-
     </section>
   );
 }
