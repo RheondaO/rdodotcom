@@ -21,7 +21,9 @@ import {
   Clock,
   Target,
   Edit,
-  CalendarDays
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 // Mini-Game Block type with new structure
@@ -552,6 +554,10 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     category: ""
   });
 
+  // Calendar state
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarView, setCalendarView] = useState<'month' | 'week'>('month');
+
   // Frequency options
   const frequencyOptions = [
     { value: "every_friday", label: "Every Friday (52/year)", count: 52 },
@@ -692,6 +698,59 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       dates.push(format(date, 'yyyy-MM-dd'));
     }
     return dates;
+  };
+
+  // Calendar helper functions
+  const getMonthCalendarDates = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    
+    // First day of the month
+    const firstDay = new Date(year, month, 1);
+    // Last day of the month
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // Start from the beginning of the week that contains the first day
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - startDate.getDay());
+    
+    // End at the end of the week that contains the last day
+    const endDate = new Date(lastDay);
+    endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+    
+    const dates = [];
+    const current = new Date(startDate);
+    
+    while (current <= endDate) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return dates;
+  };
+
+  const getWeekCalendarDates = (date: Date) => {
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - date.getDay());
+    
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      dates.push(day);
+    }
+    
+    return dates;
+  };
+
+  const navigateCalendar = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (calendarView === 'month') {
+      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+    } else {
+      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+    }
+    setCurrentDate(newDate);
   };
 
   const currentBrand = brands.find(b => b.id === activeBrand);
@@ -1645,112 +1704,165 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                 {(() => {
                   const approvedDesigns = getApprovedDesigns();
                   const designsByDate = getDesignsByDate(approvedDesigns);
-                  const dateRange = getDateRange(30);
-                  
-                  if (approvedDesigns.length === 0) {
-                    return (
-                      <div className="text-center py-12 text-gray-500">
-                        <CalendarDays className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                        <h3 className="text-lg font-medium mb-2">No Approved Designs</h3>
-                        <p className="text-sm">Approved designs from all brands will appear here</p>
-                      </div>
-                    );
-                  }
+                  const calendarDates = calendarView === 'month' 
+                    ? getMonthCalendarDates(currentDate) 
+                    : getWeekCalendarDates(currentDate);
                   
                   return (
-                    <div className="space-y-6">
-                      {/* Calendar Header */}
-                      <div className="flex items-center justify-between mb-6">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          Next 30 Days
-                        </h4>
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          {approvedDesigns.length} Approved Designs
-                        </Badge>
+                    <div className="space-y-4">
+                      {/* Calendar Navigation */}
+                      <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigateCalendar('prev')}
+                              className="h-8 w-8 p-0"
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigateCalendar('next')}
+                              className="h-8 w-8 p-0"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {calendarView === 'month' 
+                              ? format(currentDate, 'MMMM yyyy')
+                              : `${format(getWeekCalendarDates(currentDate)[0], 'MMM d')} - ${format(getWeekCalendarDates(currentDate)[6], 'MMM d, yyyy')}`
+                            }
+                          </h3>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentDate(new Date())}
+                            className="text-xs"
+                          >
+                            Today
+                          </Button>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            {approvedDesigns.length} Approved
+                          </Badge>
+                          
+                          <div className="flex bg-white dark:bg-gray-700 rounded-lg p-1">
+                            <Button
+                              variant={calendarView === 'month' ? 'default' : 'ghost'}
+                              size="sm"
+                              onClick={() => setCalendarView('month')}
+                              className="text-xs px-3 py-1"
+                            >
+                              Month
+                            </Button>
+                            <Button
+                              variant={calendarView === 'week' ? 'default' : 'ghost'}
+                              size="sm"
+                              onClick={() => setCalendarView('week')}
+                              className="text-xs px-3 py-1"
+                            >
+                              Week
+                            </Button>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Calendar Grid */}
-                      <div className="grid gap-4">
-                        {dateRange.map(date => {
-                          const designs = designsByDate[date] || [];
-                          const isToday = date === format(new Date(), 'yyyy-MM-dd');
-                          const hasContent = designs.length > 0;
-                          
-                          return (
-                            <div 
-                              key={date}
-                              className={`p-4 rounded-xl border-2 transition-all ${
-                                isToday 
-                                  ? 'border-purple-300 bg-purple-50 dark:bg-purple-900/20' 
-                                  : hasContent 
-                                    ? 'border-green-200 bg-green-50 dark:bg-green-900/20' 
-                                    : 'border-gray-200 bg-gray-50 dark:bg-gray-800'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <div>
-                                  <h5 className={`font-semibold ${isToday ? 'text-purple-800' : 'text-gray-900 dark:text-white'}`}>
-                                    {format(new Date(date), 'EEEE, MMMM d')}
-                                  </h5>
-                                  {isToday && (
-                                    <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-xs">
-                                      Today
-                                    </Badge>
+                      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        {/* Week Days Header */}
+                        <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800">
+                          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                            <div key={day} className="p-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 last:border-r-0">
+                              {day}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Calendar Dates */}
+                        <div className={`grid grid-cols-7 ${calendarView === 'week' ? 'min-h-[300px]' : ''}`}>
+                          {calendarDates.map((date, index) => {
+                            const dateStr = format(date, 'yyyy-MM-dd');
+                            const designs = designsByDate[dateStr] || [];
+                            const isToday = dateStr === format(new Date(), 'yyyy-MM-dd');
+                            const isCurrentMonth = calendarView === 'week' || date.getMonth() === currentDate.getMonth();
+                            const hasContent = designs.length > 0;
+                            
+                            return (
+                              <div
+                                key={index}
+                                className={`min-h-[120px] p-2 border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 ${
+                                  calendarView === 'month' && index >= calendarDates.length - 7 ? 'border-b-0' : ''
+                                } ${!isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'} hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
+                              >
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className={`text-sm font-medium ${
+                                    isToday 
+                                      ? 'bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center' 
+                                      : isCurrentMonth 
+                                        ? 'text-gray-900 dark:text-white' 
+                                        : 'text-gray-400'
+                                  }`}>
+                                    {date.getDate()}
+                                  </span>
+                                  {hasContent && (
+                                    <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full">
+                                      {designs.length}
+                                    </span>
                                   )}
                                 </div>
-                                {hasContent && (
-                                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                                    {designs.length} design{designs.length > 1 ? 's' : ''}
-                                  </Badge>
-                                )}
-                              </div>
-                              
-                              {hasContent ? (
-                                <div className="space-y-2">
-                                  {designs.map(design => {
+                                
+                                {/* Content Items */}
+                                <div className="space-y-1">
+                                  {designs.slice(0, calendarView === 'week' ? 10 : 3).map((design, designIndex) => {
                                     const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
                                     return (
-                                      <div 
+                                      <div
                                         key={design.id}
-                                        className="p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm border"
+                                        className="text-xs p-1.5 rounded-md border-l-2 bg-green-50 dark:bg-green-900/20 border-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 cursor-pointer transition-colors"
+                                        style={{
+                                          borderLeftColor: miniGame?.color || '#10B981'
+                                        }}
+                                        title={`${design.title} - ${miniGame?.name || 'Content'}`}
                                       >
-                                        <div className="flex items-center justify-between">
-                                          <div className="flex items-center">
-                                            {miniGame && (
-                                              <div 
-                                                className="w-3 h-3 rounded-full mr-2"
-                                                style={{ backgroundColor: miniGame.color }}
-                                              />
-                                            )}
-                                            <div>
-                                              <h6 className="font-medium text-sm text-gray-900 dark:text-white">
-                                                {design.title}
-                                              </h6>
-                                              <p className="text-xs text-gray-500">
-                                                {miniGame?.name}
-                                              </p>
-                                            </div>
-                                          </div>
-                                          <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                                            Approved
-                                          </Badge>
+                                        <div className="font-medium text-gray-900 dark:text-white truncate">
+                                          {design.title}
                                         </div>
-                                        {design.description && (
-                                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-                                            {design.description}
-                                          </p>
+                                        {calendarView === 'week' && (
+                                          <div className="text-gray-500 truncate">
+                                            {miniGame?.name}
+                                          </div>
                                         )}
                                       </div>
                                     );
                                   })}
+                                  
+                                  {designs.length > (calendarView === 'week' ? 10 : 3) && (
+                                    <div className="text-xs text-gray-500 p-1">
+                                      +{designs.length - (calendarView === 'week' ? 10 : 3)} more
+                                    </div>
+                                  )}
                                 </div>
-                              ) : (
-                                <p className="text-sm text-gray-500">No content scheduled</p>
-                              )}
-                            </div>
-                          );
-                        })}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
+
+                      {approvedDesigns.length === 0 && (
+                        <div className="text-center py-12 text-gray-500">
+                          <CalendarDays className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                          <h3 className="text-lg font-medium mb-2">No Approved Designs</h3>
+                          <p className="text-sm">Approved designs from all brands will appear here</p>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
