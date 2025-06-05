@@ -197,3 +197,40 @@
   border-color: hsl(var(--ring));
   box-shadow: 0 0 0 3px hsla(var(--ring), 0.2);
 }
+
+/* Line clamp utilities for content display */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Calendar content bubbles with better text display */
+.calendar-content-bubble {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.3;
+}
+
+/* Enhanced calendar content visibility */
+.calendar-content-title {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}

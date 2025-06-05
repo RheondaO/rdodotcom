@@ -2216,7 +2216,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           </div>
 
                           {/* Calendar Dates */}
-                          <div className={`grid grid-cols-7 ${calendarView === 'week' ? 'min-h-[300px]' : ''}`}>
+                          <div className={`grid grid-cols-7 ${calendarView === 'week' ? 'min-h-[400px]' : ''}`}>
                             {calendarDates.map((date, index) => {
                               const dateStr = format(date, 'yyyy-MM-dd');
                               const designs = designsByDate[dateStr] || [];
@@ -2227,11 +2227,11 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                               return (
                                 <div
                                   key={index}
-                                  className={`min-h-[120px] p-2 border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 ${
+                                  className={`${calendarView === 'week' ? 'min-h-[350px]' : 'min-h-[140px]'} p-2 border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 ${
                                     calendarView === 'month' && index >= calendarDates.length - 7 ? 'border-b-0' : ''
                                   } ${!isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'} hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
                                 >
-                                  <div className="flex items-center justify-between mb-1">
+                                  <div className="flex items-center justify-between mb-2">
                                     <span className={`text-sm font-medium ${
                                       isToday 
                                         ? 'bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center' 
@@ -2249,23 +2249,23 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                   </div>
                                   
                                   {/* Content Items */}
-                                  <div className="space-y-1">
-                                    {designs.slice(0, calendarView === 'week' ? 10 : 3).map((design) => {
+                                  <div className="space-y-1.5">
+                                    {designs.slice(0, calendarView === 'week' ? 15 : 4).map((design) => {
                                       const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
                                       return (
                                         <div
                                           key={design.id}
-                                          className="text-xs p-1.5 rounded-md border-l-2 bg-green-50 dark:bg-green-900/20 border-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 cursor-pointer transition-colors"
+                                          className={`calendar-content-bubble ${calendarView === 'week' ? 'text-sm p-2' : 'text-xs p-1.5'} rounded-md border-l-3 bg-green-50 dark:bg-green-900/20 border-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 cursor-pointer transition-colors`}
                                           style={{
                                             borderLeftColor: miniGame?.color || '#10B981'
                                           }}
-                                          title={`${design.title} - ${miniGame?.name || 'Content'}`}
+                                          title={`${design.title} - ${miniGame?.name || 'Content'}\n${design.description}`}
                                         >
-                                          <div className="font-medium text-gray-900 dark:text-white truncate">
+                                          <div className={`calendar-content-title font-medium text-gray-900 dark:text-white ${calendarView === 'week' ? 'line-clamp-3' : 'line-clamp-2'}`}>
                                             {design.title}
                                           </div>
                                           {calendarView === 'week' && (
-                                            <div className="text-gray-500 truncate">
+                                            <div className="text-gray-500 text-xs mt-1 line-clamp-1">
                                               {miniGame?.name}
                                             </div>
                                           )}
@@ -2273,9 +2273,9 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                       );
                                     })}
                                     
-                                    {designs.length > (calendarView === 'week' ? 10 : 3) && (
-                                      <div className="text-xs text-gray-500 p-1">
-                                        +{designs.length - (calendarView === 'week' ? 10 : 3)} more
+                                    {designs.length > (calendarView === 'week' ? 15 : 4) && (
+                                      <div className="text-xs text-gray-500 p-1 text-center">
+                                        +{designs.length - (calendarView === 'week' ? 15 : 4)} more
                                       </div>
                                     )}
                                   </div>
