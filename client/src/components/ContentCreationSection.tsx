@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import ContentPipelineSection from './ContentPipelineSection';
 import { 
   Briefcase, 
   Gamepad2, 
@@ -23,7 +24,8 @@ import {
   Edit,
   CalendarDays,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Workflow
 } from 'lucide-react';
 
 // Mini-Game Block type with new structure
@@ -1673,11 +1675,12 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 rounded-xl">
+            <TabsList className="grid w-full grid-cols-6 rounded-xl">
               <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
               <TabsTrigger value="progress" className="rounded-lg">Progress Tracker</TabsTrigger>
               <TabsTrigger value="designs" className="rounded-lg">Design Queue</TabsTrigger>
               <TabsTrigger value="calendar" className="rounded-lg">Content Calendar</TabsTrigger>
+              <TabsTrigger value="pipeline" className="rounded-lg">Content Pipeline</TabsTrigger>
               <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
             </TabsList>
 
@@ -2338,6 +2341,10 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   })()}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="pipeline" className="space-y-6">
+              <ContentPipelineSection />
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
