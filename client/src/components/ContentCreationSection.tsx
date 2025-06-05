@@ -1948,50 +1948,79 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             </div>
                           </div>
                           
-                          {/* Individual Vertical Progress Bar */}
+                          {/* Enhanced Vertical Progress Bar */}
                           <div className="flex justify-center mb-4">
-                            <div className="relative w-8 h-32 bg-gray-200 rounded-full p-1">
-                              <div className="relative w-full h-full flex flex-col-reverse">
-                                {Array.from({ length: Math.min(miniGame.frequencyValue, 20) }, (_, index) => {
-                                  const unitIndex = index + 1;
-                                  const isCompleted = unitIndex <= progressData.completed;
-                                  const segmentHeight = miniGame.frequencyValue > 0 ? Math.max(100 / Math.min(miniGame.frequencyValue, 20), 3) : 5;
-                                  
-                                  return (
-                                    <div
-                                      key={index}
-                                      className="relative transition-all duration-300"
-                                      style={{ 
-                                        height: `${segmentHeight}%`,
-                                        marginBottom: index < Math.min(miniGame.frequencyValue, 20) - 1 ? '1px' : '0'
-                                      }}
-                                    >
-                                      <div 
-                                        className={`w-full h-full rounded-sm transition-all duration-500 ${
-                                          isCompleted 
-                                            ? 'opacity-100 transform scale-100' 
-                                            : 'opacity-30 transform scale-95'
-                                        }`}
+                            <div className="relative">
+                              {/* Outer glow container */}
+                              <div className="absolute -inset-1 rounded-full opacity-30 blur-sm transition-all duration-500"
+                                   style={{ backgroundColor: miniGame.color }}>
+                              </div>
+                              
+                              {/* Main progress container */}
+                              <div className="relative w-10 h-36 bg-gradient-to-b from-gray-100 to-gray-200 rounded-full p-1.5 shadow-inner border border-gray-300">
+                                <div className="relative w-full h-full flex flex-col-reverse">
+                                  {Array.from({ length: Math.min(miniGame.frequencyValue, 18) }, (_, index) => {
+                                    const unitIndex = index + 1;
+                                    const isCompleted = unitIndex <= progressData.completed;
+                                    const segmentHeight = miniGame.frequencyValue > 0 ? Math.max(100 / Math.min(miniGame.frequencyValue, 18), 4) : 5;
+                                    
+                                    return (
+                                      <div
+                                        key={index}
+                                        className="relative transition-all duration-500 ease-out"
                                         style={{ 
-                                          backgroundColor: isCompleted ? miniGame.color : '#E5E7EB',
-                                          boxShadow: isCompleted ? `0 0 6px ${miniGame.color}30` : 'none'
+                                          height: `${segmentHeight}%`,
+                                          marginBottom: index < Math.min(miniGame.frequencyValue, 18) - 1 ? '1.5px' : '0'
                                         }}
-                                      />
-                                      {/* Line marker separator */}
-                                      {index < Math.min(miniGame.frequencyValue, 20) - 1 && (
-                                        <div className="absolute -top-0.5 left-0 w-full h-0.5 bg-white rounded-full" />
-                                      )}
+                                      >
+                                        <div 
+                                          className={`w-full h-full rounded-md transition-all duration-700 ease-out ${
+                                            isCompleted 
+                                              ? 'opacity-100 transform scale-100 shadow-sm' 
+                                              : 'opacity-25 transform scale-90'
+                                          }`}
+                                          style={{ 
+                                            background: isCompleted 
+                                              ? `linear-gradient(135deg, ${miniGame.color}, ${miniGame.color}CC)`
+                                              : 'linear-gradient(135deg, #F3F4F6, #E5E7EB)',
+                                            boxShadow: isCompleted 
+                                              ? `0 2px 8px ${miniGame.color}40, inset 0 1px 0 rgba(255,255,255,0.3)` 
+                                              : 'inset 0 1px 2px rgba(0,0,0,0.1)'
+                                          }}
+                                        />
+                                        
+                                        {/* Enhanced line marker separator */}
+                                        {index < Math.min(miniGame.frequencyValue, 18) - 1 && (
+                                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent rounded-full shadow-sm" />
+                                        )}
+                                        
+                                        {/* Sparkle effect for completed segments */}
+                                        {isCompleted && (
+                                          <div className="absolute inset-0 rounded-md overflow-hidden">
+                                            <div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full opacity-60 animate-pulse" />
+                                            <div className="absolute bottom-1 right-1 w-0.5 h-0.5 bg-white rounded-full opacity-40" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                  
+                                  {/* Enhanced overflow indicator */}
+                                  {miniGame.frequencyValue > 18 && (
+                                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                      <div className="text-xs font-semibold text-white bg-gradient-to-r from-gray-600 to-gray-700 px-2 py-1 rounded-full shadow-lg border border-gray-500">
+                                        +{miniGame.frequencyValue - 18}
+                                      </div>
                                     </div>
-                                  );
-                                })}
-                                {/* Show overflow indicator if more than 20 units */}
-                                {miniGame.frequencyValue > 20 && (
-                                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                                    <div className="text-xs font-medium text-gray-500 bg-white px-1 py-0.5 rounded shadow">
-                                      +{miniGame.frequencyValue - 20}
-                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Progress percentage overlay */}
+                                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
+                                  <div className="text-xs font-bold text-white bg-black bg-opacity-50 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                                    {progressData.progress}%
                                   </div>
-                                )}
+                                </div>
                               </div>
                             </div>
                           </div>
