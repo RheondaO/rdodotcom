@@ -1687,14 +1687,13 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-7 rounded-xl">
+            <TabsList className="grid w-full grid-cols-6 rounded-xl">
               <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
               <TabsTrigger value="progress" className="rounded-lg">Progress Tracker</TabsTrigger>
               <TabsTrigger value="designs" className="rounded-lg">Design Queue</TabsTrigger>
               <TabsTrigger value="calendar" className="rounded-lg">Content Calendar</TabsTrigger>
               <TabsTrigger value="pipeline" className="rounded-lg">Content Pipeline</TabsTrigger>
               <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
-              <TabsTrigger value="social" className="rounded-lg">Social Media</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -2660,24 +2659,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
-              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BarChart3 className="text-purple-500 mr-3 h-5 w-5" />
-                    Content Analytics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12 text-gray-500">
-                    <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium mb-2">Performance Analytics</h3>
-                    <p className="text-sm">Track engagement and reach metrics</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="social" className="space-y-6">
               <SocialMediaAnalytics 
                 miniGameBlocks={miniGameBlocks}
                 miniGameDesigns={miniGameDesigns}
