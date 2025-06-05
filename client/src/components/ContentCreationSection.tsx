@@ -19,7 +19,8 @@ import {
   TrendingUp,
   BarChart3,
   Clock,
-  Target
+  Target,
+  Edit
 } from 'lucide-react';
 
 // Mini-Game Block type with new structure
@@ -1216,7 +1217,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                         <div className="space-y-3">
                           <div>
                             <div className="flex justify-between text-sm mb-1">
-                              <span>Annual Progress</span>
+                              <span>Totality Progress</span>
                               <span className="font-medium">{progressData.completed}/{progressData.total}</span>
                             </div>
                             <div className="flex justify-between text-xs mb-2 text-gray-500">
