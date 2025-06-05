@@ -2012,12 +2012,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             </div>
                           </div>
                           
-                          {/* Frequency Info */}
-                          <div className="mt-3 text-center">
-                            <div className="text-xs text-gray-500">
-                              {frequencyOptions.find(freq => freq.value === miniGame.frequency)?.label.split('(')[0]}
-                            </div>
-                          </div>
+
                         </div>
                       );
                     })}
