@@ -281,12 +281,12 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
             </div>
             <div className="mt-4 text-center">
               <Button
-                onClick={() => onNavigate('social')}
+                onClick={() => onNavigate('rotationonly')}
                 variant="outline"
                 size="sm"
                 className="bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-700"
               >
-                Manage Content Studio →
+                Manage rotationONLY Studio →
               </Button>
             </div>
           </div>
