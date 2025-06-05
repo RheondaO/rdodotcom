@@ -1119,20 +1119,9 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
             <TabsContent value="designs" className="space-y-6">
               <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Target className="text-purple-500 mr-3 h-5 w-5" />
-                      Design Queue Management
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setShowCreateDesignDialog(true)}
-                      className="rounded-xl"
-                    >
-                      <Target className="h-4 w-4 mr-2" />
-                      Add Design
-                    </Button>
+                  <CardTitle className="flex items-center">
+                    <Target className="text-purple-500 mr-3 h-5 w-5" />
+                    Design Queue Management
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1230,18 +1219,33 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
         </div>
       )}
 
-      {/* Fixed Position New Mini-Game Button - Bottom Left Corner */}
+      {/* Fixed Position Floating Action Buttons - Bottom Left Corner */}
       {activeBrand === "rotationONLY" && (
-        <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
-          <DialogTrigger asChild>
-            <Button 
-              className="fixed bottom-6 left-6 z-50 rounded-full w-16 h-16 shadow-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 border-0"
-              size="lg"
-            >
-              <Sparkles className="h-6 w-6" />
-            </Button>
-          </DialogTrigger>
-        </Dialog>
+        <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-3">
+          {/* New Design Button */}
+          <Dialog open={showCreateDesignDialog} onOpenChange={setShowCreateDesignDialog}>
+            <DialogTrigger asChild>
+              <Button 
+                className="rounded-full w-14 h-14 shadow-xl bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 border-0"
+                size="lg"
+              >
+                <Target className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+          </Dialog>
+          
+          {/* New Mini-Game Button */}
+          <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
+            <DialogTrigger asChild>
+              <Button 
+                className="rounded-full w-16 h-16 shadow-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 border-0"
+                size="lg"
+              >
+                <Sparkles className="h-6 w-6" />
+              </Button>
+            </DialogTrigger>
+          </Dialog>
+        </div>
       )}
     </section>
   );
