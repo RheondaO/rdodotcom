@@ -1952,17 +1952,51 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             </div>
                           </div>
                           
-                          {/* Vertical Progress Bar */}
+                          {/* Segmented Progress Bar with Line Markers */}
                           <div className="flex justify-center">
-                            <div className="relative w-8 h-32 bg-gray-200 rounded-full overflow-hidden">
-                              <div 
-                                className="absolute bottom-0 w-full rounded-full transition-all duration-500"
-                                style={{ 
-                                  height: `${progressPercentage}%`,
-                                  backgroundColor: category.color,
-                                  boxShadow: `0 0 10px ${category.color}40`
-                                }}
-                              />
+                            <div className="relative w-8 h-32 bg-gray-200 rounded-full p-1">
+                              <div className="relative w-full h-full flex flex-col-reverse">
+                                {Array.from({ length: Math.min(totalDesigns, 20) }, (_, index) => {
+                                  const unitIndex = index + 1;
+                                  const isCompleted = unitIndex <= completedDesigns;
+                                  const segmentHeight = totalDesigns > 0 ? Math.max(100 / Math.min(totalDesigns, 20), 3) : 5;
+                                  
+                                  return (
+                                    <div
+                                      key={index}
+                                      className="relative transition-all duration-300"
+                                      style={{ 
+                                        height: `${segmentHeight}%`,
+                                        marginBottom: index < Math.min(totalDesigns, 20) - 1 ? '1px' : '0'
+                                      }}
+                                    >
+                                      <div 
+                                        className={`w-full h-full rounded-sm transition-all duration-500 ${
+                                          isCompleted 
+                                            ? 'opacity-100 transform scale-100' 
+                                            : 'opacity-30 transform scale-95'
+                                        }`}
+                                        style={{ 
+                                          backgroundColor: isCompleted ? category.color : '#E5E7EB',
+                                          boxShadow: isCompleted ? `0 0 6px ${category.color}30` : 'none'
+                                        }}
+                                      />
+                                      {/* Line marker separator */}
+                                      {index < Math.min(totalDesigns, 20) - 1 && (
+                                        <div className="absolute -top-0.5 left-0 w-full h-0.5 bg-white rounded-full" />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                                {/* Show overflow indicator if more than 20 units */}
+                                {totalDesigns > 20 && (
+                                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                    <div className="text-xs font-medium text-gray-500 bg-white px-1 py-0.5 rounded shadow">
+                                      +{totalDesigns - 20}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                           
