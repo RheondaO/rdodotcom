@@ -11,7 +11,6 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import ContentPipelineSection from './ContentPipelineSection';
-import SocialMediaAnalytics from './SocialMediaAnalytics';
 import { 
   Briefcase, 
   Gamepad2, 
@@ -2722,16 +2721,8 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                 </Tabs>
               </CardContent>
             </Card>
-          )}
-
-          <TabsContent value="social" className="space-y-6">
-            <SocialMediaAnalytics 
-              miniGameBlocks={miniGameBlocks} 
-              miniGameDesigns={miniGameDesigns} 
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+        </div>
+      )}
     </section>
   );
 }
