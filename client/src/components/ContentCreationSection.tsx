@@ -783,14 +783,13 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             
                             let title = selectedMiniGame.name;
                             
-                            // Add astrological sign if selected
-                            if (newDesign.astrologicalSign !== "none" && selectedSign) {
-                              title += ` during ${selectedSign.label}`;
+                            // Add moon phase and astrological sign in the correct order
+                            if (newDesign.moonPhase !== "none" && selectedMoonPhase) {
+                              title += ` On ${selectedMoonPhase.label}`;
                             }
                             
-                            // Add moon phase if selected
-                            if (newDesign.moonPhase !== "none" && selectedMoonPhase) {
-                              title += ` on ${selectedMoonPhase.label}`;
+                            if (newDesign.astrologicalSign !== "none" && selectedSign) {
+                              title += ` in ${selectedSign.label}`;
                             }
                             
                             return title;
@@ -871,11 +870,11 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                         const selectedMoonPhase = moonPhaseOptions.find(phase => phase.value === newDesign.moonPhase);
                         
                         let generatedTitle = selectedMiniGame?.name || "";
-                        if (newDesign.astrologicalSign !== "none" && selectedSign) {
-                          generatedTitle += ` during ${selectedSign.label}`;
-                        }
                         if (newDesign.moonPhase !== "none" && selectedMoonPhase) {
-                          generatedTitle += ` on ${selectedMoonPhase.label}`;
+                          generatedTitle += ` On ${selectedMoonPhase.label}`;
+                        }
+                        if (newDesign.astrologicalSign !== "none" && selectedSign) {
+                          generatedTitle += ` in ${selectedSign.label}`;
                         }
                         
                         const design: MiniGameDesign = {
