@@ -20,7 +20,8 @@ import {
   BarChart3,
   Clock,
   Target,
-  Edit
+  Edit,
+  CalendarDays
 } from 'lucide-react';
 
 // Mini-Game Block type with new structure
@@ -93,11 +94,11 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       hasMiniGames: false
     },
     {
-      id: "misc",
-      name: "Misc",
-      icon: "📦",
+      id: "contentCalendar",
+      name: "Content Calendar",
+      icon: "📅",
       color: "#10B981",
-      description: "Miscellaneous content and collaborations",
+      description: "Schedule and manage approved content designs",
       hasMiniGames: false
     }
   ];
@@ -482,7 +483,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   const [brandContent, setBrandContent] = useState({
     reallyObvi: [],
     personal: [],
-    misc: []
+    contentCalendar: []
   });
 
   // Sample mini-game designs
@@ -662,6 +663,35 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       frequencyValue: 0,
       category: ""
     });
+  };
+
+  // Content Calendar helper functions
+  const getApprovedDesigns = () => {
+    return miniGameDesigns.filter(design => design.status === 'approved');
+  };
+
+  const getDesignsByDate = (designs: MiniGameDesign[]) => {
+    const designsByDate: { [date: string]: MiniGameDesign[] } = {};
+    designs.forEach(design => {
+      if (design.targetDate) {
+        if (!designsByDate[design.targetDate]) {
+          designsByDate[design.targetDate] = [];
+        }
+        designsByDate[design.targetDate].push(design);
+      }
+    });
+    return designsByDate;
+  };
+
+  const getDateRange = (days = 30) => {
+    const dates = [];
+    const today = new Date();
+    for (let i = 0; i < days; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push(format(date, 'yyyy-MM-dd'));
+    }
+    return dates;
   };
 
   const currentBrand = brands.find(b => b.id === activeBrand);
@@ -1599,48 +1629,177 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
         </>
       ) : (
         <div className="space-y-6">
-          {/* Other Brand Content Management */}
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="text-purple-500 mr-3 h-5 w-5" />
-                Content Planning for {currentBrand?.name}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="content" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 rounded-xl">
-                  <TabsTrigger value="content" className="rounded-lg">Content Library</TabsTrigger>
-                  <TabsTrigger value="schedule" className="rounded-lg">Publishing Schedule</TabsTrigger>
-                  <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="content" className="space-y-4">
-                  <div className="text-center py-12 text-gray-500">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium mb-2">Content Library</h3>
-                    <p className="text-sm">Manage your content pieces and drafts</p>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="schedule" className="space-y-4">
-                  <div className="text-center py-12 text-gray-500">
-                    <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium mb-2">Publishing Schedule</h3>
-                    <p className="text-sm">Plan and schedule your content releases</p>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="analytics" className="space-y-4">
-                  <div className="text-center py-12 text-gray-500">
-                    <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium mb-2">Performance Analytics</h3>
-                    <p className="text-sm">Track engagement and reach metrics</p>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+          {activeBrand === "contentCalendar" ? (
+            /* Content Calendar View */
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CalendarDays className="text-purple-500 mr-3 h-5 w-5" />
+                  Content Calendar - Approved Designs
+                </CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Schedule and manage your approved content designs
+                </p>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const approvedDesigns = getApprovedDesigns();
+                  const designsByDate = getDesignsByDate(approvedDesigns);
+                  const dateRange = getDateRange(30);
+                  
+                  if (approvedDesigns.length === 0) {
+                    return (
+                      <div className="text-center py-12 text-gray-500">
+                        <CalendarDays className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <h3 className="text-lg font-medium mb-2">No Approved Designs</h3>
+                        <p className="text-sm">Approved designs from rotationONLY will appear here</p>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div className="space-y-6">
+                      {/* Calendar Header */}
+                      <div className="flex items-center justify-between mb-6">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          Next 30 Days
+                        </h4>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          {approvedDesigns.length} Approved Designs
+                        </Badge>
+                      </div>
+
+                      {/* Calendar Grid */}
+                      <div className="grid gap-4">
+                        {dateRange.map(date => {
+                          const designs = designsByDate[date] || [];
+                          const isToday = date === format(new Date(), 'yyyy-MM-dd');
+                          const hasContent = designs.length > 0;
+                          
+                          return (
+                            <div 
+                              key={date}
+                              className={`p-4 rounded-xl border-2 transition-all ${
+                                isToday 
+                                  ? 'border-purple-300 bg-purple-50 dark:bg-purple-900/20' 
+                                  : hasContent 
+                                    ? 'border-green-200 bg-green-50 dark:bg-green-900/20' 
+                                    : 'border-gray-200 bg-gray-50 dark:bg-gray-800'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div>
+                                  <h5 className={`font-semibold ${isToday ? 'text-purple-800' : 'text-gray-900 dark:text-white'}`}>
+                                    {format(new Date(date), 'EEEE, MMMM d')}
+                                  </h5>
+                                  {isToday && (
+                                    <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-xs">
+                                      Today
+                                    </Badge>
+                                  )}
+                                </div>
+                                {hasContent && (
+                                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                    {designs.length} design{designs.length > 1 ? 's' : ''}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {hasContent ? (
+                                <div className="space-y-2">
+                                  {designs.map(design => {
+                                    const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
+                                    return (
+                                      <div 
+                                        key={design.id}
+                                        className="p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm border"
+                                      >
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center">
+                                            {miniGame && (
+                                              <div 
+                                                className="w-3 h-3 rounded-full mr-2"
+                                                style={{ backgroundColor: miniGame.color }}
+                                              />
+                                            )}
+                                            <div>
+                                              <h6 className="font-medium text-sm text-gray-900 dark:text-white">
+                                                {design.title}
+                                              </h6>
+                                              <p className="text-xs text-gray-500">
+                                                {miniGame?.name}
+                                              </p>
+                                            </div>
+                                          </div>
+                                          <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                                            Approved
+                                          </Badge>
+                                        </div>
+                                        {design.description && (
+                                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                                            {design.description}
+                                          </p>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-500">No content scheduled</p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          ) : (
+            /* Other Brand Content Management */
+            <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="text-purple-500 mr-3 h-5 w-5" />
+                  Content Planning for {currentBrand?.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="content" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 rounded-xl">
+                    <TabsTrigger value="content" className="rounded-lg">Content Library</TabsTrigger>
+                    <TabsTrigger value="schedule" className="rounded-lg">Publishing Schedule</TabsTrigger>
+                    <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="content" className="space-y-4">
+                    <div className="text-center py-12 text-gray-500">
+                      <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-lg font-medium mb-2">Content Library</h3>
+                      <p className="text-sm">Manage your content pieces and drafts</p>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="schedule" className="space-y-4">
+                    <div className="text-center py-12 text-gray-500">
+                      <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-lg font-medium mb-2">Publishing Schedule</h3>
+                      <p className="text-sm">Plan and schedule your content releases</p>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="analytics" className="space-y-4">
+                    <div className="text-center py-12 text-gray-500">
+                      <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-lg font-medium mb-2">Performance Analytics</h3>
+                      <p className="text-sm">Track engagement and reach metrics</p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 
