@@ -524,6 +524,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     targetDate: string;
     astrologicalSign: string;
     moonPhase: string;
+    fullMoonName: string;
   }>({
     miniGameBlockId: 0,
     title: "",
@@ -531,7 +532,8 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     designNotes: "",
     targetDate: "",
     astrologicalSign: "none",
-    moonPhase: "none"
+    moonPhase: "none",
+    fullMoonName: "none"
   });
 
   // Frequency options
@@ -769,6 +771,41 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                               </SelectContent>
                             </Select>
                           </div>
+
+                          {/* Traditional Full Moon Name - Only show when Full Moon is selected */}
+                          {newDesign.moonPhase === "full_moon" && (
+                            <div className="space-y-2 md:col-span-2">
+                              <Label htmlFor="fullMoonName" className="text-sm font-semibold text-gray-900 dark:text-white">
+                                Traditional Full Moon Name
+                              </Label>
+                              <Select 
+                                value={newDesign.fullMoonName} 
+                                onValueChange={(value) => setNewDesign({...newDesign, fullMoonName: value})}
+                              >
+                                <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                                  <SelectValue placeholder="Select traditional full moon name..." />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl">
+                                  <SelectItem value="none" className="rounded-lg">None</SelectItem>
+                                  <SelectItem value="wolf_moon" className="rounded-lg">Wolf Moon (January)</SelectItem>
+                                  <SelectItem value="snow_moon" className="rounded-lg">Snow Moon (February)</SelectItem>
+                                  <SelectItem value="worm_moon" className="rounded-lg">Worm Moon (March)</SelectItem>
+                                  <SelectItem value="pink_moon" className="rounded-lg">Pink Moon (April)</SelectItem>
+                                  <SelectItem value="flower_moon" className="rounded-lg">Flower Moon (May)</SelectItem>
+                                  <SelectItem value="strawberry_moon" className="rounded-lg">Strawberry Moon (June)</SelectItem>
+                                  <SelectItem value="buck_moon" className="rounded-lg">Buck Moon (July)</SelectItem>
+                                  <SelectItem value="sturgeon_moon" className="rounded-lg">Sturgeon Moon (August)</SelectItem>
+                                  <SelectItem value="harvest_moon" className="rounded-lg">Harvest Moon (September)</SelectItem>
+                                  <SelectItem value="hunters_moon" className="rounded-lg">Hunter's Moon (October)</SelectItem>
+                                  <SelectItem value="beaver_moon" className="rounded-lg">Beaver Moon (November)</SelectItem>
+                                  <SelectItem value="cold_moon" className="rounded-lg">Cold Moon (December)</SelectItem>
+                                  <SelectItem value="blue_moon" className="rounded-lg">Blue Moon (Second full moon in a month)</SelectItem>
+                                  <SelectItem value="blood_moon" className="rounded-lg">Blood Moon (Lunar eclipse)</SelectItem>
+                                  <SelectItem value="supermoon" className="rounded-lg">Supermoon (Closest to Earth)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
@@ -794,7 +831,26 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                               { value: "third_quarter", label: "Third Quarter" },
                               { value: "waning_crescent", label: "Waning Crescent" }
                             ];
+                            const fullMoonNameOptions = [
+                              { value: "none", label: "None" },
+                              { value: "wolf_moon", label: "Wolf Moon" },
+                              { value: "snow_moon", label: "Snow Moon" },
+                              { value: "worm_moon", label: "Worm Moon" },
+                              { value: "pink_moon", label: "Pink Moon" },
+                              { value: "flower_moon", label: "Flower Moon" },
+                              { value: "strawberry_moon", label: "Strawberry Moon" },
+                              { value: "buck_moon", label: "Buck Moon" },
+                              { value: "sturgeon_moon", label: "Sturgeon Moon" },
+                              { value: "harvest_moon", label: "Harvest Moon" },
+                              { value: "hunters_moon", label: "Hunter's Moon" },
+                              { value: "beaver_moon", label: "Beaver Moon" },
+                              { value: "cold_moon", label: "Cold Moon" },
+                              { value: "blue_moon", label: "Blue Moon" },
+                              { value: "blood_moon", label: "Blood Moon" },
+                              { value: "supermoon", label: "Supermoon" }
+                            ];
                             const selectedMoonPhase = moonPhaseOptions.find(phase => phase.value === newDesign.moonPhase);
+                            const selectedFullMoonName = fullMoonNameOptions.find(name => name.value === newDesign.fullMoonName);
                             
                             if (!selectedMiniGame) {
                               return <span className="text-gray-400">Select a mini-game block to see preview</span>;
@@ -802,9 +858,13 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             
                             let title = selectedMiniGame.name;
                             
-                            // Add moon phase and astrological sign in the correct order
+                            // Add moon phase (with traditional name if it's a full moon)
                             if (newDesign.moonPhase !== "none" && selectedMoonPhase) {
-                              title += ` On ${selectedMoonPhase.label}`;
+                              if (newDesign.moonPhase === "full_moon" && newDesign.fullMoonName !== "none" && selectedFullMoonName) {
+                                title += ` On ${selectedFullMoonName.label}`;
+                              } else {
+                                title += ` On ${selectedMoonPhase.label}`;
+                              }
                             }
                             
                             if (newDesign.astrologicalSign !== "none" && selectedSign) {
@@ -886,11 +946,34 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           { value: "third_quarter", label: "Third Quarter" },
                           { value: "waning_crescent", label: "Waning Crescent" }
                         ];
+                        const fullMoonNameOptions = [
+                          { value: "none", label: "None" },
+                          { value: "wolf_moon", label: "Wolf Moon" },
+                          { value: "snow_moon", label: "Snow Moon" },
+                          { value: "worm_moon", label: "Worm Moon" },
+                          { value: "pink_moon", label: "Pink Moon" },
+                          { value: "flower_moon", label: "Flower Moon" },
+                          { value: "strawberry_moon", label: "Strawberry Moon" },
+                          { value: "buck_moon", label: "Buck Moon" },
+                          { value: "sturgeon_moon", label: "Sturgeon Moon" },
+                          { value: "harvest_moon", label: "Harvest Moon" },
+                          { value: "hunters_moon", label: "Hunter's Moon" },
+                          { value: "beaver_moon", label: "Beaver Moon" },
+                          { value: "cold_moon", label: "Cold Moon" },
+                          { value: "blue_moon", label: "Blue Moon" },
+                          { value: "blood_moon", label: "Blood Moon" },
+                          { value: "supermoon", label: "Supermoon" }
+                        ];
                         const selectedMoonPhase = moonPhaseOptions.find(phase => phase.value === newDesign.moonPhase);
+                        const selectedFullMoonName = fullMoonNameOptions.find(name => name.value === newDesign.fullMoonName);
                         
                         let generatedTitle = selectedMiniGame?.name || "";
                         if (newDesign.moonPhase !== "none" && selectedMoonPhase) {
-                          generatedTitle += ` On ${selectedMoonPhase.label}`;
+                          if (newDesign.moonPhase === "full_moon" && newDesign.fullMoonName !== "none" && selectedFullMoonName) {
+                            generatedTitle += ` On ${selectedFullMoonName.label}`;
+                          } else {
+                            generatedTitle += ` On ${selectedMoonPhase.label}`;
+                          }
                         }
                         if (newDesign.astrologicalSign !== "none" && selectedSign) {
                           generatedTitle += ` in ${selectedSign.label}`;
@@ -917,7 +1000,8 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           designNotes: "",
                           targetDate: "",
                           astrologicalSign: "none",
-                          moonPhase: "none"
+                          moonPhase: "none",
+                          fullMoonName: "none"
                         });
                         setShowCreateDesignDialog(false);
                       }}
