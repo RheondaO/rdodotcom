@@ -1996,21 +1996,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             </div>
                           </div>
                           
-                          {/* Status Breakdown */}
-                          <div className="grid grid-cols-3 gap-1 text-xs">
-                            <div className="text-center p-1.5 bg-blue-50 rounded">
-                              <div className="font-semibold text-blue-600">{getStatusCountForMiniGame(miniGame.id, 'designed')}</div>
-                              <div className="text-blue-500 text-xs">Designed</div>
-                            </div>
-                            <div className="text-center p-1.5 bg-yellow-50 rounded">
-                              <div className="font-semibold text-yellow-600">{getStatusCountForMiniGame(miniGame.id, 'reviewed')}</div>
-                              <div className="text-yellow-500 text-xs">Reviewed</div>
-                            </div>
-                            <div className="text-center p-1.5 bg-green-50 rounded">
-                              <div className="font-semibold text-green-600">{getStatusCountForMiniGame(miniGame.id, 'approved')}</div>
-                              <div className="text-green-500 text-xs">Approved</div>
-                            </div>
-                          </div>
+
                           
 
                         </div>
