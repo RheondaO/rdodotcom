@@ -1924,24 +1924,24 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     </div>
                   </div>
 
-                  {/* Individual Mini Game Block Progress Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {/* Individual Mini Game Block Progress Cards - Equal Height Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-end">
                     {miniGameBlocks.map(miniGame => {
                       const progressData = getProgressForMiniGame(miniGame.id);
                       const category = categoryOptions.find(cat => cat.value === miniGame.category);
                       
                       return (
-                        <div key={miniGame.id} className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border shadow-sm">
-                          {/* Header */}
-                          <div className="flex items-center mb-4">
-                            <span className="text-lg mr-2">{getCategoryIcon(miniGame.category)}</span>
-                            <div>
-                              <h4 className="font-semibold text-sm text-gray-900">{miniGame.name}</h4>
+                        <div key={miniGame.id} className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border shadow-sm flex flex-col min-h-[300px]">
+                          {/* Header - Fixed height */}
+                          <div className="flex items-start mb-6 h-[4rem]">
+                            <span className="text-lg mr-2 mt-1">{getCategoryIcon(miniGame.category)}</span>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-sm text-gray-900 leading-tight">{miniGame.name}</h4>
                             </div>
                           </div>
                           
-                          {/* Enhanced Wider & Cuter Vertical Progress Bar */}
-                          <div className="flex flex-col items-center mb-4">
+                          {/* Progress Bar Container - Anchored from bottom */}
+                          <div className="flex flex-col items-center justify-end flex-1">
                             <div className="relative mb-3">
                               {/* Outer glow container */}
                               <div className="absolute -inset-2 rounded-full opacity-40 blur-md transition-all duration-500"
