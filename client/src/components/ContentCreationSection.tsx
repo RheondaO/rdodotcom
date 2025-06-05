@@ -904,7 +904,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                         setShowCreateDesignDialog(false);
                       }}
                       className="flex-1 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-                      disabled={!newDesign.title || !newDesign.miniGameBlockId}
+                      disabled={!newDesign.miniGameBlockId}
                     >
                       <Target className="h-4 w-4 mr-2" />
                       Create Design Block
