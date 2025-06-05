@@ -672,60 +672,63 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   </DialogHeader>
                   
                   <div className="space-y-6 py-4">
-                    {/* Astrological Sign */}
-                    <div className="space-y-2">
-                      <Label htmlFor="designAstrologicalSign" className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Astrological Sign
-                      </Label>
-                      <Select 
-                        value={newDesign.astrologicalSign} 
-                        onValueChange={(value) => setNewDesign({...newDesign, astrologicalSign: value})}
-                      >
-                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
-                          <SelectValue placeholder="Select zodiac sign..." />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="none" className="rounded-lg">None</SelectItem>
-                          <SelectItem value="aquarius" className="rounded-lg">Aquarius ♒</SelectItem>
-                          <SelectItem value="aries" className="rounded-lg">Aries ♈</SelectItem>
-                          <SelectItem value="cancer" className="rounded-lg">Cancer ♋</SelectItem>
-                          <SelectItem value="capricorn" className="rounded-lg">Capricorn ♑</SelectItem>
-                          <SelectItem value="gemini" className="rounded-lg">Gemini ♊</SelectItem>
-                          <SelectItem value="leo" className="rounded-lg">Leo ♌</SelectItem>
-                          <SelectItem value="libra" className="rounded-lg">Libra ♎</SelectItem>
-                          <SelectItem value="pisces" className="rounded-lg">Pisces ♓</SelectItem>
-                          <SelectItem value="sagittarius" className="rounded-lg">Sagittarius ♐</SelectItem>
-                          <SelectItem value="scorpio" className="rounded-lg">Scorpio ♏</SelectItem>
-                          <SelectItem value="taurus" className="rounded-lg">Taurus ♉</SelectItem>
-                          <SelectItem value="virgo" className="rounded-lg">Virgo ♍</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {/* Astrological Sign and Moon Phase - Side by Side */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Astrological Sign */}
+                      <div className="space-y-2">
+                        <Label htmlFor="designAstrologicalSign" className="text-sm font-semibold text-gray-900 dark:text-white">
+                          Astrological Sign
+                        </Label>
+                        <Select 
+                          value={newDesign.astrologicalSign} 
+                          onValueChange={(value) => setNewDesign({...newDesign, astrologicalSign: value})}
+                        >
+                          <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                            <SelectValue placeholder="Select zodiac sign..." />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="none" className="rounded-lg">None</SelectItem>
+                            <SelectItem value="aquarius" className="rounded-lg">Aquarius ♒</SelectItem>
+                            <SelectItem value="aries" className="rounded-lg">Aries ♈</SelectItem>
+                            <SelectItem value="cancer" className="rounded-lg">Cancer ♋</SelectItem>
+                            <SelectItem value="capricorn" className="rounded-lg">Capricorn ♑</SelectItem>
+                            <SelectItem value="gemini" className="rounded-lg">Gemini ♊</SelectItem>
+                            <SelectItem value="leo" className="rounded-lg">Leo ♌</SelectItem>
+                            <SelectItem value="libra" className="rounded-lg">Libra ♎</SelectItem>
+                            <SelectItem value="pisces" className="rounded-lg">Pisces ♓</SelectItem>
+                            <SelectItem value="sagittarius" className="rounded-lg">Sagittarius ♐</SelectItem>
+                            <SelectItem value="scorpio" className="rounded-lg">Scorpio ♏</SelectItem>
+                            <SelectItem value="taurus" className="rounded-lg">Taurus ♉</SelectItem>
+                            <SelectItem value="virgo" className="rounded-lg">Virgo ♍</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    {/* Moon Phase */}
-                    <div className="space-y-2">
-                      <Label htmlFor="designMoonPhase" className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Moon Phase
-                      </Label>
-                      <Select 
-                        value={newDesign.moonPhase} 
-                        onValueChange={(value) => setNewDesign({...newDesign, moonPhase: value})}
-                      >
-                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
-                          <SelectValue placeholder="Select moon phase..." />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="none" className="rounded-lg">None</SelectItem>
-                          <SelectItem value="new_moon" className="rounded-lg">New Moon 🌑</SelectItem>
-                          <SelectItem value="waxing_crescent" className="rounded-lg">Waxing Crescent 🌒</SelectItem>
-                          <SelectItem value="first_quarter" className="rounded-lg">First Quarter 🌓</SelectItem>
-                          <SelectItem value="waxing_gibbous" className="rounded-lg">Waxing Gibbous 🌔</SelectItem>
-                          <SelectItem value="full_moon" className="rounded-lg">Full Moon 🌕</SelectItem>
-                          <SelectItem value="waning_gibbous" className="rounded-lg">Waning Gibbous 🌖</SelectItem>
-                          <SelectItem value="third_quarter" className="rounded-lg">Third Quarter 🌗</SelectItem>
-                          <SelectItem value="waning_crescent" className="rounded-lg">Waning Crescent 🌘</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {/* Moon Phase */}
+                      <div className="space-y-2">
+                        <Label htmlFor="designMoonPhase" className="text-sm font-semibold text-gray-900 dark:text-white">
+                          Moon Phase
+                        </Label>
+                        <Select 
+                          value={newDesign.moonPhase} 
+                          onValueChange={(value) => setNewDesign({...newDesign, moonPhase: value})}
+                        >
+                          <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                            <SelectValue placeholder="Select moon phase..." />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="none" className="rounded-lg">None</SelectItem>
+                            <SelectItem value="new_moon" className="rounded-lg">New Moon 🌑</SelectItem>
+                            <SelectItem value="waxing_crescent" className="rounded-lg">Waxing Crescent 🌒</SelectItem>
+                            <SelectItem value="first_quarter" className="rounded-lg">First Quarter 🌓</SelectItem>
+                            <SelectItem value="waxing_gibbous" className="rounded-lg">Waxing Gibbous 🌔</SelectItem>
+                            <SelectItem value="full_moon" className="rounded-lg">Full Moon 🌕</SelectItem>
+                            <SelectItem value="waning_gibbous" className="rounded-lg">Waning Gibbous 🌖</SelectItem>
+                            <SelectItem value="third_quarter" className="rounded-lg">Third Quarter 🌗</SelectItem>
+                            <SelectItem value="waning_crescent" className="rounded-lg">Waning Crescent 🌘</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
                     {/* Mini-Game Selection */}
