@@ -1941,9 +1941,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                               <div className="text-lg font-bold" style={{ color: miniGame.color }}>
                                 {progressData.progress}%
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {progressData.completed}/{progressData.total}
-                              </div>
                             </div>
                           </div>
                           
