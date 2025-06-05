@@ -529,7 +529,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     description: "",
     designNotes: "",
     targetDate: "",
-    astrologicalSign: ""
+    astrologicalSign: "none"
   });
 
   // Frequency options
@@ -767,7 +767,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           <SelectValue placeholder="Select zodiac sign..." />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                          <SelectItem value="" className="rounded-lg">None</SelectItem>
+                          <SelectItem value="none" className="rounded-lg">None</SelectItem>
                           <SelectItem value="aquarius" className="rounded-lg">Aquarius ♒</SelectItem>
                           <SelectItem value="aries" className="rounded-lg">Aries ♈</SelectItem>
                           <SelectItem value="cancer" className="rounded-lg">Cancer ♋</SelectItem>
@@ -815,7 +815,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           description: "",
                           designNotes: "",
                           targetDate: "",
-                          astrologicalSign: ""
+                          astrologicalSign: "none"
                         });
                         setShowCreateDesignDialog(false);
                       }}
