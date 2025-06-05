@@ -2014,10 +2014,10 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                   )}
                                 </div>
                                 
-                                {/* Progress percentage overlay */}
+                                {/* Progress ratio overlay */}
                                 <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
                                   <div className="text-xs font-bold text-white bg-black bg-opacity-50 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
-                                    {progressData.progress}%
+                                    {progressData.completed}/{progressData.total}
                                   </div>
                                 </div>
                               </div>
