@@ -740,20 +740,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
   return (
     <section className="mb-8">
-      {/* Brand Selection */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent flex items-center">
-            <Briefcase className="text-purple-500 mr-3 h-6 w-6" />
-            Content Management Suite
-          </h3>
-          <p className="text-muted-foreground dark:text-gray-300 mt-1">
-            Manage content across all your brands
-          </p>
-        </div>
-      </div>
-
-      {/* Brand Navigation */}
+      {/* Direct Brand Navigation */}
       <div className="mb-6">
         <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
           {brands.map(brand => (
