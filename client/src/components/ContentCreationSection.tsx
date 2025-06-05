@@ -522,14 +522,14 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     description: string;
     designNotes: string;
     targetDate: string;
-    priority: string;
+    astrologicalSign: string;
   }>({
     miniGameBlockId: 0,
     title: "",
     description: "",
     designNotes: "",
     targetDate: "",
-    priority: "Medium"
+    astrologicalSign: ""
   });
 
   // Frequency options
@@ -768,29 +768,34 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   />
                 </div>
 
-                {/* Priority Level */}
+                {/* Astrological Sign */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Priority Level
+                  <Label htmlFor="designAstrologicalSign" className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Astrological Sign
                   </Label>
-                  <div className="flex gap-2">
-                    {['Low', 'Medium', 'High', 'Urgent'].map((priority) => (
-                      <Button
-                        key={priority}
-                        type="button"
-                        variant={newDesign.priority === priority ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setNewDesign({...newDesign, priority})}
-                        className={`rounded-xl transition-all ${
-                          newDesign.priority === priority 
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
-                            : 'hover:border-purple-300'
-                        }`}
-                      >
-                        {priority}
-                      </Button>
-                    ))}
-                  </div>
+                  <Select 
+                    value={newDesign.astrologicalSign} 
+                    onValueChange={(value) => setNewDesign({...newDesign, astrologicalSign: value})}
+                  >
+                    <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                      <SelectValue placeholder="Select zodiac sign..." />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="" className="rounded-lg">None</SelectItem>
+                      <SelectItem value="aquarius" className="rounded-lg">Aquarius ♒</SelectItem>
+                      <SelectItem value="aries" className="rounded-lg">Aries ♈</SelectItem>
+                      <SelectItem value="cancer" className="rounded-lg">Cancer ♋</SelectItem>
+                      <SelectItem value="capricorn" className="rounded-lg">Capricorn ♑</SelectItem>
+                      <SelectItem value="gemini" className="rounded-lg">Gemini ♊</SelectItem>
+                      <SelectItem value="leo" className="rounded-lg">Leo ♌</SelectItem>
+                      <SelectItem value="libra" className="rounded-lg">Libra ♎</SelectItem>
+                      <SelectItem value="pisces" className="rounded-lg">Pisces ♓</SelectItem>
+                      <SelectItem value="sagittarius" className="rounded-lg">Sagittarius ♐</SelectItem>
+                      <SelectItem value="scorpio" className="rounded-lg">Scorpio ♏</SelectItem>
+                      <SelectItem value="taurus" className="rounded-lg">Taurus ♉</SelectItem>
+                      <SelectItem value="virgo" className="rounded-lg">Virgo ♍</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -824,7 +829,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                       description: "",
                       designNotes: "",
                       targetDate: "",
-                      priority: "Medium"
+                      astrologicalSign: ""
                     });
                     setShowCreateDesignDialog(false);
                   }}
