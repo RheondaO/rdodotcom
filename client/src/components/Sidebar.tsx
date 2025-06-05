@@ -29,7 +29,7 @@ import { format, addDays, subDays } from "date-fns";
 import { useDailyData, useUpdateDailyEntry } from "@/hooks/use-daily-data";
 import { useTheme } from "@/hooks/use-theme";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "rotationonly" | "apps" | "sitemap";
 
 interface SidebarProps {
   activeView: ViewType;
@@ -66,7 +66,6 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     { key: "goals" as ViewType, label: "Goals", icon: Target },
     { key: "groceries" as ViewType, label: "Groceries", icon: ShoppingCart },
     { key: "finances" as ViewType, label: "Finances", icon: DollarSign },
-    { key: "content" as ViewType, label: "Social Media", icon: PenTool },
     { key: "habits" as ViewType, label: "Habits", icon: Zap },
     { key: "health" as ViewType, label: "Health", icon: Heart },
     { key: "productivity" as ViewType, label: "Productivity", icon: Briefcase },
