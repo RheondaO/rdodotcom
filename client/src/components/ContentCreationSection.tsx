@@ -77,7 +77,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   
   // Search and Filter States
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<'name' | 'progress' | 'category' | 'frequency'>('name');
+  const [sortBy, setSortBy] = useState<'name' | 'progress' | 'category' | 'frequency' | 'title' | 'status' | 'targetDate' | 'version'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -1696,13 +1696,101 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
+              {/* Search and Filters for Overview */}
+              <div className="mb-6 space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                    <div className="flex items-center space-x-2">
+                      <Search className="w-4 h-4 text-gray-500" />
+                      <Input
+                        placeholder="Search mini-games..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-64"
+                      />
+                    </div>
+                    
+                    <Select value={filterCategory} onValueChange={setFilterCategory}>
+                      <SelectTrigger className="w-48">
+                        <Filter className="w-4 h-4 mr-2" />
+                        <SelectValue placeholder="Filter by category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categoryOptions.map(cat => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            <div className="flex items-center">
+                              <span className="mr-2">{cat.icon}</span>
+                              {cat.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+                      <SelectTrigger className="w-36">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="name">Name</SelectItem>
+                        <SelectItem value="progress">Progress</SelectItem>
+                        <SelectItem value="category">Category</SelectItem>
+                        <SelectItem value="frequency">Frequency</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="p-2"
+                    >
+                      {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
               {/* Mini-Game Blocks Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {miniGameBlocks.map(miniGame => {
-                  const progressData = getProgressForMiniGame(miniGame.id);
-                  const designs = getDesignsByMiniGame(miniGame.id);
-                  
-                  return (
+                {(() => {
+                  // Filter and sort mini-game blocks for overview
+                  let filteredBlocks = miniGameBlocks.filter(miniGame => {
+                    const matchesSearch = miniGame.name.toLowerCase().includes(searchQuery.toLowerCase());
+                    const matchesCategory = filterCategory === 'all' || miniGame.category === filterCategory;
+                    return matchesSearch && matchesCategory;
+                  });
+
+                  // Sort blocks for overview
+                  filteredBlocks.sort((a, b) => {
+                    let compareValue = 0;
+                    switch (sortBy) {
+                      case 'name':
+                        compareValue = a.name.localeCompare(b.name);
+                        break;
+                      case 'progress':
+                        const progressA = getProgressForMiniGame(a.id).progress;
+                        const progressB = getProgressForMiniGame(b.id).progress;
+                        compareValue = progressA - progressB;
+                        break;
+                      case 'category':
+                        compareValue = a.category.localeCompare(b.category);
+                        break;
+                      case 'frequency':
+                        compareValue = a.frequencyValue - b.frequencyValue;
+                        break;
+                    }
+                    return sortOrder === 'asc' ? compareValue : -compareValue;
+                  });
+
+                  return filteredBlocks.map(miniGame => {
+                    const progressData = getProgressForMiniGame(miniGame.id);
+                    const designs = getDesignsByMiniGame(miniGame.id);
+                    
+                    return (
                     <Card key={miniGame.id} className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
                       <div 
                         className="h-3 w-full"
@@ -1763,8 +1851,9 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                         </div>
                       </CardContent>
                     </Card>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
 
               {/* Edit Mini Game Block Dialog */}
@@ -2170,29 +2259,115 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {miniGameDesigns.map(design => {
-                      const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
-                      return (
-                        <div key={design.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                          <div>
-                            <h4 className="font-semibold">{design.title}</h4>
-                            <p className="text-sm text-gray-600">{miniGame?.name}</p>
-                            <p className="text-xs text-gray-500">{design.description}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className={statusColors[design.status as keyof typeof statusColors]}>
-                              {design.status}
-                            </Badge>
-                            {design.targetDate && (
-                              <div className="text-xs text-gray-500">
-                                Due: {format(new Date(design.targetDate), 'MMM d')}
-                              </div>
-                            )}
-                          </div>
+                  {/* Search and Filters for Design Queue */}
+                  <div className="mb-6 space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <div className="flex items-center space-x-2">
+                          <Search className="w-4 h-4 text-gray-500" />
+                          <Input
+                            placeholder="Search designs..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-64"
+                          />
                         </div>
-                      );
-                    })}
+                        
+                        <Select value={filterStatus} onValueChange={setFilterStatus}>
+                          <SelectTrigger className="w-48">
+                            <Filter className="w-4 h-4 mr-2" />
+                            <SelectValue placeholder="Filter by status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="designed">Designed</SelectItem>
+                            <SelectItem value="reviewed">Reviewed</SelectItem>
+                            <SelectItem value="approved">Approved</SelectItem>
+                            <SelectItem value="archived">Archived</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+                          <SelectTrigger className="w-36">
+                            <SelectValue placeholder="Sort by" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="title">Title</SelectItem>
+                            <SelectItem value="status">Status</SelectItem>
+                            <SelectItem value="targetDate">Due Date</SelectItem>
+                            <SelectItem value="version">Version</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                          className="p-2"
+                        >
+                          {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(() => {
+                      // Filter and sort designs
+                      let filteredDesigns = miniGameDesigns.filter(design => {
+                        const matchesSearch = design.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                            design.description.toLowerCase().includes(searchQuery.toLowerCase());
+                        const matchesStatus = filterStatus === 'all' || design.status === filterStatus;
+                        return matchesSearch && matchesStatus;
+                      });
+
+                      // Sort designs
+                      filteredDesigns.sort((a, b) => {
+                        let compareValue = 0;
+                        switch (sortBy) {
+                          case 'title':
+                            compareValue = a.title.localeCompare(b.title);
+                            break;
+                          case 'status':
+                            compareValue = a.status.localeCompare(b.status);
+                            break;
+                          case 'targetDate':
+                            const dateA = a.targetDate ? new Date(a.targetDate).getTime() : 0;
+                            const dateB = b.targetDate ? new Date(b.targetDate).getTime() : 0;
+                            compareValue = dateA - dateB;
+                            break;
+                          case 'version':
+                            compareValue = a.version - b.version;
+                            break;
+                        }
+                        return sortOrder === 'asc' ? compareValue : -compareValue;
+                      });
+
+                      return filteredDesigns.map(design => {
+                        const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
+                        return (
+                          <div key={design.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                            <div>
+                              <h4 className="font-semibold">{design.title}</h4>
+                              <p className="text-sm text-gray-600">{miniGame?.name}</p>
+                              <p className="text-xs text-gray-500">{design.description}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className={statusColors[design.status as keyof typeof statusColors]}>
+                                {design.status}
+                              </Badge>
+                              {design.targetDate && (
+                                <div className="text-xs text-gray-500">
+                                  Due: {format(new Date(design.targetDate), 'MMM d')}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
                 </CardContent>
               </Card>
