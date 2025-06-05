@@ -658,6 +658,175 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     New Block
                   </Button>
                 </DialogTrigger>
+                <DialogContent className="rounded-2xl max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
+                    <DialogTitle className="text-xl font-heading bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent flex items-center">
+                      <Target className="h-5 w-5 text-purple-500 mr-2" />
+                      Create New Design Block
+                    </DialogTitle>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      Design a new content piece for your selected mini-game block
+                    </p>
+                  </DialogHeader>
+                  
+                  <div className="space-y-6 py-4">
+                    {/* Mini-Game Selection */}
+                    <div className="space-y-2">
+                      <Label htmlFor="designMiniGame" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Mini-Game Block *
+                      </Label>
+                      <Select 
+                        value={newDesign.miniGameBlockId.toString()} 
+                        onValueChange={(value) => setNewDesign({...newDesign, miniGameBlockId: parseInt(value)})}
+                      >
+                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                          <SelectValue placeholder="Choose a mini-game block..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {miniGameBlocks.map(mg => (
+                            <SelectItem key={mg.id} value={mg.id.toString()} className="rounded-lg">
+                              <div className="flex items-center">
+                                <span className="mr-2">{getCategoryIcon(mg.category)}</span>
+                                <span>{mg.name}</span>
+                                <span className="ml-2 text-xs text-gray-500">({mg.frequencyValue}/year)</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Design Title */}
+                    <div className="space-y-2">
+                      <Label htmlFor="designTitle" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Design Title *
+                      </Label>
+                      <Input
+                        id="designTitle"
+                        value={newDesign.title}
+                        onChange={(e) => setNewDesign({...newDesign, title: e.target.value})}
+                        placeholder="e.g., Summer Solstice Affirmations"
+                        className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors"
+                      />
+                    </div>
+
+                    {/* Design Description */}
+                    <div className="space-y-2">
+                      <Label htmlFor="designDescription" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Content Description
+                      </Label>
+                      <Textarea
+                        id="designDescription"
+                        value={newDesign.description}
+                        onChange={(e) => setNewDesign({...newDesign, description: e.target.value})}
+                        placeholder="Describe the main content and theme of this design..."
+                        className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors min-h-[100px]"
+                        rows={4}
+                      />
+                    </div>
+
+                    {/* Design Notes */}
+                    <div className="space-y-2">
+                      <Label htmlFor="designNotes" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Design Notes & Requirements
+                      </Label>
+                      <Textarea
+                        id="designNotes"
+                        value={newDesign.designNotes}
+                        onChange={(e) => setNewDesign({...newDesign, designNotes: e.target.value})}
+                        placeholder="Visual elements, colors, fonts, special requirements..."
+                        className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors min-h-[80px]"
+                        rows={3}
+                      />
+                    </div>
+
+                    {/* Target Date */}
+                    <div className="space-y-2">
+                      <Label htmlFor="targetDate" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Target Completion Date
+                      </Label>
+                      <Input
+                        id="targetDate"
+                        type="date"
+                        value={newDesign.targetDate}
+                        onChange={(e) => setNewDesign({...newDesign, targetDate: e.target.value})}
+                        className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors"
+                      />
+                    </div>
+
+                    {/* Astrological Sign */}
+                    <div className="space-y-2">
+                      <Label htmlFor="designAstrologicalSign" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Astrological Sign
+                      </Label>
+                      <Select 
+                        value={newDesign.astrologicalSign} 
+                        onValueChange={(value) => setNewDesign({...newDesign, astrologicalSign: value})}
+                      >
+                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                          <SelectValue placeholder="Select zodiac sign..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="" className="rounded-lg">None</SelectItem>
+                          <SelectItem value="aquarius" className="rounded-lg">Aquarius ♒</SelectItem>
+                          <SelectItem value="aries" className="rounded-lg">Aries ♈</SelectItem>
+                          <SelectItem value="cancer" className="rounded-lg">Cancer ♋</SelectItem>
+                          <SelectItem value="capricorn" className="rounded-lg">Capricorn ♑</SelectItem>
+                          <SelectItem value="gemini" className="rounded-lg">Gemini ♊</SelectItem>
+                          <SelectItem value="leo" className="rounded-lg">Leo ♌</SelectItem>
+                          <SelectItem value="libra" className="rounded-lg">Libra ♎</SelectItem>
+                          <SelectItem value="pisces" className="rounded-lg">Pisces ♓</SelectItem>
+                          <SelectItem value="sagittarius" className="rounded-lg">Sagittarius ♐</SelectItem>
+                          <SelectItem value="scorpio" className="rounded-lg">Scorpio ♏</SelectItem>
+                          <SelectItem value="taurus" className="rounded-lg">Taurus ♉</SelectItem>
+                          <SelectItem value="virgo" className="rounded-lg">Virgo ♍</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowCreateDesignDialog(false)}
+                      className="flex-1 rounded-xl"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        const design: MiniGameDesign = {
+                          id: Date.now(),
+                          ...newDesign,
+                          status: "designed",
+                          designedDate: format(new Date(), 'yyyy-MM-dd'),
+                          reviewedDate: null,
+                          approvedDate: null,
+                          version: 1,
+                          isTemplate: false,
+                          createdAt: format(new Date(), 'yyyy-MM-dd'),
+                          updatedAt: format(new Date(), 'yyyy-MM-dd')
+                        };
+                        setMiniGameDesigns([...miniGameDesigns, design]);
+                        setNewDesign({
+                          miniGameBlockId: 0,
+                          title: "",
+                          description: "",
+                          designNotes: "",
+                          targetDate: "",
+                          astrologicalSign: ""
+                        });
+                        setShowCreateDesignDialog(false);
+                      }}
+                      className="flex-1 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                      disabled={!newDesign.title || !newDesign.miniGameBlockId}
+                    >
+                      <Target className="h-4 w-4 mr-2" />
+                      Create Design Block
+                    </Button>
+                  </div>
+                </DialogContent>
               </Dialog>
               
               <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
@@ -670,178 +839,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
               </Dialog>
             </div>
           </div>
-
-          <Dialog open={showCreateDesignDialog} onOpenChange={setShowCreateDesignDialog}>
-            <DialogContent className="rounded-2xl max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
-                <DialogTitle className="text-xl font-heading bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent flex items-center">
-                  <Target className="h-5 w-5 text-purple-500 mr-2" />
-                  Create New Design Block
-                </DialogTitle>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                  Design a new content piece for your selected mini-game block
-                </p>
-              </DialogHeader>
-              
-              <div className="space-y-6 py-4">
-                {/* Mini-Game Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="designMiniGame" className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Mini-Game Block *
-                  </Label>
-                  <Select 
-                    value={newDesign.miniGameBlockId.toString()} 
-                    onValueChange={(value) => setNewDesign({...newDesign, miniGameBlockId: parseInt(value)})}
-                  >
-                    <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
-                      <SelectValue placeholder="Choose a mini-game block..." />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      {miniGameBlocks.map(mg => (
-                        <SelectItem key={mg.id} value={mg.id.toString()} className="rounded-lg">
-                          <div className="flex items-center">
-                            <span className="mr-2">{getCategoryIcon(mg.category)}</span>
-                            <span>{mg.name}</span>
-                            <span className="ml-2 text-xs text-gray-500">({mg.frequencyValue}/year)</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Design Title */}
-                <div className="space-y-2">
-                  <Label htmlFor="designTitle" className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Design Title *
-                  </Label>
-                  <Input
-                    id="designTitle"
-                    value={newDesign.title}
-                    onChange={(e) => setNewDesign({...newDesign, title: e.target.value})}
-                    placeholder="e.g., Summer Solstice Affirmations"
-                    className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors"
-                  />
-                </div>
-
-                {/* Design Description */}
-                <div className="space-y-2">
-                  <Label htmlFor="designDescription" className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Content Description
-                  </Label>
-                  <Textarea
-                    id="designDescription"
-                    value={newDesign.description}
-                    onChange={(e) => setNewDesign({...newDesign, description: e.target.value})}
-                    placeholder="Describe the main content and theme of this design..."
-                    className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors min-h-[100px]"
-                    rows={4}
-                  />
-                </div>
-
-                {/* Design Notes */}
-                <div className="space-y-2">
-                  <Label htmlFor="designNotes" className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Design Notes & Requirements
-                  </Label>
-                  <Textarea
-                    id="designNotes"
-                    value={newDesign.designNotes}
-                    onChange={(e) => setNewDesign({...newDesign, designNotes: e.target.value})}
-                    placeholder="Visual elements, colors, fonts, special requirements..."
-                    className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors min-h-[80px]"
-                    rows={3}
-                  />
-                </div>
-
-                {/* Target Date */}
-                <div className="space-y-2">
-                  <Label htmlFor="targetDate" className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Target Completion Date
-                  </Label>
-                  <Input
-                    id="targetDate"
-                    type="date"
-                    value={newDesign.targetDate}
-                    onChange={(e) => setNewDesign({...newDesign, targetDate: e.target.value})}
-                    className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors"
-                  />
-                </div>
-
-                {/* Astrological Sign */}
-                <div className="space-y-2">
-                  <Label htmlFor="designAstrologicalSign" className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Astrological Sign
-                  </Label>
-                  <Select 
-                    value={newDesign.astrologicalSign} 
-                    onValueChange={(value) => setNewDesign({...newDesign, astrologicalSign: value})}
-                  >
-                    <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
-                      <SelectValue placeholder="Select zodiac sign..." />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      <SelectItem value="" className="rounded-lg">None</SelectItem>
-                      <SelectItem value="aquarius" className="rounded-lg">Aquarius ♒</SelectItem>
-                      <SelectItem value="aries" className="rounded-lg">Aries ♈</SelectItem>
-                      <SelectItem value="cancer" className="rounded-lg">Cancer ♋</SelectItem>
-                      <SelectItem value="capricorn" className="rounded-lg">Capricorn ♑</SelectItem>
-                      <SelectItem value="gemini" className="rounded-lg">Gemini ♊</SelectItem>
-                      <SelectItem value="leo" className="rounded-lg">Leo ♌</SelectItem>
-                      <SelectItem value="libra" className="rounded-lg">Libra ♎</SelectItem>
-                      <SelectItem value="pisces" className="rounded-lg">Pisces ♓</SelectItem>
-                      <SelectItem value="sagittarius" className="rounded-lg">Sagittarius ♐</SelectItem>
-                      <SelectItem value="scorpio" className="rounded-lg">Scorpio ♏</SelectItem>
-                      <SelectItem value="taurus" className="rounded-lg">Taurus ♉</SelectItem>
-                      <SelectItem value="virgo" className="rounded-lg">Virgo ♍</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowCreateDesignDialog(false)}
-                  className="flex-1 rounded-xl"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={() => {
-                    const design: MiniGameDesign = {
-                      id: Date.now(),
-                      ...newDesign,
-                      status: "designed",
-                      designedDate: format(new Date(), 'yyyy-MM-dd'),
-                      reviewedDate: null,
-                      approvedDate: null,
-                      version: 1,
-                      isTemplate: false,
-                      createdAt: format(new Date(), 'yyyy-MM-dd'),
-                      updatedAt: format(new Date(), 'yyyy-MM-dd')
-                    };
-                    setMiniGameDesigns([...miniGameDesigns, design]);
-                    setNewDesign({
-                      miniGameBlockId: 0,
-                      title: "",
-                      description: "",
-                      designNotes: "",
-                      targetDate: "",
-                      astrologicalSign: ""
-                    });
-                    setShowCreateDesignDialog(false);
-                  }}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-                  disabled={!newDesign.title || !newDesign.miniGameBlockId}
-                >
-                  <Target className="h-4 w-4 mr-2" />
-                  Create Design Block
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
 
           <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
             <DialogContent className="rounded-2xl max-w-md">
