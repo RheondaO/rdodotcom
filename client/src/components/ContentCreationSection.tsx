@@ -2027,12 +2027,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
                                 </div>
                                 
-                                {/* Cute progress ratio overlay */}
-                                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                                  <div className="text-xs font-bold text-white bg-gradient-to-r from-gray-700 to-gray-800 px-2 py-1 rounded-full shadow-lg border-2 border-white backdrop-blur-sm">
-                                    <span className="drop-shadow-sm">{progressData.completed}/{progressData.total}</span>
-                                  </div>
-                                </div>
                               </div>
                             </div>
                             
@@ -2052,6 +2046,13 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                     ⭐
                                   </div>
                                 )}
+                              </div>
+                              
+                              {/* Completion ratio underneath percentage */}
+                              <div className="mt-2">
+                                <div className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full shadow-sm">
+                                  {progressData.completed}/{progressData.total}
+                                </div>
                               </div>
                             </div>
                           </div>
