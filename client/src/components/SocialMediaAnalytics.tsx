@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Eye, Heart, MessageCircle, Share2, Calendar, Clock, Award, Target, BarChart3, PieChart as PieChartIcon, Plus, Instagram, Facebook, Twitter } from 'lucide-react';
-import { format } from 'date-fns';
 
 interface SocialMediaPost {
   id: number;
