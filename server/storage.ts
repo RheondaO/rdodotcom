@@ -52,7 +52,13 @@ import {
   type MiniGameBlock,
   type InsertMiniGameBlock,
   type MiniGameDesign,
-  type InsertMiniGameDesign
+  type InsertMiniGameDesign,
+  type SocialMediaPost,
+  type InsertSocialMediaPost,
+  type SocialMediaAnalytics,
+  type InsertSocialMediaAnalytics,
+  type PerformanceInsights,
+  type InsertPerformanceInsights
 } from "@shared/schema";
 
 export interface IStorage {
@@ -1084,6 +1090,225 @@ export class MemStorage implements IStorage {
       'waning_crescent': 'Waning Crescent'
     };
     return names[phase] || phase;
+  }
+
+  // Social Media Posts Methods
+  async getAllSocialMediaPosts(): Promise<SocialMediaPost[]> {
+    return Array.from(this.socialMediaPosts.values());
+  }
+
+  async getSocialMediaPostsByDesign(designId: number): Promise<SocialMediaPost[]> {
+    return Array.from(this.socialMediaPosts.values()).filter(post => post.miniGameDesignId === designId);
+  }
+
+  async getSocialMediaPostsByDateRange(startDate: string, endDate: string): Promise<SocialMediaPost[]> {
+    return Array.from(this.socialMediaPosts.values()).filter(post => {
+      const postDate = new Date(post.scheduledDate);
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      return postDate >= start && postDate <= end;
+    });
+  }
+
+  async createSocialMediaPost(post: InsertSocialMediaPost): Promise<SocialMediaPost> {
+    const newPost: SocialMediaPost = {
+      id: this.currentId++,
+      ...post,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.socialMediaPosts.set(newPost.id, newPost);
+    return newPost;
+  }
+
+  async updateSocialMediaPost(id: number, updates: Partial<SocialMediaPost>): Promise<SocialMediaPost> {
+    const existing = this.socialMediaPosts.get(id);
+    if (!existing) {
+      throw new Error(`Social media post with id ${id} not found`);
+    }
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.socialMediaPosts.set(id, updated);
+    return updated;
+  }
+
+  async deleteSocialMediaPost(id: number): Promise<void> {
+    this.socialMediaPosts.delete(id);
+  }
+
+  // Social Media Analytics Methods
+  async getAllSocialMediaAnalytics(): Promise<SocialMediaAnalytics[]> {
+    return Array.from(this.socialMediaAnalytics.values());
+  }
+
+  async getSocialMediaAnalyticsByPost(postId: number): Promise<SocialMediaAnalytics[]> {
+    return Array.from(this.socialMediaAnalytics.values()).filter(analytics => analytics.postId === postId);
+  }
+
+  async getLatestAnalyticsForPost(postId: number): Promise<SocialMediaAnalytics | undefined> {
+    const analytics = await this.getSocialMediaAnalyticsByPost(postId);
+    if (analytics.length === 0) return undefined;
+    return analytics.sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime())[0];
+  }
+
+  async createSocialMediaAnalytics(analytics: InsertSocialMediaAnalytics): Promise<SocialMediaAnalytics> {
+    const newAnalytics: SocialMediaAnalytics = {
+      id: this.currentId++,
+      ...analytics,
+      recordedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.socialMediaAnalytics.set(newAnalytics.id, newAnalytics);
+    return newAnalytics;
+  }
+
+  async updateSocialMediaAnalytics(id: number, updates: Partial<SocialMediaAnalytics>): Promise<SocialMediaAnalytics> {
+    const existing = this.socialMediaAnalytics.get(id);
+    if (!existing) {
+      throw new Error(`Social media analytics with id ${id} not found`);
+    }
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.socialMediaAnalytics.set(id, updated);
+    return updated;
+  }
+
+  // Performance Insights Methods
+  async getAllPerformanceInsights(): Promise<PerformanceInsights[]> {
+    return Array.from(this.performanceInsights.values());
+  }
+
+  async getPerformanceInsightsByMiniGame(miniGameBlockId: number): Promise<PerformanceInsights[]> {
+    return Array.from(this.performanceInsights.values()).filter(insight => insight.miniGameBlockId === miniGameBlockId);
+  }
+
+  async getPerformanceInsightsByPlatform(platform: string): Promise<PerformanceInsights[]> {
+    return Array.from(this.performanceInsights.values()).filter(insight => insight.platform === platform);
+  }
+
+  async getPerformanceInsightsByDayOfWeek(dayOfWeek: string): Promise<PerformanceInsights[]> {
+    return Array.from(this.performanceInsights.values()).filter(insight => insight.dayOfWeek === dayOfWeek);
+  }
+
+  async createPerformanceInsights(insights: InsertPerformanceInsights): Promise<PerformanceInsights> {
+    const newInsights: PerformanceInsights = {
+      id: this.currentId++,
+      ...insights,
+      lastUpdated: new Date()
+    };
+    this.performanceInsights.set(newInsights.id, newInsights);
+    return newInsights;
+  }
+
+  async updatePerformanceInsights(id: number, updates: Partial<PerformanceInsights>): Promise<PerformanceInsights> {
+    const existing = this.performanceInsights.get(id);
+    if (!existing) {
+      throw new Error(`Performance insights with id ${id} not found`);
+    }
+    const updated = { ...existing, ...updates, lastUpdated: new Date() };
+    this.performanceInsights.set(id, updated);
+    return updated;
+  }
+
+  async deletePerformanceInsights(id: number): Promise<void> {
+    this.performanceInsights.delete(id);
+  }
+
+  async aggregatePerformanceData(): Promise<void> {
+    const posts = await this.getAllSocialMediaPosts();
+    const allAnalytics = await this.getAllSocialMediaAnalytics();
+    
+    // Group by mini-game, platform, day of week, time slot, and post type
+    const groupedData: { [key: string]: {
+      impressions: number[];
+      reach: number[];
+      likes: number[];
+      comments: number[];
+      shares: number[];
+      engagementRates: number[];
+    } } = {};
+
+    for (const post of posts) {
+      const postAnalytics = allAnalytics.filter(a => a.postId === post.id);
+      if (postAnalytics.length === 0) continue;
+
+      const latestAnalytics = postAnalytics[postAnalytics.length - 1];
+      const design = await this.getMiniGameDesignsByBlock(post.miniGameDesignId);
+      const miniGameBlock = design.length > 0 ? await this.getAllMiniGameBlocks().then(blocks => 
+        blocks.find(b => b.id === design[0].miniGameBlockId)
+      ) : null;
+
+      if (!miniGameBlock) continue;
+
+      const key = `${miniGameBlock.id}-${post.platform}-${post.dayOfWeek}-${post.timeSlot}-${post.postType}`;
+      
+      if (!groupedData[key]) {
+        groupedData[key] = {
+          impressions: [],
+          reach: [],
+          likes: [],
+          comments: [],
+          shares: [],
+          engagementRates: []
+        };
+      }
+
+      groupedData[key].impressions.push(latestAnalytics.impressions);
+      groupedData[key].reach.push(latestAnalytics.reach);
+      groupedData[key].likes.push(latestAnalytics.likes);
+      groupedData[key].comments.push(latestAnalytics.comments);
+      groupedData[key].shares.push(latestAnalytics.shares);
+      
+      const engagementRate = latestAnalytics.impressions > 0 ? 
+        ((latestAnalytics.likes + latestAnalytics.comments + latestAnalytics.shares) / latestAnalytics.impressions) * 100 : 0;
+      groupedData[key].engagementRates.push(engagementRate);
+    }
+
+    // Create or update performance insights
+    for (const [key, data] of Object.entries(groupedData)) {
+      const [miniGameBlockId, platform, dayOfWeek, timeSlot, postType] = key.split('-');
+      
+      const avgImpressions = data.impressions.reduce((sum, val) => sum + val, 0) / data.impressions.length;
+      const avgReach = data.reach.reduce((sum, val) => sum + val, 0) / data.reach.length;
+      const avgLikes = data.likes.reduce((sum, val) => sum + val, 0) / data.likes.length;
+      const avgComments = data.comments.reduce((sum, val) => sum + val, 0) / data.comments.length;
+      const avgShares = data.shares.reduce((sum, val) => sum + val, 0) / data.shares.length;
+      const avgEngagementRate = data.engagementRates.reduce((sum, val) => sum + val, 0) / data.engagementRates.length;
+
+      const existingInsight = Array.from(this.performanceInsights.values()).find(insight =>
+        insight.miniGameBlockId === parseInt(miniGameBlockId) &&
+        insight.platform === platform &&
+        insight.dayOfWeek === dayOfWeek &&
+        insight.timeSlot === timeSlot &&
+        insight.postType === postType
+      );
+
+      if (existingInsight) {
+        await this.updatePerformanceInsights(existingInsight.id, {
+          avgImpressions: Math.round(avgImpressions),
+          avgReach: Math.round(avgReach),
+          avgLikes: Math.round(avgLikes),
+          avgComments: Math.round(avgComments),
+          avgShares: Math.round(avgShares),
+          avgEngagementRate: Math.round(avgEngagementRate * 100) / 100,
+          totalPosts: data.impressions.length
+        });
+      } else {
+        await this.createPerformanceInsights({
+          miniGameBlockId: parseInt(miniGameBlockId),
+          platform,
+          dayOfWeek,
+          timeSlot,
+          postType,
+          avgImpressions: Math.round(avgImpressions),
+          avgReach: Math.round(avgReach),
+          avgLikes: Math.round(avgLikes),
+          avgComments: Math.round(avgComments),
+          avgShares: Math.round(avgShares),
+          avgEngagementRate: Math.round(avgEngagementRate * 100) / 100,
+          totalPosts: data.impressions.length
+        });
+      }
+    }
   }
 }
 

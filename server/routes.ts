@@ -14,7 +14,10 @@ import {
   insertHabitLogSchema,
   insertTodoSchema,
   insertMiniGameBlockSchema,
-  insertMiniGameDesignSchema
+  insertMiniGameDesignSchema,
+  insertSocialMediaPostSchema,
+  insertSocialMediaAnalyticsSchema,
+  insertPerformanceInsightsSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -387,6 +390,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Moon phase scheduling error:", error);
       res.status(500).json({ error: "Failed to schedule moon phase content" });
+    }
+  });
+
+  // Social Media Posts
+  app.get("/api/social-media-posts", async (req, res) => {
+    try {
+      const posts = await storage.getAllSocialMediaPosts();
+      res.json(posts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch social media posts" });
+    }
+  });
+
+  app.get("/api/social-media-posts/design/:designId", async (req, res) => {
+    try {
+      const designId = parseInt(req.params.designId);
+      const posts = await storage.getSocialMediaPostsByDesign(designId);
+      res.json(posts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch posts for design" });
+    }
+  });
+
+  app.post("/api/social-media-posts", async (req, res) => {
+    try {
+      const data = insertSocialMediaPostSchema.parse(req.body);
+      const post = await storage.createSocialMediaPost(data);
+      res.json(post);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid social media post data" });
+    }
+  });
+
+  app.put("/api/social-media-posts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const post = await storage.updateSocialMediaPost(id, updates);
+      res.json(post);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update social media post" });
+    }
+  });
+
+  app.delete("/api/social-media-posts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSocialMediaPost(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete social media post" });
+    }
+  });
+
+  // Social Media Analytics
+  app.get("/api/social-media-analytics", async (req, res) => {
+    try {
+      const analytics = await storage.getAllSocialMediaAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch social media analytics" });
+    }
+  });
+
+  app.post("/api/social-media-analytics", async (req, res) => {
+    try {
+      const data = insertSocialMediaAnalyticsSchema.parse(req.body);
+      const analytics = await storage.createSocialMediaAnalytics(data);
+      res.json(analytics);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid social media analytics data" });
+    }
+  });
+
+  // Performance Insights
+  app.get("/api/performance-insights", async (req, res) => {
+    try {
+      const insights = await storage.getAllPerformanceInsights();
+      res.json(insights);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch performance insights" });
+    }
+  });
+
+  app.post("/api/performance-insights", async (req, res) => {
+    try {
+      const data = insertPerformanceInsightsSchema.parse(req.body);
+      const insights = await storage.createPerformanceInsights(data);
+      res.json(insights);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid performance insights data" });
+    }
+  });
+
+  app.post("/api/aggregate-performance-data", async (req, res) => {
+    try {
+      await storage.aggregatePerformanceData();
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to aggregate performance data" });
     }
   });
 
