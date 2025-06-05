@@ -632,19 +632,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
             </button>
           ))}
         </div>
-        
-        {/* Brand Description */}
-        {currentBrand && (
-          <div className="mt-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border">
-            <div className="flex items-center">
-              <span className="text-2xl mr-3">{currentBrand.icon}</span>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white">{currentBrand.name}</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{currentBrand.description}</p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Content Based on Selected Brand */}
