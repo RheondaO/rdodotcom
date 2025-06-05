@@ -619,3 +619,12 @@ export type AppSprint = typeof appSprints.$inferSelect;
 
 export type InsertAppTimeEntry = z.infer<typeof insertAppTimeEntrySchema>;
 export type AppTimeEntry = typeof appTimeEntries.$inferSelect;
+
+export type InsertSocialMediaPost = z.infer<typeof insertSocialMediaPostSchema>;
+export type SocialMediaPost = typeof socialMediaPosts.$inferSelect;
+
+export type InsertSocialMediaAnalytics = z.infer<typeof insertSocialMediaAnalyticsSchema>;
+export type SocialMediaAnalytics = typeof socialMediaAnalytics.$inferSelect;
+
+export type InsertPerformanceInsights = z.infer<typeof insertPerformanceInsightsSchema>;
+export type PerformanceInsights = typeof performanceInsights.$inferSelect;

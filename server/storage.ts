@@ -188,6 +188,33 @@ export interface IStorage {
   
   // Scheduling
   scheduleContentForMoonPhases(year: number, month: number): Promise<void>;
+
+  // Social Media Posts
+  getAllSocialMediaPosts(): Promise<SocialMediaPost[]>;
+  getSocialMediaPostsByDesign(designId: number): Promise<SocialMediaPost[]>;
+  getSocialMediaPostsByDateRange(startDate: string, endDate: string): Promise<SocialMediaPost[]>;
+  createSocialMediaPost(post: InsertSocialMediaPost): Promise<SocialMediaPost>;
+  updateSocialMediaPost(id: number, updates: Partial<SocialMediaPost>): Promise<SocialMediaPost>;
+  deleteSocialMediaPost(id: number): Promise<void>;
+
+  // Social Media Analytics
+  getAllSocialMediaAnalytics(): Promise<SocialMediaAnalytics[]>;
+  getSocialMediaAnalyticsByPost(postId: number): Promise<SocialMediaAnalytics[]>;
+  getLatestAnalyticsForPost(postId: number): Promise<SocialMediaAnalytics | undefined>;
+  createSocialMediaAnalytics(analytics: InsertSocialMediaAnalytics): Promise<SocialMediaAnalytics>;
+  updateSocialMediaAnalytics(id: number, updates: Partial<SocialMediaAnalytics>): Promise<SocialMediaAnalytics>;
+
+  // Performance Insights
+  getAllPerformanceInsights(): Promise<PerformanceInsights[]>;
+  getPerformanceInsightsByMiniGame(miniGameBlockId: number): Promise<PerformanceInsights[]>;
+  getPerformanceInsightsByPlatform(platform: string): Promise<PerformanceInsights[]>;
+  getPerformanceInsightsByDayOfWeek(dayOfWeek: string): Promise<PerformanceInsights[]>;
+  createPerformanceInsights(insights: InsertPerformanceInsights): Promise<PerformanceInsights>;
+  updatePerformanceInsights(id: number, updates: Partial<PerformanceInsights>): Promise<PerformanceInsights>;
+  deletePerformanceInsights(id: number): Promise<void>;
+  
+  // Analytics aggregation
+  aggregatePerformanceData(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -216,6 +243,9 @@ export class MemStorage implements IStorage {
   private appTimeEntries: Map<number, AppTimeEntry> = new Map();
   private miniGameBlocks: Map<number, MiniGameBlock> = new Map();
   private miniGameDesigns: Map<number, MiniGameDesign> = new Map();
+  private socialMediaPosts: Map<number, SocialMediaPost> = new Map();
+  private socialMediaAnalytics: Map<number, SocialMediaAnalytics> = new Map();
+  private performanceInsights: Map<number, PerformanceInsights> = new Map();
   private currentId = 1;
 
   constructor() {
