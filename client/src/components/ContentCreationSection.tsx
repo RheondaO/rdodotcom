@@ -1930,23 +1930,16 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                       return (
                         <div key={miniGame.id} className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border shadow-sm">
                           {/* Header */}
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center">
-                              <span className="text-lg mr-2">{getCategoryIcon(miniGame.category)}</span>
-                              <div>
-                                <h4 className="font-semibold text-sm text-gray-900">{miniGame.name}</h4>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-lg font-bold" style={{ color: miniGame.color }}>
-                                {progressData.progress}%
-                              </div>
+                          <div className="flex items-center mb-4">
+                            <span className="text-lg mr-2">{getCategoryIcon(miniGame.category)}</span>
+                            <div>
+                              <h4 className="font-semibold text-sm text-gray-900">{miniGame.name}</h4>
                             </div>
                           </div>
                           
                           {/* Enhanced Vertical Progress Bar */}
-                          <div className="flex justify-center mb-4">
-                            <div className="relative">
+                          <div className="flex flex-col items-center mb-4">
+                            <div className="relative mb-3">
                               {/* Outer glow container */}
                               <div className="absolute -inset-1 rounded-full opacity-30 blur-sm transition-all duration-500"
                                    style={{ backgroundColor: miniGame.color }}>
@@ -2017,6 +2010,13 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                     {progressData.completed}/{progressData.total}
                                   </div>
                                 </div>
+                              </div>
+                            </div>
+                            
+                            {/* Percentage display underneath */}
+                            <div className="text-center">
+                              <div className="text-lg font-bold" style={{ color: miniGame.color }}>
+                                {progressData.progress}%
                               </div>
                             </div>
                           </div>
