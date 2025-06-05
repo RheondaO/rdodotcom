@@ -1,40 +1,28 @@
-
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState } from 'react';
+import { format } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
-  PenTool, 
-  Plus, 
-  Calendar, 
-  Clock, 
-  Star,
-  CheckCircle,
-  Circle,
-  Edit,
-  Trash2,
-  Eye,
-  BarChart3,
-  Target,
-  Moon,
-  Sun,
-  Sparkles,
-  Briefcase,
-  Building,
-  Gamepad2,
-  Palette,
+  Briefcase, 
+  Gamepad2, 
+  Sparkles, 
+  Eye, 
+  Calendar,
   TrendingUp,
-  Zap
-} from "lucide-react";
-import { format, addDays, addWeeks, isBefore, isAfter, startOfYear, endOfYear } from "date-fns";
+  BarChart3,
+  Clock,
+  Target
+} from 'lucide-react';
 
+// Mini-Game Block type with new structure
 interface MiniGameBlock {
   id: number;
   name: string;
@@ -48,6 +36,7 @@ interface MiniGameBlock {
   createdAt: string;
 }
 
+// Mini-Game Design type
 interface MiniGameDesign {
   id: number;
   miniGameBlockId: number;
@@ -495,42 +484,27 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     misc: []
   });
 
+  // Sample mini-game designs
   const [miniGameDesigns, setMiniGameDesigns] = useState<MiniGameDesign[]>([
-    // Sample designs for Vibe Check-In
     {
       id: 1,
       miniGameBlockId: 1,
-      title: "Vibe Check #1 - Energy Levels",
-      description: "Rate your energy on a scale of 1-10",
-      designNotes: "Use gradient backgrounds, include emoji reactions",
+      title: "Weekly Admin Review",
+      description: "Administrative check-in post template",
+      designNotes: "Include progress updates and upcoming content",
       status: "approved",
-      targetDate: format(new Date(), 'yyyy-MM-dd'),
-      designedDate: format(new Date(), 'yyyy-MM-dd'),
-      reviewedDate: format(new Date(), 'yyyy-MM-dd'),
-      approvedDate: format(new Date(), 'yyyy-MM-dd'),
+      targetDate: "2025-06-07",
+      designedDate: "2025-06-01",
+      reviewedDate: "2025-06-02",
+      approvedDate: "2025-06-03",
       version: 1,
-      isTemplate: false,
-      createdAt: format(new Date(), 'yyyy-MM-dd'),
-      updatedAt: format(new Date(), 'yyyy-MM-dd')
-    },
-    {
-      id: 2,
-      miniGameBlockId: 1,
-      title: "Vibe Check #2 - Mood Colors",
-      description: "What color represents your current mood?",
-      designNotes: "Color palette selection interface",
-      status: "designed",
-      targetDate: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
-      designedDate: format(new Date(), 'yyyy-MM-dd'),
-      reviewedDate: null,
-      approvedDate: null,
-      version: 1,
-      isTemplate: false,
+      isTemplate: true,
       createdAt: format(new Date(), 'yyyy-MM-dd'),
       updatedAt: format(new Date(), 'yyyy-MM-dd')
     }
   ]);
 
+  // New mini-game form state
   const [newMiniGame, setNewMiniGame] = useState({
     name: "",
     dateOfPost: "",
@@ -541,6 +515,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     category: "engagement"
   });
 
+  // New design form state
   const [newDesign, setNewDesign] = useState({
     miniGameBlockId: 0,
     title: "",
@@ -549,6 +524,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     targetDate: ""
   });
 
+  // Frequency options
   const frequencyOptions = [
     { value: "every_friday", label: "Every Friday (52/year)", count: 52 },
     { value: "every_1st_friday", label: "Every 1st Friday (12/year)", count: 12 },
@@ -644,28 +620,26 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
             <button
               key={brand.id}
               onClick={() => setActiveBrand(brand.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+              className={`flex-1 flex items-center justify-center px-4 py-3 rounded-lg transition-all duration-200 ${
                 activeBrand === brand.id
-                  ? 'bg-white dark:bg-gray-700 shadow-md text-gray-900 dark:text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400'
               }`}
             >
-              <span className="text-lg">{brand.icon}</span>
-              <span className="font-medium text-sm">{brand.name}</span>
+              <span className="text-lg mr-2">{brand.icon}</span>
+              <span className="text-sm font-medium hidden sm:block">{brand.name}</span>
             </button>
           ))}
         </div>
         
+        {/* Brand Description */}
         {currentBrand && (
-          <div className="mt-3 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: currentBrand.color }}
-              />
+          <div className="mt-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border">
+            <div className="flex items-center">
+              <span className="text-2xl mr-3">{currentBrand.icon}</span>
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-white">{currentBrand.name}</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{currentBrand.description}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{currentBrand.description}</p>
               </div>
             </div>
           </div>
@@ -681,13 +655,10 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
               Mini-Game Block Studio ✨
             </h4>
             <div className="flex gap-2">
+            </div>
+          </div>
+
           <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="rounded-xl">
-                <Sparkles className="h-4 w-4 mr-2" />
-                New Mini-Game
-              </Button>
-            </DialogTrigger>
             <DialogContent className="rounded-2xl max-w-md">
               <DialogHeader>
                 <DialogTitle>Create Mini-Game Block</DialogTitle>
@@ -739,12 +710,12 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                         setNewMiniGame({
                           ...newMiniGame, 
                           frequency: value,
-                          frequencyValue: freq?.count || 0
+                          frequencyValue: freq?.count || 52
                         });
                       }}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select frequency" />
                       </SelectTrigger>
                       <SelectContent>
                         {frequencyOptions.map(freq => (
@@ -757,14 +728,20 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   </div>
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select value={newMiniGame.category} onValueChange={(value) => setNewMiniGame({...newMiniGame, category: value})}>
+                    <Select 
+                      value={newMiniGame.category} 
+                      onValueChange={(value) => setNewMiniGame({...newMiniGame, category: value})}
+                    >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
                         {categoryOptions.map(cat => (
                           <SelectItem key={cat.value} value={cat.value}>
-                            {cat.icon} {cat.label}
+                            <span className="flex items-center">
+                              <span className="mr-2">{cat.icon}</span>
+                              {cat.label}
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -822,26 +799,29 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
           <Dialog open={showCreateDesignDialog} onOpenChange={setShowCreateDesignDialog}>
             <DialogTrigger asChild>
-              <Button className="rounded-xl">
-                <Palette className="h-4 w-4 mr-2" />
+              <Button variant="outline" size="sm" className="rounded-xl">
+                <Target className="h-4 w-4 mr-2" />
                 New Design
               </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-2xl">
+            <DialogContent className="rounded-2xl max-w-md">
               <DialogHeader>
-                <DialogTitle>Create Design</DialogTitle>
+                <DialogTitle>Create Design Entry</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="designMiniGame">Mini-Game Block</Label>
-                  <Select value={newDesign.miniGameBlockId.toString()} onValueChange={(value) => setNewDesign({...newDesign, miniGameBlockId: parseInt(value)})}>
+                  <Select 
+                    value={newDesign.miniGameBlockId.toString()} 
+                    onValueChange={(value) => setNewDesign({...newDesign, miniGameBlockId: parseInt(value)})}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select mini-game block" />
+                      <SelectValue placeholder="Select mini-game" />
                     </SelectTrigger>
                     <SelectContent>
                       {miniGameBlocks.map(mg => (
                         <SelectItem key={mg.id} value={mg.id.toString()}>
-                          {getCategoryIcon(mg.category)} {mg.name}
+                          {mg.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -853,7 +833,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     id="designTitle"
                     value={newDesign.title}
                     onChange={(e) => setNewDesign({...newDesign, title: e.target.value})}
-                    placeholder="Design title..."
+                    placeholder="Enter design title"
                   />
                 </div>
                 <div>
@@ -862,7 +842,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     id="designDescription"
                     value={newDesign.description}
                     onChange={(e) => setNewDesign({...newDesign, description: e.target.value})}
-                    placeholder="What does this design do?"
+                    placeholder="Describe the design concept"
                   />
                 </div>
                 <div>
@@ -871,13 +851,13 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     id="designNotes"
                     value={newDesign.designNotes}
                     onChange={(e) => setNewDesign({...newDesign, designNotes: e.target.value})}
-                    placeholder="Visual elements, colors, interactions..."
+                    placeholder="Additional notes and requirements"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="designTargetDate">Target Date</Label>
+                  <Label htmlFor="targetDate">Target Date</Label>
                   <Input
-                    id="designTargetDate"
+                    id="targetDate"
                     type="date"
                     value={newDesign.targetDate}
                     onChange={(e) => setNewDesign({...newDesign, targetDate: e.target.value})}
@@ -914,422 +894,230 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
               </div>
             </DialogContent>
           </Dialog>
-        </div>
-      </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 rounded-xl">
-          <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
-          <TabsTrigger value="progress" className="rounded-lg">Progress Tracker</TabsTrigger>
-          <TabsTrigger value="designs" className="rounded-lg">Design Queue</TabsTrigger>
-          <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
-        </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4 rounded-xl">
+              <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
+              <TabsTrigger value="progress" className="rounded-lg">Progress Tracker</TabsTrigger>
+              <TabsTrigger value="designs" className="rounded-lg">Design Queue</TabsTrigger>
+              <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* Mini-Game Blocks Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {miniGameBlocks.map(miniGame => {
-              const progressData = getProgressForMiniGame(miniGame.id);
-              const designs = getDesignsByMiniGame(miniGame.id);
-              
-              return (
-                <Card key={miniGame.id} className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
-                  <div 
-                    className="h-3 w-full"
-                    style={{ backgroundColor: miniGame.color }}
-                  />
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-2">{getCategoryIcon(miniGame.category)}</span>
-                        <div>
-                          <h4 className="font-bold">{miniGame.name}</h4>
-                          <p className="text-xs text-gray-500 font-normal">
-                            {miniGame.frequencyValue} designs/year
-                          </p>
-                        </div>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setSelectedMiniGame(miniGame.id)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-gray-600 text-sm mb-4 space-y-1">
-                      <div>📅 {miniGame.dateOfPost && format(new Date(miniGame.dateOfPost), 'MMMM d, yyyy')}</div>
-                      {miniGame.astrologicalSign && (
-                        <div>✨ {miniGame.name} during {astrologicalSignOptions.find(sign => sign.value === miniGame.astrologicalSign)?.label}</div>
-                      )}
-                      <div>🔄 {frequencyOptions.find(freq => freq.value === miniGame.frequency)?.label}</div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Annual Progress</span>
-                          <span className="font-medium">{progressData.completed}/{progressData.total}</span>
-                        </div>
-                        <div className="flex justify-between text-xs mb-2 text-gray-500">
-                          <span>Completion Rate</span>
-                          <span>{progressData.progress}%</span>
-                        </div>
-                        <Progress value={progressData.progress} className="h-3" />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Designed:</span>
-                          <span className="font-medium">{getStatusCountForMiniGame(miniGame.id, 'designed')}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Remaining:</span>
-                          <span className="font-medium text-orange-600">{progressData.remaining}</span>
-                        </div>
-                      </div>
-                      
-                      <Badge variant="outline" className="text-xs">
-                        {frequencyOptions.find(f => f.value === miniGame.frequency)?.label}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="progress" className="space-y-6">
-          {/* Vertical Progress Bars like ContentAiCompanion */}
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2 text-purple-500" />
-                Annual Design Progress Tracker
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <TabsContent value="overview" className="space-y-6">
+              {/* Mini-Game Blocks Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {miniGameBlocks.map(miniGame => {
                   const progressData = getProgressForMiniGame(miniGame.id);
+                  const designs = getDesignsByMiniGame(miniGame.id);
                   
                   return (
-                    <div key={miniGame.id} className="text-center">
-                      <div className="mb-3">
-                        <h4 className="font-medium text-sm text-gray-800 mb-1">{miniGame.name}</h4>
-                        <p className="text-xs text-gray-500">
-                          {progressData.completed}/{progressData.total} designs
-                        </p>
-                      </div>
-                      
-                      {/* Vertical Progress Bar with Individual Design Notches */}
-                      <div className="relative mx-auto w-12 h-48 bg-gray-200 rounded-full overflow-hidden border-2 border-gray-300">
-                        {/* Progress Fill */}
-                        <div 
-                          className="absolute bottom-0 w-full transition-all duration-700 ease-in-out"
-                          style={{ 
-                            height: `${progressData.progress}%`,
-                            background: `linear-gradient(to top, ${miniGame.color}, ${miniGame.color}99)`
-                          }}
-                        />
-                        
-                        {/* Individual Design Notches - Each represents one design needed */}
-                        {Array.from({ length: progressData.total }, (_, i) => {
-                          const notchPosition = ((i + 1) / progressData.total) * 100;
-                          const isCompleted = i < progressData.completed;
-                          
-                          return (
-                            <div
-                              key={i}
-                              className={`absolute w-full h-0.5 transition-all duration-300 ${
-                                isCompleted 
-                                  ? 'bg-white/60 shadow-sm' 
-                                  : 'bg-gray-400/60'
-                              }`}
-                              style={{ bottom: `${notchPosition}%` }}
-                            />
-                          );
-                        })}
-                        
-                        {/* Quarter markers for visual reference */}
-                        {[25, 50, 75].map(quarter => (
-                          <div
-                            key={quarter}
-                            className="absolute w-full h-1 bg-gray-300/80"
-                            style={{ bottom: `${quarter}%` }}
-                          />
-                        ))}
-                        
-                        {/* Progress Text */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="text-xs font-bold text-white drop-shadow-lg">
-                              {progressData.completed}
-                            </div>
-                            <div className="text-xs text-white/80 drop-shadow-lg">
-                              of {progressData.total}
+                    <Card key={miniGame.id} className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
+                      <div 
+                        className="h-3 w-full"
+                        style={{ backgroundColor: miniGame.color }}
+                      />
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="text-2xl mr-2">{getCategoryIcon(miniGame.category)}</span>
+                            <div>
+                              <h4 className="font-bold">{miniGame.name}</h4>
+                              <p className="text-xs text-gray-500 font-normal">
+                                {miniGame.frequencyValue} designs/year
+                              </p>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-3 space-y-2">
-                        <div className="text-xs text-gray-600 font-medium">
-                          {progressData.remaining} remaining
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {progressData.progress}% complete
-                        </div>
-                        <Badge 
-                          className="text-xs" 
-                          style={{ backgroundColor: miniGame.color + '20', color: miniGame.color }}
-                        >
-                          {getCategoryIcon(miniGame.category)} {miniGame.category}
-                        </Badge>
-                        
-                        {/* Quick Action Button */}
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          className="w-full text-xs h-7"
-                          onClick={() => {
-                            setNewDesign({
-                              ...newDesign,
-                              miniGameBlockId: miniGame.id
-                            });
-                            setShowCreateDesignDialog(true);
-                          }}
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Add Design
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="designs" className="space-y-6">
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Palette className="h-5 w-5 mr-2 text-purple-500" />
-                Design Queue
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {miniGameDesigns.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  No designs yet. Create your first design to get started!
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {miniGameDesigns.map(design => {
-                    const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
-                    return (
-                      <div key={design.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-lg">{getCategoryIcon(miniGame?.category || 'engagement')}</span>
-                            <h4 className="font-medium text-gray-800">{design.title}</h4>
-                            <Badge className={`text-xs ${statusColors[design.status as keyof typeof statusColors]}`}>
-                              {design.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{design.description}</p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>Mini-Game: {miniGame?.name}</span>
-                            {design.targetDate && (
-                              <span>Target: {format(new Date(design.targetDate), 'MMM dd')}</span>
-                            )}
-                            <span>v{design.version}</span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {design.status === 'designed' && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {
-                                const updatedDesigns = miniGameDesigns.map(d => 
-                                  d.id === design.id 
-                                    ? { ...d, status: 'approved', approvedDate: format(new Date(), 'yyyy-MM-dd') }
-                                    : d
-                                );
-                                setMiniGameDesigns(updatedDesigns);
-                              }}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Approve
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setSelectedMiniGame(selectedMiniGame === miniGame.id ? null : miniGame.id)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-gray-600 text-sm mb-4 space-y-1">
+                          <div>📅 {miniGame.dateOfPost && format(new Date(miniGame.dateOfPost), 'MMMM d, yyyy')}</div>
+                          {miniGame.astrologicalSign && (
+                            <div>✨ {miniGame.name} during {astrologicalSignOptions.find(sign => sign.value === miniGame.astrologicalSign)?.label}</div>
+                          )}
+                          <div>🔄 {frequencyOptions.find(freq => freq.value === miniGame.frequency)?.label}</div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                        
+                        <div className="space-y-3">
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Annual Progress</span>
+                              <span className="font-medium">{progressData.completed}/{progressData.total}</span>
+                            </div>
+                            <div className="flex justify-between text-xs mb-2 text-gray-500">
+                              <span>Completion Rate</span>
+                              <span>{progressData.progress}%</span>
+                            </div>
+                            <Progress value={progressData.progress} className="h-3" />
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div className="text-center p-2 bg-blue-50 rounded-lg">
+                              <div className="font-semibold text-blue-600">{getStatusCountForMiniGame(miniGame.id, 'designed')}</div>
+                              <div className="text-blue-500">Designed</div>
+                            </div>
+                            <div className="text-center p-2 bg-yellow-50 rounded-lg">
+                              <div className="font-semibold text-yellow-600">{getStatusCountForMiniGame(miniGame.id, 'reviewed')}</div>
+                              <div className="text-yellow-500">Reviewed</div>
+                            </div>
+                            <div className="text-center p-2 bg-green-50 rounded-lg">
+                              <div className="font-semibold text-green-600">{getStatusCountForMiniGame(miniGame.id, 'approved')}</div>
+                              <div className="text-green-500">Approved</div>
+                            </div>
+                          </div>
 
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-gradient-to-br from-blue-400 to-cyan-500 text-white shadow-lg border-0 rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-blue-100 text-sm">Total Mini-Games</p>
-                    <p className="text-3xl font-bold">{miniGameBlocks.length}</p>
-                  </div>
-                  <Gamepad2 className="h-8 w-8 text-blue-200" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-lg border-0 rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-green-100 text-sm">Designs Created</p>
-                    <p className="text-3xl font-bold">{miniGameDesigns.length}</p>
-                  </div>
-                  <Palette className="h-8 w-8 text-green-200" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-purple-400 to-pink-500 text-white shadow-lg border-0 rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-100 text-sm">Approved Designs</p>
-                    <p className="text-3xl font-bold">{miniGameDesigns.filter(d => d.status === 'approved').length}</p>
-                  </div>
-                  <CheckCircle className="h-8 w-8 text-purple-200" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <TrendingUp className="h-5 w-5 mr-2 text-purple-500" />
-                Category Performance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {categoryOptions.map(category => {
-                  const categoryMiniGames = miniGameBlocks.filter(mg => mg.category === category.value);
-                  const categoryDesigns = miniGameDesigns.filter(d => 
-                    categoryMiniGames.some(mg => mg.id === d.miniGameBlockId)
-                  );
-                  const approvedDesigns = categoryDesigns.filter(d => d.status === 'approved').length;
-                  const totalNeeded = categoryMiniGames.reduce((sum, mg) => sum + mg.frequencyValue, 0);
-                  const designedNotApproved = categoryDesigns.filter(d => d.status === 'designed').length;
-                  const progress = totalNeeded > 0 ? Math.round((approvedDesigns / totalNeeded) * 100) : 0;
-                  
-                  if (categoryMiniGames.length === 0) return null;
-                  
-                  return (
-                    <div key={category.value} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-3">{category.icon}</span>
-                        <div>
-                          <h4 className="font-medium">{category.label}</h4>
-                          <p className="text-sm text-gray-600">
-                            {categoryMiniGames.length} mini-games • {approvedDesigns}/{totalNeeded} approved
-                          </p>
-                          {designedNotApproved > 0 && (
-                            <p className="text-xs text-orange-600">
-                              {designedNotApproved} awaiting approval
-                            </p>
+                          {selectedMiniGame === miniGame.id && (
+                            <div className="mt-4 pt-4 border-t space-y-2">
+                              <h5 className="font-semibold text-sm">Recent Designs:</h5>
+                              {designs.length > 0 ? (
+                                designs.slice(0, 3).map(design => (
+                                  <div key={design.id} className="flex items-center justify-between text-xs">
+                                    <span className="truncate">{design.title}</span>
+                                    <Badge variant="secondary" className={statusColors[design.status as keyof typeof statusColors]}>
+                                      {design.status}
+                                    </Badge>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-xs text-gray-500">No designs yet</p>
+                              )}
+                            </div>
                           )}
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold" style={{ color: category.color }}>
-                          {progress}%
-                        </div>
-                        <Progress value={progress} className="w-24 h-3" />
-                        <div className="text-xs text-gray-500 mt-1">
-                          {totalNeeded - approvedDesigns} remaining
-                        </div>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+
+            <TabsContent value="progress" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <TrendingUp className="text-purple-500 mr-3 h-5 w-5" />
+                    Progress Tracking Dashboard
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12 text-gray-500">
+                    <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium mb-2">Progress Analytics</h3>
+                    <p className="text-sm">Track completion rates and timelines</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="designs" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Target className="text-purple-500 mr-3 h-5 w-5" />
+                      Design Queue Management
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setShowCreateDesignDialog(true)}
+                      className="rounded-xl"
+                    >
+                      <Target className="h-4 w-4 mr-2" />
+                      Add Design
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {miniGameDesigns.map(design => {
+                      const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
+                      return (
+                        <div key={design.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                          <div>
+                            <h4 className="font-semibold">{design.title}</h4>
+                            <p className="text-sm text-gray-600">{miniGame?.name}</p>
+                            <p className="text-xs text-gray-500">{design.description}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className={statusColors[design.status as keyof typeof statusColors]}>
+                              {design.status}
+                            </Badge>
+                            {design.targetDate && (
+                              <div className="text-xs text-gray-500">
+                                Due: {format(new Date(design.targetDate), 'MMM d')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="text-purple-500 mr-3 h-5 w-5" />
+                    Content Analytics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-12 text-gray-500">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium mb-2">Performance Analytics</h3>
+                    <p className="text-sm">Track engagement and reach metrics</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </>
       ) : (
         <div className="space-y-6">
           {/* Other Brand Content Management */}
           <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <span className="text-2xl">{currentBrand?.icon}</span>
-                <div>
-                  <h4 className="text-lg">{currentBrand?.name}</h4>
-                  <p className="text-sm text-muted-foreground font-normal">Content Pipeline & Strategy</p>
-                </div>
+              <CardTitle className="flex items-center">
+                <Calendar className="text-purple-500 mr-3 h-5 w-5" />
+                Content Planning for {currentBrand?.name}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="content" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 rounded-xl">
-                  <TabsTrigger value="content" className="rounded-lg">Content Pipeline</TabsTrigger>
-                  <TabsTrigger value="calendar" className="rounded-lg">Content Calendar</TabsTrigger>
-                  <TabsTrigger value="strategy" className="rounded-lg">Strategy & Goals</TabsTrigger>
-                  <TabsTrigger value="analytics" className="rounded-lg">Performance</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3 rounded-xl">
+                  <TabsTrigger value="content" className="rounded-lg">Content Library</TabsTrigger>
+                  <TabsTrigger value="schedule" className="rounded-lg">Publishing Schedule</TabsTrigger>
+                  <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
                 </TabsList>
-
-                <TabsContent value="content" className="mt-6">
-                  <div className="text-center py-12 text-gray-500">
-                    <PenTool className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium mb-2">Content Pipeline Coming Soon</h3>
-                    <p className="text-sm">Traditional content management for {currentBrand?.name}</p>
-                    <Button className="mt-4" variant="outline">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Content Piece
-                    </Button>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="calendar" className="mt-6">
+                
+                <TabsContent value="content" className="space-y-4">
                   <div className="text-center py-12 text-gray-500">
                     <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium mb-2">Editorial Calendar</h3>
-                    <p className="text-sm">Schedule and plan content releases</p>
+                    <h3 className="text-lg font-medium mb-2">Content Library</h3>
+                    <p className="text-sm">Manage your content pieces and drafts</p>
                   </div>
                 </TabsContent>
-
-                <TabsContent value="strategy" className="mt-6">
+                
+                <TabsContent value="schedule" className="space-y-4">
                   <div className="text-center py-12 text-gray-500">
-                    <Target className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium mb-2">Content Strategy</h3>
-                    <p className="text-sm">Define goals and messaging for {currentBrand?.name}</p>
+                    <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium mb-2">Publishing Schedule</h3>
+                    <p className="text-sm">Plan and schedule your content releases</p>
                   </div>
                 </TabsContent>
-
-                <TabsContent value="analytics" className="mt-6">
+                
+                <TabsContent value="analytics" className="space-y-4">
                   <div className="text-center py-12 text-gray-500">
                     <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                     <h3 className="text-lg font-medium mb-2">Performance Analytics</h3>
@@ -1340,6 +1128,20 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Fixed Position New Mini-Game Button - Bottom Left Corner */}
+      {activeBrand === "rotationONLY" && (
+        <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
+          <DialogTrigger asChild>
+            <Button 
+              className="fixed bottom-6 left-6 z-50 rounded-full w-16 h-16 shadow-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 border-0"
+              size="lg"
+            >
+              <Sparkles className="h-6 w-6" />
+            </Button>
+          </DialogTrigger>
+        </Dialog>
       )}
     </section>
   );
