@@ -25,7 +25,11 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Workflow
+  Workflow,
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc
 } from 'lucide-react';
 
 // Mini-Game Block type with new structure
@@ -70,6 +74,13 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   const [selectedMiniGame, setSelectedMiniGame] = useState<number | null>(null);
   const [showCreateMiniGameDialog, setShowCreateMiniGameDialog] = useState(false);
   const [showCreateDesignDialog, setShowCreateDesignDialog] = useState(false);
+  
+  // Search and Filter States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<'name' | 'progress' | 'category' | 'frequency'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   // Brand definitions
   const brands = [
@@ -1885,6 +1896,64 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {/* Search and Filters for Progress Tracker */}
+                  <div className="mb-6 space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <div className="flex items-center space-x-2">
+                          <Search className="w-4 h-4 text-gray-500" />
+                          <Input
+                            placeholder="Search mini-games..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-64"
+                          />
+                        </div>
+                        
+                        <Select value={filterCategory} onValueChange={setFilterCategory}>
+                          <SelectTrigger className="w-48">
+                            <Filter className="w-4 h-4 mr-2" />
+                            <SelectValue placeholder="Filter by category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Categories</SelectItem>
+                            {categoryOptions.map(cat => (
+                              <SelectItem key={cat.value} value={cat.value}>
+                                <div className="flex items-center">
+                                  <span className="mr-2">{cat.icon}</span>
+                                  {cat.label}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+                          <SelectTrigger className="w-36">
+                            <SelectValue placeholder="Sort by" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="name">Name</SelectItem>
+                            <SelectItem value="progress">Progress</SelectItem>
+                            <SelectItem value="category">Category</SelectItem>
+                            <SelectItem value="frequency">Frequency</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                          className="p-2"
+                        >
+                          {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Overall Progress Summary - Moved to Top */}
                   <div className="mb-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border">
                     <h4 className="text-lg font-semibold mb-4 text-purple-800">Annual Content Overview</h4>
@@ -1926,143 +1995,167 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
                   {/* Individual Mini Game Block Progress Cards - Equal Height Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-end">
-                    {miniGameBlocks.map(miniGame => {
-                      const progressData = getProgressForMiniGame(miniGame.id);
-                      const category = categoryOptions.find(cat => cat.value === miniGame.category);
-                      
-                      return (
-                        <div key={miniGame.id} className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border shadow-sm flex flex-col min-h-[300px]">
-                          {/* Header - Fixed height */}
-                          <div className="flex items-start mb-6 h-[4rem]">
-                            <span className="text-lg mr-2 mt-1">{getCategoryIcon(miniGame.category)}</span>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-sm text-gray-900 leading-tight">{miniGame.name}</h4>
-                            </div>
-                          </div>
-                          
-                          {/* Progress Bar Container - Anchored from bottom */}
-                          <div className="flex flex-col items-center justify-end flex-1">
-                            <div className="relative mb-3">
-                              {/* Outer glow container */}
-                              <div className="absolute -inset-2 rounded-full opacity-40 blur-md transition-all duration-500"
-                                   style={{ backgroundColor: miniGame.color }}>
-                              </div>
-                              
-                              {/* Decorative sparkles around the bar */}
-                              <div className="absolute -top-2 -left-2 w-2 h-2 bg-yellow-300 rounded-full animate-pulse opacity-60"></div>
-                              <div className="absolute -top-1 -right-3 w-1.5 h-1.5 bg-pink-300 rounded-full animate-pulse opacity-70" style={{ animationDelay: '0.5s' }}></div>
-                              <div className="absolute -bottom-2 -left-3 w-1 h-1 bg-purple-300 rounded-full animate-pulse opacity-50" style={{ animationDelay: '1s' }}></div>
-                              <div className="absolute -bottom-1 -right-2 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse opacity-60" style={{ animationDelay: '1.5s' }}></div>
-                              
-                              {/* Main progress container - Wider and Cuter */}
-                              <div className="relative w-16 h-40 bg-gradient-to-b from-white via-gray-50 to-gray-100 rounded-full p-2 shadow-lg border-2 border-white" style={{ 
-                                boxShadow: `0 4px 20px ${miniGame.color}20, inset 0 2px 4px rgba(0,0,0,0.1)` 
-                              }}>
-                                <div className="relative w-full h-full flex flex-col-reverse">
-                                  {Array.from({ length: Math.min(miniGame.frequencyValue, 18) }, (_, index) => {
-                                    const unitIndex = index + 1;
-                                    const isCompleted = unitIndex <= progressData.completed;
-                                    const segmentHeight = miniGame.frequencyValue > 0 ? Math.max(100 / Math.min(miniGame.frequencyValue, 18), 4) : 5;
-                                    
-                                    return (
-                                      <div
-                                        key={index}
-                                        className="relative transition-all duration-500 ease-out"
-                                        style={{ 
-                                          height: `${segmentHeight}%`,
-                                          marginBottom: index < Math.min(miniGame.frequencyValue, 18) - 1 ? '2px' : '0'
-                                        }}
-                                      >
-                                        <div 
-                                          className={`w-full h-full rounded-lg transition-all duration-700 ease-out ${
-                                            isCompleted 
-                                              ? 'opacity-100 transform scale-100 shadow-md' 
-                                              : 'opacity-30 transform scale-95'
-                                          }`}
-                                          style={{ 
-                                            background: isCompleted 
-                                              ? `linear-gradient(135deg, ${miniGame.color}E6, ${miniGame.color}, ${miniGame.color}CC)`
-                                              : 'linear-gradient(135deg, #F8FAFC, #F1F5F9, #E2E8F0)',
-                                            boxShadow: isCompleted 
-                                              ? `0 3px 12px ${miniGame.color}50, inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -1px 2px ${miniGame.color}30` 
-                                              : 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 -1px 2px rgba(255,255,255,0.8)',
-                                            border: isCompleted ? `1px solid ${miniGame.color}40` : '1px solid rgba(226, 232, 240, 0.8)'
-                                          }}
-                                        />
-                                        
-                                        {/* Enhanced line marker separator with cute styling */}
-                                        {index < Math.min(miniGame.frequencyValue, 18) - 1 && (
-                                          <div className="absolute -top-1.5 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-gradient-to-r from-transparent via-white to-transparent rounded-full shadow-lg border border-gray-100" />
-                                        )}
-                                        
-                                        {/* Enhanced sparkle effects for completed segments */}
-                                        {isCompleted && (
-                                          <div className="absolute inset-0 rounded-lg overflow-hidden">
-                                            <div className="absolute top-1 left-1.5 w-1.5 h-1.5 bg-white rounded-full opacity-80 animate-pulse shadow-sm" />
-                                            <div className="absolute top-2 right-1 w-1 h-1 bg-yellow-200 rounded-full opacity-70 animate-pulse" style={{ animationDelay: '0.3s' }} />
-                                            <div className="absolute bottom-1.5 right-2 w-0.5 h-0.5 bg-pink-200 rounded-full opacity-60 animate-pulse" style={{ animationDelay: '0.6s' }} />
-                                            <div className="absolute bottom-2 left-1 w-1 h-1 bg-blue-200 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '0.9s' }} />
-                                            
-                                            {/* Cute heart icon for special segments */}
-                                            {unitIndex % 5 === 0 && (
-                                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-pink-300 text-xs animate-pulse" style={{ animationDelay: '1.2s' }}>
-                                                ♡
-                                              </div>
-                                            )}
-                                          </div>
-                                        )}
-                                        
-                                        {/* Cute milestone indicators */}
-                                        {isCompleted && unitIndex % 10 === 0 && (
-                                          <div className="absolute -right-2 top-1/2 transform -translate-y-1/2">
-                                            <div className="w-3 h-3 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-full border-2 border-white shadow-md flex items-center justify-center">
-                                              <div className="text-xs text-yellow-800">✨</div>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                  
+                    {(() => {
+                      // Filter and sort mini-game blocks
+                      let filteredBlocks = miniGameBlocks.filter(miniGame => {
+                        const matchesSearch = miniGame.name.toLowerCase().includes(searchQuery.toLowerCase());
+                        const matchesCategory = filterCategory === 'all' || miniGame.category === filterCategory;
+                        return matchesSearch && matchesCategory;
+                      });
 
-                                </div>
-                                
+                      // Sort blocks
+                      filteredBlocks.sort((a, b) => {
+                        let compareValue = 0;
+                        switch (sortBy) {
+                          case 'name':
+                            compareValue = a.name.localeCompare(b.name);
+                            break;
+                          case 'progress':
+                            const progressA = getProgressForMiniGame(a.id).progress;
+                            const progressB = getProgressForMiniGame(b.id).progress;
+                            compareValue = progressA - progressB;
+                            break;
+                          case 'category':
+                            compareValue = a.category.localeCompare(b.category);
+                            break;
+                          case 'frequency':
+                            compareValue = a.frequencyValue - b.frequencyValue;
+                            break;
+                        }
+                        return sortOrder === 'asc' ? compareValue : -compareValue;
+                      });
+
+                      return filteredBlocks.map(miniGame => {
+                        const progressData = getProgressForMiniGame(miniGame.id);
+                        const category = categoryOptions.find(cat => cat.value === miniGame.category);
+                        
+                        return (
+                          <div key={miniGame.id} className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border shadow-sm flex flex-col min-h-[300px]">
+                            {/* Header - Fixed height */}
+                            <div className="flex items-start mb-6 h-[4rem]">
+                              <span className="text-lg mr-2 mt-1">{getCategoryIcon(miniGame.category)}</span>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-sm text-gray-900 leading-tight">{miniGame.name}</h4>
                               </div>
                             </div>
                             
-                            {/* Enhanced percentage display underneath */}
-                            <div className="text-center">
-                              <div className="relative inline-block">
-                                <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm">
-                                  {progressData.progress}%
+                            {/* Progress Bar Container - Anchored from bottom */}
+                            <div className="flex flex-col items-center justify-end flex-1">
+                              <div className="relative mb-3">
+                                {/* Outer glow container */}
+                                <div className="absolute -inset-2 rounded-full opacity-40 blur-md transition-all duration-500"
+                                     style={{ backgroundColor: miniGame.color }}>
                                 </div>
-                                {progressData.progress === 100 && (
-                                  <div className="absolute -top-1 -right-3 text-yellow-400 animate-bounce">
-                                    🏆
+                                
+                                {/* Decorative sparkles around the bar */}
+                                <div className="absolute -top-2 -left-2 w-2 h-2 bg-yellow-300 rounded-full animate-pulse opacity-60"></div>
+                                <div className="absolute -top-1 -right-3 w-1.5 h-1.5 bg-pink-300 rounded-full animate-pulse opacity-70" style={{ animationDelay: '0.5s' }}></div>
+                                <div className="absolute -bottom-2 -left-3 w-1 h-1 bg-purple-300 rounded-full animate-pulse opacity-50" style={{ animationDelay: '1s' }}></div>
+                                <div className="absolute -bottom-1 -right-2 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse opacity-60" style={{ animationDelay: '1.5s' }}></div>
+                                
+                                {/* Main progress container - Wider and Cuter */}
+                                <div className="relative w-16 h-40 bg-gradient-to-b from-white via-gray-50 to-gray-100 rounded-full p-2 shadow-lg border-2 border-white" style={{ 
+                                  boxShadow: `0 4px 20px ${miniGame.color}20, inset 0 2px 4px rgba(0,0,0,0.1)` 
+                                }}>
+                                  <div className="relative w-full h-full flex flex-col-reverse">
+                                    {Array.from({ length: Math.min(miniGame.frequencyValue, 18) }, (_, index) => {
+                                      const unitIndex = index + 1;
+                                      const isCompleted = unitIndex <= progressData.completed;
+                                      const segmentHeight = miniGame.frequencyValue > 0 ? Math.max(100 / Math.min(miniGame.frequencyValue, 18), 4) : 5;
+                                      
+                                      return (
+                                        <div
+                                          key={index}
+                                          className="relative transition-all duration-500 ease-out"
+                                          style={{ 
+                                            height: `${segmentHeight}%`,
+                                            marginBottom: index < Math.min(miniGame.frequencyValue, 18) - 1 ? '2px' : '0'
+                                          }}
+                                        >
+                                          <div 
+                                            className={`w-full h-full rounded-lg transition-all duration-700 ease-out ${
+                                              isCompleted 
+                                                ? 'opacity-100 transform scale-100 shadow-md' 
+                                                : 'opacity-30 transform scale-95'
+                                            }`}
+                                            style={{ 
+                                              background: isCompleted 
+                                                ? `linear-gradient(135deg, ${miniGame.color}E6, ${miniGame.color}, ${miniGame.color}CC)`
+                                                : 'linear-gradient(135deg, #F8FAFC, #F1F5F9, #E2E8F0)',
+                                              boxShadow: isCompleted 
+                                                ? `0 3px 12px ${miniGame.color}50, inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -1px 2px ${miniGame.color}30` 
+                                                : 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 -1px 2px rgba(255,255,255,0.8)',
+                                              border: isCompleted ? `1px solid ${miniGame.color}40` : '1px solid rgba(226, 232, 240, 0.8)'
+                                            }}
+                                          />
+                                          
+                                          {/* Enhanced line marker separator with cute styling */}
+                                          {index < Math.min(miniGame.frequencyValue, 18) - 1 && (
+                                            <div className="absolute -top-1.5 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-gradient-to-r from-transparent via-white to-transparent rounded-full shadow-lg border border-gray-100" />
+                                          )}
+                                          
+                                          {/* Enhanced sparkle effects for completed segments */}
+                                          {isCompleted && (
+                                            <div className="absolute inset-0 rounded-lg overflow-hidden">
+                                              <div className="absolute top-1 left-1.5 w-1.5 h-1.5 bg-white rounded-full opacity-80 animate-pulse shadow-sm" />
+                                              <div className="absolute top-2 right-1 w-1 h-1 bg-yellow-200 rounded-full opacity-70 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                                              <div className="absolute bottom-1.5 right-2 w-0.5 h-0.5 bg-pink-200 rounded-full opacity-60 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                                              <div className="absolute bottom-2 left-1 w-1 h-1 bg-blue-200 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '0.9s' }} />
+                                              
+                                              {/* Cute heart icon for special segments */}
+                                              {unitIndex % 5 === 0 && (
+                                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-pink-300 text-xs animate-pulse" style={{ animationDelay: '1.2s' }}>
+                                                  ♡
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+                                          
+                                          {/* Cute milestone indicators */}
+                                          {isCompleted && unitIndex % 10 === 0 && (
+                                            <div className="absolute -right-2 top-1/2 transform -translate-y-1/2">
+                                              <div className="w-3 h-3 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-full border-2 border-white shadow-md flex items-center justify-center">
+                                                <div className="text-xs text-yellow-800">✨</div>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
                                   </div>
-                                )}
-                                {progressData.progress >= 50 && progressData.progress < 100 && (
-                                  <div className="absolute -top-1 -right-2 text-green-400 animate-pulse">
-                                    ⭐
-                                  </div>
-                                )}
+                                </div>
                               </div>
                               
-                              {/* Completion ratio underneath percentage */}
-                              <div className="mt-2">
-                                <div className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full shadow-sm">
-                                  {progressData.completed}/{progressData.total}
+                              {/* Enhanced percentage display underneath */}
+                              <div className="text-center">
+                                <div className="relative inline-block">
+                                  <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm">
+                                    {progressData.progress}%
+                                  </div>
+                                  {progressData.progress === 100 && (
+                                    <div className="absolute -top-1 -right-3 text-yellow-400 animate-bounce">
+                                      🏆
+                                    </div>
+                                  )}
+                                  {progressData.progress >= 50 && progressData.progress < 100 && (
+                                    <div className="absolute -top-1 -right-2 text-green-400 animate-pulse">
+                                      ⭐
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Completion ratio underneath percentage */}
+                                <div className="mt-2">
+                                  <div className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full shadow-sm">
+                                    {progressData.completed}/{progressData.total}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          
-
-                          
-
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                   </div>
                 </CardContent>
               </Card>
