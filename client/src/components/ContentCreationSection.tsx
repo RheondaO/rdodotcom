@@ -1314,10 +1314,11 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 rounded-xl">
+            <TabsList className="grid w-full grid-cols-5 rounded-xl">
               <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
               <TabsTrigger value="progress" className="rounded-lg">Progress Tracker</TabsTrigger>
               <TabsTrigger value="designs" className="rounded-lg">Design Queue</TabsTrigger>
+              <TabsTrigger value="calendar" className="rounded-lg">Content Calendar</TabsTrigger>
               <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
             </TabsList>
 
@@ -1668,6 +1669,277 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
               </Card>
             </TabsContent>
 
+            <TabsContent value="calendar" className="space-y-6">
+              <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <CalendarDays className="text-purple-500 mr-3 h-5 w-5" />
+                    Content Calendar - Approved Designs
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Schedule and manage approved content designs from all brands
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const approvedDesigns = miniGameDesigns.filter(d => d.status === 'approved');
+                    const designsByDate = approvedDesigns.reduce((acc: Record<string, any[]>, design) => {
+                      if (design.targetDate) {
+                        const date = design.targetDate;
+                        if (!acc[date]) acc[date] = [];
+                        acc[date].push(design);
+                      }
+                      return acc;
+                    }, {});
+                    const calendarDates = calendarView === 'month' 
+                      ? getMonthCalendarDates(currentDate) 
+                      : getWeekCalendarDates(currentDate);
+                    
+                    return (
+                      <div className="space-y-4">
+                        {/* Calendar Navigation */}
+                        <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigateCalendar('prev')}
+                                className="h-8 w-8 p-0"
+                              >
+                                <ChevronLeft className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigateCalendar('next')}
+                                className="h-8 w-8 p-0"
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              onClick={() => setShowDatePicker(!showDatePicker)}
+                              className="text-lg font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-1 h-auto"
+                            >
+                              {calendarView === 'month' 
+                                ? format(currentDate, 'MMMM yyyy')
+                                : `${format(getWeekCalendarDates(currentDate)[0], 'MMM d')} - ${format(getWeekCalendarDates(currentDate)[6], 'MMM d, yyyy')}`
+                              }
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentDate(new Date())}
+                              className="text-xs"
+                            >
+                              Today
+                            </Button>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                              {approvedDesigns.length} Approved
+                            </Badge>
+                            
+                            <div className="flex bg-white dark:bg-gray-700 rounded-lg p-1">
+                              <Button
+                                variant={calendarView === 'month' ? 'default' : 'ghost'}
+                                size="sm"
+                                onClick={() => setCalendarView('month')}
+                                className="text-xs px-3 py-1"
+                              >
+                                Month
+                              </Button>
+                              <Button
+                                variant={calendarView === 'week' ? 'default' : 'ghost'}
+                                size="sm"
+                                onClick={() => setCalendarView('week')}
+                                className="text-xs px-3 py-1"
+                              >
+                                Week
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Month Year Selector */}
+                        {showDatePicker && (
+                          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-lg">
+                            <div className="grid grid-cols-2 gap-4">
+                              {/* Month Selector */}
+                              <div>
+                                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                  Month
+                                </Label>
+                                <Select 
+                                  value={currentDate.getMonth().toString()}
+                                  onValueChange={(value) => {
+                                    const newDate = new Date(currentDate);
+                                    newDate.setMonth(parseInt(value));
+                                    setCurrentDate(newDate);
+                                  }}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 12 }, (_, i) => (
+                                      <SelectItem key={i} value={i.toString()}>
+                                        {format(new Date(2024, i, 1), 'MMMM')}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Year Selector */}
+                              <div>
+                                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                  Year
+                                </Label>
+                                <Select 
+                                  value={currentDate.getFullYear().toString()}
+                                  onValueChange={(value) => {
+                                    const newDate = new Date(currentDate);
+                                    newDate.setFullYear(parseInt(value));
+                                    setCurrentDate(newDate);
+                                  }}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Array.from({ length: 10 }, (_, i) => {
+                                      const year = new Date().getFullYear() - 2 + i;
+                                      return (
+                                        <SelectItem key={year} value={year.toString()}>
+                                          {year}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <div className="flex justify-end gap-2 mt-4">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowDatePicker(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => setShowDatePicker(false)}
+                                className="bg-purple-500 hover:bg-purple-600 text-white"
+                              >
+                                Apply
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Calendar Grid */}
+                        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                          {/* Week Days Header */}
+                          <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800">
+                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                              <div key={day} className="p-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 last:border-r-0">
+                                {day}
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Calendar Dates */}
+                          <div className={`grid grid-cols-7 ${calendarView === 'week' ? 'min-h-[300px]' : ''}`}>
+                            {calendarDates.map((date, index) => {
+                              const dateStr = format(date, 'yyyy-MM-dd');
+                              const designs = designsByDate[dateStr] || [];
+                              const isToday = dateStr === format(new Date(), 'yyyy-MM-dd');
+                              const isCurrentMonth = calendarView === 'week' || date.getMonth() === currentDate.getMonth();
+                              const hasContent = designs.length > 0;
+                              
+                              return (
+                                <div
+                                  key={index}
+                                  className={`min-h-[120px] p-2 border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 ${
+                                    calendarView === 'month' && index >= calendarDates.length - 7 ? 'border-b-0' : ''
+                                  } ${!isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'} hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
+                                >
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className={`text-sm font-medium ${
+                                      isToday 
+                                        ? 'bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center' 
+                                        : isCurrentMonth 
+                                          ? 'text-gray-900 dark:text-white' 
+                                          : 'text-gray-400'
+                                    }`}>
+                                      {date.getDate()}
+                                    </span>
+                                    {hasContent && (
+                                      <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full">
+                                        {designs.length}
+                                      </span>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Content Items */}
+                                  <div className="space-y-1">
+                                    {designs.slice(0, calendarView === 'week' ? 10 : 3).map((design) => {
+                                      const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
+                                      return (
+                                        <div
+                                          key={design.id}
+                                          className="text-xs p-1.5 rounded-md border-l-2 bg-green-50 dark:bg-green-900/20 border-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 cursor-pointer transition-colors"
+                                          style={{
+                                            borderLeftColor: miniGame?.color || '#10B981'
+                                          }}
+                                          title={`${design.title} - ${miniGame?.name || 'Content'}`}
+                                        >
+                                          <div className="font-medium text-gray-900 dark:text-white truncate">
+                                            {design.title}
+                                          </div>
+                                          {calendarView === 'week' && (
+                                            <div className="text-gray-500 truncate">
+                                              {miniGame?.name}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                    
+                                    {designs.length > (calendarView === 'week' ? 10 : 3) && (
+                                      <div className="text-xs text-gray-500 p-1">
+                                        +{designs.length - (calendarView === 'week' ? 10 : 3)} more
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {approvedDesigns.length === 0 && (
+                          <div className="text-center py-12 text-gray-500">
+                            <CalendarDays className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                            <h3 className="text-lg font-medium mb-2">No Approved Designs</h3>
+                            <p className="text-sm">Approved designs from all brands will appear here</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             <TabsContent value="analytics" className="space-y-6">
               <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
@@ -1689,271 +1961,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
         </>
       ) : (
         <div className="space-y-6">
-          {activeBrand === "contentCalendar" ? (
-            /* Content Calendar View */
-            <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <CalendarDays className="text-purple-500 mr-3 h-5 w-5" />
-                  Content Calendar - Approved Designs
-                </CardTitle>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Schedule and manage approved content designs from all brands
-                </p>
-              </CardHeader>
-              <CardContent>
-                {(() => {
-                  const approvedDesigns = getApprovedDesigns();
-                  const designsByDate = getDesignsByDate(approvedDesigns);
-                  const calendarDates = calendarView === 'month' 
-                    ? getMonthCalendarDates(currentDate) 
-                    : getWeekCalendarDates(currentDate);
-                  
-                  return (
-                    <div className="space-y-4">
-                      {/* Calendar Navigation */}
-                      <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => navigateCalendar('prev')}
-                              className="h-8 w-8 p-0"
-                            >
-                              <ChevronLeft className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => navigateCalendar('next')}
-                              className="h-8 w-8 p-0"
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          
-                          <Button
-                            variant="ghost"
-                            onClick={() => setShowDatePicker(!showDatePicker)}
-                            className="text-lg font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-1 h-auto"
-                          >
-                            {calendarView === 'month' 
-                              ? format(currentDate, 'MMMM yyyy')
-                              : `${format(getWeekCalendarDates(currentDate)[0], 'MMM d')} - ${format(getWeekCalendarDates(currentDate)[6], 'MMM d, yyyy')}`
-                            }
-                          </Button>
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentDate(new Date())}
-                            className="text-xs"
-                          >
-                            Today
-                          </Button>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="bg-green-100 text-green-800">
-                            {approvedDesigns.length} Approved
-                          </Badge>
-                          
-                          <div className="flex bg-white dark:bg-gray-700 rounded-lg p-1">
-                            <Button
-                              variant={calendarView === 'month' ? 'default' : 'ghost'}
-                              size="sm"
-                              onClick={() => setCalendarView('month')}
-                              className="text-xs px-3 py-1"
-                            >
-                              Month
-                            </Button>
-                            <Button
-                              variant={calendarView === 'week' ? 'default' : 'ghost'}
-                              size="sm"
-                              onClick={() => setCalendarView('week')}
-                              className="text-xs px-3 py-1"
-                            >
-                              Week
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Month Year Selector */}
-                      {showDatePicker && (
-                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-lg">
-                          <div className="grid grid-cols-2 gap-4">
-                            {/* Month Selector */}
-                            <div>
-                              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                                Month
-                              </Label>
-                              <Select 
-                                value={currentDate.getMonth().toString()}
-                                onValueChange={(value) => {
-                                  const newDate = new Date(currentDate);
-                                  newDate.setMonth(parseInt(value));
-                                  setCurrentDate(newDate);
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Array.from({ length: 12 }, (_, i) => (
-                                    <SelectItem key={i} value={i.toString()}>
-                                      {format(new Date(2024, i, 1), 'MMMM')}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            {/* Year Selector */}
-                            <div>
-                              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-                                Year
-                              </Label>
-                              <Select 
-                                value={currentDate.getFullYear().toString()}
-                                onValueChange={(value) => {
-                                  const newDate = new Date(currentDate);
-                                  newDate.setFullYear(parseInt(value));
-                                  setCurrentDate(newDate);
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Array.from({ length: 10 }, (_, i) => {
-                                    const year = new Date().getFullYear() - 2 + i;
-                                    return (
-                                      <SelectItem key={year} value={year.toString()}>
-                                        {year}
-                                      </SelectItem>
-                                    );
-                                  })}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-
-                          <div className="flex justify-end gap-2 mt-4">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setShowDatePicker(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => setShowDatePicker(false)}
-                              className="bg-purple-500 hover:bg-purple-600 text-white"
-                            >
-                              Apply
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Calendar Grid */}
-                      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                        {/* Week Days Header */}
-                        <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800">
-                          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                            <div key={day} className="p-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 last:border-r-0">
-                              {day}
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Calendar Dates */}
-                        <div className={`grid grid-cols-7 ${calendarView === 'week' ? 'min-h-[300px]' : ''}`}>
-                          {calendarDates.map((date, index) => {
-                            const dateStr = format(date, 'yyyy-MM-dd');
-                            const designs = designsByDate[dateStr] || [];
-                            const isToday = dateStr === format(new Date(), 'yyyy-MM-dd');
-                            const isCurrentMonth = calendarView === 'week' || date.getMonth() === currentDate.getMonth();
-                            const hasContent = designs.length > 0;
-                            
-                            return (
-                              <div
-                                key={index}
-                                className={`min-h-[120px] p-2 border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 ${
-                                  calendarView === 'month' && index >= calendarDates.length - 7 ? 'border-b-0' : ''
-                                } ${!isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'} hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
-                              >
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className={`text-sm font-medium ${
-                                    isToday 
-                                      ? 'bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center' 
-                                      : isCurrentMonth 
-                                        ? 'text-gray-900 dark:text-white' 
-                                        : 'text-gray-400'
-                                  }`}>
-                                    {date.getDate()}
-                                  </span>
-                                  {hasContent && (
-                                    <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full">
-                                      {designs.length}
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                {/* Content Items */}
-                                <div className="space-y-1">
-                                  {designs.slice(0, calendarView === 'week' ? 10 : 3).map((design, designIndex) => {
-                                    const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
-                                    return (
-                                      <div
-                                        key={design.id}
-                                        className="text-xs p-1.5 rounded-md border-l-2 bg-green-50 dark:bg-green-900/20 border-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 cursor-pointer transition-colors"
-                                        style={{
-                                          borderLeftColor: miniGame?.color || '#10B981'
-                                        }}
-                                        title={`${design.title} - ${miniGame?.name || 'Content'}`}
-                                      >
-                                        <div className="font-medium text-gray-900 dark:text-white truncate">
-                                          {design.title}
-                                        </div>
-                                        {calendarView === 'week' && (
-                                          <div className="text-gray-500 truncate">
-                                            {miniGame?.name}
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                  
-                                  {designs.length > (calendarView === 'week' ? 10 : 3) && (
-                                    <div className="text-xs text-gray-500 p-1">
-                                      +{designs.length - (calendarView === 'week' ? 10 : 3)} more
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {approvedDesigns.length === 0 && (
-                        <div className="text-center py-12 text-gray-500">
-                          <CalendarDays className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                          <h3 className="text-lg font-medium mb-2">No Approved Designs</h3>
-                          <p className="text-sm">Approved designs from all brands will appear here</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-              </CardContent>
-            </Card>
-          ) : (
-            /* Other Brand Content Management */
+          {/* Other Brand Content Management */}
             <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -1995,11 +2003,8 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                 </Tabs>
               </CardContent>
             </Card>
-          )}
         </div>
       )}
-
-
     </section>
   );
 }
