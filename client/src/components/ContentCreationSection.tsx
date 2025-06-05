@@ -620,14 +620,15 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
             <button
               key={brand.id}
               onClick={() => setActiveBrand(brand.id)}
-              className={`flex-1 flex items-center justify-center px-4 py-3 rounded-lg transition-all duration-200 ${
+              className={`flex-1 flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg transition-all duration-200 ${
                 activeBrand === brand.id
                   ? 'bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-400'
                   : 'text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400'
               }`}
             >
-              <span className="text-lg mr-2">{brand.icon}</span>
-              <span className="text-sm font-medium hidden sm:block">{brand.name}</span>
+              <span className="text-lg mr-1 sm:mr-2">{brand.icon}</span>
+              <span className="text-xs sm:text-sm font-medium hidden sm:block whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px] lg:max-w-none">{brand.name}</span>
+              <span className="text-xs font-medium sm:hidden">{brand.id === "rotationONLY" ? "rotation" : brand.name}</span>
             </button>
           ))}
         </div>
