@@ -1940,16 +1940,24 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             </div>
                           </div>
                           
-                          {/* Enhanced Vertical Progress Bar */}
+                          {/* Enhanced Wider & Cuter Vertical Progress Bar */}
                           <div className="flex flex-col items-center mb-4">
                             <div className="relative mb-3">
                               {/* Outer glow container */}
-                              <div className="absolute -inset-1 rounded-full opacity-30 blur-sm transition-all duration-500"
+                              <div className="absolute -inset-2 rounded-full opacity-40 blur-md transition-all duration-500"
                                    style={{ backgroundColor: miniGame.color }}>
                               </div>
                               
-                              {/* Main progress container */}
-                              <div className="relative w-10 h-36 bg-gradient-to-b from-gray-100 to-gray-200 rounded-full p-1.5 shadow-inner border border-gray-300">
+                              {/* Decorative sparkles around the bar */}
+                              <div className="absolute -top-2 -left-2 w-2 h-2 bg-yellow-300 rounded-full animate-pulse opacity-60"></div>
+                              <div className="absolute -top-1 -right-3 w-1.5 h-1.5 bg-pink-300 rounded-full animate-pulse opacity-70" style={{ animationDelay: '0.5s' }}></div>
+                              <div className="absolute -bottom-2 -left-3 w-1 h-1 bg-purple-300 rounded-full animate-pulse opacity-50" style={{ animationDelay: '1s' }}></div>
+                              <div className="absolute -bottom-1 -right-2 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse opacity-60" style={{ animationDelay: '1.5s' }}></div>
+                              
+                              {/* Main progress container - Wider and Cuter */}
+                              <div className="relative w-16 h-40 bg-gradient-to-b from-white via-gray-50 to-gray-100 rounded-full p-2 shadow-lg border-2 border-white" style={{ 
+                                boxShadow: `0 4px 20px ${miniGame.color}20, inset 0 2px 4px rgba(0,0,0,0.1)` 
+                              }}>
                                 <div className="relative w-full h-full flex flex-col-reverse">
                                   {Array.from({ length: Math.min(miniGame.frequencyValue, 18) }, (_, index) => {
                                     const unitIndex = index + 1;
@@ -1962,35 +1970,54 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                         className="relative transition-all duration-500 ease-out"
                                         style={{ 
                                           height: `${segmentHeight}%`,
-                                          marginBottom: index < Math.min(miniGame.frequencyValue, 18) - 1 ? '1.5px' : '0'
+                                          marginBottom: index < Math.min(miniGame.frequencyValue, 18) - 1 ? '2px' : '0'
                                         }}
                                       >
                                         <div 
-                                          className={`w-full h-full rounded-md transition-all duration-700 ease-out ${
+                                          className={`w-full h-full rounded-lg transition-all duration-700 ease-out ${
                                             isCompleted 
-                                              ? 'opacity-100 transform scale-100 shadow-sm' 
-                                              : 'opacity-25 transform scale-90'
+                                              ? 'opacity-100 transform scale-100 shadow-md' 
+                                              : 'opacity-30 transform scale-95'
                                           }`}
                                           style={{ 
                                             background: isCompleted 
-                                              ? `linear-gradient(135deg, ${miniGame.color}, ${miniGame.color}CC)`
-                                              : 'linear-gradient(135deg, #F3F4F6, #E5E7EB)',
+                                              ? `linear-gradient(135deg, ${miniGame.color}E6, ${miniGame.color}, ${miniGame.color}CC)`
+                                              : 'linear-gradient(135deg, #F8FAFC, #F1F5F9, #E2E8F0)',
                                             boxShadow: isCompleted 
-                                              ? `0 2px 8px ${miniGame.color}40, inset 0 1px 0 rgba(255,255,255,0.3)` 
-                                              : 'inset 0 1px 2px rgba(0,0,0,0.1)'
+                                              ? `0 3px 12px ${miniGame.color}50, inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -1px 2px ${miniGame.color}30` 
+                                              : 'inset 0 2px 4px rgba(0,0,0,0.1), inset 0 -1px 2px rgba(255,255,255,0.8)',
+                                            border: isCompleted ? `1px solid ${miniGame.color}40` : '1px solid rgba(226, 232, 240, 0.8)'
                                           }}
                                         />
                                         
-                                        {/* Enhanced line marker separator */}
+                                        {/* Enhanced line marker separator with cute styling */}
                                         {index < Math.min(miniGame.frequencyValue, 18) - 1 && (
-                                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent rounded-full shadow-sm" />
+                                          <div className="absolute -top-1.5 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-gradient-to-r from-transparent via-white to-transparent rounded-full shadow-lg border border-gray-100" />
                                         )}
                                         
-                                        {/* Sparkle effect for completed segments */}
+                                        {/* Enhanced sparkle effects for completed segments */}
                                         {isCompleted && (
-                                          <div className="absolute inset-0 rounded-md overflow-hidden">
-                                            <div className="absolute top-1 left-1 w-1 h-1 bg-white rounded-full opacity-60 animate-pulse" />
-                                            <div className="absolute bottom-1 right-1 w-0.5 h-0.5 bg-white rounded-full opacity-40" />
+                                          <div className="absolute inset-0 rounded-lg overflow-hidden">
+                                            <div className="absolute top-1 left-1.5 w-1.5 h-1.5 bg-white rounded-full opacity-80 animate-pulse shadow-sm" />
+                                            <div className="absolute top-2 right-1 w-1 h-1 bg-yellow-200 rounded-full opacity-70 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                                            <div className="absolute bottom-1.5 right-2 w-0.5 h-0.5 bg-pink-200 rounded-full opacity-60 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                                            <div className="absolute bottom-2 left-1 w-1 h-1 bg-blue-200 rounded-full opacity-50 animate-pulse" style={{ animationDelay: '0.9s' }} />
+                                            
+                                            {/* Cute heart icon for special segments */}
+                                            {unitIndex % 5 === 0 && (
+                                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-pink-300 text-xs animate-pulse" style={{ animationDelay: '1.2s' }}>
+                                                ♡
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                        
+                                        {/* Cute milestone indicators */}
+                                        {isCompleted && unitIndex % 10 === 0 && (
+                                          <div className="absolute -right-2 top-1/2 transform -translate-y-1/2">
+                                            <div className="w-3 h-3 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-full border-2 border-white shadow-md flex items-center justify-center">
+                                              <div className="text-xs text-yellow-800">✨</div>
+                                            </div>
                                           </div>
                                         )}
                                       </div>
@@ -2007,19 +2034,31 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                   )}
                                 </div>
                                 
-                                {/* Progress ratio overlay */}
-                                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
-                                  <div className="text-xs font-bold text-white bg-black bg-opacity-50 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
-                                    {progressData.completed}/{progressData.total}
+                                {/* Cute progress ratio overlay */}
+                                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                                  <div className="text-xs font-bold text-white bg-gradient-to-r from-gray-700 to-gray-800 px-2 py-1 rounded-full shadow-lg border-2 border-white backdrop-blur-sm">
+                                    <span className="drop-shadow-sm">{progressData.completed}/{progressData.total}</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
                             
-                            {/* Percentage display underneath */}
+                            {/* Enhanced percentage display underneath */}
                             <div className="text-center">
-                              <div className="text-lg font-bold" style={{ color: miniGame.color }}>
-                                {progressData.progress}%
+                              <div className="relative inline-block">
+                                <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm">
+                                  {progressData.progress}%
+                                </div>
+                                {progressData.progress === 100 && (
+                                  <div className="absolute -top-1 -right-3 text-yellow-400 animate-bounce">
+                                    🏆
+                                  </div>
+                                )}
+                                {progressData.progress >= 50 && progressData.progress < 100 && (
+                                  <div className="absolute -top-1 -right-2 text-green-400 animate-pulse">
+                                    ⭐
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
