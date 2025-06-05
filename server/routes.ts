@@ -12,7 +12,9 @@ import {
   insertContentProgressSchema,
   insertHabitSchema,
   insertHabitLogSchema,
-  insertTodoSchema
+  insertTodoSchema,
+  insertMiniGameBlockSchema,
+  insertMiniGameDesignSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -329,6 +331,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(timeBlock);
     } catch (error) {
       res.status(400).json({ error: "Invalid time block data" });
+    }
+  });
+
+  // Mini Game Blocks
+  app.get("/api/mini-game-blocks", async (req, res) => {
+    try {
+      const blocks = await storage.getAllMiniGameBlocks();
+      res.json(blocks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mini game blocks" });
+    }
+  });
+
+  app.post("/api/mini-game-blocks", async (req, res) => {
+    try {
+      const data = insertMiniGameBlockSchema.parse(req.body);
+      const block = await storage.createMiniGameBlock(data);
+      res.json(block);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid mini game block data" });
+    }
+  });
+
+  // Mini Game Designs
+  app.get("/api/mini-game-designs", async (req, res) => {
+    try {
+      const designs = await storage.getAllMiniGameDesigns();
+      res.json(designs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch mini game designs" });
+    }
+  });
+
+  app.post("/api/mini-game-designs", async (req, res) => {
+    try {
+      const data = insertMiniGameDesignSchema.parse(req.body);
+      const design = await storage.createMiniGameDesign(data);
+      res.json(design);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid mini game design data" });
+    }
+  });
+
+  // Moon Phase Scheduling
+  app.post("/api/schedule-moon-phases", async (req, res) => {
+    try {
+      const { year, month } = req.body;
+      if (!year || !month) {
+        return res.status(400).json({ error: "Year and month are required" });
+      }
+      
+      await storage.scheduleContentForMoonPhases(year, month);
+      res.json({ success: true, message: `Content scheduled for ${month}/${year}` });
+    } catch (error) {
+      console.error("Moon phase scheduling error:", error);
+      res.status(500).json({ error: "Failed to schedule moon phase content" });
     }
   });
 

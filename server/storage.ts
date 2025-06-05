@@ -48,7 +48,11 @@ import {
   type AppSprint,
   type InsertAppSprint,
   type AppTimeEntry,
-  type InsertAppTimeEntry
+  type InsertAppTimeEntry,
+  type MiniGameBlock,
+  type InsertMiniGameBlock,
+  type MiniGameDesign,
+  type InsertMiniGameDesign
 } from "@shared/schema";
 
 export interface IStorage {
@@ -168,6 +172,22 @@ export interface IStorage {
   createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry>;
   updateAppTimeEntry(id: number, updates: Partial<AppTimeEntry>): Promise<AppTimeEntry>;
   deleteAppTimeEntry(id: number): Promise<void>;
+
+  // Mini Game Blocks
+  getAllMiniGameBlocks(): Promise<MiniGameBlock[]>;
+  createMiniGameBlock(block: InsertMiniGameBlock): Promise<MiniGameBlock>;
+  updateMiniGameBlock(id: number, updates: Partial<MiniGameBlock>): Promise<MiniGameBlock>;
+  deleteMiniGameBlock(id: number): Promise<void>;
+
+  // Mini Game Designs
+  getAllMiniGameDesigns(): Promise<MiniGameDesign[]>;
+  getMiniGameDesignsByBlock(blockId: number): Promise<MiniGameDesign[]>;
+  createMiniGameDesign(design: InsertMiniGameDesign): Promise<MiniGameDesign>;
+  updateMiniGameDesign(id: number, updates: Partial<MiniGameDesign>): Promise<MiniGameDesign>;
+  deleteMiniGameDesign(id: number): Promise<void>;
+  
+  // Scheduling
+  scheduleContentForMoonPhases(year: number, month: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -194,6 +214,8 @@ export class MemStorage implements IStorage {
   private appTasks: Map<number, AppTask> = new Map();
   private appSprints: Map<number, AppSprint> = new Map();
   private appTimeEntries: Map<number, AppTimeEntry> = new Map();
+  private miniGameBlocks: Map<number, MiniGameBlock> = new Map();
+  private miniGameDesigns: Map<number, MiniGameDesign> = new Map();
   private currentId = 1;
 
   constructor() {
@@ -872,6 +894,166 @@ export class MemStorage implements IStorage {
     };
     this.contentProgress.set(newProgress.id, newProgress);
     return newProgress;
+  }
+
+  // Mini Game Blocks methods
+  async getAllMiniGameBlocks(): Promise<MiniGameBlock[]> {
+    return Array.from(this.miniGameBlocks.values());
+  }
+
+  async createMiniGameBlock(block: InsertMiniGameBlock): Promise<MiniGameBlock> {
+    const newBlock: MiniGameBlock = {
+      id: this.currentId++,
+      ...block,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.miniGameBlocks.set(newBlock.id, newBlock);
+    return newBlock;
+  }
+
+  async updateMiniGameBlock(id: number, updates: Partial<MiniGameBlock>): Promise<MiniGameBlock> {
+    const block = this.miniGameBlocks.get(id);
+    if (!block) {
+      throw new Error("Mini game block not found");
+    }
+
+    const updated = { ...block, ...updates, updatedAt: new Date() };
+    this.miniGameBlocks.set(id, updated);
+    return updated;
+  }
+
+  async deleteMiniGameBlock(id: number): Promise<void> {
+    this.miniGameBlocks.delete(id);
+  }
+
+  // Mini Game Designs methods
+  async getAllMiniGameDesigns(): Promise<MiniGameDesign[]> {
+    return Array.from(this.miniGameDesigns.values());
+  }
+
+  async getMiniGameDesignsByBlock(blockId: number): Promise<MiniGameDesign[]> {
+    return Array.from(this.miniGameDesigns.values()).filter(design => design.miniGameBlockId === blockId);
+  }
+
+  async createMiniGameDesign(design: InsertMiniGameDesign): Promise<MiniGameDesign> {
+    const newDesign: MiniGameDesign = {
+      id: this.currentId++,
+      ...design,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.miniGameDesigns.set(newDesign.id, newDesign);
+    return newDesign;
+  }
+
+  async updateMiniGameDesign(id: number, updates: Partial<MiniGameDesign>): Promise<MiniGameDesign> {
+    const design = this.miniGameDesigns.get(id);
+    if (!design) {
+      throw new Error("Mini game design not found");
+    }
+
+    const updated = { ...design, ...updates, updatedAt: new Date() };
+    this.miniGameDesigns.set(id, updated);
+    return updated;
+  }
+
+  async deleteMiniGameDesign(id: number): Promise<void> {
+    this.miniGameDesigns.delete(id);
+  }
+
+  // Moon phase calculation helpers
+  private calculateMoonPhase(date: Date): string {
+    // This is a simplified moon phase calculation
+    // For production, you'd want to use a more accurate astronomical library
+    const referenceNewMoon = new Date('2025-01-13'); // Known new moon date
+    const lunarCycle = 29.53058867; // days in lunar cycle
+    
+    const daysSinceReference = (date.getTime() - referenceNewMoon.getTime()) / (1000 * 60 * 60 * 24);
+    const phaseValue = ((daysSinceReference % lunarCycle) + lunarCycle) % lunarCycle;
+    
+    if (phaseValue < 1.84566) return 'new_moon';
+    if (phaseValue < 5.53699) return 'waxing_crescent';
+    if (phaseValue < 9.22831) return 'first_quarter';
+    if (phaseValue < 12.91963) return 'waxing_gibbous';
+    if (phaseValue < 16.61096) return 'full_moon';
+    if (phaseValue < 20.30228) return 'waning_gibbous';
+    if (phaseValue < 23.99361) return 'third_quarter';
+    return 'waning_crescent';
+  }
+
+  private getMoonPhaseDates(year: number, month: number): { date: Date; phase: string }[] {
+    const dates: { date: Date; phase: string }[] = [];
+    const daysInMonth = new Date(year, month, 0).getDate();
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month - 1, day);
+      const phase = this.calculateMoonPhase(date);
+      const previousDay = day > 1 ? this.calculateMoonPhase(new Date(year, month - 1, day - 1)) : null;
+      
+      // Only add dates where the phase changes (moon phase events)
+      if (phase !== previousDay) {
+        dates.push({ date, phase });
+      }
+    }
+    
+    return dates;
+  }
+
+  // Scheduling method
+  async scheduleContentForMoonPhases(year: number, month: number): Promise<void> {
+    const moonPhaseDates = this.getMoonPhaseDates(year, month);
+    const blocks = await this.getAllMiniGameBlocks();
+    
+    // Define moon phase to content mappings
+    const moonPhaseContentMap: { [key: string]: string[] } = {
+      'waning_crescent': ['Written Realms'],
+      'full_moon': ['Reading'], // Add any blocks that should post on full moon
+      'new_moon': ['Moon Cycle'], // Add any blocks that should post on new moon
+      'first_quarter': ['Positive Affirmations'],
+      'third_quarter': ['She Stays On My Mind', 'The Way He Makes Me Feel']
+    };
+    
+    for (const { date, phase } of moonPhaseDates) {
+      const contentTypes = moonPhaseContentMap[phase];
+      if (!contentTypes) continue;
+      
+      for (const contentType of contentTypes) {
+        const matchingBlock = blocks.find(block => block.name === contentType);
+        if (!matchingBlock) continue;
+        
+        // Create a design for this moon phase event
+        const design: InsertMiniGameDesign = {
+          miniGameBlockId: matchingBlock.id,
+          title: `${matchingBlock.name} for ${this.getMoonPhaseName(phase)}`,
+          description: `Scheduled content for ${phase} on ${date.toDateString()}`,
+          designNotes: `Auto-scheduled for moon phase: ${phase}`,
+          status: 'designed',
+          targetDate: date.toISOString().split('T')[0],
+          designedDate: new Date().toISOString().split('T')[0],
+          reviewedDate: null,
+          approvedDate: null,
+          version: 1,
+          isTemplate: false
+        };
+        
+        await this.createMiniGameDesign(design);
+      }
+    }
+  }
+
+  private getMoonPhaseName(phase: string): string {
+    const names: { [key: string]: string } = {
+      'new_moon': 'New Moon',
+      'waxing_crescent': 'Waxing Crescent',
+      'first_quarter': 'First Quarter',
+      'waxing_gibbous': 'Waxing Gibbous',
+      'full_moon': 'Full Moon',
+      'waning_gibbous': 'Waning Gibbous',
+      'third_quarter': 'Third Quarter',
+      'waning_crescent': 'Waning Crescent'
+    };
+    return names[phase] || phase;
   }
 }
 
