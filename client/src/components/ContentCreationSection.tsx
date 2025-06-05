@@ -80,22 +80,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       hasMiniGames: true
     },
     {
-      id: "reallyObvi",
-      name: "Really Obvi Media Lab",
-      icon: "🧪",
-      color: "#3B82F6",
-      description: "Media experiments and creative projects",
-      hasMiniGames: false
-    },
-    {
-      id: "personal",
-      name: "Personal Brand",
-      icon: "✨",
-      color: "#EC4899",
-      description: "Personal content and thought leadership",
-      hasMiniGames: false
-    },
-    {
       id: "contentCalendar",
       name: "Content Calendar",
       icon: "📅",
@@ -483,8 +467,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
   // Content for other brands (without mini-games)
   const [brandContent, setBrandContent] = useState({
-    reallyObvi: [],
-    personal: [],
     contentCalendar: []
   });
 
