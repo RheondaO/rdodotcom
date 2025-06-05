@@ -523,13 +523,15 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     designNotes: string;
     targetDate: string;
     astrologicalSign: string;
+    moonPhase: string;
   }>({
     miniGameBlockId: 0,
     title: "",
     description: "",
     designNotes: "",
     targetDate: "",
-    astrologicalSign: "none"
+    astrologicalSign: "none",
+    moonPhase: "none"
   });
 
   // Frequency options
@@ -670,6 +672,62 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   </DialogHeader>
                   
                   <div className="space-y-6 py-4">
+                    {/* Astrological Sign */}
+                    <div className="space-y-2">
+                      <Label htmlFor="designAstrologicalSign" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Astrological Sign
+                      </Label>
+                      <Select 
+                        value={newDesign.astrologicalSign} 
+                        onValueChange={(value) => setNewDesign({...newDesign, astrologicalSign: value})}
+                      >
+                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                          <SelectValue placeholder="Select zodiac sign..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="none" className="rounded-lg">None</SelectItem>
+                          <SelectItem value="aquarius" className="rounded-lg">Aquarius ♒</SelectItem>
+                          <SelectItem value="aries" className="rounded-lg">Aries ♈</SelectItem>
+                          <SelectItem value="cancer" className="rounded-lg">Cancer ♋</SelectItem>
+                          <SelectItem value="capricorn" className="rounded-lg">Capricorn ♑</SelectItem>
+                          <SelectItem value="gemini" className="rounded-lg">Gemini ♊</SelectItem>
+                          <SelectItem value="leo" className="rounded-lg">Leo ♌</SelectItem>
+                          <SelectItem value="libra" className="rounded-lg">Libra ♎</SelectItem>
+                          <SelectItem value="pisces" className="rounded-lg">Pisces ♓</SelectItem>
+                          <SelectItem value="sagittarius" className="rounded-lg">Sagittarius ♐</SelectItem>
+                          <SelectItem value="scorpio" className="rounded-lg">Scorpio ♏</SelectItem>
+                          <SelectItem value="taurus" className="rounded-lg">Taurus ♉</SelectItem>
+                          <SelectItem value="virgo" className="rounded-lg">Virgo ♍</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Moon Phase */}
+                    <div className="space-y-2">
+                      <Label htmlFor="designMoonPhase" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Moon Phase
+                      </Label>
+                      <Select 
+                        value={newDesign.moonPhase} 
+                        onValueChange={(value) => setNewDesign({...newDesign, moonPhase: value})}
+                      >
+                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                          <SelectValue placeholder="Select moon phase..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="none" className="rounded-lg">None</SelectItem>
+                          <SelectItem value="new_moon" className="rounded-lg">New Moon 🌑</SelectItem>
+                          <SelectItem value="waxing_crescent" className="rounded-lg">Waxing Crescent 🌒</SelectItem>
+                          <SelectItem value="first_quarter" className="rounded-lg">First Quarter 🌓</SelectItem>
+                          <SelectItem value="waxing_gibbous" className="rounded-lg">Waxing Gibbous 🌔</SelectItem>
+                          <SelectItem value="full_moon" className="rounded-lg">Full Moon 🌕</SelectItem>
+                          <SelectItem value="waning_gibbous" className="rounded-lg">Waning Gibbous 🌖</SelectItem>
+                          <SelectItem value="third_quarter" className="rounded-lg">Third Quarter 🌗</SelectItem>
+                          <SelectItem value="waning_crescent" className="rounded-lg">Waning Crescent 🌘</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     {/* Mini-Game Selection */}
                     <div className="space-y-2">
                       <Label htmlFor="designMiniGame" className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -696,18 +754,49 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                       </Select>
                     </div>
 
-                    {/* Design Title */}
+                    {/* Design Title Preview */}
                     <div className="space-y-2">
-                      <Label htmlFor="designTitle" className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Design Title *
+                      <Label className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Design Title Preview
                       </Label>
-                      <Input
-                        id="designTitle"
-                        value={newDesign.title}
-                        onChange={(e) => setNewDesign({...newDesign, title: e.target.value})}
-                        placeholder="e.g., Summer Solstice Affirmations"
-                        className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors"
-                      />
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-600">
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
+                          {(() => {
+                            const selectedMiniGame = miniGameBlocks.find(mg => mg.id === newDesign.miniGameBlockId);
+                            const selectedSign = astrologicalSignOptions.find(sign => sign.value === newDesign.astrologicalSign);
+                            const moonPhaseOptions = [
+                              { value: "none", label: "None" },
+                              { value: "new_moon", label: "New Moon" },
+                              { value: "waxing_crescent", label: "Waxing Crescent" },
+                              { value: "first_quarter", label: "First Quarter" },
+                              { value: "waxing_gibbous", label: "Waxing Gibbous" },
+                              { value: "full_moon", label: "Full Moon" },
+                              { value: "waning_gibbous", label: "Waning Gibbous" },
+                              { value: "third_quarter", label: "Third Quarter" },
+                              { value: "waning_crescent", label: "Waning Crescent" }
+                            ];
+                            const selectedMoonPhase = moonPhaseOptions.find(phase => phase.value === newDesign.moonPhase);
+                            
+                            if (!selectedMiniGame) {
+                              return <span className="text-gray-400">Select a mini-game block to see preview</span>;
+                            }
+                            
+                            let title = selectedMiniGame.name;
+                            
+                            // Add astrological sign if selected
+                            if (newDesign.astrologicalSign !== "none" && selectedSign) {
+                              title += ` during ${selectedSign.label}`;
+                            }
+                            
+                            // Add moon phase if selected
+                            if (newDesign.moonPhase !== "none" && selectedMoonPhase) {
+                              title += ` on ${selectedMoonPhase.label}`;
+                            }
+                            
+                            return title;
+                          })()}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Design Description */}
@@ -753,36 +842,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                         className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors"
                       />
                     </div>
-
-                    {/* Astrological Sign */}
-                    <div className="space-y-2">
-                      <Label htmlFor="designAstrologicalSign" className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Astrological Sign
-                      </Label>
-                      <Select 
-                        value={newDesign.astrologicalSign} 
-                        onValueChange={(value) => setNewDesign({...newDesign, astrologicalSign: value})}
-                      >
-                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
-                          <SelectValue placeholder="Select zodiac sign..." />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="none" className="rounded-lg">None</SelectItem>
-                          <SelectItem value="aquarius" className="rounded-lg">Aquarius ♒</SelectItem>
-                          <SelectItem value="aries" className="rounded-lg">Aries ♈</SelectItem>
-                          <SelectItem value="cancer" className="rounded-lg">Cancer ♋</SelectItem>
-                          <SelectItem value="capricorn" className="rounded-lg">Capricorn ♑</SelectItem>
-                          <SelectItem value="gemini" className="rounded-lg">Gemini ♊</SelectItem>
-                          <SelectItem value="leo" className="rounded-lg">Leo ♌</SelectItem>
-                          <SelectItem value="libra" className="rounded-lg">Libra ♎</SelectItem>
-                          <SelectItem value="pisces" className="rounded-lg">Pisces ♓</SelectItem>
-                          <SelectItem value="sagittarius" className="rounded-lg">Sagittarius ♐</SelectItem>
-                          <SelectItem value="scorpio" className="rounded-lg">Scorpio ♏</SelectItem>
-                          <SelectItem value="taurus" className="rounded-lg">Taurus ♉</SelectItem>
-                          <SelectItem value="virgo" className="rounded-lg">Virgo ♍</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
 
                   {/* Action Buttons */}
@@ -796,9 +855,33 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     </Button>
                     <Button 
                       onClick={() => {
+                        const selectedMiniGame = miniGameBlocks.find(mg => mg.id === newDesign.miniGameBlockId);
+                        const selectedSign = astrologicalSignOptions.find(sign => sign.value === newDesign.astrologicalSign);
+                        const moonPhaseOptions = [
+                          { value: "none", label: "None" },
+                          { value: "new_moon", label: "New Moon" },
+                          { value: "waxing_crescent", label: "Waxing Crescent" },
+                          { value: "first_quarter", label: "First Quarter" },
+                          { value: "waxing_gibbous", label: "Waxing Gibbous" },
+                          { value: "full_moon", label: "Full Moon" },
+                          { value: "waning_gibbous", label: "Waning Gibbous" },
+                          { value: "third_quarter", label: "Third Quarter" },
+                          { value: "waning_crescent", label: "Waning Crescent" }
+                        ];
+                        const selectedMoonPhase = moonPhaseOptions.find(phase => phase.value === newDesign.moonPhase);
+                        
+                        let generatedTitle = selectedMiniGame?.name || "";
+                        if (newDesign.astrologicalSign !== "none" && selectedSign) {
+                          generatedTitle += ` during ${selectedSign.label}`;
+                        }
+                        if (newDesign.moonPhase !== "none" && selectedMoonPhase) {
+                          generatedTitle += ` on ${selectedMoonPhase.label}`;
+                        }
+                        
                         const design: MiniGameDesign = {
                           id: Date.now(),
                           ...newDesign,
+                          title: generatedTitle,
                           status: "designed",
                           designedDate: format(new Date(), 'yyyy-MM-dd'),
                           reviewedDate: null,
@@ -815,7 +898,8 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           description: "",
                           designNotes: "",
                           targetDate: "",
-                          astrologicalSign: "none"
+                          astrologicalSign: "none",
+                          moonPhase: "none"
                         });
                         setShowCreateDesignDialog(false);
                       }}
