@@ -557,6 +557,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   // Calendar state
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<'month' | 'week'>('month');
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Frequency options
   const frequencyOptions = [
@@ -1732,12 +1733,16 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             </Button>
                           </div>
                           
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          <Button
+                            variant="ghost"
+                            onClick={() => setShowDatePicker(!showDatePicker)}
+                            className="text-lg font-semibold text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-1 h-auto"
+                          >
                             {calendarView === 'month' 
                               ? format(currentDate, 'MMMM yyyy')
                               : `${format(getWeekCalendarDates(currentDate)[0], 'MMM d')} - ${format(getWeekCalendarDates(currentDate)[6], 'MMM d, yyyy')}`
                             }
-                          </h3>
+                          </Button>
                           
                           <Button
                             variant="outline"
@@ -1774,6 +1779,85 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           </div>
                         </div>
                       </div>
+
+                      {/* Month Year Selector */}
+                      {showDatePicker && (
+                        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-lg">
+                          <div className="grid grid-cols-2 gap-4">
+                            {/* Month Selector */}
+                            <div>
+                              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                Month
+                              </Label>
+                              <Select 
+                                value={currentDate.getMonth().toString()}
+                                onValueChange={(value) => {
+                                  const newDate = new Date(currentDate);
+                                  newDate.setMonth(parseInt(value));
+                                  setCurrentDate(newDate);
+                                }}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Array.from({ length: 12 }, (_, i) => (
+                                    <SelectItem key={i} value={i.toString()}>
+                                      {format(new Date(2024, i, 1), 'MMMM')}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {/* Year Selector */}
+                            <div>
+                              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                Year
+                              </Label>
+                              <Select 
+                                value={currentDate.getFullYear().toString()}
+                                onValueChange={(value) => {
+                                  const newDate = new Date(currentDate);
+                                  newDate.setFullYear(parseInt(value));
+                                  setCurrentDate(newDate);
+                                }}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Array.from({ length: 10 }, (_, i) => {
+                                    const year = new Date().getFullYear() - 2 + i;
+                                    return (
+                                      <SelectItem key={year} value={year.toString()}>
+                                        {year}
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end gap-2 mt-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowDatePicker(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => setShowDatePicker(false)}
+                              className="bg-purple-500 hover:bg-purple-600 text-white"
+                            >
+                              Apply
+                            </Button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Calendar Grid */}
                       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
