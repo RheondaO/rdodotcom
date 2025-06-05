@@ -94,14 +94,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       color: "#EC4899",
       description: "Personal content and thought leadership",
       hasMiniGames: false
-    },
-    {
-      id: "contentCalendar",
-      name: "Content Calendar",
-      icon: "📅",
-      color: "#10B981",
-      description: "Schedule and manage approved content designs",
-      hasMiniGames: false
     }
   ];
 
@@ -484,8 +476,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   // Content for other brands (without mini-games)
   const [brandContent, setBrandContent] = useState({
     reallyObvi: [],
-    personal: [],
-    contentCalendar: []
+    personal: []
   });
 
   // Sample mini-game designs
@@ -1966,7 +1957,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Calendar className="text-purple-500 mr-3 h-5 w-5" />
-                  Content Planning for {currentBrand?.name}
+                  Content Planning for {brands.find(b => b.id === activeBrand)?.name || 'Selected Brand'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
