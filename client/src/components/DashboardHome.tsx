@@ -241,6 +241,58 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
         </Card>
       </div>
 
+      {/* Annual Content Overview */}
+      <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <span className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+              Content Studio Overview
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  1,592
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Total Designs Needed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  1
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                  0
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">In Progress</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  1,591
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Remaining</div>
+              </div>
+            </div>
+            <div className="mt-4 text-center">
+              <Button
+                onClick={() => onNavigate('social')}
+                variant="outline"
+                size="sm"
+                className="bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-700"
+              >
+                Manage Content Studio →
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Active Focus Session */}
       {activeTimer && (
         <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg border-0 rounded-2xl">
