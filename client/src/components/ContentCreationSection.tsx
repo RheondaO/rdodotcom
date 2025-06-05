@@ -1719,66 +1719,17 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           <div>🔄 {frequencyOptions.find(freq => freq.value === miniGame.frequency)?.label}</div>
                         </div>
                         
-                        <div className="space-y-4">
-                          {/* Individual Vertical Progress Bar */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex justify-between text-sm mb-1">
-                                <span>Progress</span>
-                                <span className="font-medium">{progressData.completed}/{progressData.total}</span>
-                              </div>
-                              <div className="text-xs text-gray-500 mb-2">
-                                {progressData.progress}% Complete
-                              </div>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Totality Progress</span>
+                              <span className="font-medium">{progressData.completed}/{progressData.total}</span>
                             </div>
-                            
-                            {/* Vertical Progress Bar */}
-                            <div className="flex justify-center ml-4">
-                              <div className="relative w-6 h-24 bg-gray-200 rounded-full p-0.5">
-                                <div className="relative w-full h-full flex flex-col-reverse">
-                                  {Array.from({ length: Math.min(miniGame.frequencyValue, 15) }, (_, index) => {
-                                    const unitIndex = index + 1;
-                                    const isCompleted = unitIndex <= progressData.completed;
-                                    const segmentHeight = miniGame.frequencyValue > 0 ? Math.max(100 / Math.min(miniGame.frequencyValue, 15), 4) : 6;
-                                    
-                                    return (
-                                      <div
-                                        key={index}
-                                        className="relative transition-all duration-300"
-                                        style={{ 
-                                          height: `${segmentHeight}%`,
-                                          marginBottom: index < Math.min(miniGame.frequencyValue, 15) - 1 ? '0.5px' : '0'
-                                        }}
-                                      >
-                                        <div 
-                                          className={`w-full h-full rounded-sm transition-all duration-500 ${
-                                            isCompleted 
-                                              ? 'opacity-100 transform scale-100' 
-                                              : 'opacity-20 transform scale-90'
-                                          }`}
-                                          style={{ 
-                                            backgroundColor: isCompleted ? miniGame.color : '#E5E7EB',
-                                            boxShadow: isCompleted ? `0 0 4px ${miniGame.color}30` : 'none'
-                                          }}
-                                        />
-                                        {/* Line marker separator */}
-                                        {index < Math.min(miniGame.frequencyValue, 15) - 1 && (
-                                          <div className="absolute -top-0.5 left-0 w-full h-0.5 bg-white rounded-full" />
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                  {/* Show overflow indicator if more than 15 units */}
-                                  {miniGame.frequencyValue > 15 && (
-                                    <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
-                                      <div className="text-xs font-medium text-gray-500 bg-white px-1 py-0.5 rounded shadow text-center" style={{ fontSize: '8px' }}>
-                                        +{miniGame.frequencyValue - 15}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
+                            <div className="flex justify-between text-xs mb-2 text-gray-500">
+                              <span>Completion Rate</span>
+                              <span>{progressData.progress}%</span>
                             </div>
+                            <Progress value={progressData.progress} className="h-3" />
                           </div>
                           
                           <div className="grid grid-cols-3 gap-2 text-xs">
@@ -1970,45 +1921,41 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Category Progress Bars */}
-                    {categoryOptions.map(category => {
-                      const categoryBlocks = miniGameBlocks.filter(mg => mg.category === category.value);
-                      const totalDesigns = categoryBlocks.reduce((sum, mg) => sum + mg.frequencyValue, 0);
-                      const completedDesigns = categoryBlocks.reduce((sum, mg) => {
-                        const progress = getProgressForMiniGame(mg.id);
-                        return sum + progress.completed;
-                      }, 0);
-                      const progressPercentage = totalDesigns > 0 ? (completedDesigns / totalDesigns) * 100 : 0;
-
+                  {/* Individual Mini Game Block Progress Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {miniGameBlocks.map(miniGame => {
+                      const progressData = getProgressForMiniGame(miniGame.id);
+                      const category = categoryOptions.find(cat => cat.value === miniGame.category);
+                      
                       return (
-                        <div key={category.value} className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border">
+                        <div key={miniGame.id} className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border shadow-sm">
+                          {/* Header */}
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center">
-                              <span className="text-2xl mr-3">{category.icon}</span>
+                              <span className="text-lg mr-2">{getCategoryIcon(miniGame.category)}</span>
                               <div>
-                                <h4 className="font-semibold text-sm">{category.label}</h4>
-                                <p className="text-xs text-gray-500">{categoryBlocks.length} blocks</p>
+                                <h4 className="font-semibold text-sm text-gray-900">{miniGame.name}</h4>
+                                <p className="text-xs text-gray-500">{miniGame.frequencyValue} designs/year</p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-lg font-bold" style={{ color: category.color }}>
-                                {Math.round(progressPercentage)}%
+                              <div className="text-lg font-bold" style={{ color: miniGame.color }}>
+                                {progressData.progress}%
                               </div>
                               <div className="text-xs text-gray-500">
-                                {completedDesigns}/{totalDesigns}
+                                {progressData.completed}/{progressData.total}
                               </div>
                             </div>
                           </div>
                           
-                          {/* Segmented Progress Bar with Line Markers */}
-                          <div className="flex justify-center">
+                          {/* Individual Vertical Progress Bar */}
+                          <div className="flex justify-center mb-4">
                             <div className="relative w-8 h-32 bg-gray-200 rounded-full p-1">
                               <div className="relative w-full h-full flex flex-col-reverse">
-                                {Array.from({ length: Math.min(totalDesigns, 20) }, (_, index) => {
+                                {Array.from({ length: Math.min(miniGame.frequencyValue, 20) }, (_, index) => {
                                   const unitIndex = index + 1;
-                                  const isCompleted = unitIndex <= completedDesigns;
-                                  const segmentHeight = totalDesigns > 0 ? Math.max(100 / Math.min(totalDesigns, 20), 3) : 5;
+                                  const isCompleted = unitIndex <= progressData.completed;
+                                  const segmentHeight = miniGame.frequencyValue > 0 ? Math.max(100 / Math.min(miniGame.frequencyValue, 20), 3) : 5;
                                   
                                   return (
                                     <div
@@ -2016,7 +1963,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                       className="relative transition-all duration-300"
                                       style={{ 
                                         height: `${segmentHeight}%`,
-                                        marginBottom: index < Math.min(totalDesigns, 20) - 1 ? '1px' : '0'
+                                        marginBottom: index < Math.min(miniGame.frequencyValue, 20) - 1 ? '1px' : '0'
                                       }}
                                     >
                                       <div 
@@ -2026,22 +1973,22 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                             : 'opacity-30 transform scale-95'
                                         }`}
                                         style={{ 
-                                          backgroundColor: isCompleted ? category.color : '#E5E7EB',
-                                          boxShadow: isCompleted ? `0 0 6px ${category.color}30` : 'none'
+                                          backgroundColor: isCompleted ? miniGame.color : '#E5E7EB',
+                                          boxShadow: isCompleted ? `0 0 6px ${miniGame.color}30` : 'none'
                                         }}
                                       />
                                       {/* Line marker separator */}
-                                      {index < Math.min(totalDesigns, 20) - 1 && (
+                                      {index < Math.min(miniGame.frequencyValue, 20) - 1 && (
                                         <div className="absolute -top-0.5 left-0 w-full h-0.5 bg-white rounded-full" />
                                       )}
                                     </div>
                                   );
                                 })}
                                 {/* Show overflow indicator if more than 20 units */}
-                                {totalDesigns > 20 && (
+                                {miniGame.frequencyValue > 20 && (
                                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
                                     <div className="text-xs font-medium text-gray-500 bg-white px-1 py-0.5 rounded shadow">
-                                      +{totalDesigns - 20}
+                                      +{miniGame.frequencyValue - 20}
                                     </div>
                                   </div>
                                 )}
@@ -2049,22 +1996,27 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             </div>
                           </div>
                           
-                          {/* Individual Block Breakdown */}
-                          <div className="mt-4 space-y-2">
-                            {categoryBlocks.slice(0, 3).map(block => {
-                              const blockProgress = getProgressForMiniGame(block.id);
-                              return (
-                                <div key={block.id} className="flex items-center justify-between text-xs">
-                                  <span className="truncate">{block.name}</span>
-                                  <span className="font-medium">{blockProgress.completed}/{blockProgress.total}</span>
-                                </div>
-                              );
-                            })}
-                            {categoryBlocks.length > 3 && (
-                              <div className="text-xs text-gray-500 text-center">
-                                +{categoryBlocks.length - 3} more blocks
-                              </div>
-                            )}
+                          {/* Status Breakdown */}
+                          <div className="grid grid-cols-3 gap-1 text-xs">
+                            <div className="text-center p-1.5 bg-blue-50 rounded">
+                              <div className="font-semibold text-blue-600">{getStatusCountForMiniGame(miniGame.id, 'designed')}</div>
+                              <div className="text-blue-500 text-xs">Designed</div>
+                            </div>
+                            <div className="text-center p-1.5 bg-yellow-50 rounded">
+                              <div className="font-semibold text-yellow-600">{getStatusCountForMiniGame(miniGame.id, 'reviewed')}</div>
+                              <div className="text-yellow-500 text-xs">Reviewed</div>
+                            </div>
+                            <div className="text-center p-1.5 bg-green-50 rounded">
+                              <div className="font-semibold text-green-600">{getStatusCountForMiniGame(miniGame.id, 'approved')}</div>
+                              <div className="text-green-500 text-xs">Approved</div>
+                            </div>
+                          </div>
+                          
+                          {/* Frequency Info */}
+                          <div className="mt-3 text-center">
+                            <div className="text-xs text-gray-500">
+                              {frequencyOptions.find(freq => freq.value === miniGame.frequency)?.label.split('(')[0]}
+                            </div>
                           </div>
                         </div>
                       );
