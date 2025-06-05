@@ -11,7 +11,7 @@ import ReportsSection from "@/components/ReportsSection";
 import DashboardHome from "@/components/DashboardHome";
 import SiteMapSection from "@/components/SiteMapSection";
 import AppDevelopmentSection from "@/components/AppDevelopmentSection";
-
+import ContentManagementSuite from "@/components/ContentManagementSuite";
 import ContentCreationSection from "@/components/ContentCreationSection";
 import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
@@ -21,7 +21,7 @@ import { Download, Sun, Moon } from "lucide-react";
 import { format, addDays, subDays, isSameDay, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useTheme } from "@/hooks/use-theme";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "rotationonly" | "apps" | "sitemap";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
 
 export default function Dashboard() {
@@ -71,7 +71,7 @@ export default function Dashboard() {
       case "reports": return "Reports & Analytics";
       case "finances": return "Financial Tracking";
       case "groceries": return "Grocery Management";
-
+      case "content": return "Content Management Suite";
       case "sitemap": return "Site Map";
       default: return "Dashboard";
     }
@@ -92,7 +92,7 @@ export default function Dashboard() {
       case "reports": return "View analytics and progress reports";
       case "finances": return "Manage your finances, bills, and spending";
       case "groceries": return "Plan and track your grocery shopping";
-
+      case "content": return "Manage your content planning, creation, and scheduling";
       case "sitemap": return "Quick access to all pages and sections";
       default: return "Track your daily habits and goals";
     }
@@ -197,7 +197,7 @@ export default function Dashboard() {
           {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
           {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
           {activeView === "groceries" && <GrocerySection />}
-
+          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
           {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} />}
           {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
           {activeView === "sitemap" && (
