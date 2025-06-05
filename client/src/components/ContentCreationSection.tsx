@@ -2248,19 +2248,19 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           </div>
                         )}
 
-                        {/* Calendar Grid */}
-                        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        {/* Enhanced Calendar Grid */}
+                        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
                           {/* Week Days Header */}
-                          <div className="grid grid-cols-7 bg-gray-50 dark:bg-gray-800">
+                          <div className="grid grid-cols-7 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
                             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                              <div key={day} className="p-3 text-center text-sm font-medium text-gray-700 dark:text-gray-300 border-r border-gray-200 dark:border-gray-700 last:border-r-0">
+                              <div key={day} className="p-4 text-center text-sm font-semibold text-purple-700 dark:text-purple-300 border-r border-purple-200 dark:border-purple-700 last:border-r-0">
                                 {day}
                               </div>
                             ))}
                           </div>
 
-                          {/* Calendar Dates */}
-                          <div className={`grid grid-cols-7 ${calendarView === 'week' ? 'min-h-[400px]' : ''}`}>
+                          {/* Calendar Dates - Extra Large Grid */}
+                          <div className={`grid grid-cols-7 ${calendarView === 'week' ? 'min-h-[600px]' : ''}`}>
                             {calendarDates.map((date, index) => {
                               const dateStr = format(date, 'yyyy-MM-dd');
                               const designs = designsByDate[dateStr] || [];
@@ -2271,14 +2271,15 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                               return (
                                 <div
                                   key={index}
-                                  className={`${calendarView === 'week' ? 'min-h-[350px]' : 'min-h-[140px]'} p-2 border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 ${
+                                  className={`${calendarView === 'week' ? 'min-h-[580px]' : 'min-h-[180px]'} p-3 border-r border-b border-gray-200 dark:border-gray-700 last:border-r-0 ${
                                     calendarView === 'month' && index >= calendarDates.length - 7 ? 'border-b-0' : ''
-                                  } ${!isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'} hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
+                                  } ${!isCurrentMonth ? 'bg-gray-50/80 dark:bg-gray-800/80' : 'bg-white dark:bg-gray-900'} hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-200`}
                                 >
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className={`text-sm font-medium ${
+                                  {/* Date Header */}
+                                  <div className="flex items-center justify-between mb-3">
+                                    <span className={`text-base font-bold ${
                                       isToday 
-                                        ? 'bg-purple-500 text-white w-6 h-6 rounded-full flex items-center justify-center' 
+                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md' 
                                         : isCurrentMonth 
                                           ? 'text-gray-900 dark:text-white' 
                                           : 'text-gray-400'
@@ -2286,40 +2287,48 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                       {date.getDate()}
                                     </span>
                                     {hasContent && (
-                                      <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full">
-                                        {designs.length}
+                                      <span className="text-xs bg-gradient-to-r from-green-400 to-emerald-500 text-white px-2 py-1 rounded-full font-medium shadow-sm">
+                                        {designs.length} post{designs.length !== 1 ? 's' : ''}
                                       </span>
                                     )}
                                   </div>
                                   
-                                  {/* Content Items */}
-                                  <div className="space-y-1.5">
-                                    {designs.slice(0, calendarView === 'week' ? 15 : 4).map((design) => {
+                                  {/* Content Items - Enhanced Layout */}
+                                  <div className="space-y-2">
+                                    {designs.slice(0, calendarView === 'week' ? 7 : 6).map((design, designIndex) => {
                                       const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
                                       return (
                                         <div
                                           key={design.id}
-                                          className={`calendar-content-bubble ${calendarView === 'week' ? 'text-sm p-2' : 'text-xs p-1.5'} rounded-md border-l-3 bg-green-50 dark:bg-green-900/20 border-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 cursor-pointer transition-colors`}
+                                          className={`calendar-content-bubble ${calendarView === 'week' ? 'text-sm p-3' : 'text-xs p-2'} rounded-lg border-l-4 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md group`}
                                           style={{
                                             borderLeftColor: miniGame?.color || '#10B981'
                                           }}
                                           title={`${design.title} - ${miniGame?.name || 'Content'}\n${design.description}`}
                                         >
-                                          <div className={`calendar-content-title font-medium text-gray-900 dark:text-white ${calendarView === 'week' ? 'line-clamp-3' : 'line-clamp-2'}`}>
+                                          <div className={`calendar-content-title font-semibold text-gray-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300 ${calendarView === 'week' ? 'line-clamp-2' : 'line-clamp-1'} transition-colors`}>
                                             {design.title}
                                           </div>
                                           {calendarView === 'week' && (
-                                            <div className="text-gray-500 text-xs mt-1 line-clamp-1">
+                                            <div className="text-gray-500 dark:text-gray-400 text-xs mt-1 line-clamp-1 group-hover:text-purple-600 dark:group-hover:text-purple-400">
                                               {miniGame?.name}
+                                            </div>
+                                          )}
+                                          {calendarView === 'month' && miniGame && (
+                                            <div className="flex items-center mt-1">
+                                              <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: miniGame.color }}></div>
+                                              <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                {miniGame.name}
+                                              </span>
                                             </div>
                                           )}
                                         </div>
                                       );
                                     })}
                                     
-                                    {designs.length > (calendarView === 'week' ? 15 : 4) && (
-                                      <div className="text-xs text-gray-500 p-1 text-center">
-                                        +{designs.length - (calendarView === 'week' ? 15 : 4)} more
+                                    {designs.length > (calendarView === 'week' ? 7 : 6) && (
+                                      <div className="text-xs text-center p-2 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg text-gray-600 dark:text-gray-300 font-medium">
+                                        +{designs.length - (calendarView === 'week' ? 7 : 6)} more posts
                                       </div>
                                     )}
                                   </div>
