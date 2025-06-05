@@ -655,6 +655,23 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
               Mini-Game Block Studio ✨
             </h4>
             <div className="flex gap-2">
+              <Dialog open={showCreateDesignDialog} onOpenChange={setShowCreateDesignDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="rounded-xl">
+                    <Target className="h-4 w-4 mr-2" />
+                    New Design
+                  </Button>
+                </DialogTrigger>
+              </Dialog>
+              
+              <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
+                <DialogTrigger asChild>
+                  <Button className="rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    New Mini-Game
+                  </Button>
+                </DialogTrigger>
+              </Dialog>
             </div>
           </div>
 
@@ -1219,34 +1236,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
         </div>
       )}
 
-      {/* Fixed Position Floating Action Buttons - Bottom Left Corner */}
-      {activeBrand === "rotationONLY" && (
-        <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-3">
-          {/* New Design Button */}
-          <Dialog open={showCreateDesignDialog} onOpenChange={setShowCreateDesignDialog}>
-            <DialogTrigger asChild>
-              <Button 
-                className="rounded-full w-14 h-14 shadow-xl bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 border-0"
-                size="lg"
-              >
-                <Target className="h-5 w-5" />
-              </Button>
-            </DialogTrigger>
-          </Dialog>
-          
-          {/* New Mini-Game Button */}
-          <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
-            <DialogTrigger asChild>
-              <Button 
-                className="rounded-full w-16 h-16 shadow-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 border-0"
-                size="lg"
-              >
-                <Sparkles className="h-6 w-6" />
-              </Button>
-            </DialogTrigger>
-          </Dialog>
-        </div>
-      )}
+
     </section>
   );
 }
