@@ -1935,7 +1935,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                               <span className="text-lg mr-2">{getCategoryIcon(miniGame.category)}</span>
                               <div>
                                 <h4 className="font-semibold text-sm text-gray-900">{miniGame.name}</h4>
-                                <p className="text-xs text-gray-500">{miniGame.frequencyValue} designs/year</p>
                               </div>
                             </div>
                             <div className="text-right">
