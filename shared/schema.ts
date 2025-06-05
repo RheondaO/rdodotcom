@@ -439,6 +439,18 @@ export const insertContentProgressSchema = createInsertSchema(contentProgress).o
   createdAt: true,
 });
 
+export const insertMiniGameBlockSchema = createInsertSchema(miniGameBlocks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMiniGameDesignSchema = createInsertSchema(miniGameDesigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertAppProjectSchema = createInsertSchema(appProjects).omit({
   id: true,
   createdAt: true,
@@ -519,6 +531,12 @@ export type ContentPiece = typeof contentPieces.$inferSelect;
 
 export type InsertContentProgress = z.infer<typeof insertContentProgressSchema>;
 export type ContentProgress = typeof contentProgress.$inferSelect;
+
+export type InsertMiniGameBlock = z.infer<typeof insertMiniGameBlockSchema>;
+export type MiniGameBlock = typeof miniGameBlocks.$inferSelect;
+
+export type InsertMiniGameDesign = z.infer<typeof insertMiniGameDesignSchema>;
+export type MiniGameDesign = typeof miniGameDesigns.$inferSelect;
 
 export type InsertAppProject = z.infer<typeof insertAppProjectSchema>;
 export type AppProject = typeof appProjects.$inferSelect;

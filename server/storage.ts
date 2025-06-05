@@ -33,6 +33,14 @@ import {
   type InsertIncomeEntry,
   type Challenge,
   type InsertChallenge,
+  type ContentCategory,
+  type InsertContentCategory,
+  type ContentType,
+  type InsertContentType,
+  type ContentPiece,
+  type InsertContentPiece,
+  type ContentProgress,
+  type InsertContentProgress,
   type AppProject,
   type InsertAppProject,
   type AppTask,
@@ -121,6 +129,23 @@ export interface IStorage {
   updateChallenge(id: number, updates: Partial<Challenge>): Promise<Challenge>;
   deleteChallenge(id: number): Promise<void>;
 
+  // Content Categories
+  getAllContentCategories(): Promise<ContentCategory[]>;
+  createContentCategory(category: InsertContentCategory): Promise<ContentCategory>;
+
+  // Content Types
+  getAllContentTypes(): Promise<ContentType[]>;
+  createContentType(type: InsertContentType): Promise<ContentType>;
+
+  // Content Pieces
+  getAllContentPieces(): Promise<ContentPiece[]>;
+  createContentPiece(piece: InsertContentPiece): Promise<ContentPiece>;
+  updateContentPiece(id: number, updates: Partial<ContentPiece>): Promise<ContentPiece>;
+
+  // Content Progress
+  getAllContentProgress(): Promise<ContentProgress[]>;
+  createContentProgress(progress: InsertContentProgress): Promise<ContentProgress>;
+
   // App Development
   getAllAppProjects(): Promise<AppProject[]>;
   getAppProject(id: number): Promise<AppProject | undefined>;
@@ -161,6 +186,10 @@ export class MemStorage implements IStorage {
   private budgets: Map<number, Budget> = new Map();
   private incomeEntries: Map<number, IncomeEntry> = new Map();
   private challenges: Map<number, Challenge> = new Map();
+  private contentCategories: Map<number, ContentCategory> = new Map();
+  private contentTypes: Map<number, ContentType> = new Map();
+  private contentPieces: Map<number, ContentPiece> = new Map();
+  private contentProgress: Map<number, ContentProgress> = new Map();
   private appProjects: Map<number, AppProject> = new Map();
   private appTasks: Map<number, AppTask> = new Map();
   private appSprints: Map<number, AppSprint> = new Map();
@@ -771,6 +800,78 @@ export class MemStorage implements IStorage {
 
   async deleteGroceryList(id: number): Promise<void> {
     this.groceryLists.delete(id);
+  }
+
+  // Content Categories methods
+  async getAllContentCategories(): Promise<ContentCategory[]> {
+    return Array.from(this.contentCategories.values());
+  }
+
+  async createContentCategory(category: InsertContentCategory): Promise<ContentCategory> {
+    const newCategory: ContentCategory = {
+      id: this.currentId++,
+      ...category,
+      createdAt: new Date()
+    };
+    this.contentCategories.set(newCategory.id, newCategory);
+    return newCategory;
+  }
+
+  // Content Types methods
+  async getAllContentTypes(): Promise<ContentType[]> {
+    return Array.from(this.contentTypes.values());
+  }
+
+  async createContentType(type: InsertContentType): Promise<ContentType> {
+    const newType: ContentType = {
+      id: this.currentId++,
+      ...type,
+      createdAt: new Date()
+    };
+    this.contentTypes.set(newType.id, newType);
+    return newType;
+  }
+
+  // Content Pieces methods
+  async getAllContentPieces(): Promise<ContentPiece[]> {
+    return Array.from(this.contentPieces.values());
+  }
+
+  async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> {
+    const newPiece: ContentPiece = {
+      id: this.currentId++,
+      ...piece,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.contentPieces.set(newPiece.id, newPiece);
+    return newPiece;
+  }
+
+  async updateContentPiece(id: number, updates: Partial<ContentPiece>): Promise<ContentPiece> {
+    const piece = this.contentPieces.get(id);
+    if (!piece) {
+      throw new Error("Content piece not found");
+    }
+
+    const updated = { ...piece, ...updates, updatedAt: new Date() };
+    this.contentPieces.set(id, updated);
+    return updated;
+  }
+
+  // Content Progress methods
+  async getAllContentProgress(): Promise<ContentProgress[]> {
+    return Array.from(this.contentProgress.values());
+  }
+
+  async createContentProgress(progress: InsertContentProgress): Promise<ContentProgress> {
+    const newProgress: ContentProgress = {
+      id: this.currentId++,
+      ...progress,
+      createdAt: new Date()
+    };
+    this.contentProgress.set(newProgress.id, newProgress);
+    return newProgress;
   }
 }
 
