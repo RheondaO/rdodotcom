@@ -1007,10 +1007,110 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12 text-gray-500">
-                    <Clock className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium mb-2">Progress Analytics</h3>
-                    <p className="text-sm">Track completion rates and timelines</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Category Progress Bars */}
+                    {categoryOptions.map(category => {
+                      const categoryBlocks = miniGameBlocks.filter(mg => mg.category === category.value);
+                      const totalDesigns = categoryBlocks.reduce((sum, mg) => sum + mg.frequencyValue, 0);
+                      const completedDesigns = categoryBlocks.reduce((sum, mg) => {
+                        const progress = getProgressForMiniGame(mg.id);
+                        return sum + progress.completed;
+                      }, 0);
+                      const progressPercentage = totalDesigns > 0 ? (completedDesigns / totalDesigns) * 100 : 0;
+
+                      return (
+                        <div key={category.value} className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center">
+                              <span className="text-2xl mr-3">{category.icon}</span>
+                              <div>
+                                <h4 className="font-semibold text-sm">{category.label}</h4>
+                                <p className="text-xs text-gray-500">{categoryBlocks.length} blocks</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold" style={{ color: category.color }}>
+                                {Math.round(progressPercentage)}%
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {completedDesigns}/{totalDesigns}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Vertical Progress Bar */}
+                          <div className="flex justify-center">
+                            <div className="relative w-8 h-32 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                className="absolute bottom-0 w-full rounded-full transition-all duration-500"
+                                style={{ 
+                                  height: `${progressPercentage}%`,
+                                  backgroundColor: category.color,
+                                  boxShadow: `0 0 10px ${category.color}40`
+                                }}
+                              />
+                            </div>
+                          </div>
+                          
+                          {/* Individual Block Breakdown */}
+                          <div className="mt-4 space-y-2">
+                            {categoryBlocks.slice(0, 3).map(block => {
+                              const blockProgress = getProgressForMiniGame(block.id);
+                              return (
+                                <div key={block.id} className="flex items-center justify-between text-xs">
+                                  <span className="truncate">{block.name}</span>
+                                  <span className="font-medium">{blockProgress.completed}/{blockProgress.total}</span>
+                                </div>
+                              );
+                            })}
+                            {categoryBlocks.length > 3 && (
+                              <div className="text-xs text-gray-500 text-center">
+                                +{categoryBlocks.length - 3} more blocks
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Overall Progress Summary */}
+                  <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border">
+                    <h4 className="text-lg font-semibold mb-4 text-purple-800">Annual Content Overview</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {miniGameBlocks.reduce((sum, mg) => sum + mg.frequencyValue, 0)}
+                        </div>
+                        <div className="text-sm text-gray-600">Total Designs Needed</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">
+                          {miniGameBlocks.reduce((sum, mg) => {
+                            const progress = getProgressForMiniGame(mg.id);
+                            return sum + progress.completed;
+                          }, 0)}
+                        </div>
+                        <div className="text-sm text-gray-600">Completed</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-yellow-600">
+                          {miniGameBlocks.reduce((sum, mg) => {
+                            return sum + getStatusCountForMiniGame(mg.id, 'designed') + getStatusCountForMiniGame(mg.id, 'reviewed');
+                          }, 0)}
+                        </div>
+                        <div className="text-sm text-gray-600">In Progress</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-red-600">
+                          {miniGameBlocks.reduce((sum, mg) => {
+                            const progress = getProgressForMiniGame(mg.id);
+                            return sum + progress.remaining;
+                          }, 0)}
+                        </div>
+                        <div className="text-sm text-gray-600">Remaining</div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
