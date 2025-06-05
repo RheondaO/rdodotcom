@@ -1210,10 +1210,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                       </CardHeader>
                       <CardContent>
                         <div className="text-gray-600 text-sm mb-4 space-y-1">
-                          <div>📅 {miniGame.dateOfPost && format(new Date(miniGame.dateOfPost), 'MMMM d, yyyy')}</div>
-                          {miniGame.astrologicalSign && (
-                            <div>✨ {miniGame.name} during {astrologicalSignOptions.find(sign => sign.value === miniGame.astrologicalSign)?.label}</div>
-                          )}
                           <div>🔄 {frequencyOptions.find(freq => freq.value === miniGame.frequency)?.label}</div>
                         </div>
                         
