@@ -537,6 +537,20 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     fullMoonName: "none"
   });
 
+  // Edit mini-game state
+  const [editingMiniGame, setEditingMiniGame] = useState<number | null>(null);
+  const [editMiniGameData, setEditMiniGameData] = useState<{
+    name: string;
+    frequency: string;
+    frequencyValue: number;
+    category: string;
+  }>({
+    name: "",
+    frequency: "",
+    frequencyValue: 0,
+    category: ""
+  });
+
   // Frequency options
   const frequencyOptions = [
     { value: "every_friday", label: "Every Friday (52/year)", count: 52 },
@@ -607,6 +621,47 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   const getCategoryIcon = (category: string) => {
     const categoryData = categoryOptions.find(cat => cat.value === category);
     return categoryData?.icon || "🎮";
+  };
+
+  // Edit mini-game functions
+  const startEditingMiniGame = (miniGame: MiniGameBlock) => {
+    setEditingMiniGame(miniGame.id);
+    setEditMiniGameData({
+      name: miniGame.name,
+      frequency: miniGame.frequency,
+      frequencyValue: miniGame.frequencyValue,
+      category: miniGame.category
+    });
+  };
+
+  const saveEditedMiniGame = () => {
+    if (!editingMiniGame) return;
+    
+    setMiniGameBlocks(prevBlocks => 
+      prevBlocks.map(block => 
+        block.id === editingMiniGame 
+          ? { ...block, ...editMiniGameData }
+          : block
+      )
+    );
+    
+    setEditingMiniGame(null);
+    setEditMiniGameData({
+      name: "",
+      frequency: "",
+      frequencyValue: 0,
+      category: ""
+    });
+  };
+
+  const cancelEditingMiniGame = () => {
+    setEditingMiniGame(null);
+    setEditMiniGameData({
+      name: "",
+      frequency: "",
+      frequencyValue: 0,
+      category: ""
+    });
   };
 
   const currentBrand = brands.find(b => b.id === activeBrand);
@@ -1203,9 +1258,9 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => setSelectedMiniGame(selectedMiniGame === miniGame.id ? null : miniGame.id)}
+                            onClick={() => startEditingMiniGame(miniGame)}
                           >
-                            <Eye className="h-4 w-4" />
+                            <Edit className="h-4 w-4" />
                           </Button>
                         </CardTitle>
                       </CardHeader>
@@ -1241,30 +1296,131 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                               <div className="text-green-500">Approved</div>
                             </div>
                           </div>
-
-                          {selectedMiniGame === miniGame.id && (
-                            <div className="mt-4 pt-4 border-t space-y-2">
-                              <h5 className="font-semibold text-sm">Recent Designs:</h5>
-                              {designs.length > 0 ? (
-                                designs.slice(0, 3).map(design => (
-                                  <div key={design.id} className="flex items-center justify-between text-xs">
-                                    <span className="truncate">{design.title}</span>
-                                    <Badge variant="secondary" className={statusColors[design.status as keyof typeof statusColors]}>
-                                      {design.status}
-                                    </Badge>
-                                  </div>
-                                ))
-                              ) : (
-                                <p className="text-xs text-gray-500">No designs yet</p>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </CardContent>
                     </Card>
                   );
                 })}
               </div>
+
+              {/* Edit Mini Game Block Dialog */}
+              <Dialog open={editingMiniGame !== null} onOpenChange={(open) => !open && cancelEditingMiniGame()}>
+                <DialogContent className="sm:max-w-[500px] bg-white dark:bg-gray-900 border-0 shadow-2xl rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                      Edit Mini Game Block
+                    </DialogTitle>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Update the mini game block details
+                    </p>
+                  </DialogHeader>
+                  
+                  <div className="space-y-6 py-4">
+                    {/* Title */}
+                    <div className="space-y-2">
+                      <Label htmlFor="editTitle" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Title *
+                      </Label>
+                      <Input 
+                        id="editTitle"
+                        value={editMiniGameData.name}
+                        onChange={(e) => setEditMiniGameData({...editMiniGameData, name: e.target.value})}
+                        className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors"
+                        placeholder="Enter mini game block title..."
+                      />
+                    </div>
+
+                    {/* Frequency */}
+                    <div className="space-y-2">
+                      <Label htmlFor="editFrequency" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Frequency *
+                      </Label>
+                      <Select 
+                        value={editMiniGameData.frequency} 
+                        onValueChange={(value) => {
+                          const freq = frequencyOptions.find(f => f.value === value);
+                          setEditMiniGameData({
+                            ...editMiniGameData, 
+                            frequency: value,
+                            frequencyValue: freq?.count || 52
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                          <SelectValue placeholder="Select frequency..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {frequencyOptions.map(freq => (
+                            <SelectItem key={freq.value} value={freq.value} className="rounded-lg">
+                              {freq.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Number of Blocks/Year */}
+                    <div className="space-y-2">
+                      <Label htmlFor="editFrequencyValue" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Number of Blocks/Year *
+                      </Label>
+                      <Input 
+                        id="editFrequencyValue"
+                        type="number"
+                        value={editMiniGameData.frequencyValue}
+                        onChange={(e) => setEditMiniGameData({...editMiniGameData, frequencyValue: parseInt(e.target.value) || 0})}
+                        className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors"
+                        placeholder="Enter number of blocks per year..."
+                        min="1"
+                        max="365"
+                      />
+                    </div>
+
+                    {/* Category */}
+                    <div className="space-y-2">
+                      <Label htmlFor="editCategory" className="text-sm font-semibold text-gray-900 dark:text-white">
+                        Category *
+                      </Label>
+                      <Select 
+                        value={editMiniGameData.category} 
+                        onValueChange={(value) => setEditMiniGameData({...editMiniGameData, category: value})}
+                      >
+                        <SelectTrigger className="rounded-xl border-2 hover:border-purple-300 focus:border-purple-500 transition-colors">
+                          <SelectValue placeholder="Select category..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          {categoryOptions.map(cat => (
+                            <SelectItem key={cat.value} value={cat.value} className="rounded-lg">
+                              <div className="flex items-center">
+                                <span className="mr-2">{cat.icon}</span>
+                                {cat.label}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={cancelEditingMiniGame}
+                      className="rounded-xl border-2 border-gray-300 hover:border-gray-400"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={saveEditedMiniGame}
+                      className="rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                      disabled={!editMiniGameData.name || !editMiniGameData.frequency || !editMiniGameData.category || editMiniGameData.frequencyValue <= 0}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </TabsContent>
 
             <TabsContent value="progress" className="space-y-6">
