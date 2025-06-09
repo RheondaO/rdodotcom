@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,25 +23,18 @@ import {
   Star
 } from "lucide-react";
 import { format, differenceInDays, isAfter, isBefore, isToday, isYesterday, isTomorrow } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
+import type { Goal, InsertGoal } from "@shared/schema";
 
-interface Goal {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  targetValue: number;
-  currentValue: number;
-  unit: string;
-  targetDate: string;
-  isCompleted: boolean;
-  createdAt: string;
-}
+
 
 interface GoalsSectionProps {
   selectedDate: Date;
 }
 
 export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
+  const queryClient = useQueryClient();
+  
   const getDateLabel = () => {
     if (isToday(selectedDate)) return "Today";
     if (isYesterday(selectedDate)) return "Yesterday";
@@ -48,44 +42,57 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
     return format(selectedDate, 'EEEE');
   };
 
-  const [goals, setGoals] = useState<Goal[]>([
-    {
-      id: 1,
-      title: "Drink 8 Glasses of Water Daily",
-      description: "Maintain proper hydration for better health",
-      category: "health",
-      targetValue: 240,
-      currentValue: 180,
-      unit: "glasses",
-      targetDate: "2025-07-01",
-      isCompleted: false,
-      createdAt: "2025-06-01"
+  // Fetch goals from database
+  const { data: goals = [], isLoading } = useQuery<Goal[]>({
+    queryKey: ['/api/goals'],
+  });
+
+  // Create goal mutation
+  const createGoalMutation = useMutation({
+    mutationFn: async (goalData: InsertGoal) => {
+      return apiRequest('/api/goals', {
+        method: 'POST',
+        body: JSON.stringify(goalData),
+      });
     },
-    {
-      id: 2,
-      title: "Save $5000 Emergency Fund",
-      description: "Build financial security with emergency savings",
-      category: "finance",
-      targetValue: 5000,
-      currentValue: 3200,
-      unit: "dollars",
-      targetDate: "2025-12-31",
-      isCompleted: false,
-      createdAt: "2025-01-01"
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      setShowCreateDialog(false);
+      setNewGoal({
+        title: "",
+        description: "",
+        category: "health",
+        targetValue: "0",
+        unit: "",
+        targetDate: ""
+      });
     },
-    {
-      id: 3,
-      title: "Exercise 30 Days Streak",
-      description: "Build a consistent exercise habit",
-      category: "health",
-      targetValue: 30,
-      currentValue: 30,
-      unit: "days",
-      targetDate: "2025-06-30",
-      isCompleted: true,
-      createdAt: "2025-05-01"
-    }
-  ]);
+  });
+
+  // Update goal mutation
+  const updateGoalMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Goal> }) => {
+      return apiRequest(`/api/goals/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+    },
+  });
+
+  // Delete goal mutation
+  const deleteGoalMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/goals/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+    },
+  });
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newGoal, setNewGoal] = useState({

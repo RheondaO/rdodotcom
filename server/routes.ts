@@ -6,6 +6,7 @@ import {
   insertBillSchema, 
   insertBillPaymentSchema, 
   insertGroceryItemSchema,
+  insertGoalSchema,
   insertContentCategorySchema,
   insertContentTypeSchema,
   insertContentPieceSchema,
@@ -143,6 +144,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete grocery item" });
+    }
+  });
+
+  // Goals
+  app.get("/api/goals", async (req, res) => {
+    try {
+      const goals = await storage.getAllGoals();
+      res.json(goals);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch goals" });
+    }
+  });
+
+  app.post("/api/goals", async (req, res) => {
+    try {
+      const data = insertGoalSchema.parse(req.body);
+      const goal = await storage.createGoal(data);
+      res.json(goal);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid goal data" });
+    }
+  });
+
+  app.patch("/api/goals/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const goal = await storage.updateGoal(id, req.body);
+      res.json(goal);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update goal" });
+    }
+  });
+
+  app.delete("/api/goals/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteGoal(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete goal" });
     }
   });
 
