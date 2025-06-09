@@ -1476,4 +1476,502 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database Storage Implementation
+export class DatabaseStorage implements IStorage {
+  // Goals methods using database
+  async getAllGoals(): Promise<Goal[]> {
+    return await db.select().from(goals);
+  }
+
+  async createGoal(goal: InsertGoal): Promise<Goal> {
+    const [newGoal] = await db.insert(goals).values(goal).returning();
+    return newGoal;
+  }
+
+  async updateGoal(id: number, updates: Partial<Goal>): Promise<Goal> {
+    const [updatedGoal] = await db
+      .update(goals)
+      .set(updates)
+      .where(eq(goals.id, id))
+      .returning();
+    return updatedGoal;
+  }
+
+  async deleteGoal(id: number): Promise<void> {
+    await db.delete(goals).where(eq(goals.id, id));
+  }
+
+  // Placeholder implementations for other methods (keeping existing MemStorage functionality)
+  private memStorage = new MemStorage();
+
+  async getDailyEntry(date: string): Promise<DailyEntry | undefined> {
+    return this.memStorage.getDailyEntry(date);
+  }
+
+  async createOrUpdateDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
+    return this.memStorage.createOrUpdateDailyEntry(entry);
+  }
+
+  async getAllBills(): Promise<Bill[]> {
+    return this.memStorage.getAllBills();
+  }
+
+  async createBill(bill: InsertBill): Promise<Bill> {
+    return this.memStorage.createBill(bill);
+  }
+
+  async deleteBill(id: number): Promise<void> {
+    return this.memStorage.deleteBill(id);
+  }
+
+  async getBillPaymentsForDate(date: string): Promise<BillPayment[]> {
+    return this.memStorage.getBillPaymentsForDate(date);
+  }
+
+  async createBillPayment(payment: InsertBillPayment): Promise<BillPayment> {
+    return this.memStorage.createBillPayment(payment);
+  }
+
+  async updateBillPayment(id: number, isPaid: boolean): Promise<BillPayment> {
+    return this.memStorage.updateBillPayment(id, isPaid);
+  }
+
+  async getAllGroceryItems(): Promise<GroceryItem[]> {
+    return this.memStorage.getAllGroceryItems();
+  }
+
+  async createGroceryItem(item: InsertGroceryItem): Promise<GroceryItem> {
+    return this.memStorage.createGroceryItem(item);
+  }
+
+  async updateGroceryItem(id: number, updates: Partial<GroceryItem>): Promise<GroceryItem> {
+    return this.memStorage.updateGroceryItem(id, updates);
+  }
+
+  async deleteGroceryItem(id: number): Promise<void> {
+    return this.memStorage.deleteGroceryItem(id);
+  }
+
+  async getAllGroceryLists(): Promise<GroceryList[]> {
+    return this.memStorage.getAllGroceryLists();
+  }
+
+  async createGroceryList(list: InsertGroceryList): Promise<GroceryList> {
+    return this.memStorage.createGroceryList(list);
+  }
+
+  async deleteGroceryList(id: number): Promise<void> {
+    return this.memStorage.deleteGroceryList(id);
+  }
+
+  async getAllHabits(): Promise<Habit[]> {
+    return this.memStorage.getAllHabits();
+  }
+
+  async createHabit(habit: InsertHabit): Promise<Habit> {
+    return this.memStorage.createHabit(habit);
+  }
+
+  async updateHabit(id: number, updates: Partial<Habit>): Promise<Habit> {
+    return this.memStorage.updateHabit(id, updates);
+  }
+
+  async deleteHabit(id: number): Promise<void> {
+    return this.memStorage.deleteHabit(id);
+  }
+
+  async getHabitLogs(habitId: number, startDate?: string, endDate?: string): Promise<HabitLog[]> {
+    return this.memStorage.getHabitLogs(habitId, startDate, endDate);
+  }
+
+  async createHabitLog(log: InsertHabitLog): Promise<HabitLog> {
+    return this.memStorage.createHabitLog(log);
+  }
+
+  async updateHabitLog(id: number, updates: Partial<HabitLog>): Promise<HabitLog> {
+    return this.memStorage.updateHabitLog(id, updates);
+  }
+
+  async getAllMedications(): Promise<Medication[]> {
+    return this.memStorage.getAllMedications();
+  }
+
+  async createMedication(medication: InsertMedication): Promise<Medication> {
+    return this.memStorage.createMedication(medication);
+  }
+
+  async updateMedication(id: number, updates: Partial<Medication>): Promise<Medication> {
+    return this.memStorage.updateMedication(id, updates);
+  }
+
+  async deleteMedication(id: number): Promise<void> {
+    return this.memStorage.deleteMedication(id);
+  }
+
+  async getAllTodos(): Promise<Todo[]> {
+    return this.memStorage.getAllTodos();
+  }
+
+  async getTodosByDate(date: string): Promise<Todo[]> {
+    return this.memStorage.getTodosByDate(date);
+  }
+
+  async createTodo(todo: InsertTodo): Promise<Todo> {
+    return this.memStorage.createTodo(todo);
+  }
+
+  async updateTodo(id: number, updates: Partial<Todo>): Promise<Todo> {
+    return this.memStorage.updateTodo(id, updates);
+  }
+
+  async deleteTodo(id: number): Promise<void> {
+    return this.memStorage.deleteTodo(id);
+  }
+
+  async getTimeBlocksByDate(date: string): Promise<TimeBlock[]> {
+    return this.memStorage.getTimeBlocksByDate(date);
+  }
+
+  async createTimeBlock(timeBlock: InsertTimeBlock): Promise<TimeBlock> {
+    return this.memStorage.createTimeBlock(timeBlock);
+  }
+
+  async updateTimeBlock(id: number, updates: Partial<TimeBlock>): Promise<TimeBlock> {
+    return this.memStorage.updateTimeBlock(id, updates);
+  }
+
+  async deleteTimeBlock(id: number): Promise<void> {
+    return this.memStorage.deleteTimeBlock(id);
+  }
+
+  async getFocusSessionsByDate(date: string): Promise<FocusSession[]> {
+    return this.memStorage.getFocusSessionsByDate(date);
+  }
+
+  async createFocusSession(session: InsertFocusSession): Promise<FocusSession> {
+    return this.memStorage.createFocusSession(session);
+  }
+
+  async updateFocusSession(id: number, updates: Partial<FocusSession>): Promise<FocusSession> {
+    return this.memStorage.updateFocusSession(id, updates);
+  }
+
+  async getBudgetsByMonth(month: string): Promise<Budget[]> {
+    return this.memStorage.getBudgetsByMonth(month);
+  }
+
+  async createBudget(budget: InsertBudget): Promise<Budget> {
+    return this.memStorage.createBudget(budget);
+  }
+
+  async updateBudget(id: number, updates: Partial<Budget>): Promise<Budget> {
+    return this.memStorage.updateBudget(id, updates);
+  }
+
+  async getIncomeEntriesByDateRange(startDate: string, endDate: string): Promise<IncomeEntry[]> {
+    return this.memStorage.getIncomeEntriesByDateRange(startDate, endDate);
+  }
+
+  async createIncomeEntry(entry: InsertIncomeEntry): Promise<IncomeEntry> {
+    return this.memStorage.createIncomeEntry(entry);
+  }
+
+  async deleteIncomeEntry(id: number): Promise<void> {
+    return this.memStorage.deleteIncomeEntry(id);
+  }
+
+  async getAllChallenges(): Promise<Challenge[]> {
+    return this.memStorage.getAllChallenges();
+  }
+
+  async getActiveChallenges(): Promise<Challenge[]> {
+    return this.memStorage.getActiveChallenges();
+  }
+
+  async createChallenge(challenge: InsertChallenge): Promise<Challenge> {
+    return this.memStorage.createChallenge(challenge);
+  }
+
+  async updateChallenge(id: number, updates: Partial<Challenge>): Promise<Challenge> {
+    return this.memStorage.updateChallenge(id, updates);
+  }
+
+  async deleteChallenge(id: number): Promise<void> {
+    return this.memStorage.deleteChallenge(id);
+  }
+
+  async getAllContentCategories(): Promise<ContentCategory[]> {
+    return this.memStorage.getAllContentCategories();
+  }
+
+  async createContentCategory(category: InsertContentCategory): Promise<ContentCategory> {
+    return this.memStorage.createContentCategory(category);
+  }
+
+  async getAllContentTypes(): Promise<ContentType[]> {
+    return this.memStorage.getAllContentTypes();
+  }
+
+  async createContentType(type: InsertContentType): Promise<ContentType> {
+    return this.memStorage.createContentType(type);
+  }
+
+  async getAllContentPieces(): Promise<ContentPiece[]> {
+    return this.memStorage.getAllContentPieces();
+  }
+
+  async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> {
+    return this.memStorage.createContentPiece(piece);
+  }
+
+  async updateContentPiece(id: number, updates: Partial<ContentPiece>): Promise<ContentPiece> {
+    return this.memStorage.updateContentPiece(id, updates);
+  }
+
+  async getAllContentProgress(): Promise<ContentProgress[]> {
+    return this.memStorage.getAllContentProgress();
+  }
+
+  async createContentProgress(progress: InsertContentProgress): Promise<ContentProgress> {
+    return this.memStorage.createContentProgress(progress);
+  }
+
+  async getAllAppProjects(): Promise<AppProject[]> {
+    return this.memStorage.getAllAppProjects();
+  }
+
+  async getAppProject(id: number): Promise<AppProject | undefined> {
+    return this.memStorage.getAppProject(id);
+  }
+
+  async createAppProject(project: InsertAppProject): Promise<AppProject> {
+    return this.memStorage.createAppProject(project);
+  }
+
+  async updateAppProject(id: number, updates: Partial<AppProject>): Promise<AppProject> {
+    return this.memStorage.updateAppProject(id, updates);
+  }
+
+  async deleteAppProject(id: number): Promise<void> {
+    return this.memStorage.deleteAppProject(id);
+  }
+
+  async getAppTasksByProject(projectId: number): Promise<AppTask[]> {
+    return this.memStorage.getAppTasksByProject(projectId);
+  }
+
+  async getAllAppTasks(): Promise<AppTask[]> {
+    return this.memStorage.getAllAppTasks();
+  }
+
+  async createAppTask(task: InsertAppTask): Promise<AppTask> {
+    return this.memStorage.createAppTask(task);
+  }
+
+  async updateAppTask(id: number, updates: Partial<AppTask>): Promise<AppTask> {
+    return this.memStorage.updateAppTask(id, updates);
+  }
+
+  async deleteAppTask(id: number): Promise<void> {
+    return this.memStorage.deleteAppTask(id);
+  }
+
+  async getAppSprintsByProject(projectId: number): Promise<AppSprint[]> {
+    return this.memStorage.getAppSprintsByProject(projectId);
+  }
+
+  async createAppSprint(sprint: InsertAppSprint): Promise<AppSprint> {
+    return this.memStorage.createAppSprint(sprint);
+  }
+
+  async updateAppSprint(id: number, updates: Partial<AppSprint>): Promise<AppSprint> {
+    return this.memStorage.updateAppSprint(id, updates);
+  }
+
+  async deleteAppSprint(id: number): Promise<void> {
+    return this.memStorage.deleteAppSprint(id);
+  }
+
+  async getAppTimeEntriesByProject(projectId: number, startDate?: string, endDate?: string): Promise<AppTimeEntry[]> {
+    return this.memStorage.getAppTimeEntriesByProject(projectId, startDate, endDate);
+  }
+
+  async createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry> {
+    return this.memStorage.createAppTimeEntry(entry);
+  }
+
+  async updateAppTimeEntry(id: number, updates: Partial<AppTimeEntry>): Promise<AppTimeEntry> {
+    return this.memStorage.updateAppTimeEntry(id, updates);
+  }
+
+  async deleteAppTimeEntry(id: number): Promise<void> {
+    return this.memStorage.deleteAppTimeEntry(id);
+  }
+
+  async getAllMiniGameBlocks(): Promise<MiniGameBlock[]> {
+    return this.memStorage.getAllMiniGameBlocks();
+  }
+
+  async createMiniGameBlock(block: InsertMiniGameBlock): Promise<MiniGameBlock> {
+    return this.memStorage.createMiniGameBlock(block);
+  }
+
+  async updateMiniGameBlock(id: number, updates: Partial<MiniGameBlock>): Promise<MiniGameBlock> {
+    return this.memStorage.updateMiniGameBlock(id, updates);
+  }
+
+  async deleteMiniGameBlock(id: number): Promise<void> {
+    return this.memStorage.deleteMiniGameBlock(id);
+  }
+
+  async getAllMiniGameDesigns(): Promise<MiniGameDesign[]> {
+    return this.memStorage.getAllMiniGameDesigns();
+  }
+
+  async getMiniGameDesignsByBlock(blockId: number): Promise<MiniGameDesign[]> {
+    return this.memStorage.getMiniGameDesignsByBlock(blockId);
+  }
+
+  async createMiniGameDesign(design: InsertMiniGameDesign): Promise<MiniGameDesign> {
+    return this.memStorage.createMiniGameDesign(design);
+  }
+
+  async updateMiniGameDesign(id: number, updates: Partial<MiniGameDesign>): Promise<MiniGameDesign> {
+    return this.memStorage.updateMiniGameDesign(id, updates);
+  }
+
+  async deleteMiniGameDesign(id: number): Promise<void> {
+    return this.memStorage.deleteMiniGameDesign(id);
+  }
+
+  async scheduleContentForMoonPhases(year: number, month: number): Promise<void> {
+    return this.memStorage.scheduleContentForMoonPhases(year, month);
+  }
+
+  async getAllSocialMediaPosts(): Promise<SocialMediaPost[]> {
+    return this.memStorage.getAllSocialMediaPosts();
+  }
+
+  async getSocialMediaPostsByDesign(designId: number): Promise<SocialMediaPost[]> {
+    return this.memStorage.getSocialMediaPostsByDesign(designId);
+  }
+
+  async getSocialMediaPostsByDateRange(startDate: string, endDate: string): Promise<SocialMediaPost[]> {
+    return this.memStorage.getSocialMediaPostsByDateRange(startDate, endDate);
+  }
+
+  async createSocialMediaPost(post: InsertSocialMediaPost): Promise<SocialMediaPost> {
+    return this.memStorage.createSocialMediaPost(post);
+  }
+
+  async updateSocialMediaPost(id: number, updates: Partial<SocialMediaPost>): Promise<SocialMediaPost> {
+    return this.memStorage.updateSocialMediaPost(id, updates);
+  }
+
+  async deleteSocialMediaPost(id: number): Promise<void> {
+    return this.memStorage.deleteSocialMediaPost(id);
+  }
+
+  async getAllSocialMediaAnalytics(): Promise<SocialMediaAnalytics[]> {
+    return this.memStorage.getAllSocialMediaAnalytics();
+  }
+
+  async getSocialMediaAnalyticsByPost(postId: number): Promise<SocialMediaAnalytics[]> {
+    return this.memStorage.getSocialMediaAnalyticsByPost(postId);
+  }
+
+  async getLatestAnalyticsForPost(postId: number): Promise<SocialMediaAnalytics | undefined> {
+    return this.memStorage.getLatestAnalyticsForPost(postId);
+  }
+
+  async createSocialMediaAnalytics(analytics: InsertSocialMediaAnalytics): Promise<SocialMediaAnalytics> {
+    return this.memStorage.createSocialMediaAnalytics(analytics);
+  }
+
+  async updateSocialMediaAnalytics(id: number, updates: Partial<SocialMediaAnalytics>): Promise<SocialMediaAnalytics> {
+    return this.memStorage.updateSocialMediaAnalytics(id, updates);
+  }
+
+  async getAllPerformanceInsights(): Promise<PerformanceInsights[]> {
+    return this.memStorage.getAllPerformanceInsights();
+  }
+
+  async getPerformanceInsightsByMiniGame(miniGameBlockId: number): Promise<PerformanceInsights[]> {
+    return this.memStorage.getPerformanceInsightsByMiniGame(miniGameBlockId);
+  }
+
+  async getPerformanceInsightsByPlatform(platform: string): Promise<PerformanceInsights[]> {
+    return this.memStorage.getPerformanceInsightsByPlatform(platform);
+  }
+
+  async getPerformanceInsightsByDayOfWeek(dayOfWeek: string): Promise<PerformanceInsights[]> {
+    return this.memStorage.getPerformanceInsightsByDayOfWeek(dayOfWeek);
+  }
+
+  async createPerformanceInsights(insights: InsertPerformanceInsights): Promise<PerformanceInsights> {
+    return this.memStorage.createPerformanceInsights(insights);
+  }
+
+  async updatePerformanceInsights(id: number, updates: Partial<PerformanceInsights>): Promise<PerformanceInsights> {
+    return this.memStorage.updatePerformanceInsights(id, updates);
+  }
+
+  async deletePerformanceInsights(id: number): Promise<void> {
+    return this.memStorage.deletePerformanceInsights(id);
+  }
+
+  async aggregatePerformanceData(): Promise<void> {
+    return this.memStorage.aggregatePerformanceData();
+  }
+
+  async getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
+    return this.memStorage.getReportsAnalytics(period, startDate, endDate);
+  }
+
+  async getHabitsAnalytics(startDate: string, endDate: string): Promise<any> {
+    return this.memStorage.getHabitsAnalytics(startDate, endDate);
+  }
+
+  async getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
+    // Use database for goals analytics
+    const allGoals = await this.getAllGoals();
+    const activeGoals = allGoals.filter(goal => !goal.isCompleted);
+    const completedGoals = allGoals.filter(goal => goal.isCompleted);
+
+    const goalsAnalytics = allGoals.map(goal => {
+      const currentVal = parseFloat(goal.currentValue || "0");
+      const targetVal = parseFloat(goal.targetValue || "0");
+      const progress = targetVal > 0 ? (currentVal / targetVal) * 100 : 0;
+
+      return {
+        id: goal.id,
+        title: goal.title,
+        category: goal.category,
+        progress: Math.round(progress),
+        isCompleted: goal.isCompleted,
+        targetDate: goal.targetDate,
+        onTrack: progress >= 75 || goal.isCompleted
+      };
+    });
+
+    return {
+      goals: goalsAnalytics,
+      summary: {
+        total: allGoals.length,
+        active: activeGoals.length,
+        completed: completedGoals.length,
+        onTrack: goalsAnalytics.filter(g => g.onTrack).length
+      }
+    };
+  }
+
+  async getHealthAnalytics(startDate: string, endDate: string): Promise<any> {
+    return this.memStorage.getHealthAnalytics(startDate, endDate);
+  }
+
+  async getProductivityAnalytics(startDate: string, endDate: string): Promise<any> {
+    return this.memStorage.getProductivityAnalytics(startDate, endDate);
+  }
+}
+
+export const storage = new DatabaseStorage();
