@@ -99,7 +99,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
     title: "",
     description: "",
     category: "health",
-    targetValue: 0,
+    targetValue: "0",
     unit: "",
     targetDate: ""
   });
@@ -117,38 +117,37 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const handleCreateGoal = () => {
     if (!newGoal.title || !newGoal.targetDate) return;
 
-    const goal: Goal = {
-      id: Date.now(),
-      ...newGoal,
-      currentValue: 0,
-      isCompleted: false,
-      createdAt: format(new Date(), 'yyyy-MM-dd')
-    };
-
-    setGoals([...goals, goal]);
-    setNewGoal({
-      title: "",
-      description: "",
-      category: "health",
-      targetValue: 0,
-      unit: "",
-      targetDate: ""
+    createGoalMutation.mutate({
+      title: newGoal.title,
+      description: newGoal.description || null,
+      category: newGoal.category,
+      targetValue: newGoal.targetValue,
+      currentValue: "0",
+      unit: newGoal.unit || null,
+      targetDate: newGoal.targetDate,
+      isCompleted: false
     });
-    setShowCreateDialog(false);
   };
 
-  const updateGoalProgress = (goalId: number, newValue: number) => {
-    setGoals(goals.map(goal => {
-      if (goal.id === goalId) {
-        const isCompleted = newValue >= goal.targetValue;
-        return { ...goal, currentValue: newValue, isCompleted };
+  const updateGoalProgress = (goalId: number, newValue: string) => {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal) return;
+    
+    const targetVal = parseFloat(goal.targetValue || "0");
+    const currentVal = parseFloat(newValue);
+    const isCompleted = currentVal >= targetVal;
+    
+    updateGoalMutation.mutate({
+      id: goalId,
+      updates: {
+        currentValue: newValue,
+        isCompleted
       }
-      return goal;
-    }));
+    });
   };
 
   const deleteGoal = (goalId: number) => {
-    setGoals(goals.filter(goal => goal.id !== goalId));
+    deleteGoalMutation.mutate(goalId);
   };
 
   return (
@@ -267,7 +266,12 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {activeGoals.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500 mx-auto mb-4"></div>
+              <p className="text-gray-500 dark:text-gray-400">Loading goals...</p>
+            </div>
+          ) : activeGoals.length === 0 ? (
             <div className="text-center py-8">
               <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 dark:text-gray-400">No active goals. Create your first goal to get started!</p>
@@ -317,17 +321,19 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
 
 interface GoalCardProps {
   goal: Goal;
-  onUpdateProgress: (goalId: number, newValue: number) => void;
+  onUpdateProgress: (goalId: number, newValue: string) => void;
   onDelete: (goalId: number) => void;
   isCompleted?: boolean;
 }
 
 function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: GoalCardProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(goal.currentValue);
+  const [editValue, setEditValue] = useState(goal.currentValue || "0");
   
-  const progress = (goal.currentValue / goal.targetValue) * 100;
-  const daysRemaining = differenceInDays(new Date(goal.targetDate), new Date());
+  const currentVal = parseFloat(goal.currentValue || "0");
+  const targetVal = parseFloat(goal.targetValue || "0");
+  const progress = targetVal > 0 ? (currentVal / targetVal) * 100 : 0;
+  const daysRemaining = goal.targetDate ? differenceInDays(new Date(goal.targetDate), new Date()) : 0;
   const isOverdue = daysRemaining < 0;
   
   const categoryColors = {
@@ -420,11 +426,11 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: Goa
             <div className="flex items-center space-x-2">
               <Input
                 type="number"
-                value={editValue}
-                onChange={(e) => setEditValue(Number(e.target.value))}
+                value={editValue || ""}
+                onChange={(e) => setEditValue(e.target.value)}
                 className="flex-1 dark:bg-gray-800 dark:text-white"
                 min="0"
-                max={goal.targetValue}
+                max={goal.targetValue || undefined}
               />
               <Button
                 onClick={handleSaveProgress}

@@ -3,6 +3,7 @@ import {
   bills, 
   billPayments, 
   groceryItems,
+  goals,
   type DailyEntry, 
   type InsertDailyEntry,
   type Bill,
@@ -60,6 +61,8 @@ import {
   type PerformanceInsights,
   type InsertPerformanceInsights
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Daily Entries
