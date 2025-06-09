@@ -115,8 +115,15 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const completedGoals = goals.filter(goal => goal.isCompleted);
 
   const handleCreateGoal = () => {
-    if (!newGoal.title || !newGoal.targetDate) return;
+    console.log("Create Goal button clicked");
+    console.log("Current goal data:", newGoal);
+    
+    if (!newGoal.title || !newGoal.targetDate) {
+      console.log("Validation failed:", { title: newGoal.title, targetDate: newGoal.targetDate });
+      return;
+    }
 
+    console.log("Attempting to create goal...");
     createGoalMutation.mutate({
       title: newGoal.title,
       description: newGoal.description || null,
@@ -126,6 +133,23 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
       unit: newGoal.unit || null,
       targetDate: newGoal.targetDate,
       isCompleted: false
+    }, {
+      onSuccess: (data) => {
+        console.log("Goal created successfully:", data);
+        // Reset form and close dialog
+        setNewGoal({
+          title: "",
+          description: "",
+          category: "health",
+          targetValue: "0",
+          unit: "",
+          targetDate: ""
+        });
+        setShowCreateDialog(false);
+      },
+      onError: (error) => {
+        console.error("Error creating goal:", error);
+      }
     });
   };
 
@@ -249,8 +273,12 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
                 </div>
               </div>
               
-              <Button onClick={handleCreateGoal} className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white">
-                Create Goal
+              <Button 
+                onClick={handleCreateGoal} 
+                disabled={createGoalMutation.isPending || !newGoal.title || !newGoal.targetDate}
+                className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white disabled:opacity-50"
+              >
+                {createGoalMutation.isPending ? "Creating..." : "Create Goal"}
               </Button>
             </div>
           </DialogContent>
