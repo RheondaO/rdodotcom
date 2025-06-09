@@ -493,6 +493,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reports Analytics
+  app.get("/api/reports/analytics/:period", async (req, res) => {
+    try {
+      const period = req.params.period;
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ error: "Start date and end date are required" });
+      }
+
+      const analytics = await storage.getReportsAnalytics(period, startDate as string, endDate as string);
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch reports analytics" });
+    }
+  });
+
+  app.get("/api/reports/habits/:dateRange", async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ error: "Start date and end date are required" });
+      }
+
+      const habitData = await storage.getHabitsAnalytics(startDate as string, endDate as string);
+      res.json(habitData);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch habits analytics" });
+    }
+  });
+
+  app.get("/api/reports/goals/:period", async (req, res) => {
+    try {
+      const period = req.params.period;
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ error: "Start date and end date are required" });
+      }
+
+      const goalData = await storage.getGoalsAnalytics(period, startDate as string, endDate as string);
+      res.json(goalData);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch goals analytics" });
+    }
+  });
+
+  app.get("/api/reports/health/:dateRange", async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ error: "Start date and end date are required" });
+      }
+
+      const healthData = await storage.getHealthAnalytics(startDate as string, endDate as string);
+      res.json(healthData);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch health analytics" });
+    }
+  });
+
+  app.get("/api/reports/productivity/:dateRange", async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ error: "Start date and end date are required" });
+      }
+
+      const productivityData = await storage.getProductivityAnalytics(startDate as string, endDate as string);
+      res.json(productivityData);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch productivity analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

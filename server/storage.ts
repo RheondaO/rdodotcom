@@ -221,6 +221,13 @@ export interface IStorage {
   
   // Analytics aggregation
   aggregatePerformanceData(): Promise<void>;
+  
+  // Reports analytics methods
+  getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
+  getHabitsAnalytics(startDate: string, endDate: string): Promise<any>;
+  getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
+  getHealthAnalytics(startDate: string, endDate: string): Promise<any>;
+  getProductivityAnalytics(startDate: string, endDate: string): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -1309,6 +1316,160 @@ export class MemStorage implements IStorage {
         });
       }
     }
+  }
+
+  // Reports Analytics Implementation
+  async getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
+    const habits = await this.getAllHabits();
+    const goals = await this.getAllGoals();
+    const dailyEntries = Array.from(this.dailyEntries.values()).filter(entry => 
+      entry.date >= startDate && entry.date <= endDate
+    );
+
+    const totalDays = dailyEntries.length;
+    const habitsCompleted = dailyEntries.reduce((sum, entry) => {
+      const completions = entry.habitCompletions ? JSON.parse(entry.habitCompletions) : [];
+      return sum + completions.length;
+    }, 0);
+
+    const avgWaterIntake = totalDays > 0 ? 
+      dailyEntries.reduce((sum, entry) => sum + (entry.waterIntake || 0), 0) / totalDays : 0;
+
+    const avgWorkHours = totalDays > 0 ? 
+      dailyEntries.reduce((sum, entry) => sum + parseFloat(entry.workHours || "0"), 0) / totalDays : 0;
+
+    return {
+      period,
+      totalDays,
+      habitsCompleted,
+      avgWaterIntake: Math.round(avgWaterIntake * 10) / 10,
+      avgWorkHours: Math.round(avgWorkHours * 10) / 10,
+      goalsActive: goals.filter(g => !g.isCompleted).length,
+      goalsCompleted: goals.filter(g => g.isCompleted).length,
+      trends: {
+        habitsImproving: habitsCompleted > totalDays * 2,
+        waterIntakeGood: avgWaterIntake >= 8,
+        workLifeBalance: avgWorkHours >= 6 && avgWorkHours <= 8
+      }
+    };
+  }
+
+  async getHabitsAnalytics(startDate: string, endDate: string): Promise<any> {
+    const habits = await this.getAllHabits();
+    const habitLogs = Array.from(this.habitLogs.values()).filter(log =>
+      log.date >= startDate && log.date <= endDate
+    );
+
+    const habitAnalytics = habits.map(habit => {
+      const logs = habitLogs.filter(log => log.habitId === habit.id);
+      const completedLogs = logs.filter(log => log.completed);
+      const completionRate = logs.length > 0 ? (completedLogs.length / logs.length) * 100 : 0;
+
+      return {
+        id: habit.id,
+        name: habit.name,
+        category: habit.category,
+        currentStreak: habit.currentStreak,
+        longestStreak: habit.longestStreak,
+        completionRate: Math.round(completionRate),
+        totalCompletions: completedLogs.length,
+        totalDays: logs.length
+      };
+    });
+
+    return {
+      habits: habitAnalytics,
+      avgCompletionRate: habitAnalytics.length > 0 ? 
+        Math.round(habitAnalytics.reduce((sum, h) => sum + h.completionRate, 0) / habitAnalytics.length) : 0,
+      topPerformer: habitAnalytics.sort((a, b) => b.completionRate - a.completionRate)[0]
+    };
+  }
+
+  async getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
+    const goals = await this.getAllGoals();
+    const activeGoals = goals.filter(g => !g.isCompleted);
+    const completedGoals = goals.filter(g => g.isCompleted);
+
+    const goalsAnalytics = goals.map(goal => {
+      const progress = goal.targetValue && parseFloat(goal.targetValue) > 0 ? 
+        (parseFloat(goal.currentValue || "0") / parseFloat(goal.targetValue)) * 100 : 0;
+
+      return {
+        id: goal.id,
+        title: goal.title,
+        category: goal.category,
+        progress: Math.round(progress),
+        isCompleted: goal.isCompleted,
+        targetDate: goal.targetDate,
+        onTrack: progress >= 75 || goal.isCompleted
+      };
+    });
+
+    return {
+      goals: goalsAnalytics,
+      summary: {
+        total: goals.length,
+        active: activeGoals.length,
+        completed: completedGoals.length,
+        onTrack: goalsAnalytics.filter(g => g.onTrack).length
+      }
+    };
+  }
+
+  async getHealthAnalytics(startDate: string, endDate: string): Promise<any> {
+    const dailyEntries = Array.from(this.dailyEntries.values()).filter(entry => 
+      entry.date >= startDate && entry.date <= endDate
+    );
+
+    const totalDays = dailyEntries.length;
+    if (totalDays === 0) return { totalDays: 0 };
+
+    const avgWaterIntake = dailyEntries.reduce((sum, entry) => sum + (entry.waterIntake || 0), 0) / totalDays;
+    const avgSleepHours = dailyEntries.reduce((sum, entry) => sum + parseFloat(entry.sleepHours || "0"), 0) / totalDays;
+    const exerciseDays = dailyEntries.filter(entry => entry.exerciseCompleted).length;
+    const avgMood = dailyEntries.filter(entry => entry.mood).length;
+
+    return {
+      totalDays,
+      avgWaterIntake: Math.round(avgWaterIntake * 10) / 10,
+      avgSleepHours: Math.round(avgSleepHours * 10) / 10,
+      exerciseFrequency: Math.round((exerciseDays / totalDays) * 100),
+      moodTrackedDays: avgMood,
+      trends: {
+        hydrationGood: avgWaterIntake >= 8,
+        sleepGood: avgSleepHours >= 7 && avgSleepHours <= 9,
+        exerciseConsistent: (exerciseDays / totalDays) >= 0.5
+      }
+    };
+  }
+
+  async getProductivityAnalytics(startDate: string, endDate: string): Promise<any> {
+    const dailyEntries = Array.from(this.dailyEntries.values()).filter(entry => 
+      entry.date >= startDate && entry.date <= endDate
+    );
+    const focusSessions = Array.from(this.focusSessions.values()).filter(session =>
+      session.date >= startDate && session.date <= endDate
+    );
+
+    const totalDays = dailyEntries.length;
+    if (totalDays === 0) return { totalDays: 0 };
+
+    const avgWorkHours = dailyEntries.reduce((sum, entry) => sum + parseFloat(entry.workHours || "0"), 0) / totalDays;
+    const avgFocusSessions = dailyEntries.reduce((sum, entry) => sum + (entry.focusSessionsCompleted || 0), 0) / totalDays;
+    const successfulSessions = focusSessions.filter(session => session.wasSuccessful).length;
+
+    return {
+      totalDays,
+      avgWorkHours: Math.round(avgWorkHours * 10) / 10,
+      avgFocusSessions: Math.round(avgFocusSessions * 10) / 10,
+      totalFocusSessions: focusSessions.length,
+      successRate: focusSessions.length > 0 ? Math.round((successfulSessions / focusSessions.length) * 100) : 0,
+      trends: {
+        workLifeBalance: avgWorkHours >= 6 && avgWorkHours <= 8,
+        focusImproving: avgFocusSessions >= 2,
+        consistentProductivity: successfulSessions > focusSessions.length * 0.7
+      }
+    };
   }
 }
 
