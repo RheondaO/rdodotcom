@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -98,59 +99,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     date: string;
   }>>([]);
 
-  // Mock data - in real app would come from API
-  const projects: AppProject[] = [
-    {
-      id: 1,
-      name: "Professional Portfolio",
-      description: "Personal portfolio website showcasing my development skills and projects",
-      status: "in_progress",
-      projectType: "web",
-      repositoryUrl: "https://github.com/yourusername/portfolio",
-      deploymentUrl: "https://yourportfolio.com",
-      targetDate: "2025-07-15",
-      startDate: "2025-05-01",
-      progress: 75,
-      estimatedHours: 120,
-      actualHours: 85,
-      techStack: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Framer Motion"],
-      isActive: true,
-      createdAt: "2025-05-01T00:00:00Z",
-      updatedAt: "2025-06-03T10:30:00Z"
-    },
-    {
-      id: 2,
-      name: "Really Obvious Media Lab",
-      description: "Creative media laboratory website with interactive features and content management",
-      status: "in_progress",
-      projectType: "web",
-      repositoryUrl: "https://github.com/yourusername/media-lab",
-      deploymentUrl: "https://reallyobviousmedialab.net",
-      targetDate: "2025-08-30",
-      startDate: "2025-04-15",
-      progress: 60,
-      estimatedHours: 200,
-      actualHours: 110,
-      techStack: ["Vue.js", "Node.js", "PostgreSQL", "Express", "GSAP"],
-      isActive: true,
-      createdAt: "2025-04-15T00:00:00Z",
-      updatedAt: "2025-06-03T09:15:00Z"
-    },
-    {
-      id: 3,
-      name: "Belle Journal App",
-      description: "Comprehensive life management application with habit tracking and analytics",
-      status: "planning",
-      projectType: "web",
-      progress: 25,
-      estimatedHours: 300,
-      actualHours: 45,
-      techStack: ["React", "TypeScript", "Vite", "Tailwind CSS", "Drizzle ORM"],
-      isActive: true,
-      createdAt: "2025-06-01T00:00:00Z",
-      updatedAt: "2025-06-03T12:00:00Z"
-    }
-  ];
+  // Fetch real project data from API
+  const { data: projects = [] } = useQuery({
+    queryKey: ['/api/app-projects'],
+    select: (data: any[]) => data || []
+  });
 
   const tasks: AppTask[] = [
     {

@@ -106,88 +106,10 @@ export default function ContentPipelineSection() {
     { value: 'high', label: 'High', color: '#EF4444' }
   ];
 
-  // Sample data
+  // Load content ideas from API
   useEffect(() => {
-    const sampleContent: ContentIdea[] = [
-      {
-        id: 1,
-        title: "10 Pink Aesthetic Room Makeover Ideas",
-        description: "Create a dreamy pink bedroom transformation guide with budget-friendly tips",
-        category: "Home Decor",
-        priority: "high",
-        tags: ["pink", "bedroom", "aesthetic", "makeover", "budget"],
-        status: "draft",
-        createdDate: "2025-06-01",
-        targetDate: "2025-06-15",
-        assignedTo: "Belle",
-        contentType: "carousel",
-        platform: ["Instagram", "Pinterest"],
-        estimatedHours: 4,
-        notes: "Include before/after photos, shopping links"
-      },
-      {
-        id: 2,
-        title: "Morning Skincare Routine for Glowing Skin",
-        description: "Step-by-step morning skincare routine for that perfect glow",
-        category: "Beauty & Skincare",
-        priority: "medium",
-        tags: ["skincare", "morning", "routine", "glow"],
-        status: "ideation",
-        createdDate: "2025-06-02",
-        targetDate: "2025-06-20",
-        contentType: "video",
-        platform: ["TikTok", "Instagram"],
-        estimatedHours: 6,
-        notes: "Film in natural lighting, include product closeups"
-      },
-      {
-        id: 3,
-        title: "Productive Girl Summer Planning",
-        description: "How to have the most productive and fulfilling summer",
-        category: "Productivity",
-        priority: "high",
-        tags: ["summer", "productivity", "planning", "goals"],
-        status: "review",
-        createdDate: "2025-05-28",
-        targetDate: "2025-06-10",
-        contentType: "post",
-        platform: ["Instagram", "TikTok"],
-        estimatedHours: 3,
-        actualHours: 3.5,
-        notes: "Include free planning template download"
-      },
-      {
-        id: 4,
-        title: "Self-Care Sunday Ritual Ideas",
-        description: "Luxurious self-care activities for the perfect Sunday",
-        category: "Self Care",
-        priority: "medium",
-        tags: ["selfcare", "sunday", "ritual", "relaxation"],
-        status: "approved",
-        createdDate: "2025-06-03",
-        targetDate: "2025-06-16",
-        contentType: "carousel",
-        platform: ["Instagram", "Pinterest"],
-        estimatedHours: 3,
-        notes: "Create aesthetic flat lay photos"
-      },
-      {
-        id: 5,
-        title: "DIY Pink Hair Accessories",
-        description: "Cute and easy DIY hair accessories in pink theme",
-        category: "DIY & Crafts",
-        priority: "low",
-        tags: ["diy", "hair", "accessories", "pink", "crafts"],
-        status: "scheduled",
-        createdDate: "2025-06-04",
-        targetDate: "2025-06-12",
-        contentType: "video",
-        platform: ["YouTube", "TikTok"],
-        estimatedHours: 5,
-        notes: "Film step-by-step tutorial"
-      }
-    ];
-    setContentIdeas(sampleContent);
+    // TODO: Replace with actual API call to fetch content ideas
+    setContentIdeas([]);
   }, []);
 
   const getStatusColor = (status: string) => {
