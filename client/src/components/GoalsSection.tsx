@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { format, differenceInDays, isAfter, isBefore, isToday, isYesterday, isTomorrow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Goal, InsertGoal } from "@shared/schema";
 
 
@@ -34,6 +35,7 @@ interface GoalsSectionProps {
 
 export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   const getDateLabel = () => {
     if (isToday(selectedDate)) return "Today";
@@ -125,6 +127,17 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
       return;
     }
 
+    // Check if user has reached the maximum goal limit (5 goals)
+    if (goals.length >= 5) {
+      console.log("Maximum goal limit reached");
+      toast({
+        title: "Goal Limit Reached",
+        description: "You can only have a maximum of 5 goals at a time. Delete an existing goal to create a new one.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     console.log("Attempting to create goal...");
     createGoalMutation.mutate({
       title: newGoal.title,
@@ -175,9 +188,12 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
         
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg">
+            <Button 
+              disabled={goals.length >= 5}
+              className="bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <Plus className="mr-2 h-4 w-4" />
-              New Goal
+              New Goal {goals.length >= 5 ? "(5/5)" : `(${goals.length}/5)`}
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-white dark:bg-gray-900 border-0 rounded-2xl">

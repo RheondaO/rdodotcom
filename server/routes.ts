@@ -160,6 +160,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/goals", async (req, res) => {
     try {
       console.log("Received goal data:", req.body);
+      
+      // Check goal limit (5 goals maximum)
+      const existingGoals = await storage.getAllGoals();
+      if (existingGoals.length >= 5) {
+        return res.status(400).json({ 
+          error: "Goal limit exceeded", 
+          message: "You can only have a maximum of 5 goals at a time." 
+        });
+      }
+      
       const data = insertGoalSchema.parse(req.body);
       console.log("Parsed goal data:", data);
       const goal = await storage.createGoal(data);
