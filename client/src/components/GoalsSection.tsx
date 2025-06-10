@@ -130,7 +130,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
       title: newGoal.title,
       description: newGoal.description || null,
       category: newGoal.category,
-      targetValue: newGoal.targetValue,
+      targetValue: newGoal.targetValue.toString(),
       currentValue: "0",
       unit: newGoal.unit || null,
       targetDate: newGoal.targetDate,
