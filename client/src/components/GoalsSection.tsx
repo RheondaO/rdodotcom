@@ -50,10 +50,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   // Create goal mutation
   const createGoalMutation = useMutation({
     mutationFn: async (goalData: InsertGoal) => {
-      return apiRequest('/api/goals', {
-        method: 'POST',
-        body: JSON.stringify(goalData),
-      });
+      return apiRequest('POST', '/api/goals', goalData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
@@ -72,10 +69,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   // Update goal mutation
   const updateGoalMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number; updates: Partial<Goal> }) => {
-      return apiRequest(`/api/goals/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(updates),
-      });
+      return apiRequest('PATCH', `/api/goals/${id}`, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
@@ -86,9 +80,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const deleteGoalMutation = useMutation({
     mutationFn: async (id: number) => {
       console.log('Making DELETE request for goal ID:', id);
-      return apiRequest(`/api/goals/${id}`, {
-        method: 'DELETE',
-      });
+      return apiRequest('DELETE', `/api/goals/${id}`);
     },
     onSuccess: (data) => {
       console.log('Delete successful:', data);
