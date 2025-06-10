@@ -159,11 +159,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/goals", async (req, res) => {
     try {
+      console.log("Received goal data:", req.body);
       const data = insertGoalSchema.parse(req.body);
+      console.log("Parsed goal data:", data);
       const goal = await storage.createGoal(data);
       res.json(goal);
     } catch (error) {
-      res.status(400).json({ error: "Invalid goal data" });
+      console.error("Goal creation error:", error);
+      res.status(400).json({ error: "Invalid goal data", details: error.message });
     }
   });
 

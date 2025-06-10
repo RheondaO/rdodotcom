@@ -50,9 +50,11 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   // Create goal mutation
   const createGoalMutation = useMutation({
     mutationFn: async (goalData: InsertGoal) => {
+      console.log("Sending goal data:", goalData);
       return apiRequest('POST', '/api/goals', goalData);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Goal created successfully:", data);
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
       setShowCreateDialog(false);
       setNewGoal({
@@ -63,6 +65,9 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
         unit: "",
         targetDate: ""
       });
+    },
+    onError: (error) => {
+      console.error("Error creating goal:", error);
     },
   });
 
@@ -130,23 +135,6 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
       unit: newGoal.unit || null,
       targetDate: newGoal.targetDate,
       isCompleted: false
-    }, {
-      onSuccess: (data) => {
-        console.log("Goal created successfully:", data);
-        // Reset form and close dialog
-        setNewGoal({
-          title: "",
-          description: "",
-          category: "health",
-          targetValue: "0",
-          unit: "",
-          targetDate: ""
-        });
-        setShowCreateDialog(false);
-      },
-      onError: (error) => {
-        console.error("Error creating goal:", error);
-      }
     });
   };
 
