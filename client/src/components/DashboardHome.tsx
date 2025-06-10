@@ -26,6 +26,8 @@ import { useDailyData } from "@/hooks/use-daily-data";
 import { useHabits } from "@/hooks/use-habits";
 import { useTodos } from "@/hooks/use-todos";
 import { useTimeBlocks } from "@/hooks/use-time-blocks";
+import { useQuery } from "@tanstack/react-query";
+import type { Goal, Medication } from "@shared/schema";
 
 interface DashboardHomeProps {
   selectedDate: Date;
@@ -38,6 +40,16 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
   const { data: habits = [] } = useHabits();
   const { data: todos = [] } = useTodos(dateString);
   const { data: timeBlocksData = [] } = useTimeBlocks(dateString);
+  
+  // Fetch real goals data from API
+  const { data: goals = [] } = useQuery<Goal[]>({
+    queryKey: ['/api/goals'],
+  });
+  
+  // Fetch real medications data from API
+  const { data: medications = [] } = useQuery<Medication[]>({
+    queryKey: ['/api/medications'],
+  });
   
   const [activeTimer, setActiveTimer] = useState<{
     type: string;
@@ -85,16 +97,33 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     date: todo.dueDate
   }));
 
-  const upcomingGoals = [
-    { id: 1, title: "Complete React course", progress: 75, dueDate: "Jun 15" },
-    { id: 2, title: "Save $1000", progress: 60, dueDate: "Jun 30" },
-    { id: 3, title: "Run 5K", progress: 40, dueDate: "Jun 20" }
-  ];
+  // Process real goals data for dashboard display
+  const upcomingGoals = goals
+    .filter(goal => !goal.isCompleted)
+    .slice(0, 3)
+    .map(goal => {
+      const currentVal = parseFloat(goal.currentValue || "0");
+      const targetVal = parseFloat(goal.targetValue || "0");
+      const progress = targetVal > 0 ? Math.round((currentVal / targetVal) * 100) : 0;
+      
+      return {
+        id: goal.id,
+        title: goal.title,
+        progress: Math.min(progress, 100),
+        dueDate: goal.targetDate ? format(new Date(goal.targetDate), 'MMM d') : 'No deadline'
+      };
+    });
 
-  const medicationReminders = [
-    { id: 1, name: "Vitamin D", time: "08:00", taken: true },
-    { id: 2, name: "Omega-3", time: "20:00", taken: false }
-  ];
+  // Process real medications data for dashboard display
+  const medicationReminders = medications
+    .filter(med => med.isActive)
+    .slice(0, 3)
+    .map(med => ({
+      id: med.id,
+      name: med.name,
+      time: med.reminderTimes || "08:00",
+      taken: false // TODO: Check if medication was taken today from daily entry
+    }));
 
   // Use real time blocks data, with formatted time display
   const timeBlocks = timeBlocksData.map(block => ({

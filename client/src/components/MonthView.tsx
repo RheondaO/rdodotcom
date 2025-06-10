@@ -20,6 +20,7 @@ import {
 } from "date-fns";
 import { useDailyData } from "@/hooks/use-daily-data";
 import { useQuery } from "@tanstack/react-query";
+import type { Goal, Todo, Medication, TimeBlock } from "@shared/schema";
 
 interface MonthViewProps {
   selectedDate: Date;
