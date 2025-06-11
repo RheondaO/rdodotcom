@@ -1,4 +1,3 @@
-
 import { Request, Response, NextFunction } from 'express';
 
 export interface AuthenticatedRequest extends Request {
@@ -44,8 +43,8 @@ export const requireAuth = (req: AuthenticatedRequest, res: Response, next: Next
 };
 
 export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  if (!req.user || req.user.username !== ADMIN_USERNAME) {
-    return res.status(403).json({ error: 'Admin access required' });
+  if (!req.user || (req.user.username !== process.env.REPL_OWNER && req.user.username !== 'bellejournalapp')) {
+    return res.status(403).json({ error: "Admin access required" });
   }
   next();
 };

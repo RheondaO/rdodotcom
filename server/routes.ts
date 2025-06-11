@@ -51,7 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ 
       authenticated: !!req.user,
       user: req.user,
-      isAdmin: req.user?.username === 'YOUR_ACTUAL_REPLIT_USERNAME' // UPDATE THIS WITH YOUR USERNAME
+      isAdmin: req.user?.username === process.env.REPL_OWNER || req.user?.username === 'bellejournalapp'
     });
   });
 

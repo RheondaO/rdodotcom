@@ -1,9 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, TrendingUp, BookOpen, Calendar, ExternalLink, LogIn } from "lucide-react";
+import { LogIn, Calendar, TrendingUp, Users, Star, Clock, Zap, Target, FileText } from "lucide-react";
 
 interface PublicStats {
   totalGoals: number;
@@ -93,87 +92,87 @@ export default function PublicView() {
           </div>
         </div>
 
-        {/* Stats Grid */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            <Card className="border-purple-100 dark:border-purple-800">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Goals</CardTitle>
-                <Target className="h-4 w-4 text-purple-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalGoals}</div>
-                <p className="text-xs text-green-600">
-                  {stats.completedGoals} completed ({stats.completionRate}%)
-                </p>
+        {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+            <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-purple-100 dark:border-purple-800">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-purple-600 mb-2">{stats?.totalGoals || 0}</div>
+                <div className="text-gray-600 dark:text-gray-300">Total Goals</div>
+                <div className="text-sm text-green-600 mt-1">{stats?.completedGoals || 0} completed</div>
               </CardContent>
             </Card>
 
-            <Card className="border-purple-100 dark:border-purple-800">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Habits</CardTitle>
-                <TrendingUp className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.activeHabits}</div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  of {stats.totalHabits} total habits
-                </p>
+            <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-pink-100 dark:border-pink-800">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-pink-600 mb-2">{stats?.activeHabits || 0}</div>
+                <div className="text-gray-600 dark:text-gray-300">Active Habits</div>
+                <div className="text-sm text-blue-600 mt-1">{stats?.totalHabits || 0} total</div>
               </CardContent>
             </Card>
 
-            <Card className="border-purple-100 dark:border-purple-800">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Content Published</CardTitle>
-                <BookOpen className="h-4 w-4 text-blue-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.publishedContent}</div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  of {stats.totalContent} total pieces
-                </p>
+            <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-orange-100 dark:border-orange-800">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-orange-600 mb-2">{stats?.publishedContent || 0}</div>
+                <div className="text-gray-600 dark:text-gray-300">Published Content</div>
+                <div className="text-sm text-purple-600 mt-1">{stats?.totalContent || 0} total pieces</div>
               </CardContent>
             </Card>
 
-            <Card className="border-purple-100 dark:border-purple-800">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-                <Calendar className="h-4 w-4 text-orange-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.completionRate}%</div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  goal completion rate
-                </p>
+            <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-blue-100 dark:border-blue-800">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-2">{stats?.totalPosts || 0}</div>
+                <div className="text-gray-600 dark:text-gray-300">Social Posts</div>
+                <div className="text-sm text-teal-600 mt-1">{stats?.totalBlocks || 0} content blocks</div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-green-100 dark:border-green-800">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl font-bold text-green-600 mb-2">{stats?.streak || 0}</div>
+                <div className="text-gray-600 dark:text-gray-300">Current Streak</div>
+                <div className="text-sm text-indigo-600 mt-1">{stats?.completionRate || 0}% success</div>
               </CardContent>
             </Card>
           </div>
-        )}
 
-        {/* Recent Content */}
-        {recentContent && recentContent.length > 0 && (
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-8 text-center">Recent Published Content</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentContent.map((content) => (
-                <Card key={content.id} className="hover:shadow-lg transition-shadow border-purple-100 dark:border-purple-800">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{content.title}</CardTitle>
-                    <CardDescription>{content.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary">Published</Badge>
-                      <span className="text-sm text-gray-500">
-                        {content.publishedDate ? new Date(content.publishedDate).toLocaleDateString() : 'Recently'}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        {/* Recent Activity */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold mb-6 text-center">Recent Activity</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recentContent?.map((item) => (
+                <div key={`${item.type}-${item.id}`} className="p-4 bg-white/40 dark:bg-gray-800/40 rounded-lg border border-purple-100 dark:border-purple-800">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{item.title}</h3>
+                    {item.type === 'goal' ? (
+                      <Target className="h-4 w-4 text-green-500 mt-1" />
+                    ) : (
+                      <FileText className="h-4 w-4 text-purple-500 mt-1" />
+                    )}
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">{item.description}</p>
+                  <div className="flex justify-between items-center">
+                    <Badge 
+                      variant="outline" 
+                      className={`${
+                        item.type === 'goal' 
+                          ? 'text-green-600 border-green-200' 
+                          : 'text-purple-600 border-purple-200'
+                      }`}
+                    >
+                      {item.status}
+                    </Badge>
+                    <span className="text-xs text-gray-500">
+                      {new Date(item.updatedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              )) || (
+                <div className="text-center py-8 text-gray-500">
+                  No recent activity available
+                </div>
+              )}
           </div>
-        )}
+        </div>
 
         {/* About Section */}
         <div className="text-center bg-white/50 dark:bg-gray-800/50 rounded-2xl p-12 backdrop-blur-sm">

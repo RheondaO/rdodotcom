@@ -329,6 +329,8 @@ export class MemStorage implements IStorage {
     const activeHabits = Array.from(this.habits.values()).filter(h => h.isActive).length;
     const contentPieces = this.contentPieces.size;
     const publishedContent = Array.from(this.contentPieces.values()).filter(c => c.status === 'published').length;
+    const totalPosts = this.socialMediaPosts.size;
+    const totalBlocks = this.miniGameBlocks.size;
 
     return {
       totalGoals: goals,
@@ -337,22 +339,59 @@ export class MemStorage implements IStorage {
       activeHabits: activeHabits,
       totalContent: contentPieces,
       publishedContent: publishedContent,
-      completionRate: goals > 0 ? Math.round((completedGoals / goals) * 100) : 0
+      totalPosts: totalPosts,
+      totalBlocks: totalBlocks,
+      completionRate: goals > 0 ? Math.round((completedGoals / goals) * 100) : 0,
+      streak: this.calculateCurrentStreak(),
+      lastUpdated: new Date().toISOString()
     };
   }
 
+  private calculateCurrentStreak(): number {
+    const today = new Date().toISOString().split('T')[0];
+    const entries = Array.from(this.dailyEntries.values())
+      .filter(entry => entry.date <= today)
+      .sort((a, b) => b.date.localeCompare(a.date));
+    
+    let streak = 0;
+    for (const entry of entries) {
+      if (entry.waterIntake && entry.waterIntake > 0) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
   async getPublicRecentContent() {
-    return Array.from(this.contentPieces.values())
+    const contentPieces = Array.from(this.contentPieces.values())
       .filter(piece => piece.status === 'published')
       .sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime())
-      .slice(0, 5)
+      .slice(0, 3)
       .map(piece => ({
         id: piece.id,
         title: piece.title,
         description: piece.description,
         updatedAt: piece.updatedAt,
-        status: piece.status
+        status: piece.status,
+        type: 'content'
       }));
+
+    const recentGoals = Array.from(this.goals.values())
+      .filter(goal => goal.isCompleted)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 2)
+      .map(goal => ({
+        id: goal.id,
+        title: `Completed: ${goal.title}`,
+        description: goal.description,
+        updatedAt: goal.createdAt,
+        status: 'completed',
+        type: 'goal'
+      }));
+
+    return [...contentPieces, ...recentGoals].slice(0, 5);
   }
 
   async getDailyEntry(date: string): Promise<DailyEntry | undefined> {
