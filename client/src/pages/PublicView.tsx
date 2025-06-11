@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Target, TrendingUp, BookOpen, Calendar, ExternalLink } from "lucide-react";
+import { Target, TrendingUp, BookOpen, Calendar, ExternalLink, LogIn } from "lucide-react";
 
 interface PublicStats {
   totalGoals: number;
@@ -53,9 +53,20 @@ export default function PublicView() {
               Belle Journal
             </h1>
           </div>
-          <Badge variant="outline" className="text-purple-600 border-purple-200">
-            Building in Public
-          </Badge>
+          <div className="flex items-center space-x-3">
+            <Badge variant="outline" className="text-purple-600 border-purple-200">
+              Building in Public
+            </Badge>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => window.location.href = '/dashboard'}
+              className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Admin Login
+            </Button>
+          </div>
         </div>
       </header>
 
