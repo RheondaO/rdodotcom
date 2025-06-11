@@ -213,7 +213,7 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
         <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-heading font-semibold text-gray-800">Grocery Budget</h4>
+              <h4 className="font-heading font-semibold text-gray-800">Shopping Budget</h4>
               <Button variant="ghost" size="sm" className="hover:bg-orange-50 rounded-xl">
                 <Receipt className="h-4 w-4 text-orange-500" />
               </Button>

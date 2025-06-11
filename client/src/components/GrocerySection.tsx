@@ -74,7 +74,7 @@ export default function GrocerySection() {
       <section>
         <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
           <ShoppingCart className="text-secondary mr-3 h-5 w-5" />
-          Grocery List
+          Shopping List
         </h3>
         <Card className="bg-white shadow-sm">
           <CardContent className="p-6">
@@ -89,7 +89,7 @@ export default function GrocerySection() {
     <section>
       <h3 className="text-2xl font-heading font-bold text-purple-600 mb-6 flex items-center">
         <ShoppingCart className="text-purple-500 mr-3 h-6 w-6" />
-        Grocery List 🛒
+        Shopping List 🛒
       </h3>
       
       <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
@@ -127,7 +127,7 @@ export default function GrocerySection() {
         <CardContent className="p-6">
           {(groceryItems as any[]).length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              <div className="text-lg font-script mb-2">No grocery items yet</div>
+              <div className="text-lg font-script mb-2">No shopping items yet</div>
               <div className="text-sm">Add some items to get started!</div>
             </div>
           ) : (
