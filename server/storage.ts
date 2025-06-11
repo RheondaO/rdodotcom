@@ -194,7 +194,7 @@ export interface IStorage {
   createMiniGameDesign(design: InsertMiniGameDesign): Promise<MiniGameDesign>;
   updateMiniGameDesign(id: number, updates: Partial<MiniGameDesign>): Promise<MiniGameDesign>;
   deleteMiniGameDesign(id: number): Promise<void>;
-  
+
   // Scheduling
   scheduleContentForMoonPhases(year: number, month: number): Promise<void>;
 
@@ -221,16 +221,20 @@ export interface IStorage {
   createPerformanceInsights(insights: InsertPerformanceInsights): Promise<PerformanceInsights>;
   updatePerformanceInsights(id: number, updates: Partial<PerformanceInsights>): Promise<PerformanceInsights>;
   deletePerformanceInsights(id: number): Promise<void>;
-  
+
   // Analytics aggregation
   aggregatePerformanceData(): Promise<void>;
-  
+
   // Reports analytics methods
   getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
   getHabitsAnalytics(startDate: string, endDate: string): Promise<any>;
   getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
   getHealthAnalytics(startDate: string, endDate: string): Promise<any>;
   getProductivityAnalytics(startDate: string, endDate: string): Promise<any>;
+
+  // Public data methods (no sensitive information)
+  getPublicStats(): Promise<any>;
+  getPublicRecentContent(): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -315,6 +319,40 @@ export class MemStorage implements IStorage {
       longestStreak: 30,
       isActive: true
     });
+  }
+
+  // Public data methods (no sensitive information)
+  async getPublicStats() {
+    const goals = this.goals.size;
+    const completedGoals = Array.from(this.goals.values()).filter(g => g.isCompleted).length;
+    const habits = this.habits.size;
+    const activeHabits = Array.from(this.habits.values()).filter(h => h.isActive).length;
+    const contentPieces = this.contentPieces.size;
+    const publishedContent = Array.from(this.contentPieces.values()).filter(c => c.status === 'published').length;
+
+    return {
+      totalGoals: goals,
+      completedGoals: completedGoals,
+      totalHabits: habits,
+      activeHabits: activeHabits,
+      totalContent: contentPieces,
+      publishedContent: publishedContent,
+      completionRate: goals > 0 ? Math.round((completedGoals / goals) * 100) : 0
+    };
+  }
+
+  async getPublicRecentContent() {
+    return Array.from(this.contentPieces.values())
+      .filter(piece => piece.status === 'published')
+      .sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime())
+      .slice(0, 5)
+      .map(piece => ({
+        id: piece.id,
+        title: piece.title,
+        description: piece.description,
+        updatedAt: piece.updatedAt,
+        status: piece.status
+      }));
   }
 
   async getDailyEntry(date: string): Promise<DailyEntry | undefined> {
@@ -847,7 +885,7 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteMedication(id: number): Promise<void> {
+  async deleteMedication(medication: number): Promise<void> {
     this.medications.delete(id);
   }
 
@@ -1014,10 +1052,10 @@ export class MemStorage implements IStorage {
     // For production, you'd want to use a more accurate astronomical library
     const referenceNewMoon = new Date('2025-01-13'); // Known new moon date
     const lunarCycle = 29.53058867; // days in lunar cycle
-    
+
     const daysSinceReference = (date.getTime() - referenceNewMoon.getTime()) / (1000 * 60 * 60 * 24);
     const phaseValue = ((daysSinceReference % lunarCycle) + lunarCycle) % lunarCycle;
-    
+
     if (phaseValue < 1.84566) return 'new_moon';
     if (phaseValue < 5.53699) return 'waxing_crescent';
     if (phaseValue < 9.22831) return 'first_quarter';
@@ -1031,18 +1069,18 @@ export class MemStorage implements IStorage {
   private getMoonPhaseDates(year: number, month: number): { date: Date; phase: string }[] {
     const dates: { date: Date; phase: string }[] = [];
     const daysInMonth = new Date(year, month, 0).getDate();
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month - 1, day);
       const phase = this.calculateMoonPhase(date);
       const previousDay = day > 1 ? this.calculateMoonPhase(new Date(year, month - 1, day - 1)) : null;
-      
+
       // Only add dates where the phase changes (moon phase events)
       if (phase !== previousDay) {
         dates.push({ date, phase });
       }
     }
-    
+
     return dates;
   }
 
@@ -1050,7 +1088,7 @@ export class MemStorage implements IStorage {
   async scheduleContentForMoonPhases(year: number, month: number): Promise<void> {
     const moonPhaseDates = this.getMoonPhaseDates(year, month);
     const blocks = await this.getAllMiniGameBlocks();
-    
+
     // Define moon phase to content mappings
     const moonPhaseContentMap: { [key: string]: string[] } = {
       'waning_crescent': ['Written Realms'],
@@ -1059,15 +1097,15 @@ export class MemStorage implements IStorage {
       'first_quarter': ['Positive Affirmations'],
       'third_quarter': ['She Stays On My Mind', 'The Way He Makes Me Feel']
     };
-    
+
     for (const { date, phase } of moonPhaseDates) {
       const contentTypes = moonPhaseContentMap[phase];
       if (!contentTypes) continue;
-      
+
       for (const contentType of contentTypes) {
         const matchingBlock = blocks.find(block => block.name === contentType);
         if (!matchingBlock) continue;
-        
+
         // Create a design for this moon phase event
         const design: InsertMiniGameDesign = {
           miniGameBlockId: matchingBlock.id,
@@ -1082,7 +1120,7 @@ export class MemStorage implements IStorage {
           version: 1,
           isTemplate: false
         };
-        
+
         await this.createMiniGameDesign(design);
       }
     }
@@ -1226,7 +1264,7 @@ export class MemStorage implements IStorage {
   async aggregatePerformanceData(): Promise<void> {
     const posts = await this.getAllSocialMediaPosts();
     const allAnalytics = await this.getAllSocialMediaAnalytics();
-    
+
     // Group by mini-game, platform, day of week, time slot, and post type
     const groupedData: { [key: string]: {
       impressions: number[];
@@ -1250,7 +1288,7 @@ export class MemStorage implements IStorage {
       if (!miniGameBlock) continue;
 
       const key = `${miniGameBlock.id}-${post.platform}-${post.dayOfWeek}-${post.timeSlot}-${post.postType}`;
-      
+
       if (!groupedData[key]) {
         groupedData[key] = {
           impressions: [],
@@ -1267,7 +1305,7 @@ export class MemStorage implements IStorage {
       groupedData[key].likes.push(latestAnalytics.likes);
       groupedData[key].comments.push(latestAnalytics.comments);
       groupedData[key].shares.push(latestAnalytics.shares);
-      
+
       const engagementRate = latestAnalytics.impressions > 0 ? 
         ((latestAnalytics.likes + latestAnalytics.comments + latestAnalytics.shares) / latestAnalytics.impressions) * 100 : 0;
       groupedData[key].engagementRates.push(engagementRate);
@@ -1276,7 +1314,7 @@ export class MemStorage implements IStorage {
     // Create or update performance insights
     for (const [key, data] of Object.entries(groupedData)) {
       const [miniGameBlockId, platform, dayOfWeek, timeSlot, postType] = key.split('-');
-      
+
       const avgImpressions = data.impressions.reduce((sum, val) => sum + val, 0) / data.impressions.length;
       const avgReach = data.reach.reduce((sum, val) => sum + val, 0) / data.reach.length;
       const avgLikes = data.likes.reduce((sum, val) => sum + val, 0) / data.likes.length;
@@ -1971,6 +2009,14 @@ export class DatabaseStorage implements IStorage {
 
   async getProductivityAnalytics(startDate: string, endDate: string): Promise<any> {
     return this.memStorage.getProductivityAnalytics(startDate, endDate);
+  }
+
+  async getPublicStats(): Promise<any> {
+    return this.memStorage.getPublicStats();
+  }
+
+  async getPublicRecentContent(): Promise<any> {
+    return this.memStorage.getPublicRecentContent();
   }
 }
 

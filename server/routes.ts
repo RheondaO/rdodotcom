@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { authenticateUser, requireAuth, requireAdmin, type AuthenticatedRequest } from "./auth";
 import { 
   insertDailyEntrySchema, 
   insertBillSchema, 
@@ -22,6 +23,40 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Apply authentication middleware to all routes
+  app.use(authenticateUser);
+
+  // Public routes (no auth required)
+  app.get("/api/public/stats", async (req, res) => {
+    try {
+      const stats = await storage.getPublicStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch public stats" });
+    }
+  });
+
+  app.get("/api/public/recent-content", async (req, res) => {
+    try {
+      const content = await storage.getPublicRecentContent();
+      res.json(content);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch recent content" });
+    }
+  });
+
+  // Auth status endpoint
+  app.get("/api/auth/status", (req: AuthenticatedRequest, res) => {
+    res.json({ 
+      authenticated: !!req.user,
+      user: req.user,
+      isAdmin: req.user?.username === 'YOUR_ACTUAL_REPLIT_USERNAME' // UPDATE THIS WITH YOUR USERNAME
+    });
+  });
+
+  // Protected routes (require authentication)
+  app.use("/api", requireAuth);
 
   // Daily Entries
   app.get("/api/daily-entry/:date", async (req, res) => {

@@ -6,6 +6,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Add Replit Auth headers middleware
+app.use((req, res, next) => {
+  // In production, Replit automatically adds these headers for authenticated users
+  // For development/testing, you can manually set them or they'll be undefined
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
