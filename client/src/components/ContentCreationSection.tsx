@@ -76,7 +76,6 @@ interface NotepadItem {
   linkedBlockId: number | null; // Links to MiniGameBlock ID
   linkedBlockName?: string; // Display name of linked block
   isCompleted: boolean;
-  priority: 'low' | 'medium' | 'high';
   createdAt: string;
   updatedAt: string;
 }
@@ -96,7 +95,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
   const [newNoteContent, setNewNoteContent] = useState("");
   const [selectedBlockForNote, setSelectedBlockForNote] = useState<number | null>(null);
-  const [notePriority, setNotePriority] = useState<'low' | 'medium' | 'high'>('medium');
   
   // Search and Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -1079,7 +1077,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
       linkedBlockId: selectedBlockForNote,
       linkedBlockName: linkedBlock?.name,
       isCompleted: false,
-      priority: notePriority,
       createdAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
       updatedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss')
     };
@@ -1087,7 +1084,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     setNotepadItems([...notepadItems, newNote]);
     setNewNoteContent("");
     setSelectedBlockForNote(null);
-    setNotePriority('medium');
   };
 
   const toggleNoteCompletion = (id: number) => {
@@ -1100,14 +1096,6 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
   const deleteNoteItem = (id: number) => {
     setNotepadItems(notepadItems.filter(note => note.id !== id));
-  };
-
-  const updateNotePriority = (id: number, priority: 'low' | 'medium' | 'high') => {
-    setNotepadItems(notepadItems.map(note => 
-      note.id === id 
-        ? { ...note, priority, updatedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss') }
-        : note
-    ));
   };
 
   // Content Calendar helper functions
@@ -2765,16 +2753,7 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                             ))}
                           </SelectContent>
                         </Select>
-                        <Select value={notePriority} onValueChange={(value) => setNotePriority(value as 'low' | 'medium' | 'high')}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="low">Low Priority</SelectItem>
-                            <SelectItem value="medium">Medium Priority</SelectItem>
-                            <SelectItem value="high">High Priority</SelectItem>
-                          </SelectContent>
-                        </Select>
+
                         <Button onClick={addNoteItem} disabled={!newNoteContent.trim()}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Note
@@ -2817,12 +2796,8 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                               </div>
                               
                               <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                <Badge variant={
-                                  note.priority === 'high' ? 'destructive' : 
-                                  note.priority === 'medium' ? 'default' : 
-                                  'secondary'
-                                }>
-                                  {note.priority} priority
+                                <Badge variant="secondary">
+                                  Added {format(new Date(note.createdAt), 'MMM d, yyyy')}
                                 </Badge>
                                 
                                 {note.linkedBlockName && (
@@ -2836,25 +2811,10 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                                     {note.linkedBlockName}
                                   </Badge>
                                 )}
-                                
-                                <span className="text-xs">
-                                  {format(new Date(note.createdAt), 'MMM d, yyyy')}
-                                </span>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-1">
-                              <Select value={note.priority} onValueChange={(value) => updateNotePriority(note.id, value as 'low' | 'medium' | 'high')}>
-                                <SelectTrigger className="w-auto h-8 text-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="low">Low</SelectItem>
-                                  <SelectItem value="medium">Medium</SelectItem>
-                                  <SelectItem value="high">High</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              
                               <Button
                                 variant="ghost"
                                 size="sm"
