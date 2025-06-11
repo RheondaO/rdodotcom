@@ -209,7 +209,7 @@ export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
           </CardContent>
         </Card>
 
-        {/* Grocery Spending */}
+        {/* Shopping Spending */}
         <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">

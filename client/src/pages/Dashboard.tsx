@@ -70,7 +70,7 @@ export default function Dashboard() {
       case "goals": return "Goals & Achievements";
       case "reports": return "Reports & Analytics";
       case "finances": return "Financial Tracking";
-      case "groceries": return "Grocery Management";
+      case "groceries": return "Shopping Management";
       case "content": return "Content Management Suite";
       case "sitemap": return "Site Map";
       default: return "Dashboard";
@@ -91,7 +91,7 @@ export default function Dashboard() {
       case "goals": return "Set and track your personal achievements";
       case "reports": return "View analytics and progress reports";
       case "finances": return "Manage your finances, bills, and spending";
-      case "groceries": return "Plan and track your grocery shopping";
+      case "groceries": return "Plan and track your shopping list";
       case "content": return "Manage your content planning, creation, and scheduling";
       case "sitemap": return "Quick access to all pages and sections";
       default: return "Track your daily habits and goals";

@@ -627,7 +627,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
               className="h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-700"
             >
               <CheckSquare className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              <span className="text-xs">Groceries</span>
+              <span className="text-xs">Shopping</span>
             </Button>
             
             <Button
