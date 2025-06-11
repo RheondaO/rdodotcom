@@ -2752,12 +2752,12 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                         />
                       </div>
                       <div className="flex flex-col gap-2 sm:w-48">
-                        <Select value={selectedBlockForNote?.toString() || ""} onValueChange={(value) => setSelectedBlockForNote(value ? parseInt(value) : null)}>
+                        <Select value={selectedBlockForNote?.toString() || "none"} onValueChange={(value) => setSelectedBlockForNote(value === "none" ? null : parseInt(value))}>
                           <SelectTrigger>
                             <SelectValue placeholder="Link to block" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">No block</SelectItem>
+                            <SelectItem value="none">No block</SelectItem>
                             {miniGameBlocks.map((block) => (
                               <SelectItem key={block.id} value={block.id.toString()}>
                                 {block.name}
