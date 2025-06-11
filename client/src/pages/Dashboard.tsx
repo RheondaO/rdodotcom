@@ -125,7 +125,6 @@ export default function Dashboard() {
         onDateChange={setSelectedDate}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-        isReadOnly={isReadOnly}
       />
 
       <main className="flex-1 overflow-auto">
@@ -212,29 +211,31 @@ export default function Dashboard() {
         {/* Content */}
         <div className="p-4">
           {activeView === "dashboard" && (
-            <DashboardHome selectedDate={selectedDate} onNavigate={(section: string) => setActiveView(section as ViewType)} isReadOnly={isReadOnly} />
+            <DashboardHome selectedDate={selectedDate} onNavigate={(section: string) => setActiveView(section as ViewType)} />
           )}
-          {activeView === "health" && <HealthSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
-          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
-          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
-          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
-          {activeView === "reports" && <ReportsSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
-          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
-          {activeView === "groceries" && <GrocerySection isReadOnly={isReadOnly} />}
-          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={isReadOnly} />}
-          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
-          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
+          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
+          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} />}
+          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} />}
+          {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
+          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
+          {activeView === "groceries" && <GrocerySection />}
+          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
+          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} />}
+          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
           {activeView === "sitemap" && (
-            <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} isReadOnly={isReadOnly} />
+            <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} />
           )}
         </div>
       </main>
 
-      <QuickAddModal 
-        open={quickAddOpen} 
-        onOpenChange={setQuickAddOpen}
-        selectedDate={selectedDate}
-      />
+      {!isReadOnly && (
+        <QuickAddModal 
+          open={quickAddOpen} 
+          onOpenChange={setQuickAddOpen}
+          selectedDate={selectedDate}
+        />
+      )}
     </div>
   );
 }
