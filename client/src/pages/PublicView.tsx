@@ -82,7 +82,11 @@ export default function PublicView() {
             and share my journey of building better systems for life and work.
           </p>
           <div className="flex justify-center space-x-4">
-            <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              onClick={() => window.location.href = '/dashboard'}
+            >
               <ExternalLink className="mr-2 h-4 w-4" />
               Follow My Journey
             </Button>

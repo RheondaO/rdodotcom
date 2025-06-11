@@ -22,10 +22,6 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   });
 
-  if (!authStatus?.isAdmin) {
-    return <PublicView />;
-  }
-
   return <>{children}</>;
 }
 

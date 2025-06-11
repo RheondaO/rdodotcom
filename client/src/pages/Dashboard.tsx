@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/Sidebar";
 import HealthSection from "@/components/HealthSection";
 import WorkTimeSection from "@/components/WorkTimeSection";
@@ -17,7 +18,8 @@ import QuickAddModal from "@/components/QuickAddModal";
 import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
 import { Button } from "@/components/ui/button";
-import { Download, Sun, Moon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Download, Sun, Moon, Eye, Lock } from "lucide-react";
 import { format, addDays, subDays, isSameDay, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -31,6 +33,21 @@ export default function Dashboard() {
   const [timeView, setTimeView] = useState<TimeViewType>("day");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  // Check admin status
+  const { data: authStatus } = useQuery({
+    queryKey: ['/api/auth/status'],
+    queryFn: async () => {
+      const response = await fetch('/api/auth/status');
+      if (!response.ok) {
+        return { authenticated: false, isAdmin: false };
+      }
+      return response.json();
+    }
+  });
+
+  const isAdmin = authStatus?.isAdmin || false;
+  const isReadOnly = !isAdmin;
 
   // Date comparison helpers
   const today = new Date();
@@ -103,11 +120,12 @@ export default function Dashboard() {
       <Sidebar 
         activeView={activeView} 
         onViewChange={setActiveView}
-        onQuickAdd={() => setQuickAddOpen(true)}
+        onQuickAdd={isReadOnly ? () => {} : () => setQuickAddOpen(true)}
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        isReadOnly={isReadOnly}
       />
 
       <main className="flex-1 overflow-auto">
@@ -141,6 +159,12 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center space-x-3">
+              {isReadOnly && (
+                <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                  <Eye className="mr-1 h-3 w-3" />
+                  Read Only
+                </Badge>
+              )}
               <div className="text-sm text-muted-foreground dark:text-white">
                 <span className="font-medium text-pink-700 dark:text-white">
                   {format(selectedDate, 'MMM d, yyyy')}
@@ -188,20 +212,20 @@ export default function Dashboard() {
         {/* Content */}
         <div className="p-4">
           {activeView === "dashboard" && (
-            <DashboardHome selectedDate={selectedDate} onNavigate={(section: string) => setActiveView(section as ViewType)} />
+            <DashboardHome selectedDate={selectedDate} onNavigate={(section: string) => setActiveView(section as ViewType)} isReadOnly={isReadOnly} />
           )}
-          {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
-          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
-          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} />}
-          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} />}
-          {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
-          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
-          {activeView === "groceries" && <GrocerySection />}
-          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
-          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} />}
-          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
+          {activeView === "health" && <HealthSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "reports" && <ReportsSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "groceries" && <GrocerySection isReadOnly={isReadOnly} />}
+          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
+          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={isReadOnly} />}
           {activeView === "sitemap" && (
-            <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} />
+            <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} isReadOnly={isReadOnly} />
           )}
         </div>
       </main>
