@@ -2730,6 +2730,148 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
                 miniGameDesigns={miniGameDesigns}
               />
             </TabsContent>
+
+            <TabsContent value="notepad" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <NotebookPen className="w-5 h-5" />
+                    Content Notepad
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Add New Note */}
+                  <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex-1">
+                        <Textarea
+                          placeholder="Add a new note..."
+                          value={newNoteContent}
+                          onChange={(e) => setNewNoteContent(e.target.value)}
+                          className="min-h-[80px]"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 sm:w-48">
+                        <Select value={selectedBlockForNote?.toString() || ""} onValueChange={(value) => setSelectedBlockForNote(value ? parseInt(value) : null)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Link to block" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">No block</SelectItem>
+                            {miniGameBlocks.map((block) => (
+                              <SelectItem key={block.id} value={block.id.toString()}>
+                                {block.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select value={notePriority} onValueChange={(value) => setNotePriority(value as 'low' | 'medium' | 'high')}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Low Priority</SelectItem>
+                            <SelectItem value="medium">Medium Priority</SelectItem>
+                            <SelectItem value="high">High Priority</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button onClick={addNoteItem} disabled={!newNoteContent.trim()}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Note
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notes List */}
+                  <div className="space-y-3">
+                    {notepadItems.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <NotebookPen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p>No notes yet. Add your first note above!</p>
+                      </div>
+                    ) : (
+                      notepadItems.map((note) => (
+                        <Card key={note.id} className="p-4">
+                          <div className="flex items-start gap-3">
+                            <button
+                              onClick={() => toggleNoteCompletion(note.id)}
+                              className="mt-1 flex-shrink-0"
+                            >
+                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                note.isCompleted 
+                                  ? 'bg-green-500 border-green-500 text-white' 
+                                  : 'border-gray-300 hover:border-gray-400'
+                              }`}>
+                                {note.isCompleted && <span className="text-xs">✓</span>}
+                              </div>
+                            </button>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className={`transition-all duration-200 ${
+                                note.isCompleted 
+                                  ? 'line-through text-gray-500 dark:text-gray-400 opacity-70' 
+                                  : 'text-gray-900 dark:text-gray-100'
+                              }`}>
+                                {note.content}
+                              </div>
+                              
+                              <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                <Badge variant={
+                                  note.priority === 'high' ? 'destructive' : 
+                                  note.priority === 'medium' ? 'default' : 
+                                  'secondary'
+                                }>
+                                  {note.priority} priority
+                                </Badge>
+                                
+                                {note.linkedBlockName && (
+                                  <Badge variant="outline" className="flex items-center gap-1">
+                                    <span 
+                                      className="w-2 h-2 rounded-full" 
+                                      style={{
+                                        backgroundColor: miniGameBlocks.find(b => b.id === note.linkedBlockId)?.color || '#gray'
+                                      }}
+                                    />
+                                    {note.linkedBlockName}
+                                  </Badge>
+                                )}
+                                
+                                <span className="text-xs">
+                                  {format(new Date(note.createdAt), 'MMM d, yyyy')}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              <Select value={note.priority} onValueChange={(value) => updateNotePriority(note.id, value as 'low' | 'medium' | 'high')}>
+                                <SelectTrigger className="w-auto h-8 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="low">Low</SelectItem>
+                                  <SelectItem value="medium">Medium</SelectItem>
+                                  <SelectItem value="high">High</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deleteNoteItem(note.id)}
+                                className="text-red-500 hover:text-red-700 h-8 w-8 p-0"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </>
       ) : (
