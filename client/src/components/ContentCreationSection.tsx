@@ -30,7 +30,11 @@ import {
   Search,
   Filter,
   SortAsc,
-  SortDesc
+  SortDesc,
+  NotebookPen,
+  Plus,
+  X,
+  Trash2
 } from 'lucide-react';
 
 // Mini-Game Block type with new structure
@@ -65,6 +69,18 @@ interface MiniGameDesign {
   updatedAt: string;
 }
 
+// Notepad Item type
+interface NotepadItem {
+  id: number;
+  content: string;
+  linkedBlockId: number | null; // Links to MiniGameBlock ID
+  linkedBlockName?: string; // Display name of linked block
+  isCompleted: boolean;
+  priority: 'low' | 'medium' | 'high';
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ContentCreationSectionProps {
   selectedDate: Date;
 }
@@ -75,6 +91,12 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
   const [selectedMiniGame, setSelectedMiniGame] = useState<number | null>(null);
   const [showCreateMiniGameDialog, setShowCreateMiniGameDialog] = useState(false);
   const [showCreateDesignDialog, setShowCreateDesignDialog] = useState(false);
+  
+  // Notepad States
+  const [notepadItems, setNotepadItems] = useState<NotepadItem[]>([]);
+  const [newNoteContent, setNewNoteContent] = useState("");
+  const [selectedBlockForNote, setSelectedBlockForNote] = useState<number | null>(null);
+  const [notePriority, setNotePriority] = useState<'low' | 'medium' | 'high'>('medium');
   
   // Search and Filter States
   const [searchQuery, setSearchQuery] = useState("");
@@ -1045,6 +1067,49 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
     });
   };
 
+  // Notepad functionality handlers
+  const addNoteItem = () => {
+    if (!newNoteContent.trim()) return;
+    
+    const linkedBlock = selectedBlockForNote ? miniGameBlocks.find(block => block.id === selectedBlockForNote) : null;
+    
+    const newNote: NotepadItem = {
+      id: Date.now(),
+      content: newNoteContent.trim(),
+      linkedBlockId: selectedBlockForNote,
+      linkedBlockName: linkedBlock?.name,
+      isCompleted: false,
+      priority: notePriority,
+      createdAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+      updatedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss')
+    };
+    
+    setNotepadItems([...notepadItems, newNote]);
+    setNewNoteContent("");
+    setSelectedBlockForNote(null);
+    setNotePriority('medium');
+  };
+
+  const toggleNoteCompletion = (id: number) => {
+    setNotepadItems(notepadItems.map(note => 
+      note.id === id 
+        ? { ...note, isCompleted: !note.isCompleted, updatedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss') }
+        : note
+    ));
+  };
+
+  const deleteNoteItem = (id: number) => {
+    setNotepadItems(notepadItems.filter(note => note.id !== id));
+  };
+
+  const updateNotePriority = (id: number, priority: 'low' | 'medium' | 'high') => {
+    setNotepadItems(notepadItems.map(note => 
+      note.id === id 
+        ? { ...note, priority, updatedAt: format(new Date(), 'yyyy-MM-dd HH:mm:ss') }
+        : note
+    ));
+  };
+
   // Content Calendar helper functions
   const getApprovedDesigns = () => {
     return miniGameDesigns.filter(design => design.status === 'approved');
@@ -1687,13 +1752,14 @@ export default function ContentCreationSection({ selectedDate }: ContentCreation
 
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6 rounded-xl">
+            <TabsList className="grid w-full grid-cols-7 rounded-xl">
               <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
               <TabsTrigger value="progress" className="rounded-lg">Progress Tracker</TabsTrigger>
               <TabsTrigger value="designs" className="rounded-lg">Design Queue</TabsTrigger>
               <TabsTrigger value="calendar" className="rounded-lg">Content Calendar</TabsTrigger>
               <TabsTrigger value="pipeline" className="rounded-lg">Content Pipeline</TabsTrigger>
               <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
+              <TabsTrigger value="notepad" className="rounded-lg">Notepad</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
