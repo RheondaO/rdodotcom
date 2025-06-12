@@ -59,10 +59,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", adminLogin);
   app.post("/api/auth/logout", adminLogout);
 
-  // Protected routes (require authentication)
-  app.use("/api", requireAuth);
+  // Public read-only routes for dashboard data
+  app.get("/api/goals", async (req, res) => {
+    try {
+      const goals = await storage.getAllGoals();
+      res.json(goals);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch goals" });
+    }
+  });
 
-  // Daily Entries
   app.get("/api/daily-entry/:date", async (req, res) => {
     try {
       const { date } = req.params;
@@ -71,6 +77,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch daily entry" });
     }
+  });
+
+  app.get("/api/todos/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const todos = await storage.getTodosByDate(date);
+      res.json(todos);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch todos" });
+    }
+  });
+
+  app.get("/api/time-blocks/:date", async (req, res) => {
+    try {
+      const { date } = req.params;
+      const timeBlocks = await storage.getTimeBlocksByDate(date);
+      res.json(timeBlocks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch time blocks" });
+    }
+  });
+
+  app.get("/api/grocery-items", async (req, res) => {
+    try {
+      const groceryItems = await storage.getAllGroceryItems();
+      res.json(groceryItems);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch grocery items" });
+    }
+  });
+
+  // Protected routes (require authentication for write operations)
+  app.use("/api", (req, res, next) => {
+    // Only require auth for write operations (POST, PUT, PATCH, DELETE)
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+      return requireAuth(req, res, next);
+    }
+    next();
   });
 
   app.post("/api/daily-entry", async (req, res) => {

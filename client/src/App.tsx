@@ -47,17 +47,13 @@ function App() {
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Switch>
           <Route path="/public-view" component={PublicView} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/">
             <AuthGuard>
               <Dashboard />
             </AuthGuard>
           </Route>
           <Route path="/admin">
-            <AuthGuard>
-              <Dashboard />
-            </AuthGuard>
-          </Route>
-          <Route path="/dashboard">
             <AuthGuard>
               <Dashboard />
             </AuthGuard>

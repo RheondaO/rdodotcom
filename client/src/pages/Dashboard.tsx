@@ -73,13 +73,8 @@ export default function Dashboard() {
     logoutMutation.mutate();
   };
 
-  // Redirect if not authenticated
-  if (!isAuthenticated || !isAdmin) {
-    window.location.href = '/public-view';
-    return null;
-  }
-
-  const isReadOnly = false; // Admin has full functionality
+  // Determine read-only mode based on authentication
+  const isReadOnly = !isAuthenticated || !isAdmin;
 
   // Date comparison helpers
   const today = new Date();
@@ -202,16 +197,28 @@ export default function Dashboard() {
                 </span>
               </div>
               
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                disabled={logoutMutation.isPending}
-                className="text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-300 dark:hover:text-red-400 dark:hover:bg-red-950"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                {logoutMutation.isPending ? "Logging out..." : "Logout"}
-              </Button>
+              {isAuthenticated && isAdmin ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                  className="text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-300 dark:hover:text-red-400 dark:hover:bg-red-950"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {logoutMutation.isPending ? "Logging out..." : "Logout"}
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.location.href = '/public-view'}
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-300 dark:hover:text-purple-400 dark:hover:bg-purple-950"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  Public View
+                </Button>
+              )}
               
               <div className="flex items-center space-x-2">
                 <button

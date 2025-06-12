@@ -54,11 +54,7 @@ export default function PublicView() {
   };
 
   const handleFollowJourneyClick = () => {
-    if (isAuthenticated && isAdmin) {
-      window.location.href = '/';
-    } else {
-      setShowLoginForm(true);
-    }
+    window.location.href = '/dashboard';
   };
 
   const handleLoginSuccess = () => {
