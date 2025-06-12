@@ -57,7 +57,7 @@ export default function Dashboard() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/status'] });
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/public-view';
       }, 1000);
     },
     onError: () => {
@@ -75,7 +75,7 @@ export default function Dashboard() {
 
   // Redirect if not authenticated
   if (!isAuthenticated || !isAdmin) {
-    window.location.href = '/';
+    window.location.href = '/public-view';
     return null;
   }
 

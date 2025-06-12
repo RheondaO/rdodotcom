@@ -47,7 +47,7 @@ export default function PublicView() {
 
   const handleAdminLoginClick = () => {
     if (isAuthenticated && isAdmin) {
-      window.location.href = '/admin';
+      window.location.href = '/';
     } else {
       setShowLoginForm(true);
     }
@@ -55,7 +55,7 @@ export default function PublicView() {
 
   const handleFollowJourneyClick = () => {
     if (isAuthenticated && isAdmin) {
-      window.location.href = '/admin';
+      window.location.href = '/';
     } else {
       setShowLoginForm(true);
     }
@@ -63,7 +63,7 @@ export default function PublicView() {
 
   const handleLoginSuccess = () => {
     setShowLoginForm(false);
-    window.location.href = '/admin';
+    window.location.href = '/';
   };
 
   return (
