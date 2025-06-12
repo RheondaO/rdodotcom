@@ -9,22 +9,19 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-// Your admin username - replace with your actual Replit username
-const ADMIN_USERNAME = 'YOUR_ACTUAL_REPLIT_USERNAME'; // UPDATE THIS WITH YOUR USERNAME
+// Simple admin credentials - in production, use proper authentication
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = 'bellejournalapp2025'; // Change this to a secure password
 
 export const authenticateUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const userHeader = req.headers['x-replit-user-id'];
-    const nameHeader = req.headers['x-replit-user-name'];
-    const usernameHeader = req.headers['x-replit-user-username'];
-    const profileImageHeader = req.headers['x-replit-user-profile-image'];
-
-    if (userHeader && nameHeader && usernameHeader) {
+    // Check if user is authenticated via session
+    if ((req as any).session?.isAuthenticated) {
       req.user = {
-        id: userHeader as string,
-        name: nameHeader as string,
-        username: usernameHeader as string,
-        profileImage: profileImageHeader as string || ''
+        id: 'admin',
+        name: 'Admin User',
+        username: 'admin',
+        profileImage: ''
       };
     }
 
@@ -36,15 +33,50 @@ export const authenticateUser = async (req: AuthenticatedRequest, res: Response,
 };
 
 export const requireAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  if (!req.user) {
+  if (!req.user || !(req as any).session?.isAuthenticated) {
     return res.status(401).json({ error: 'Authentication required' });
   }
   next();
 };
 
 export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  if (!req.user || (req.user.username !== process.env.REPL_OWNER && req.user.username !== 'bellejournalapp')) {
+  if (!req.user || !(req as any).session?.isAuthenticated || !(req as any).session?.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
   }
   next();
+};
+
+// Login endpoint
+export const adminLogin = (req: AuthenticatedRequest, res: Response) => {
+  const { username, password } = req.body;
+
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    (req as any).session.isAuthenticated = true;
+    (req as any).session.isAdmin = true;
+    (req as any).session.username = username;
+    
+    res.json({ 
+      success: true, 
+      message: 'Admin login successful',
+      user: {
+        id: 'admin',
+        name: 'Admin User',
+        username: 'admin',
+        profileImage: ''
+      }
+    });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
+};
+
+// Logout endpoint
+export const adminLogout = (req: AuthenticatedRequest, res: Response) => {
+  (req as any).session.destroy((err: any) => {
+    if (err) {
+      res.status(500).json({ error: 'Failed to logout' });
+    } else {
+      res.json({ success: true, message: 'Logged out successfully' });
+    }
+  });
 };

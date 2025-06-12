@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { authenticateUser, requireAuth, requireAdmin, type AuthenticatedRequest } from "./auth";
+import { authenticateUser, requireAuth, requireAdmin, adminLogin, adminLogout, type AuthenticatedRequest } from "./auth";
 import { 
   insertDailyEntrySchema, 
   insertBillSchema, 
@@ -51,9 +51,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ 
       authenticated: !!req.user,
       user: req.user,
-      isAdmin: req.user?.username === process.env.REPL_OWNER || req.user?.username === 'bellejournalapp'
+      isAdmin: !!(req as any).session?.isAdmin
     });
   });
+
+  // Authentication routes
+  app.post("/api/auth/login", adminLogin);
+  app.post("/api/auth/logout", adminLogout);
 
   // Protected routes (require authentication)
   app.use("/api", requireAuth);
