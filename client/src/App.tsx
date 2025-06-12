@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 const queryClient = new QueryClient();
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { data: authStatus } = useQuery({
+  const { data: authStatus, isLoading } = useQuery({
     queryKey: ['/api/auth/status'],
     queryFn: async () => {
       const response = await fetch('/api/auth/status');
@@ -22,6 +22,22 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   });
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authStatus?.authenticated || !authStatus?.isAdmin) {
+    window.location.href = '/';
+    return null;
+  }
+
   return <>{children}</>;
 }
 
@@ -31,6 +47,11 @@ function App() {
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Switch>
           <Route path="/" component={PublicView} />
+          <Route path="/admin">
+            <AuthGuard>
+              <Dashboard />
+            </AuthGuard>
+          </Route>
           <Route path="/dashboard">
             <AuthGuard>
               <Dashboard />
