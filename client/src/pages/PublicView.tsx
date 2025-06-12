@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Target, TrendingUp, BookOpen, Calendar, ExternalLink, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import AdminLoginForm from "@/components/AdminLoginForm";
 
 interface PublicStats {
   totalGoals: number;
@@ -23,6 +26,9 @@ interface PublicContent {
 }
 
 export default function PublicView() {
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  const { isAuthenticated, isAdmin } = useAuth();
+
   const { data: stats } = useQuery<PublicStats>({
     queryKey: ['/api/public/stats'],
     queryFn: async () => {
@@ -38,6 +44,19 @@ export default function PublicView() {
       return response.json();
     }
   });
+
+  const handleAdminLoginClick = () => {
+    if (isAuthenticated && isAdmin) {
+      window.location.href = '/dashboard';
+    } else {
+      setShowLoginForm(true);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    setShowLoginForm(false);
+    window.location.href = '/dashboard';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
@@ -59,11 +78,11 @@ export default function PublicView() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => window.location.href = '/dashboard'}
+              onClick={handleAdminLoginClick}
               className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
             >
               <LogIn className="mr-2 h-4 w-4" />
-              Admin Login
+              {isAuthenticated && isAdmin ? 'Go to Dashboard' : 'Admin Login'}
             </Button>
           </div>
         </div>
@@ -195,6 +214,14 @@ export default function PublicView() {
           </p>
         </div>
       </footer>
+
+      {/* Admin Login Form Modal */}
+      {showLoginForm && (
+        <AdminLoginForm
+          onClose={() => setShowLoginForm(false)}
+          onSuccess={handleLoginSuccess}
+        />
+      )}
     </div>
   );
 }

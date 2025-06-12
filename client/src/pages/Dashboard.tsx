@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Sidebar from "@/components/Sidebar";
 import HealthSection from "@/components/HealthSection";
 import WorkTimeSection from "@/components/WorkTimeSection";
@@ -19,9 +19,11 @@ import WeekView from "@/components/WeekView";
 import MonthView from "@/components/MonthView";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Sun, Moon, Eye, Lock } from "lucide-react";
+import { Download, Sun, Moon, Eye, Lock, LogOut } from "lucide-react";
 import { format, addDays, subDays, isSameDay, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
@@ -33,21 +35,51 @@ export default function Dashboard() {
   const [timeView, setTimeView] = useState<TimeViewType>("day");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { isAuthenticated, isAdmin } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Check admin status
-  const { data: authStatus } = useQuery({
-    queryKey: ['/api/auth/status'],
-    queryFn: async () => {
-      const response = await fetch('/api/auth/status');
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
       if (!response.ok) {
-        return { authenticated: false, isAdmin: false };
+        throw new Error('Logout failed');
       }
       return response.json();
-    }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Logged out successfully",
+        description: "Redirecting to public view...",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/status'] });
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    },
+    onError: () => {
+      toast({
+        title: "Logout failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    },
   });
 
-  const isAdmin = authStatus?.isAdmin || false;
-  const isReadOnly = false; // Always allow full functionality for now
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
+  // Redirect if not authenticated
+  if (!isAuthenticated || !isAdmin) {
+    window.location.href = '/';
+    return null;
+  }
+
+  const isReadOnly = false; // Admin has full functionality
 
   // Date comparison helpers
   const today = new Date();
