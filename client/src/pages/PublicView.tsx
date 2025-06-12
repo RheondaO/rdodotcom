@@ -53,6 +53,14 @@ export default function PublicView() {
     }
   };
 
+  const handleFollowJourneyClick = () => {
+    if (isAuthenticated && isAdmin) {
+      window.location.href = '/dashboard';
+    } else {
+      setShowLoginForm(true);
+    }
+  };
+
   const handleLoginSuccess = () => {
     setShowLoginForm(false);
     window.location.href = '/dashboard';
@@ -103,10 +111,10 @@ export default function PublicView() {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-              onClick={() => window.location.href = '/dashboard'}
+              onClick={handleFollowJourneyClick}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              Follow My Journey
+              {isAuthenticated && isAdmin ? 'Go to Dashboard' : 'Follow My Journey'}
             </Button>
           </div>
         </div>
