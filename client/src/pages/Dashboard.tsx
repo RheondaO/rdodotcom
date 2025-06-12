@@ -217,7 +217,7 @@ export default function Dashboard() {
           {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
           {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} />}
           {activeView === "goals" && <GoalsSection selectedDate={selectedDate} />}
-          {activeView === "reports" && <ReportsSection selectedDate={selectedDate} />}
+          {activeView === "reports" && <ReportsSection />}
           {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
           {activeView === "groceries" && <GrocerySection />}
           {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
