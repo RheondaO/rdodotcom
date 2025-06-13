@@ -82,9 +82,10 @@ interface NotepadItem {
 
 interface ContentCreationSectionProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function ContentCreationSection({ selectedDate }: ContentCreationSectionProps) {
+export default function ContentCreationSection({ selectedDate, isReadOnly = false }: ContentCreationSectionProps) {
   const [activeBrand, setActiveBrand] = useState<string>("rotationONLY");
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedMiniGame, setSelectedMiniGame] = useState<number | null>(null);

@@ -102,25 +102,27 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
             <h4 className="font-heading font-semibold text-gray-800">Shopping List</h4>
           </div>
           
-          <form onSubmit={handleAddItem} className="flex gap-3">
+          <form onSubmit={!isReadOnly ? handleAddItem : (e) => e.preventDefault()} className="flex gap-3">
             <Input
               placeholder="Item name"
               value={newItemName}
-              onChange={(e) => setNewItemName(e.target.value)}
-              className="flex-1 rounded-xl border-pink-200 focus:border-pink-400"
+              onChange={(e) => !isReadOnly && setNewItemName(e.target.value)}
+              disabled={isReadOnly}
+              className={`flex-1 rounded-xl border-pink-200 focus:border-pink-400 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
             <Input
               placeholder="Price ($)"
               type="number"
               step="0.01"
               value={newItemPrice}
-              onChange={(e) => setNewItemPrice(e.target.value)}
-              className="w-28 rounded-xl border-pink-200 focus:border-pink-400"
+              onChange={(e) => !isReadOnly && setNewItemPrice(e.target.value)}
+              disabled={isReadOnly}
+              className={`w-28 rounded-xl border-pink-200 focus:border-pink-400 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
             <Button 
               type="submit" 
-              className="bg-gradient-to-r from-purple-400 to-pink-500 text-white hover:from-purple-500 hover:to-pink-600 shadow-md rounded-xl px-6"
-              disabled={createItemMutation.isPending}
+              className={`bg-gradient-to-r from-purple-400 to-pink-500 text-white shadow-md rounded-xl px-6 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:from-purple-500 hover:to-pink-600'}`}
+              disabled={isReadOnly || createItemMutation.isPending}
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Item
@@ -141,10 +143,10 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
                   <Checkbox
                     checked={item.isCompleted}
                     onCheckedChange={(checked) => 
-                      handleToggleItem(item.id, checked as boolean)
+                      !isReadOnly && handleToggleItem(item.id, checked as boolean)
                     }
-                    disabled={updateItemMutation.isPending}
-                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-pink-500"
+                    disabled={isReadOnly || updateItemMutation.isPending}
+                    className={`data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-pink-500 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                   />
                   <span className={`flex-1 font-medium ${
                     item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'

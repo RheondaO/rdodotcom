@@ -311,10 +311,11 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
             </div>
             <div className="mt-4 text-center">
               <Button
-                onClick={() => onNavigate('rotationonly')}
+                onClick={() => !isReadOnly && onNavigate('rotationonly')}
                 variant="outline"
                 size="sm"
-                className="bg-white/60 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-700"
+                disabled={isReadOnly}
+                className={`bg-white/60 dark:bg-gray-800/60 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white dark:hover:bg-gray-700'}`}
               >
                 Manage rotationONLY Studio →
               </Button>

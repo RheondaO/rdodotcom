@@ -187,11 +187,11 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
           </p>
         </div>
         
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <Dialog open={showCreateDialog} onOpenChange={!isReadOnly ? setShowCreateDialog : undefined}>
           <DialogTrigger asChild>
             <Button 
-              disabled={goals.length >= 5}
-              className="bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isReadOnly || goals.length >= 5}
+              className={`bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg ${(isReadOnly || goals.length >= 5) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Plus className="mr-2 h-4 w-4" />
               New Goal {goals.length >= 5 ? "(5/5)" : `(${goals.length}/5)`}

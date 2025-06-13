@@ -76,9 +76,10 @@ interface AppTask {
 
 interface AppDevelopmentSectionProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSectionProps) {
+export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
   const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "time">("overview");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
