@@ -529,18 +529,31 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         <Button
                           size="sm"
                           onClick={() => setSelectedProject(project.id)}
-                          className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                          disabled={isReadOnly}
+                          className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                         >
                           View Details
                         </Button>
                         {project.repositoryUrl && (
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            disabled={isReadOnly}
+                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
                             <GitBranch className="h-4 w-4 mr-1" />
                             Repository
                           </Button>
                         )}
                         {project.deploymentUrl && (
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            disabled={isReadOnly}
+                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
                             <Link className="h-4 w-4 mr-1" />
                             Live Site
                           </Button>
@@ -634,11 +647,19 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     <Button
                       size="sm"
                       onClick={() => setSelectedProject(project.id)}
-                      className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                      disabled={isReadOnly}
+                      className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
                       Manage
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      disabled={isReadOnly}
+                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                    >
                       <Settings className="h-4 w-4" />
                     </Button>
                   </div>
@@ -740,10 +761,20 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   )}
 
                   <div className="flex gap-2 mt-3">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      disabled={isReadOnly}
+                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                    >
                       Edit
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      disabled={isReadOnly}
+                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                    >
                       <Timer className="h-4 w-4 mr-1" />
                       Log Time
                     </Button>
@@ -761,11 +792,20 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Testing & Quality Assurance</h2>
             <div className="flex gap-2">
-              <Button className="bg-gradient-to-r from-red-400 to-orange-500 text-white">
+              <Button 
+                disabled={isReadOnly}
+                className={`bg-gradient-to-r from-red-400 to-orange-500 text-white ${
+                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Test Item
               </Button>
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                disabled={isReadOnly}
+                className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+              >
                 <CheckSquare className="h-4 w-4 mr-2" />
                 Run All Tests
               </Button>
@@ -828,13 +868,28 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       )}
 
                       <div className="flex gap-2 mt-3">
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          disabled={isReadOnly}
+                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                        >
                           Pass Test
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          disabled={isReadOnly}
+                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                        >
                           Fail Test
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          disabled={isReadOnly}
+                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                        >
                           Add Notes
                         </Button>
                       </div>
@@ -1047,7 +1102,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   </div>
                   <Button 
                     onClick={() => startTimer(activeTask)}
-                    className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white"
+                    disabled={isReadOnly}
+                    className={`w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white ${
+                      isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
                     <Play className="h-4 w-4 mr-2" />
                     Start Session
@@ -1068,8 +1126,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   </div>
                   <Button 
                     onClick={stopTimer}
+                    disabled={isReadOnly}
                     variant="destructive"
-                    className="bg-red-500 hover:bg-red-600"
+                    className={`bg-red-500 hover:bg-red-600 ${
+                      isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
                     <Square className="h-4 w-4 mr-2" />
                     Stop Session
