@@ -28,7 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
 
-export default function Dashboard() {
+function Dashboard() {
   const [activeView, setActiveView] = useState<ViewType>("dashboard");
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -290,3 +290,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default Dashboard;
