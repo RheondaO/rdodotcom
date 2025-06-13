@@ -79,6 +79,12 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
   // Update habits with completion status based on selected date
   const habitsWithCompletion = habits.map(habit => ({
     ...habit,
+    description: habit.description || "",
+    targetFrequency: habit.targetFrequency || 1,
+    currentStreak: habit.currentStreak || 0,
+    longestStreak: habit.longestStreak || 0,
+    isActive: habit.isActive ?? true,
+    createdAt: habit.createdAt?.toISOString() || new Date().toISOString(),
     completedToday: completedHabitIds.includes(habit.id)
   }));
 
