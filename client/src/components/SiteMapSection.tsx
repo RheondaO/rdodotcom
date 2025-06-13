@@ -267,8 +267,11 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       {/* Export Data Button - Bottom Right */}
       <div className="flex justify-end mt-8">
         <Button 
-          onClick={handleExportData}
-          className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl px-6 py-3 shadow-lg font-medium"
+          onClick={() => !isReadOnly && handleExportData()}
+          disabled={isReadOnly}
+          className={`bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl px-6 py-3 shadow-lg font-medium ${
+            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
           <Download className="mr-2 h-4 w-4" />
           Export Data
