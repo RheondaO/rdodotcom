@@ -1,10 +1,10 @@
 import { Switch, Route } from "wouter";
-import Dashboard from "@/pages/Dashboard";
-import PublicView from "@/pages/PublicView";
-import AuthCheck from "@/pages/AuthCheck";
-import NotFoundPage from "@/pages/not-found";
-import { ThemeProvider } from "@/hooks/use-theme";
-import { Toaster } from "@/components/ui/toaster";
+import Dashboard from "./pages/Dashboard";
+import PublicView from "./pages/PublicView";
+import AuthCheck from "./pages/AuthCheck";
+import NotFoundPage from "./pages/not-found";
+import { ThemeProvider } from "./hooks/use-theme";
+import { Toaster } from "./components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
