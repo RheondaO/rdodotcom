@@ -70,7 +70,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
   // Mutation for creating medications
   const createMedicationMutation = useMutation({
     mutationFn: async (medicationData: any) => {
-      return await apiRequest('/api/medications', { method: 'POST', body: medicationData });
+      return await apiRequest('/api/medications', 'POST', medicationData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/medications'] });
@@ -147,7 +147,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
       createdAt: format(new Date(), 'yyyy-MM-dd')
     };
 
-    setMedications([...medications, medication]);
+    createMedicationMutation.mutate(medication);
     setNewMedication({
       name: "",
       dosage: "",
@@ -159,7 +159,9 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
 
   const markMedicationTaken = (medId: number) => {
     const now = new Date();
-    setMedications(medications.map(med => {
+    // In a full implementation, this would update via API
+    console.log('Medication marked as taken:', medId);
+    // medications.map(med => {
       if (med.id === medId) {
         let nextDose = new Date();
         switch (med.frequency) {
