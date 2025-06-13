@@ -1144,7 +1144,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     </select>
                   </div>
                   <Button 
-                    onClick={() => startTimer(activeTask)}
+                    onClick={() => !isReadOnly && startTimer(activeTask)}
                     disabled={isReadOnly}
                     className={`w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white ${
                       isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
