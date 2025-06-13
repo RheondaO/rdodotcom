@@ -130,11 +130,6 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
       workHours: dailyEntry?.workHours,
       tvHours: dailyEntry?.tvHours,
       phoneHours: dailyEntry?.phoneHours,
-      socialMediaHours: dailyEntry?.socialMediaHours,
-      otherScreenHours: dailyEntry?.otherScreenHours,
-      journalEntry: dailyEntry?.journalEntry,
-      gratitudeEntry: dailyEntry?.gratitudeEntry,
-      notes: dailyEntry?.notes
     };
 
     updateDailyEntry.mutate(updatedEntry);
@@ -237,11 +232,6 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
       workHours: dailyEntry?.workHours,
       tvHours: dailyEntry?.tvHours,
       phoneHours: dailyEntry?.phoneHours,
-      socialMediaHours: dailyEntry?.socialMediaHours,
-      otherScreenHours: dailyEntry?.otherScreenHours,
-      journalEntry: dailyEntry?.journalEntry,
-      gratitudeEntry: dailyEntry?.gratitudeEntry,
-      notes: dailyEntry?.notes
     };
 
     updateDailyEntry.mutate(updatedEntry);
@@ -249,7 +239,7 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
 
   const activeHabits = habitsWithCompletion.filter(h => h.isActive);
   const todayCompletedCount = activeHabits.filter(h => h.completedToday).length;
-  const totalStreakDays = activeHabits.reduce((sum, h) => sum + h.currentStreak, 0);
+  const totalStreakDays = activeHabits.reduce((sum, h) => sum + (h.currentStreak || 0), 0);
 
   return (
     <div className="space-y-6">
