@@ -85,9 +85,14 @@ export default function FinanceSection({ selectedDate, isReadOnly = false }: Fin
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-heading font-semibold text-gray-800">Cash Savings</h4>
-              <Dialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen}>
+              <Dialog open={isAddIncomeOpen} onOpenChange={!isReadOnly ? setIsAddIncomeOpen : undefined}>
                 <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="hover:bg-green-50 rounded-xl">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    disabled={isReadOnly}
+                    className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-50'}`}
+                  >
                     <Plus className="h-4 w-4 text-green-500" />
                   </Button>
                 </DialogTrigger>
@@ -142,27 +147,27 @@ export default function FinanceSection({ selectedDate, isReadOnly = false }: Fin
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickAdd(20)}
-                  disabled={updateDailyEntry.isPending}
-                  className="text-xs bg-green-50 hover:bg-green-100 border-green-200 text-green-700 rounded-lg"
+                  onClick={() => !isReadOnly && handleQuickAdd(20)}
+                  disabled={isReadOnly || updateDailyEntry.isPending}
+                  className={`text-xs border-green-200 text-green-700 rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'bg-green-50 hover:bg-green-100'}`}
                 >
                   +$20
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickAdd(50)}
-                  disabled={updateDailyEntry.isPending}
-                  className="text-xs bg-green-50 hover:bg-green-100 border-green-200 text-green-700 rounded-lg"
+                  onClick={() => !isReadOnly && handleQuickAdd(50)}
+                  disabled={isReadOnly || updateDailyEntry.isPending}
+                  className={`text-xs border-green-200 text-green-700 rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'bg-green-50 hover:bg-green-100'}`}
                 >
                   +$50
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleQuickAdd(100)}
-                  disabled={updateDailyEntry.isPending}
-                  className="text-xs bg-green-50 hover:bg-green-100 border-green-200 text-green-700 rounded-lg"
+                  onClick={() => !isReadOnly && handleQuickAdd(100)}
+                  disabled={isReadOnly || updateDailyEntry.isPending}
+                  className={`text-xs border-green-200 text-green-700 rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'bg-green-50 hover:bg-green-100'}`}
                 >
                   +$100
                 </Button>
