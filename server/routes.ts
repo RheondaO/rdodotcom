@@ -259,7 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(goal);
     } catch (error) {
       console.error("Goal creation error:", error);
-      res.status(400).json({ error: "Invalid goal data", details: error.message });
+      res.status(400).json({ error: "Invalid goal data", details: (error as Error).message });
     }
   });
 
@@ -438,7 +438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(todo);
     } catch (error) {
       console.error("Todo creation error:", error);
-      res.status(400).json({ error: error.message || "Invalid todo data" });
+      res.status(400).json({ error: (error as Error).message || "Invalid todo data" });
     }
   });
 

@@ -440,7 +440,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
                       {project.techStack.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {project.techStack.map((tech, index) => (
+                          {project.techStack.map((tech: string, index: number) => (
                             <Badge key={index} variant="secondary" className="text-xs">
                               {tech}
                             </Badge>
@@ -553,7 +553,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
                   {project.techStack.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {project.techStack.slice(0, 3).map((tech, index) => (
+                      {project.techStack.slice(0, 3).map((tech: string, index: number) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           {tech}
                         </Badge>
