@@ -1923,7 +1923,9 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => startEditingMiniGame(miniGame)}
+                            onClick={() => !isReadOnly && startEditingMiniGame(miniGame)}
+                            disabled={isReadOnly}
+                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
