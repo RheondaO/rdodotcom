@@ -50,9 +50,7 @@ function App() {
             <PublicView />
           </Route>
           <Route path="/dashboard">
-            <AuthGuard>
-              <Dashboard />
-            </AuthGuard>
+            <Dashboard />
           </Route>
           <Route path="/admin">
             <AuthGuard>
@@ -63,9 +61,7 @@ function App() {
             <AuthCheck />
           </Route>
           <Route path="/">
-            <AuthGuard>
-              <Dashboard />
-            </AuthGuard>
+            <Dashboard />
           </Route>
           <Route>
             <NotFoundPage />
