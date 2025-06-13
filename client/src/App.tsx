@@ -46,9 +46,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Switch>
-          <Route path="/public-view" component={PublicView} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/">
+          <Route path="/public-view">
+            <PublicView />
+          </Route>
+          <Route path="/dashboard">
             <AuthGuard>
               <Dashboard />
             </AuthGuard>
@@ -58,8 +59,17 @@ function App() {
               <Dashboard />
             </AuthGuard>
           </Route>
-          <Route path="/auth-check" component={AuthCheck} />
-          <Route component={NotFoundPage} />
+          <Route path="/auth-check">
+            <AuthCheck />
+          </Route>
+          <Route path="/">
+            <AuthGuard>
+              <Dashboard />
+            </AuthGuard>
+          </Route>
+          <Route>
+            <NotFoundPage />
+          </Route>
         </Switch>
         <Toaster />
       </ThemeProvider>
