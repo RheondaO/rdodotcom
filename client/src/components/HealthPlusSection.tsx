@@ -53,9 +53,10 @@ interface HealthMetric {
 
 interface HealthPlusSectionProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function HealthPlusSection({ selectedDate }: HealthPlusSectionProps) {
+export default function HealthPlusSection({ selectedDate, isReadOnly = false }: HealthPlusSectionProps) {
   const [medications, setMedications] = useState<Medication[]>([
     {
       id: 1,
@@ -230,9 +231,12 @@ export default function HealthPlusSection({ selectedDate }: HealthPlusSectionPro
           </p>
         </div>
         
-        <Dialog open={showMedDialog} onOpenChange={setShowMedDialog}>
+        <Dialog open={showMedDialog} onOpenChange={!isReadOnly ? setShowMedDialog : undefined}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg">
+            <Button 
+              disabled={isReadOnly}
+              className={`bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Add Medication
             </Button>
@@ -278,7 +282,11 @@ export default function HealthPlusSection({ selectedDate }: HealthPlusSectionPro
                 </Select>
               </div>
               
-              <Button onClick={createMedication} className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white">
+              <Button 
+                onClick={!isReadOnly ? createMedication : undefined} 
+                disabled={isReadOnly}
+                className={`w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
                 Add Medication
               </Button>
             </div>

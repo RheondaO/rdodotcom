@@ -1204,9 +1204,12 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
           {brands.map(brand => (
             <button
               key={brand.id}
-              onClick={() => setActiveBrand(brand.id)}
+              onClick={() => !isReadOnly && setActiveBrand(brand.id)}
+              disabled={isReadOnly}
               className={`flex-1 flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg transition-all duration-200 ${
-                activeBrand === brand.id
+                isReadOnly
+                  ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400'
+                  : activeBrand === brand.id
                   ? 'bg-white dark:bg-gray-700 shadow-md text-purple-600 dark:text-purple-400'
                   : 'text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400'
               }`}
@@ -1228,9 +1231,14 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
               Mini-Game Block Studio ✨
             </h4>
             <div className="flex gap-2">
-              <Dialog open={showCreateDesignDialog} onOpenChange={setShowCreateDesignDialog}>
+              <Dialog open={showCreateDesignDialog} onOpenChange={!isReadOnly ? setShowCreateDesignDialog : undefined}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="rounded-xl">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={isReadOnly}
+                    className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
                     <Target className="h-4 w-4 mr-2" />
                     New Block
                   </Button>
