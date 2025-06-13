@@ -185,12 +185,6 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center space-x-3">
-              {isReadOnly && (
-                <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
-                  <Eye className="mr-1 h-3 w-3" />
-                  Read Only
-                </Badge>
-              )}
               <div className="text-sm text-muted-foreground dark:text-white">
                 <span className="font-medium text-pink-700 dark:text-white">
                   {format(selectedDate, 'MMM d, yyyy')}
