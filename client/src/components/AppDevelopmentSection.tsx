@@ -914,35 +914,65 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input 
+                        type="checkbox" 
+                        className={`rounded border-gray-300 ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isReadOnly}
+                      />
                       <span className="text-sm">Mobile navigation works correctly</span>
                     </div>
                     <Badge variant="outline" className="text-red-500">Failed</Badge>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input 
+                        type="checkbox" 
+                        className={`rounded border-gray-300 ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isReadOnly}
+                      />
                       <span className="text-sm">Project showcase loads properly</span>
                     </div>
                     <Badge variant="outline" className="text-green-500">Passed</Badge>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input 
+                        type="checkbox" 
+                        className={`rounded border-gray-300 ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isReadOnly}
+                      />
                       <span className="text-sm">Contact form submits successfully</span>
                     </div>
                     <Badge variant="outline" className="text-yellow-500">Pending</Badge>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input 
+                        type="checkbox" 
+                        className={`rounded border-gray-300 ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isReadOnly}
+                      />
                       <span className="text-sm">Page load time under 3 seconds</span>
                     </div>
                     <Badge variant="outline" className="text-yellow-500">Pending</Badge>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input 
+                        type="checkbox" 
+                        className={`rounded border-gray-300 ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isReadOnly}
+                      />
                       <span className="text-sm">SEO meta tags complete</span>
                     </div>
                     <Badge variant="outline" className="text-green-500">Passed</Badge>
@@ -963,7 +993,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input 
+                        type="checkbox" 
+                        className={`rounded border-gray-300 ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        disabled={isReadOnly}
+                      />
                       <span className="text-sm">Animation performance smooth</span>
                     </div>
                     <Badge variant="outline" className="text-green-500">Passed</Badge>
@@ -1080,17 +1116,24 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     <input
                       type="text"
                       placeholder="What are you working on?"
-                      className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600"
+                      className={`w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600 ${
+                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                       value={activeTask}
                       onChange={(e) => setActiveTask(e.target.value)}
+                      disabled={isReadOnly}
+                      readOnly={isReadOnly}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2">Project</label>
                     <select
-                      className="w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600"
+                      className={`w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600 ${
+                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                       value={selectedProject || ""}
                       onChange={(e) => setSelectedProject(Number(e.target.value))}
+                      disabled={isReadOnly}
                     >
                       <option value="">Select a project</option>
                       {activeProjects.map(project => (
