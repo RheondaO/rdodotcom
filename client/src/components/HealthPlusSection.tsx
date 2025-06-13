@@ -61,11 +61,8 @@ interface HealthPlusSectionProps {
 export default function HealthPlusSection({ selectedDate, isReadOnly = false }: HealthPlusSectionProps) {
   const queryClient = useQueryClient();
   
-  // Fetch medications from API
-  const { data: medications = [], isLoading: medicationsLoading } = useQuery({
-    queryKey: ['/api/medications'],
-    select: (data: any[]) => data || []
-  });
+  // Local state for medications management
+  const [medications, setMedications] = useState<Medication[]>([]);
 
   // Mutation for creating medications
   const createMedicationMutation = useMutation({
@@ -161,7 +158,8 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
     const now = new Date();
     // In a full implementation, this would update via API
     console.log('Medication marked as taken:', medId);
-    // medications.map(med => {
+    
+    setMedications(medications.map(med => {
       if (med.id === medId) {
         let nextDose = new Date();
         switch (med.frequency) {
