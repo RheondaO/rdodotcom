@@ -406,10 +406,10 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                 {moods.map(mood => (
                   <button
                     key={mood.value}
-                    onClick={() => isEditable && updateMood({ mood: mood.value })}
-                    disabled={!isEditable}
+                    onClick={() => !isReadOnly && isEditable && updateMood({ mood: mood.value })}
+                    disabled={isReadOnly || !isEditable}
                     className={`p-3 rounded-xl text-center transition-all duration-200 ${
-                      !isEditable
+                      isReadOnly || !isEditable
                         ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
                         : dailyMood.mood === mood.value
                         ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-lg scale-105'
@@ -438,10 +438,10 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                   min="1"
                   max="5"
                   value={dailyMood.energyLevel}
-                  onChange={(e) => isEditable && updateMood({ energyLevel: Number(e.target.value) })}
-                  disabled={!isEditable}
+                  onChange={(e) => !isReadOnly && isEditable && updateMood({ energyLevel: Number(e.target.value) })}
+                  disabled={isReadOnly || !isEditable}
                   className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
-                    isEditable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                    !isReadOnly && isEditable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
                   }`}
                 />
                 <div className="flex justify-between text-xs text-gray-500">
@@ -466,10 +466,10 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                   min="1"
                   max="5"
                   value={dailyMood.stressLevel}
-                  onChange={(e) => isEditable && updateMood({ stressLevel: Number(e.target.value) })}
-                  disabled={!isEditable}
+                  onChange={(e) => !isReadOnly && isEditable && updateMood({ stressLevel: Number(e.target.value) })}
+                  disabled={isReadOnly || !isEditable}
                   className={`w-full h-2 bg-gray-200 rounded-lg appearance-none ${
-                    isEditable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                    !isReadOnly && isEditable ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
                   }`}
                 />
                 <div className="flex justify-between text-xs text-gray-500">

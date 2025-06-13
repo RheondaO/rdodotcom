@@ -188,16 +188,18 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
             <Input
               placeholder="What are you working on?"
               value={activeTask}
-              onChange={(e) => setActiveTask(e.target.value)}
-              className="flex-1"
+              onChange={(e) => !isReadOnly && setActiveTask(e.target.value)}
+              disabled={isReadOnly}
+              className={`flex-1 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             />
             <div className="text-2xl font-mono font-bold text-blue-600">
               {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
             </div>
             <Button
-              onClick={isTimerRunning ? stopTimer : startTimer}
+              onClick={!isReadOnly ? (isTimerRunning ? stopTimer : startTimer) : undefined}
               variant={isTimerRunning ? "destructive" : "default"}
-              className="rounded-xl"
+              disabled={isReadOnly}
+              className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isTimerRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
@@ -213,9 +215,13 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
               <CheckSquare className="h-5 w-5 text-pink-600" />
               <span>{getDateLabel()}'s Tasks</span>
             </CardTitle>
-            <Dialog open={showTodoDialog} onOpenChange={setShowTodoDialog}>
+            <Dialog open={showTodoDialog} onOpenChange={!isReadOnly ? setShowTodoDialog : undefined}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="rounded-xl">
+                <Button 
+                  variant="outline" 
+                  disabled={isReadOnly}
+                  className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Task
                 </Button>
@@ -335,7 +341,11 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
               <Calendar className="h-5 w-5 text-blue-600" />
               <span>{getDateLabel()}'s Schedule</span>
             </CardTitle>
-            <Button variant="outline" className="rounded-xl">
+            <Button 
+              variant="outline" 
+              disabled={isReadOnly}
+              className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Time Block
             </Button>
