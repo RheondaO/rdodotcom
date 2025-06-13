@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import { Target, TrendingUp, BookOpen, Calendar, ExternalLink, LogIn } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import AdminLoginForm from "@/components/AdminLoginForm";
+import { useAuth } from "../hooks/useAuth";
+import AdminLoginForm from "../components/AdminLoginForm";
 
 interface PublicStats {
   totalGoals: number;

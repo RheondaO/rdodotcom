@@ -17,13 +17,13 @@ import ContentCreationSection from "../components/ContentCreationSection";
 import QuickAddModal from "../components/QuickAddModal";
 import WeekView from "../components/WeekView";
 import MonthView from "../components/MonthView";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 import { Download, Sun, Moon, Eye, Lock, LogOut } from "lucide-react";
 import { format, addDays, subDays, isSameDay, isToday, isYesterday, isTomorrow } from "date-fns";
-import { useTheme } from "@/hooks/use-theme";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "../hooks/use-theme";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
 
 type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
