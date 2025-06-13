@@ -6,9 +6,10 @@ import { format } from "date-fns";
 
 interface WaterIntakeCardProps {
   selectedDate: Date;
+  isEditable?: boolean;
 }
 
-export default function WaterIntakeCard({ selectedDate }: WaterIntakeCardProps) {
+export default function WaterIntakeCard({ selectedDate, isEditable = true }: WaterIntakeCardProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const updateDailyEntry = useUpdateDailyEntry();
@@ -39,9 +40,9 @@ export default function WaterIntakeCard({ selectedDate }: WaterIntakeCardProps) 
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={handleAddWater}
-            disabled={waterIntake >= waterGoal || updateDailyEntry.isPending}
-            className="hover:bg-blue-50 rounded-xl"
+            onClick={isEditable ? handleAddWater : undefined}
+            disabled={!isEditable || waterIntake >= waterGoal || updateDailyEntry.isPending}
+            className={`hover:bg-blue-50 rounded-xl ${!isEditable ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Plus className="h-4 w-4 text-blue-500" />
           </Button>

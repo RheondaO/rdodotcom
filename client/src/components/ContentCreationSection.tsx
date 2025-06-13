@@ -1813,13 +1813,14 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                       <Input
                         placeholder="Search mini-games..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-64"
+                        onChange={(e) => !isReadOnly && setSearchQuery(e.target.value)}
+                        disabled={isReadOnly}
+                        className={`w-64 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                       />
                     </div>
                     
-                    <Select value={filterCategory} onValueChange={setFilterCategory}>
-                      <SelectTrigger className="w-48">
+                    <Select value={filterCategory} onValueChange={!isReadOnly ? setFilterCategory : undefined}>
+                      <SelectTrigger className={`w-48 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isReadOnly}>
                         <Filter className="w-4 h-4 mr-2" />
                         <SelectValue placeholder="Filter by category" />
                       </SelectTrigger>
@@ -1838,8 +1839,8 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
-                      <SelectTrigger className="w-36">
+                    <Select value={sortBy} onValueChange={!isReadOnly ? (value) => setSortBy(value as any) : undefined}>
+                      <SelectTrigger className={`w-36 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isReadOnly}>
                         <SelectValue placeholder="Sort by" />
                       </SelectTrigger>
                       <SelectContent>
@@ -2067,15 +2068,16 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                   <div className="flex justify-end gap-3 pt-4">
                     <Button 
                       variant="outline" 
-                      onClick={cancelEditingMiniGame}
-                      className="rounded-xl border-2 border-gray-300 hover:border-gray-400"
+                      onClick={!isReadOnly ? cancelEditingMiniGame : undefined}
+                      disabled={isReadOnly}
+                      className={`rounded-xl border-2 border-gray-300 hover:border-gray-400 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       Cancel
                     </Button>
                     <Button 
-                      onClick={saveEditedMiniGame}
-                      className="rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-                      disabled={!editMiniGameData.name || !editMiniGameData.frequency || !editMiniGameData.category || editMiniGameData.frequencyValue <= 0}
+                      onClick={!isReadOnly ? saveEditedMiniGame : undefined}
+                      disabled={isReadOnly || !editMiniGameData.name || !editMiniGameData.frequency || !editMiniGameData.category || editMiniGameData.frequencyValue <= 0}
+                      className={`rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <Edit className="h-4 w-4 mr-2" />
                       Save Changes
@@ -2398,8 +2400,8 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
-                          <SelectTrigger className="w-36">
+                        <Select value={sortBy} onValueChange={!isReadOnly ? (value) => setSortBy(value as any) : undefined}>
+                          <SelectTrigger className={`w-36 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isReadOnly}>
                             <SelectValue placeholder="Sort by" />
                           </SelectTrigger>
                           <SelectContent>
@@ -2413,8 +2415,9 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                          className="p-2"
+                          onClick={() => !isReadOnly && setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                          disabled={isReadOnly}
+                          className={`p-2 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
                         </Button>
