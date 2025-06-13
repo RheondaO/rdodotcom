@@ -264,9 +264,12 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
           </p>
         </div>
         
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <Dialog open={showCreateDialog} onOpenChange={!isReadOnly ? setShowCreateDialog : undefined}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg">
+            <Button 
+              disabled={isReadOnly}
+              className={`bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
               <Plus className="mr-2 h-4 w-4" />
               New Habit
             </Button>
@@ -328,7 +331,11 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                 </div>
               </div>
               
-              <Button onClick={handleCreateHabit} className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white">
+              <Button 
+                onClick={!isReadOnly ? handleCreateHabit : undefined} 
+                disabled={isReadOnly}
+                className={`w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
                 Create Habit
               </Button>
             </div>
