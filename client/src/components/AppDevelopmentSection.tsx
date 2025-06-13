@@ -1048,8 +1048,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Time Tracking</h2>
             {!isTimerRunning && (
               <Button 
-                onClick={() => startTimer()}
-                className="bg-gradient-to-r from-green-400 to-emerald-500 text-white"
+                onClick={() => !isReadOnly && startTimer()}
+                disabled={isReadOnly}
+                className={`bg-gradient-to-r from-green-400 to-emerald-500 text-white ${
+                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <Play className="h-4 w-4 mr-2" />
                 Start Timer
