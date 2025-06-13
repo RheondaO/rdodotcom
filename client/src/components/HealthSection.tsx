@@ -7,9 +7,10 @@ import { format, isToday, isYesterday, isTomorrow } from "date-fns";
 
 interface HealthSectionProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function HealthSection({ selectedDate }: HealthSectionProps) {
+export default function HealthSection({ selectedDate, isReadOnly = false }: HealthSectionProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
 

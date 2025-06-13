@@ -31,9 +31,10 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface ProductivitySectionProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function ProductivitySection({ selectedDate }: ProductivitySectionProps) {
+export default function ProductivitySection({ selectedDate, isReadOnly = false }: ProductivitySectionProps) {
   const getDateLabel = () => {
     if (isToday(selectedDate)) return "Today";
     if (isYesterday(selectedDate)) return "Yesterday";

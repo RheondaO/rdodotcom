@@ -31,9 +31,10 @@ import type { Goal, InsertGoal } from "@shared/schema";
 
 interface GoalsSectionProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
+export default function GoalsSection({ selectedDate, isReadOnly = false }: GoalsSectionProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   

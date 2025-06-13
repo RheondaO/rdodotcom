@@ -255,20 +255,27 @@ export default function Dashboard() {
         {/* Content */}
         <div className="p-4">
           {activeView === "dashboard" && (
-            <DashboardHome selectedDate={selectedDate} onNavigate={(section: string) => setActiveView(section as ViewType)} />
+            <DashboardHome 
+              selectedDate={selectedDate} 
+              onNavigate={(section: string) => setActiveView(section as ViewType)}
+              isReadOnly={!isAuthenticated || !isAdmin}
+            />
           )}
-          {activeView === "health" && <HealthSection selectedDate={selectedDate} />}
-          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
-          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} />}
-          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} />}
-          {activeView === "reports" && <ReportsSection />}
-          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
-          {activeView === "groceries" && <GrocerySection />}
-          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
-          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} />}
-          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
+          {activeView === "health" && <HealthSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "reports" && <ReportsSection isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "groceries" && <GrocerySection isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "sitemap" && (
-            <SiteMapSection onNavigate={(section: string) => setActiveView(section as ViewType)} />
+            <SiteMapSection 
+              onNavigate={(section: string) => setActiveView(section as ViewType)}
+              isReadOnly={!isAuthenticated || !isAdmin}
+            />
           )}
         </div>
       </main>

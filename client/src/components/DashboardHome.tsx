@@ -32,9 +32,10 @@ import type { Goal, Medication } from "@shared/schema";
 interface DashboardHomeProps {
   selectedDate: Date;
   onNavigate: (section: string) => void;
+  isReadOnly?: boolean;
 }
 
-export default function DashboardHome({ selectedDate, onNavigate }: DashboardHomeProps) {
+export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = false }: DashboardHomeProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const { data: habits = [] } = useHabits();
