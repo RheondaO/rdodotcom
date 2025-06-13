@@ -1596,9 +1596,12 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                 </DialogContent>
               </Dialog>
               
-              <Dialog open={showCreateMiniGameDialog} onOpenChange={setShowCreateMiniGameDialog}>
+              <Dialog open={showCreateMiniGameDialog} onOpenChange={!isReadOnly ? setShowCreateMiniGameDialog : undefined}>
                 <DialogTrigger asChild>
-                  <Button className="rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                  <Button 
+                    disabled={isReadOnly}
+                    className={`rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
                     <Sparkles className="h-4 w-4 mr-2" />
                     New Mini-Game
                   </Button>
