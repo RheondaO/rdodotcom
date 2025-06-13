@@ -14,9 +14,10 @@ import { useState } from "react";
 
 interface FinanceSectionProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function FinanceSection({ selectedDate }: FinanceSectionProps) {
+export default function FinanceSection({ selectedDate, isReadOnly = false }: FinanceSectionProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const updateDailyEntry = useUpdateDailyEntry();

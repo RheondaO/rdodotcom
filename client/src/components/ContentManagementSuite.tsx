@@ -94,9 +94,10 @@ interface ContentProgress {
 
 interface ContentManagementSuiteProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function ContentManagementSuite({ selectedDate }: ContentManagementSuiteProps) {
+export default function ContentManagementSuite({ selectedDate, isReadOnly = false }: ContentManagementSuiteProps) {
   const [activeView, setActiveView] = useState<"overview" | "categories" | "content" | "calendar" | "analytics">("overview");
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);

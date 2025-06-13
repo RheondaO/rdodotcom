@@ -8,7 +8,11 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useState } from "react";
 
 
-export default function GrocerySection() {
+interface GrocerySectionProps {
+  isReadOnly?: boolean;
+}
+
+export default function GrocerySection({ isReadOnly = false }: GrocerySectionProps) {
   const [newItemName, setNewItemName] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
 

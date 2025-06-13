@@ -37,9 +37,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 interface SiteMapSectionProps {
   onNavigate: (section: string) => void;
+  isReadOnly?: boolean;
 }
 
-export default function SiteMapSection({ onNavigate }: SiteMapSectionProps) {
+export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteMapSectionProps) {
   const handleExportData = () => {
     // Create sample data export
     const exportData = {

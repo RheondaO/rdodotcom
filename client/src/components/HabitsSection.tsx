@@ -51,9 +51,10 @@ interface DailyMood {
 
 interface HabitsSectionProps {
   selectedDate: Date;
+  isReadOnly?: boolean;
 }
 
-export default function HabitsSection({ selectedDate }: HabitsSectionProps) {
+export default function HabitsSection({ selectedDate, isReadOnly = false }: HabitsSectionProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const { data: habits = [] } = useHabits();
