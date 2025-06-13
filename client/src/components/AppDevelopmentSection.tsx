@@ -562,7 +562,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h2>
             <Button 
               onClick={() => setShowNewProjectForm(true)}
-              className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+              disabled={isReadOnly}
+              className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <Plus className="h-4 w-4 mr-2" />
               New Project
@@ -671,7 +674,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               </select>
               <Button 
                 onClick={() => setShowNewTaskForm(true)}
-                className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                disabled={isReadOnly}
+                className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 New Task
