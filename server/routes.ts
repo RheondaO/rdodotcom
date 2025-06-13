@@ -668,6 +668,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Medications
+  app.get("/api/medications", async (req, res) => {
+    try {
+      const medications = await storage.getAllMedications();
+      res.json(medications);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch medications" });
+    }
+  });
+
+  app.post("/api/medications", async (req, res) => {
+    try {
+      const medication = await storage.createMedication(req.body);
+      res.json(medication);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid medication data" });
+    }
+  });
+
   // Reports Analytics
   app.get("/api/reports/analytics/:period", async (req, res) => {
     try {

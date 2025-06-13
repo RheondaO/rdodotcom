@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,30 +59,23 @@ interface HealthPlusSectionProps {
 }
 
 export default function HealthPlusSection({ selectedDate, isReadOnly = false }: HealthPlusSectionProps) {
-  const [medications, setMedications] = useState<Medication[]>([
-    {
-      id: 1,
-      name: "Vitamin D3",
-      dosage: "2000 IU",
-      frequency: "daily",
-      reminderTimes: ["08:00", "20:00"],
-      isActive: true,
-      nextDose: "2025-06-03T08:00:00",
-      lastTaken: "2025-06-02T20:15:00",
-      createdAt: "2025-05-01"
+  const queryClient = useQueryClient();
+  
+  // Fetch medications from API
+  const { data: medications = [], isLoading: medicationsLoading } = useQuery({
+    queryKey: ['/api/medications'],
+    select: (data: any[]) => data || []
+  });
+
+  // Mutation for creating medications
+  const createMedicationMutation = useMutation({
+    mutationFn: async (medicationData: any) => {
+      return await apiRequest('/api/medications', { method: 'POST', body: medicationData });
     },
-    {
-      id: 2,
-      name: "Omega-3",
-      dosage: "1000mg",
-      frequency: "daily",
-      reminderTimes: ["09:00"],
-      isActive: true,
-      nextDose: "2025-06-03T09:00:00",
-      lastTaken: null,
-      createdAt: "2025-05-15"
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/medications'] });
     }
-  ]);
+  });
 
   const [todaysHealth, setTodaysHealth] = useState<HealthMetric>({
     id: 1,
