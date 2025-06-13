@@ -21,8 +21,8 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
     return format(selectedDate, 'EEEE');
   };
 
-  // Check if the selected date is editable (today or yesterday only)
-  const isEditable = isToday(selectedDate) || isYesterday(selectedDate);
+  // Check if the selected date is editable (today or yesterday only) AND not in read-only mode
+  const isEditable = !isReadOnly && (isToday(selectedDate) || isYesterday(selectedDate));
 
   return (
     <section className="mb-8">
@@ -93,7 +93,12 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
                 <h4 className="font-heading font-semibold text-gray-800">Sleep</h4>
               </div>
               {isEditable ? (
-                <Button variant="ghost" size="sm" className="hover:bg-purple-50 rounded-xl">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  disabled={!isEditable}
+                  className={`rounded-xl ${!isEditable ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-50'}`}
+                >
                   <Edit className="h-4 w-4 text-purple-500" />
                 </Button>
               ) : (
@@ -134,7 +139,12 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
                 <h4 className="font-heading font-semibold text-gray-800">Meals</h4>
               </div>
               {isEditable ? (
-                <Button variant="ghost" size="sm" className="hover:bg-orange-50 rounded-xl">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  disabled={!isEditable}
+                  className={`rounded-xl ${!isEditable ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-50'}`}
+                >
                   <Plus className="h-4 w-4 text-orange-500" />
                 </Button>
               ) : (
