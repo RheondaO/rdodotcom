@@ -181,7 +181,12 @@ export default function FinanceSection({ selectedDate, isReadOnly = false }: Fin
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-heading font-semibold text-gray-800">Bills Status</h4>
-              <Button variant="ghost" size="sm" className="hover:bg-blue-50 rounded-xl">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                disabled={isReadOnly}
+                className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'}`}
+              >
                 <Settings className="h-4 w-4 text-blue-500" />
               </Button>
             </div>
@@ -220,7 +225,12 @@ export default function FinanceSection({ selectedDate, isReadOnly = false }: Fin
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-heading font-semibold text-gray-800">Shopping Budget</h4>
-              <Button variant="ghost" size="sm" className="hover:bg-orange-50 rounded-xl">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                disabled={isReadOnly}
+                className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-50'}`}
+              >
                 <Receipt className="h-4 w-4 text-orange-500" />
               </Button>
             </div>
