@@ -1720,6 +1720,7 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                 </div>
                 <Button 
                   onClick={() => {
+                    if (isReadOnly) return;
                     const miniGame: MiniGameBlock = {
                       id: Date.now(),
                       ...newMiniGame,
@@ -1738,7 +1739,8 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                     });
                     setShowCreateMiniGameDialog(false);
                   }}
-                  className="w-full rounded-xl"
+                  disabled={isReadOnly}
+                  className={`w-full rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Create Mini-Game Block
                 </Button>
@@ -1748,15 +1750,57 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
 
 
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={!isReadOnly ? setActiveTab : undefined} className="w-full">
             <TabsList className="grid w-full grid-cols-7 rounded-xl">
-              <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
-              <TabsTrigger value="progress" className="rounded-lg">Progress Tracker</TabsTrigger>
-              <TabsTrigger value="designs" className="rounded-lg">Design Queue</TabsTrigger>
-              <TabsTrigger value="calendar" className="rounded-lg">Content Calendar</TabsTrigger>
-              <TabsTrigger value="pipeline" className="rounded-lg">Content Pipeline</TabsTrigger>
-              <TabsTrigger value="analytics" className="rounded-lg">Analytics</TabsTrigger>
-              <TabsTrigger value="notepad" className="rounded-lg">Notepad</TabsTrigger>
+              <TabsTrigger 
+                value="overview" 
+                disabled={isReadOnly}
+                className={`rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger 
+                value="progress" 
+                disabled={isReadOnly}
+                className={`rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Progress Tracker
+              </TabsTrigger>
+              <TabsTrigger 
+                value="designs" 
+                disabled={isReadOnly}
+                className={`rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Design Queue
+              </TabsTrigger>
+              <TabsTrigger 
+                value="calendar" 
+                disabled={isReadOnly}
+                className={`rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Content Calendar
+              </TabsTrigger>
+              <TabsTrigger 
+                value="pipeline" 
+                disabled={isReadOnly}
+                className={`rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Content Pipeline
+              </TabsTrigger>
+              <TabsTrigger 
+                value="analytics" 
+                disabled={isReadOnly}
+                className={`rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger 
+                value="notepad" 
+                disabled={isReadOnly}
+                className={`rounded-lg ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                Notepad
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
@@ -1809,8 +1853,9 @@ export default function ContentCreationSection({ selectedDate, isReadOnly = fals
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="p-2"
+                      onClick={() => !isReadOnly && setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      disabled={isReadOnly}
+                      className={`p-2 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
                     </Button>

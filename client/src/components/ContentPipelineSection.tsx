@@ -63,7 +63,11 @@ interface PipelineStage {
   description: string;
 }
 
-export default function ContentPipelineSection() {
+interface ContentPipelineSectionProps {
+  isReadOnly?: boolean;
+}
+
+export default function ContentPipelineSection({ isReadOnly = false }: ContentPipelineSectionProps) {
   const [contentIdeas, setContentIdeas] = useState<ContentIdea[]>([]);
   const [isAddingContent, setIsAddingContent] = useState(false);
   const [selectedStage, setSelectedStage] = useState<string>('all');
@@ -268,7 +272,12 @@ export default function ContentPipelineSection() {
                     ))}
                   </div>
                   
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    disabled={isReadOnly}
+                    className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                  >
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </div>
@@ -291,9 +300,12 @@ export default function ContentPipelineSection() {
           <p className="text-gray-600 mt-1">Manage your content from idea to publication</p>
         </div>
         
-        <Dialog open={isAddingContent} onOpenChange={setIsAddingContent}>
+        <Dialog open={isAddingContent} onOpenChange={!isReadOnly ? setIsAddingContent : undefined}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:opacity-90">
+            <Button 
+              disabled={isReadOnly}
+              className={`bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:opacity-90 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Content
             </Button>

@@ -370,9 +370,12 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
         </div>
         
         <div className="flex items-center space-x-2">
-          <Dialog open={showNewContentDialog} onOpenChange={setShowNewContentDialog}>
+          <Dialog open={showNewContentDialog} onOpenChange={!isReadOnly ? setShowNewContentDialog : undefined}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-xl">
+              <Button 
+                disabled={isReadOnly}
+                className={`bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 New Content
               </Button>
@@ -430,7 +433,11 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 
 
                 
-                <Button onClick={createContent} className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white">
+                <Button 
+                  onClick={!isReadOnly ? createContent : undefined} 
+                  disabled={isReadOnly}
+                  className={`w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
                   Create Content
                 </Button>
               </div>
@@ -451,9 +458,12 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
           ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
-              onClick={() => setActiveView(key as any)}
+              onClick={() => !isReadOnly && setActiveView(key as any)}
+              disabled={isReadOnly}
               className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                activeView === key
+                isReadOnly
+                  ? 'border-transparent text-gray-400 opacity-50 cursor-not-allowed'
+                  : activeView === key
                   ? 'border-pink-500 text-pink-600 dark:text-pink-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
