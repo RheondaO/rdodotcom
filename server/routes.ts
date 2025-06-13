@@ -630,6 +630,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // App Projects
+  app.get("/api/app-projects", async (req, res) => {
+    try {
+      const projects = await storage.getAllAppProjects();
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch app projects" });
+    }
+  });
+
+  app.post("/api/app-projects", async (req, res) => {
+    try {
+      const project = await storage.createAppProject(req.body);
+      res.json(project);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid app project data" });
+    }
+  });
+
+  // App Tasks
+  app.get("/api/app-tasks", async (req, res) => {
+    try {
+      const tasks = await storage.getAllAppTasks();
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch app tasks" });
+    }
+  });
+
+  app.post("/api/app-tasks", async (req, res) => {
+    try {
+      const task = await storage.createAppTask(req.body);
+      res.json(task);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid app task data" });
+    }
+  });
+
   // Reports Analytics
   app.get("/api/reports/analytics/:period", async (req, res) => {
     try {

@@ -106,88 +106,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     select: (data: any[]) => data || []
   });
 
-  const tasks: AppTask[] = [
-    {
-      id: 1,
-      projectId: 1,
-      title: "Implement responsive navigation",
-      description: "Create a mobile-friendly navigation menu with smooth animations",
-      status: "done",
-      category: "feature",
-      estimatedHours: 8,
-      actualHours: 6,
-      completedDate: "2025-05-15",
-      dependencies: [],
-      attachments: [],
-      comments: "Successfully implemented with hamburger menu",
-      createdAt: "2025-05-01T00:00:00Z",
-      updatedAt: "2025-05-15T14:30:00Z"
-    },
-    {
-      id: 2,
-      projectId: 1,
-      title: "Add project showcase section",
-      description: "Design and implement a grid layout for showcasing portfolio projects",
-      status: "in_progress",
-      category: "feature",
-      estimatedHours: 12,
-      actualHours: 8,
-      dueDate: "2025-06-10",
-      dependencies: [],
-      attachments: [],
-      comments: "Working on interactive hover effects",
-      createdAt: "2025-05-16T00:00:00Z",
-      updatedAt: "2025-06-03T11:00:00Z"
-    },
-    {
-      id: 3,
-      projectId: 2,
-      title: "Set up content management system",
-      description: "Implement CMS for managing media content and blog posts",
-      status: "todo",
-      category: "feature",
-      estimatedHours: 20,
-      actualHours: 0,
-      dueDate: "2025-06-20",
-      dependencies: [],
-      attachments: [],
-      comments: "",
-      createdAt: "2025-04-20T00:00:00Z",
-      updatedAt: "2025-04-20T00:00:00Z"
-    },
-    {
-      id: 4,
-      projectId: 1,
-      title: "Test mobile navigation",
-      description: "Verify navigation works correctly on all mobile devices",
-      status: "testing",
-      category: "bug",
-      estimatedHours: 4,
-      actualHours: 2,
-      dueDate: "2025-06-05",
-      dependencies: [],
-      attachments: [],
-      comments: "Found issues with hamburger menu on iOS",
-      createdAt: "2025-06-01T00:00:00Z",
-      updatedAt: "2025-06-03T10:00:00Z"
-    },
-    {
-      id: 5,
-      projectId: 2,
-      title: "Test animation performance",
-      description: "Ensure all animations run smoothly on different devices",
-      status: "testing",
-      category: "improvement",
-      estimatedHours: 6,
-      actualHours: 3,
-      dueDate: "2025-06-08",
-      dependencies: [],
-      attachments: [],
-      comments: "Testing on various browsers and devices",
-      createdAt: "2025-05-28T00:00:00Z",
-      updatedAt: "2025-06-03T14:00:00Z"
-    }
-  ];
+  // Fetch real task data from API
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['/api/app-tasks'],
+    select: (data: any[]) => data || []
+  });
 
   const getStatusColor = (status: string) => {
     const colors = {
