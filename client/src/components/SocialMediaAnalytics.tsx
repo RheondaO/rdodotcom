@@ -10,6 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Eye, Heart, MessageCircle, Share2, Calendar, Clock, Award, Target, BarChart3, PieChart as PieChartIcon, Plus, Instagram, Facebook, Twitter } from 'lucide-react';
 import { format } from 'date-fns';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface SocialMediaPost {
   id: number;
@@ -83,12 +86,88 @@ interface SocialMediaAnalyticsProps {
 }
 
 export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }: SocialMediaAnalyticsProps) {
-  const [posts, setPosts] = useState<SocialMediaPost[]>([]);
-  const [analytics, setAnalytics] = useState<SocialMediaAnalytics[]>([]);
   const [showAddPostDialog, setShowAddPostDialog] = useState(false);
   const [showAddAnalyticsDialog, setShowAddAnalyticsDialog] = useState(false);
   const [selectedPost, setSelectedPost] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const { toast } = useToast();
+
+  // Fetch real data from API
+  const { data: posts = [], isLoading: postsLoading } = useQuery({
+    queryKey: ['/api/social-media-posts'],
+    select: (data: any[]) => data || []
+  });
+
+  const { data: analytics = [], isLoading: analyticsLoading } = useQuery({
+    queryKey: ['/api/social-media-analytics'],
+    select: (data: any[]) => data || []
+  });
+
+  // Mutations for creating posts and analytics
+  const createPostMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/social-media-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to create post');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/social-media-posts'] });
+      setShowAddPostDialog(false);
+      setNewPost({
+        miniGameDesignId: '',
+        platform: '',
+        postUrl: '',
+        scheduledDate: '',
+        publishedDate: '',
+        dayOfWeek: '',
+        timeSlot: '',
+        postType: '',
+        caption: '',
+        hashtags: '',
+        status: 'scheduled'
+      });
+      toast({ title: "Post created successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Failed to create post", variant: "destructive" });
+    }
+  });
+
+  const createAnalyticsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/social-media-analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to create analytics');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/social-media-analytics'] });
+      setShowAddAnalyticsDialog(false);
+      setNewAnalytics({
+        postId: '',
+        impressions: '',
+        reach: '',
+        likes: '',
+        comments: '',
+        shares: '',
+        saves: '',
+        clicks: '',
+        profileViews: '',
+        engagementRate: ''
+      });
+      toast({ title: "Analytics added successfully!" });
+    },
+    onError: () => {
+      toast({ title: "Failed to add analytics", variant: "destructive" });
+    }
+  });
 
   // Form states
   const [newPost, setNewPost] = useState({
@@ -265,43 +344,25 @@ export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }
   };
 
   const handleAddPost = () => {
-    const post: SocialMediaPost = {
-      id: posts.length + 1,
+    const postData = {
       miniGameDesignId: parseInt(newPost.miniGameDesignId),
       platform: newPost.platform,
-      postUrl: newPost.postUrl,
+      postUrl: newPost.postUrl || undefined,
       scheduledDate: newPost.scheduledDate,
       publishedDate: newPost.publishedDate || undefined,
       dayOfWeek: newPost.dayOfWeek,
       timeSlot: newPost.timeSlot,
       postType: newPost.postType,
-      caption: newPost.caption,
-      hashtags: newPost.hashtags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      status: newPost.status,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      caption: newPost.caption || undefined,
+      hashtags: newPost.hashtags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag),
+      status: newPost.status
     };
 
-    setPosts([...posts, post]);
-    setNewPost({
-      miniGameDesignId: '',
-      platform: '',
-      postUrl: '',
-      scheduledDate: '',
-      publishedDate: '',
-      dayOfWeek: '',
-      timeSlot: '',
-      postType: '',
-      caption: '',
-      hashtags: '',
-      status: 'scheduled'
-    });
-    setShowAddPostDialog(false);
+    createPostMutation.mutate(postData);
   };
 
   const handleAddAnalytics = () => {
-    const analyticsData: SocialMediaAnalytics = {
-      id: analytics.length + 1,
+    const analyticsData = {
       postId: parseInt(newAnalytics.postId),
       impressions: parseInt(newAnalytics.impressions) || 0,
       reach: parseInt(newAnalytics.reach) || 0,
@@ -311,26 +372,10 @@ export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }
       saves: parseInt(newAnalytics.saves) || 0,
       clicks: parseInt(newAnalytics.clicks) || 0,
       profileViews: parseInt(newAnalytics.profileViews) || 0,
-      engagementRate: parseFloat(newAnalytics.engagementRate) || 0,
-      recordedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      engagementRate: parseFloat(newAnalytics.engagementRate) || 0
     };
 
-    setAnalytics([...analytics, analyticsData]);
-    setNewAnalytics({
-      postId: '',
-      impressions: '',
-      reach: '',
-      likes: '',
-      comments: '',
-      shares: '',
-      saves: '',
-      clicks: '',
-      profileViews: '',
-      engagementRate: ''
-    });
-    setShowAddAnalyticsDialog(false);
+    createAnalyticsMutation.mutate(analyticsData);
   };
 
   const dayOfWeekData = getDayOfWeekPerformance();
