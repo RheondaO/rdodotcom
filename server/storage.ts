@@ -222,6 +222,20 @@ export interface IStorage {
   getPerformanceInsightsByMiniGame(miniGameBlockId: number): Promise<PerformanceInsights[]>;
   getPerformanceInsightsByPlatform(platform: string): Promise<PerformanceInsights[]>;
   getPerformanceInsightsByDayOfWeek(dayOfWeek: string): Promise<PerformanceInsights[]>;
+
+  // Test Cases
+  getAllTestCases(): Promise<TestCase[]>;
+  getTestCasesByProject(projectId: number): Promise<TestCase[]>;
+  createTestCase(testCase: InsertTestCase): Promise<TestCase>;
+  updateTestCase(id: number, updates: Partial<TestCase>): Promise<TestCase>;
+  deleteTestCase(id: number): Promise<void>;
+
+  // Quality Issues
+  getAllQualityIssues(): Promise<QualityIssue[]>;
+  getQualityIssuesByProject(projectId: number): Promise<QualityIssue[]>;
+  createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue>;
+  updateQualityIssue(id: number, updates: Partial<QualityIssue>): Promise<QualityIssue>;
+  deleteQualityIssue(id: number): Promise<void>;
   createPerformanceInsights(insights: InsertPerformanceInsights): Promise<PerformanceInsights>;
   updatePerformanceInsights(id: number, updates: Partial<PerformanceInsights>): Promise<PerformanceInsights>;
   deletePerformanceInsights(id: number): Promise<void>;
@@ -270,6 +284,8 @@ export class MemStorage implements IStorage {
   private socialMediaPosts: Map<number, SocialMediaPost> = new Map();
   private socialMediaAnalytics: Map<number, SocialMediaAnalytics> = new Map();
   private performanceInsights: Map<number, PerformanceInsights> = new Map();
+  private testCases: Map<number, TestCase> = new Map();
+  private qualityIssues: Map<number, QualityIssue> = new Map();
   private currentId = 1;
 
   constructor() {
@@ -1438,6 +1454,84 @@ export class MemStorage implements IStorage {
 
   async getPerformanceInsightsByDayOfWeek(dayOfWeek: string): Promise<PerformanceInsights[]> {
     return Array.from(this.performanceInsights.values()).filter(insight => insight.dayOfWeek === dayOfWeek);
+  }
+
+  // Test Cases Methods
+  async getAllTestCases(): Promise<TestCase[]> {
+    return Array.from(this.testCases.values());
+  }
+
+  async getTestCasesByProject(projectId: number): Promise<TestCase[]> {
+    return Array.from(this.testCases.values()).filter(testCase => testCase.projectId === projectId);
+  }
+
+  async createTestCase(testCase: InsertTestCase): Promise<TestCase> {
+    const newTestCase: TestCase = {
+      id: this.currentId++,
+      ...testCase,
+      steps: testCase.steps || [],
+      expectedResult: testCase.expectedResult || "",
+      actualResult: testCase.actualResult || "",
+      notes: testCase.notes || "",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.testCases.set(newTestCase.id, newTestCase);
+    return newTestCase;
+  }
+
+  async updateTestCase(id: number, updates: Partial<TestCase>): Promise<TestCase> {
+    const existing = this.testCases.get(id);
+    if (!existing) {
+      throw new Error(`Test case with id ${id} not found`);
+    }
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.testCases.set(id, updated);
+    return updated;
+  }
+
+  async deleteTestCase(id: number): Promise<void> {
+    this.testCases.delete(id);
+  }
+
+  // Quality Issues Methods
+  async getAllQualityIssues(): Promise<QualityIssue[]> {
+    return Array.from(this.qualityIssues.values());
+  }
+
+  async getQualityIssuesByProject(projectId: number): Promise<QualityIssue[]> {
+    return Array.from(this.qualityIssues.values()).filter(issue => issue.projectId === projectId);
+  }
+
+  async createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue> {
+    const newIssue: QualityIssue = {
+      id: this.currentId++,
+      ...issue,
+      description: issue.description || "",
+      stepsToReproduce: issue.stepsToReproduce || [],
+      expectedBehavior: issue.expectedBehavior || "",
+      actualBehavior: issue.actualBehavior || "",
+      workaround: issue.workaround || "",
+      resolution: issue.resolution || "",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.qualityIssues.set(newIssue.id, newIssue);
+    return newIssue;
+  }
+
+  async updateQualityIssue(id: number, updates: Partial<QualityIssue>): Promise<QualityIssue> {
+    const existing = this.qualityIssues.get(id);
+    if (!existing) {
+      throw new Error(`Quality issue with id ${id} not found`);
+    }
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.qualityIssues.set(id, updated);
+    return updated;
+  }
+
+  async deleteQualityIssue(id: number): Promise<void> {
+    this.qualityIssues.delete(id);
   }
 
   async createPerformanceInsights(insights: InsertPerformanceInsights): Promise<PerformanceInsights> {

@@ -668,6 +668,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test Cases
+  app.get("/api/test-cases", async (req, res) => {
+    try {
+      const testCases = await storage.getAllTestCases();
+      res.json(testCases);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch test cases" });
+    }
+  });
+
+  app.get("/api/test-cases/project/:projectId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const testCases = await storage.getTestCasesByProject(projectId);
+      res.json(testCases);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch test cases for project" });
+    }
+  });
+
+  app.post("/api/test-cases", async (req, res) => {
+    try {
+      const testCase = await storage.createTestCase(req.body);
+      res.json(testCase);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid test case data" });
+    }
+  });
+
+  app.put("/api/test-cases/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const testCase = await storage.updateTestCase(id, updates);
+      res.json(testCase);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update test case" });
+    }
+  });
+
+  // Quality Issues
+  app.get("/api/quality-issues", async (req, res) => {
+    try {
+      const issues = await storage.getAllQualityIssues();
+      res.json(issues);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch quality issues" });
+    }
+  });
+
+  app.get("/api/quality-issues/project/:projectId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const issues = await storage.getQualityIssuesByProject(projectId);
+      res.json(issues);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch quality issues for project" });
+    }
+  });
+
+  app.post("/api/quality-issues", async (req, res) => {
+    try {
+      const issue = await storage.createQualityIssue(req.body);
+      res.json(issue);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid quality issue data" });
+    }
+  });
+
+  app.put("/api/quality-issues/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const issue = await storage.updateQualityIssue(id, updates);
+      res.json(issue);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update quality issue" });
+    }
+  });
+
   // Medications
   app.get("/api/medications", async (req, res) => {
     try {
