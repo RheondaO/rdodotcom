@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "./ui/card";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import { ChevronLeft, ChevronRight, Calendar, Target, CheckSquare, Pill, Activity, Clock, Heart } from "lucide-react";
 import { 
   format, 
@@ -18,7 +18,7 @@ import {
   parseISO,
   isWithinInterval
 } from "date-fns";
-import { useDailyData } from "@/hooks/use-daily-data";
+import { useDailyData } from "../hooks/use-daily-data";
 import { useQuery } from "@tanstack/react-query";
 import type { Goal, Todo, Medication, TimeBlock } from "@shared/schema";
 

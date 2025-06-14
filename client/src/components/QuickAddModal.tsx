@@ -1,7 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
 import { Droplets, Utensils, Dumbbell, DollarSign } from "lucide-react";
-import { useUpdateDailyEntry } from "@/hooks/use-daily-data";
+import { useUpdateDailyEntry } from "../hooks/use-daily-data";
 import { format } from "date-fns";
 
 interface QuickAddModalProps {

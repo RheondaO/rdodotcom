@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "./ui/button";
+import { Progress } from "./ui/progress";
+import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 import { 
   Code2, 
   Monitor, 

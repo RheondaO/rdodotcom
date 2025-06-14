@@ -1,10 +1,10 @@
 import { ShoppingCart, Plus, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { Checkbox } from "./ui/checkbox";
+import { Input } from "./ui/input";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "../lib/queryClient";
 import { useState } from "react";
 
 

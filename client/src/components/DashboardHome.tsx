@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { Progress } from "./ui/progress";
 import { 
   Calendar,
   Target,
@@ -22,10 +22,10 @@ import {
   Star
 } from "lucide-react";
 import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorrow } from "date-fns";
-import { useDailyData } from "@/hooks/use-daily-data";
-import { useHabits } from "@/hooks/use-habits";
-import { useTodos } from "@/hooks/use-todos";
-import { useTimeBlocks } from "@/hooks/use-time-blocks";
+import { useDailyData } from "../hooks/use-daily-data";
+import { useHabits } from "../hooks/use-habits";
+import { useTodos } from "../hooks/use-todos";
+import { useTimeBlocks } from "../hooks/use-time-blocks";
 import { useQuery } from "@tanstack/react-query";
 import type { Goal, Medication } from "@shared/schema";
 

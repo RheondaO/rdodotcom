@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useDailyData, useUpdateDailyEntry } from "@/hooks/use-daily-data";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { useDailyData, useUpdateDailyEntry } from "../hooks/use-daily-data";
 import { format } from "date-fns";
 
 interface WaterIntakeCardProps {

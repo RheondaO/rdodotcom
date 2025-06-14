@@ -1,13 +1,13 @@
 import { DollarSign, Plus, Settings, Receipt } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { Progress } from "./ui/progress";
+import { Badge } from "./ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
-import { useDailyData, useUpdateDailyEntry } from "@/hooks/use-daily-data";
+import { useDailyData, useUpdateDailyEntry } from "../hooks/use-daily-data";
 import { useQuery } from "@tanstack/react-query";
 import { format, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useState } from "react";
