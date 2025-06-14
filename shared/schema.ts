@@ -217,14 +217,17 @@ export const contentPieces = pgTable("content_pieces", {
   contentTypeId: integer("content_type_id").notNull().references(() => contentTypes.id),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status").default("draft"), // draft, review, approved, scheduled, published
+  status: text("status").default("idea"), // idea, planning, draft, review, approved, scheduled, published, archived
   targetDate: date("target_date"),
   scheduledDate: date("scheduled_date"),
   publishedDate: date("published_date"),
+  platforms: text("platforms").array().default([]), // platforms where content will be published
+  tags: text("tags").array().default([]), // content tags
   notes: text("notes"),
   priority: text("priority").default("medium"), // low, medium, high, urgent
   estimatedDuration: integer("estimated_duration"), // minutes to complete
   actualDuration: integer("actual_duration"), // actual time spent
+  assignee: text("assignee"), // person assigned to the content
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

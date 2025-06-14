@@ -818,6 +818,108 @@ export class MemStorage implements IStorage {
     this.challenges.delete(id);
   }
 
+  // Content Management Suite methods
+  async getAllContentCategories(): Promise<ContentCategory[]> {
+    return Array.from(this.contentCategories.values());
+  }
+
+  async getContentCategories(): Promise<ContentCategory[]> {
+    return this.getAllContentCategories();
+  }
+
+  async createContentCategory(category: InsertContentCategory): Promise<ContentCategory> {
+    const newCategory: ContentCategory = {
+      id: this.currentId++,
+      ...category,
+      description: category.description ?? null,
+      isActive: category.isActive ?? true,
+      color: category.color ?? null,
+      createdAt: new Date()
+    };
+    this.contentCategories.set(newCategory.id, newCategory);
+    return newCategory;
+  }
+
+  async getAllContentTypes(): Promise<ContentType[]> {
+    return Array.from(this.contentTypes.values());
+  }
+
+  async getContentTypes(): Promise<ContentType[]> {
+    return this.getAllContentTypes();
+  }
+
+  async createContentType(type: InsertContentType): Promise<ContentType> {
+    const newType: ContentType = {
+      id: this.currentId++,
+      ...type,
+      description: type.description ?? null,
+      isRecurring: type.isRecurring ?? true,
+      createdAt: new Date()
+    };
+    this.contentTypes.set(newType.id, newType);
+    return newType;
+  }
+
+  async getAllContentPieces(): Promise<ContentPiece[]> {
+    return Array.from(this.contentPieces.values());
+  }
+
+  async getContentPieces(): Promise<ContentPiece[]> {
+    return this.getAllContentPieces();
+  }
+
+  async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> {
+    const newPiece: ContentPiece = {
+      id: this.currentId++,
+      ...piece,
+      description: piece.description ?? null,
+      status: piece.status ?? null,
+      targetDate: piece.targetDate ?? null,
+      scheduledDate: piece.scheduledDate ?? null,
+      publishedDate: piece.publishedDate ?? null,
+      notes: piece.notes ?? null,
+      priority: piece.priority ?? "medium",
+      estimatedDuration: piece.estimatedDuration ?? null,
+      actualDuration: piece.actualDuration ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.contentPieces.set(newPiece.id, newPiece);
+    return newPiece;
+  }
+
+  async updateContentPiece(id: number, updates: Partial<ContentPiece>): Promise<ContentPiece> {
+    const piece = this.contentPieces.get(id);
+    if (!piece) {
+      throw new Error("Content piece not found");
+    }
+
+    const updated = { ...piece, ...updates, updatedAt: new Date() };
+    this.contentPieces.set(id, updated);
+    return updated;
+  }
+
+  async getAllContentProgress(): Promise<ContentProgress[]> {
+    return Array.from(this.contentProgress.values());
+  }
+
+  async getContentProgress(): Promise<ContentProgress[]> {
+    return this.getAllContentProgress();
+  }
+
+  async createContentProgress(progress: InsertContentProgress): Promise<ContentProgress> {
+    const newProgress: ContentProgress = {
+      id: this.currentId++,
+      ...progress,
+      isCompleted: progress.isCompleted ?? false,
+      completedAt: progress.completedAt ?? null,
+      notes: progress.notes ?? null,
+      createdAt: new Date()
+    };
+    this.contentProgress.set(newProgress.id, newProgress);
+    return newProgress;
+  }
+
   // App Development methods
   async getAllAppProjects(): Promise<AppProject[]> {
     return Array.from(this.appProjects.values());
@@ -1926,6 +2028,59 @@ export class DatabaseStorage implements IStorage {
 
   async deleteQualityIssue(id: number): Promise<void> {
     return this.memStorage.deleteQualityIssue(id);
+  }
+
+  // Content Management Suite Methods
+  async getAllContentCategories(): Promise<ContentCategory[]> {
+    return this.memStorage.getAllContentCategories();
+  }
+
+  async getContentCategories(): Promise<ContentCategory[]> {
+    return this.memStorage.getContentCategories();
+  }
+
+  async createContentCategory(category: InsertContentCategory): Promise<ContentCategory> {
+    return this.memStorage.createContentCategory(category);
+  }
+
+  async getAllContentTypes(): Promise<ContentType[]> {
+    return this.memStorage.getAllContentTypes();
+  }
+
+  async getContentTypes(): Promise<ContentType[]> {
+    return this.memStorage.getContentTypes();
+  }
+
+  async createContentType(type: InsertContentType): Promise<ContentType> {
+    return this.memStorage.createContentType(type);
+  }
+
+  async getAllContentPieces(): Promise<ContentPiece[]> {
+    return this.memStorage.getAllContentPieces();
+  }
+
+  async getContentPieces(): Promise<ContentPiece[]> {
+    return this.memStorage.getContentPieces();
+  }
+
+  async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> {
+    return this.memStorage.createContentPiece(piece);
+  }
+
+  async updateContentPiece(id: number, updates: Partial<ContentPiece>): Promise<ContentPiece> {
+    return this.memStorage.updateContentPiece(id, updates);
+  }
+
+  async getAllContentProgress(): Promise<ContentProgress[]> {
+    return this.memStorage.getAllContentProgress();
+  }
+
+  async getContentProgress(): Promise<ContentProgress[]> {
+    return this.memStorage.getContentProgress();
+  }
+
+  async createContentProgress(progress: InsertContentProgress): Promise<ContentProgress> {
+    return this.memStorage.createContentProgress(progress);
   }
 
   // Placeholder implementations for other methods (keeping existing MemStorage functionality)
