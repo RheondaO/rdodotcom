@@ -110,7 +110,7 @@ export default function PublicView() {
               onClick={handleFollowJourneyClick}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              {isAuthenticated && isAdmin ? 'Go to Dashboard' : 'Follow My Journey'}
+              View Dashboard
             </Button>
           </div>
         </div>

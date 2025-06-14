@@ -61,7 +61,7 @@ function App() {
             <AuthCheck />
           </Route>
           <Route path="/">
-            <Dashboard />
+            <PublicView />
           </Route>
           <Route>
             <NotFoundPage />
