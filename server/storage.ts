@@ -762,8 +762,6 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-}
-
 // Additional implementation methods for DatabaseStorage
 export class DatabaseStorageExtended extends DatabaseStorage {
   async createOrUpdateDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
