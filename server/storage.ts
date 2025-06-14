@@ -859,8 +859,10 @@ export class MemStorage implements IStorage {
       estimatedHours: task.estimatedHours || null,
       actualHours: task.actualHours || null,
       assignee: task.assignee || null,
-      dependencies: task.dependencies || [],
-      comments: task.comments || "",
+      dependencies: task.dependencies ?? [],
+      tags: task.tags ?? [],
+      attachments: task.attachments ?? [],
+      comments: task.comments ?? "",
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -975,7 +977,7 @@ export class MemStorage implements IStorage {
       isCompleted: goal.isCompleted || false,
       description: goal.description || null,
       currentValue: goal.currentValue || null,
-      isActive: goal.isActive || true,
+
       createdAt: new Date()
     };
     this.goals.set(newGoal.id, newGoal);
@@ -1061,6 +1063,9 @@ export class MemStorage implements IStorage {
     const newCategory: ContentCategory = {
       id: this.currentId++,
       ...category,
+      description: category.description ?? null,
+      isActive: category.isActive ?? true,
+      color: category.color ?? null,
       createdAt: new Date()
     };
     this.contentCategories.set(newCategory.id, newCategory);
@@ -1076,6 +1081,8 @@ export class MemStorage implements IStorage {
     const newType: ContentType = {
       id: this.currentId++,
       ...type,
+      description: type.description ?? null,
+      isRecurring: type.isRecurring ?? true,
       createdAt: new Date()
     };
     this.contentTypes.set(newType.id, newType);
@@ -1091,6 +1098,15 @@ export class MemStorage implements IStorage {
     const newPiece: ContentPiece = {
       id: this.currentId++,
       ...piece,
+      description: piece.description ?? null,
+      status: piece.status ?? null,
+      targetDate: piece.targetDate ?? null,
+      scheduledDate: piece.scheduledDate ?? null,
+      publishedDate: piece.publishedDate ?? null,
+      notes: piece.notes ?? null,
+      priority: piece.priority ?? "medium",
+      estimatedDuration: piece.estimatedDuration ?? null,
+      actualDuration: piece.actualDuration ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1118,6 +1134,9 @@ export class MemStorage implements IStorage {
     const newProgress: ContentProgress = {
       id: this.currentId++,
       ...progress,
+      isCompleted: progress.isCompleted ?? false,
+      completedAt: progress.completedAt ?? null,
+      notes: progress.notes ?? null,
       createdAt: new Date()
     };
     this.contentProgress.set(newProgress.id, newProgress);
