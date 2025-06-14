@@ -367,7 +367,11 @@ export class MemStorage implements IStorage {
   async getPublicRecentContent() {
     const contentPieces = Array.from(this.contentPieces.values())
       .filter(piece => piece.status === 'published')
-      .sort((a, b) => new Date(b.updatedAt || '').getTime() - new Date(a.updatedAt || '').getTime())
+      .sort((a, b) => {
+        const dateA = b.updatedAt ? new Date(b.updatedAt) : new Date();
+        const dateB = a.updatedAt ? new Date(a.updatedAt) : new Date();
+        return dateA.getTime() - dateB.getTime();
+      })
       .slice(0, 3)
       .map(piece => ({
         id: piece.id,
@@ -413,6 +417,20 @@ export class MemStorage implements IStorage {
       const newEntry: DailyEntry = {
         id: this.currentId++,
         ...entry,
+        exerciseNotes: entry.exerciseNotes || null,
+        napDuration: entry.napDuration || null,
+        wakeUpTime: entry.wakeUpTime || null,
+        sleepHours: entry.sleepHours || null,
+        sleepQuality: entry.sleepQuality || null,
+        mood: entry.mood || null,
+        energyLevel: entry.energyLevel || null,
+        stressLevel: entry.stressLevel || null,
+        symptoms: entry.symptoms || null,
+        medicationsTaken: entry.medicationsTaken || null,
+        periodFlow: entry.periodFlow || null,
+        periodSymptoms: entry.periodSymptoms || null,
+        habitCompletions: entry.habitCompletions || null,
+        todoItems: entry.todoItems || null,
         waterIntake: entry.waterIntake || 0,
         exerciseCompleted: entry.exerciseCompleted || false,
         breakfastCompleted: entry.breakfastCompleted || false,
@@ -422,8 +440,10 @@ export class MemStorage implements IStorage {
         workHours: entry.workHours || "0",
         tvHours: entry.tvHours || "0",
         phoneHours: entry.phoneHours || "0",
+        focusSessionsCompleted: entry.focusSessionsCompleted || 0,
         cashSavings: entry.cashSavings || "0",
         grocerySpent: entry.grocerySpent || "0",
+        dailyIncome: entry.dailyIncome || "0",
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -440,6 +460,7 @@ export class MemStorage implements IStorage {
     const newBill: Bill = {
       id: this.currentId++,
       ...bill,
+      isAutoPay: bill.isAutoPay || false,
       createdAt: new Date()
     };
     this.bills.set(newBill.id, newBill);
@@ -458,6 +479,7 @@ export class MemStorage implements IStorage {
     const newPayment: BillPayment = {
       id: this.currentId++,
       ...payment,
+      isPaid: payment.isPaid || true,
       createdAt: new Date()
     };
     this.billPayments.set(newPayment.id, newPayment);
@@ -483,6 +505,8 @@ export class MemStorage implements IStorage {
     const newItem: GroceryItem = {
       id: this.currentId++,
       ...item,
+      estimatedPrice: item.estimatedPrice || null,
+      listId: item.listId || null,
       isCompleted: item.isCompleted || false,
       createdAt: new Date()
     };
@@ -518,6 +542,13 @@ export class MemStorage implements IStorage {
     const newTodo: Todo = {
       id: this.currentId++,
       ...todo,
+      dueDate: todo.dueDate || null,
+      isCompleted: todo.isCompleted || false,
+      description: todo.description || null,
+      category: todo.category || null,
+      priority: todo.priority || "medium",
+      estimatedDuration: todo.estimatedDuration || null,
+      actualDuration: todo.actualDuration || null,
       createdAt: new Date()
     };
     this.todos.set(newTodo.id, newTodo);
@@ -548,6 +579,9 @@ export class MemStorage implements IStorage {
     const newTimeBlock: TimeBlock = {
       id: this.currentId++,
       ...timeBlock,
+      description: timeBlock.description || null,
+      category: timeBlock.category || null,
+      todoId: timeBlock.todoId || null,
       createdAt: new Date()
     };
     this.timeBlocks.set(newTimeBlock.id, newTimeBlock);
@@ -578,6 +612,11 @@ export class MemStorage implements IStorage {
     const newHabit: Habit = {
       id: this.currentId++,
       ...habit,
+      description: habit.description || null,
+      targetFrequency: habit.targetFrequency || 1,
+      currentStreak: habit.currentStreak || 0,
+      longestStreak: habit.longestStreak || 0,
+      isActive: habit.isActive || true,
       createdAt: new Date()
     };
     this.habits.set(newHabit.id, newHabit);
@@ -613,6 +652,8 @@ export class MemStorage implements IStorage {
     const newLog: HabitLog = {
       id: this.currentId++,
       ...log,
+      completed: log.completed || false,
+      notes: log.notes || null,
       createdAt: new Date()
     };
     this.habitLogs.set(newLog.id, newLog);
