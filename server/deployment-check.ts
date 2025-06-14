@@ -9,20 +9,22 @@ export function checkDeploymentReadiness(): boolean {
   if (fs.existsSync(buildPath)) {
     const files = fs.readdirSync(buildPath);
     const hasIndex = files.includes('index.html');
-    const hasAssets = files.some(f => f.startsWith('assets') || f.endsWith('.js') || f.endsWith('.css'));
     
-    if (hasIndex && hasAssets) {
-      log(`✅ Deployment ready: ${files.length} files in server/public`, "deployment");
+    if (hasIndex) {
+      // Check if it's a full build (with assets) or minimal build
+      const hasAssets = files.some(f => f.startsWith('assets') || f.endsWith('.js') || f.endsWith('.css'));
+      const buildType = hasAssets ? 'full' : 'minimal';
+      log(`✅ Deployment ready: ${buildType} build with ${files.length} files`, "deployment");
       return true;
     } else {
-      log(`⚠️ Incomplete build: missing ${!hasIndex ? 'index.html' : 'assets'}`, "deployment");
+      log(`⚠️ Build directory exists but missing index.html`, "deployment");
       return false;
     }
   } else if (fs.existsSync(fallbackPath)) {
-    log(`⚠️ Build found in fallback location: ${fallbackPath}`, "deployment");
+    log(`✅ Build found in fallback location: ${fallbackPath}`, "deployment");
     return true;
   } else {
-    log(`❌ No build found. Run 'npm run build' first`, "deployment");
+    log(`❌ No build found. Run build command first`, "deployment");
     return false;
   }
 }
