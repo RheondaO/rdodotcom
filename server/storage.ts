@@ -807,12 +807,18 @@ export class MemStorage implements IStorage {
     const newProject: AppProject = {
       id: this.currentId++,
       ...project,
-      status: project.status || "active",
-      description: project.description || "",
-      targetDate: project.targetDate || null,
-      isActive: project.isActive || true,
-      priority: project.priority || "medium",
-      startDate: project.startDate || null,
+      status: project.status ?? "active",
+      description: project.description ?? "",
+      projectType: project.projectType ?? "web",
+      repositoryUrl: project.repositoryUrl ?? null,
+      deploymentUrl: project.deploymentUrl ?? null,
+      targetDate: project.targetDate ?? null,
+      isActive: project.isActive ?? true,
+      priority: project.priority ?? "medium",
+      startDate: project.startDate ?? null,
+      estimatedHours: project.estimatedHours ?? null,
+      actualHours: project.actualHours ?? 0,
+      techStack: project.techStack ?? [],
       completedDate: project.completedDate || null,
       progress: project.progress || 0,
       tags: project.tags || [],
@@ -974,9 +980,12 @@ export class MemStorage implements IStorage {
     const newGoal: Goal = {
       id: this.currentId++,
       ...goal,
-      isCompleted: goal.isCompleted || false,
-      description: goal.description || null,
-      currentValue: goal.currentValue || null,
+      isCompleted: goal.isCompleted ?? false,
+      description: goal.description ?? null,
+      targetValue: goal.targetValue ?? null,
+      currentValue: goal.currentValue ?? null,
+      unit: goal.unit ?? null,
+      targetDate: goal.targetDate ?? null,
 
       createdAt: new Date()
     };
@@ -1152,6 +1161,10 @@ export class MemStorage implements IStorage {
     const newBlock: MiniGameBlock = {
       id: this.currentId++,
       ...block,
+      description: block.description ?? null,
+      category: block.category ?? null,
+      isActive: block.isActive ?? true,
+      color: block.color ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1187,6 +1200,17 @@ export class MemStorage implements IStorage {
     const newDesign: MiniGameDesign = {
       id: this.currentId++,
       ...design,
+      status: design.status ?? null,
+      isTemplate: design.isTemplate ?? false,
+      description: design.description ?? null,
+      targetDate: design.targetDate ?? null,
+      designedDate: design.designedDate ?? null,
+      reviewedDate: design.reviewedDate ?? null,
+      approvedDate: design.approvedDate ?? null,
+      notes: design.notes ?? null,
+      tags: design.tags ?? [],
+      priority: design.priority ?? null,
+      version: design.version ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1325,6 +1349,10 @@ export class MemStorage implements IStorage {
     const newPost: SocialMediaPost = {
       id: this.currentId++,
       ...post,
+      status: post.status ?? "scheduled",
+      publishedDate: post.publishedDate ?? null,
+      postUrl: post.postUrl ?? null,
+      hashtags: post.hashtags ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1365,6 +1393,15 @@ export class MemStorage implements IStorage {
     const newAnalytics: SocialMediaAnalytics = {
       id: this.currentId++,
       ...analytics,
+      comments: analytics.comments ?? 0,
+      impressions: analytics.impressions ?? 0,
+      reach: analytics.reach ?? 0,
+      likes: analytics.likes ?? 0,
+      shares: analytics.shares ?? 0,
+      saves: analytics.saves ?? 0,
+      clicks: analytics.clicks ?? 0,
+      profileViews: analytics.profileViews ?? 0,
+      engagementRate: analytics.engagementRate ?? 0,
       recordedAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date()
