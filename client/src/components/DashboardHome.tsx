@@ -168,34 +168,35 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
     let totalFactors = 0;
     
     // Water intake (target: 8 glasses)
-    if (dailyEntry.waterIntake !== undefined) {
+    if (dailyEntry.waterIntake !== null && dailyEntry.waterIntake !== undefined) {
       healthFactors += Math.min(dailyEntry.waterIntake / 8, 1);
       totalFactors += 1;
     }
     
     // Sleep (target: 7-9 hours, optimal at 8)
-    if (dailyEntry.sleepHours !== undefined) {
-      const sleepScore = dailyEntry.sleepHours >= 7 && dailyEntry.sleepHours <= 9 ? 1 : 
-                       Math.max(0, 1 - Math.abs(dailyEntry.sleepHours - 8) * 0.2);
+    if (dailyEntry.sleepHours !== null && dailyEntry.sleepHours !== undefined) {
+      const sleepHours = parseFloat(dailyEntry.sleepHours.toString());
+      const sleepScore = sleepHours >= 7 && sleepHours <= 9 ? 1 : 
+                       Math.max(0, 1 - Math.abs(sleepHours - 8) * 0.2);
       healthFactors += sleepScore;
       totalFactors += 1;
     }
     
-    // Exercise (target: at least 30 minutes)
-    if (dailyEntry.exerciseMinutes !== undefined) {
-      healthFactors += Math.min(dailyEntry.exerciseMinutes / 30, 1);
+    // Exercise completion (boolean check)
+    if (dailyEntry.exerciseCompleted !== null && dailyEntry.exerciseCompleted !== undefined) {
+      healthFactors += dailyEntry.exerciseCompleted ? 1 : 0;
       totalFactors += 1;
     }
     
-    // Mood (1-5 scale, normalized)
-    if (dailyEntry.mood !== undefined) {
-      healthFactors += (dailyEntry.mood - 1) / 4; // Convert 1-5 to 0-1
+    // Energy level (1-5 scale, normalized)
+    if (dailyEntry.energyLevel !== null && dailyEntry.energyLevel !== undefined) {
+      healthFactors += (dailyEntry.energyLevel - 1) / 4; // Convert 1-5 to 0-1
       totalFactors += 1;
     }
     
-    // Energy (1-5 scale, normalized)
-    if (dailyEntry.energy !== undefined) {
-      healthFactors += (dailyEntry.energy - 1) / 4; // Convert 1-5 to 0-1
+    // Sleep quality (1-5 scale, normalized)
+    if (dailyEntry.sleepQuality !== null && dailyEntry.sleepQuality !== undefined) {
+      healthFactors += (dailyEntry.sleepQuality - 1) / 4; // Convert 1-5 to 0-1
       totalFactors += 1;
     }
     
@@ -321,7 +322,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-orange-100 text-sm">Health</p>
-                <p className="text-2xl font-bold">85%</p>
+                <p className="text-2xl font-bold">{healthScore}%</p>
               </div>
               <Heart className="h-8 w-8 text-orange-200" />
             </div>
