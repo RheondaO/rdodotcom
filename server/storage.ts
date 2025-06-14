@@ -296,31 +296,79 @@ export class DatabaseStorage implements IStorage {
     return updatedLog;
   }
 
-  // Public stats with real data calculations
+  // Enhanced analytics with comprehensive real data calculations
   async getPublicStats(): Promise<any> {
-    const [goalStats] = await db.select({
-      totalGoals: count(),
-      completedGoals: sum(schema.goals.isCompleted),
-    }).from(schema.goals);
+    try {
+      // Goal analytics - separate queries for accurate counts
+      const [totalGoals] = await db.select({ count: count() }).from(schema.goals);
+      const [completedGoals] = await db.select({ count: count() })
+        .from(schema.goals)
+        .where(eq(schema.goals.isCompleted, true));
 
-    const [habitStats] = await db.select({
-      totalHabits: count(),
-      activeHabits: sum(schema.habits.isActive),
-    }).from(schema.habits);
+      // Habit analytics - separate queries for accurate counts
+      const [totalHabits] = await db.select({ count: count() }).from(schema.habits);
+      const [activeHabits] = await db.select({ count: count() })
+        .from(schema.habits)
+        .where(eq(schema.habits.isActive, true));
 
-    const [focusStats] = await db.select({
-      totalFocusSessions: count(),
-      avgFocusTime: avg(schema.focusSessions.actualDuration),
-    }).from(schema.focusSessions);
+      // Focus session analytics
+      const [focusStats] = await db.select({
+        totalFocusSessions: count(),
+        avgFocusTime: avg(schema.focusSessions.actualDuration),
+      }).from(schema.focusSessions);
 
-    return {
-      totalGoals: goalStats.totalGoals || 0,
-      completedGoals: goalStats.completedGoals || 0,
-      totalHabits: habitStats.totalHabits || 0,
-      activeHabits: habitStats.activeHabits || 0,
-      totalFocusSessions: focusStats.totalFocusSessions || 0,
-      avgFocusTime: focusStats.avgFocusTime || 0,
-    };
+      // Daily entry wellness metrics
+      const [wellnessStats] = await db.select({
+        avgSleepQuality: avg(schema.dailyEntries.sleepQuality),
+        avgEnergyLevel: avg(schema.dailyEntries.energyLevel),
+        avgStressLevel: avg(schema.dailyEntries.stressLevel),
+        totalWaterIntake: sum(schema.dailyEntries.waterIntake),
+      }).from(schema.dailyEntries);
+
+      // Recent activity analytics
+      const [recentStats] = await db.select({
+        recentEntries: count(),
+      }).from(schema.dailyEntries)
+        .where(gte(schema.dailyEntries.date, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]));
+
+      // Calculate health wellness score from real data with proper type conversion
+      const sleepQualityNum = parseFloat(String(wellnessStats?.avgSleepQuality || 0));
+      const energyLevelNum = parseFloat(String(wellnessStats?.avgEnergyLevel || 0));
+      const stressLevelNum = parseFloat(String(wellnessStats?.avgStressLevel || 5));
+      const healthScore = Math.round(((sleepQualityNum + energyLevelNum + (6 - stressLevelNum)) / 15) * 100);
+
+      return {
+        totalGoals: totalGoals?.count || 0,
+        completedGoals: completedGoals?.count || 0,
+        totalHabits: totalHabits?.count || 0,
+        activeHabits: activeHabits?.count || 0,
+        totalFocusSessions: focusStats?.totalFocusSessions || 0,
+        avgFocusTime: Math.round(parseFloat(String(focusStats?.avgFocusTime || 0))),
+        healthWellnessScore: Math.max(0, Math.min(100, healthScore)),
+        avgSleepQuality: Math.round(sleepQualityNum * 10) / 10,
+        avgEnergyLevel: Math.round(energyLevelNum * 10) / 10,
+        avgStressLevel: Math.round(stressLevelNum * 10) / 10,
+        totalWaterIntake: parseFloat(String(wellnessStats?.totalWaterIntake || 0)),
+        recentActivityDays: recentStats?.recentEntries || 0,
+      };
+    } catch (error) {
+      console.error('Error calculating public stats:', error);
+      // Return minimal stats if database queries fail
+      return {
+        totalGoals: 0,
+        completedGoals: 0,
+        totalHabits: 0,
+        activeHabits: 0,
+        totalFocusSessions: 0,
+        avgFocusTime: 0,
+        healthWellnessScore: 0,
+        avgSleepQuality: 0,
+        avgEnergyLevel: 0,
+        avgStressLevel: 0,
+        totalWaterIntake: 0,
+        recentActivityDays: 0,
+      };
+    }
   }
 
   async getPublicRecentContent(): Promise<any> {
