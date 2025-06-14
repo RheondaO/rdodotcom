@@ -13,7 +13,7 @@ import type {
   SocialMediaPost, InsertSocialMediaPost, SocialMediaAnalytics, InsertSocialMediaAnalytics,
   AppProject, InsertAppProject, AppSprint, InsertAppSprint, AppTask, InsertAppTask,
   AppTimeEntry, InsertAppTimeEntry, TestCase, InsertTestCase, QualityIssue, InsertQualityIssue,
-  PerformanceInsight, InsertPerformanceInsight, MiniGameDesign, InsertMiniGameDesign,
+  PerformanceInsights, InsertPerformanceInsights, MiniGameDesign, InsertMiniGameDesign,
   MiniGameBlock, InsertMiniGameBlock
 } from "@shared/schema";
 
@@ -134,8 +134,8 @@ export interface IStorage {
   createTestCase(testCase: InsertTestCase): Promise<TestCase>;
   getAllQualityIssues(): Promise<QualityIssue[]>;
   createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue>;
-  getAllPerformanceInsights(): Promise<PerformanceInsight[]>;
-  createPerformanceInsight(insight: InsertPerformanceInsight): Promise<PerformanceInsight>;
+  getAllPerformanceInsights(): Promise<PerformanceInsights[]>;
+  createPerformanceInsight(insight: InsertPerformanceInsights): Promise<PerformanceInsights>;
 
   // Mini games
   getAllMiniGameDesigns(): Promise<MiniGameDesign[]>;
@@ -268,7 +268,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getHabitLogs(habitId?: number, startDate?: string, endDate?: string): Promise<HabitLog[]> {
-    let query = db.select().from(schema.habitLogs);
     const conditions = [];
     
     if (habitId) conditions.push(eq(schema.habitLogs.habitId, habitId));
@@ -276,10 +275,12 @@ export class DatabaseStorage implements IStorage {
     if (endDate) conditions.push(lte(schema.habitLogs.date, endDate));
     
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db.select().from(schema.habitLogs)
+        .where(and(...conditions))
+        .orderBy(desc(schema.habitLogs.date));
     }
     
-    return await query.orderBy(desc(schema.habitLogs.date));
+    return await db.select().from(schema.habitLogs).orderBy(desc(schema.habitLogs.date));
   }
 
   async createHabitLog(log: InsertHabitLog): Promise<HabitLog> {
@@ -387,8 +388,8 @@ export class DatabaseStorage implements IStorage {
   async createTestCase(testCase: InsertTestCase): Promise<TestCase> { throw new Error('Not implemented'); }
   async getAllQualityIssues(): Promise<QualityIssue[]> { return []; }
   async createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue> { throw new Error('Not implemented'); }
-  async getAllPerformanceInsights(): Promise<PerformanceInsight[]> { return []; }
-  async createPerformanceInsight(insight: InsertPerformanceInsight): Promise<PerformanceInsight> { throw new Error('Not implemented'); }
+  async getAllPerformanceInsights(): Promise<PerformanceInsights[]> { return []; }
+  async createPerformanceInsight(insight: InsertPerformanceInsights): Promise<PerformanceInsights> { throw new Error('Not implemented'); }
   async getAllMiniGameDesigns(): Promise<MiniGameDesign[]> { return []; }
   async createMiniGameDesign(design: InsertMiniGameDesign): Promise<MiniGameDesign> { throw new Error('Not implemented'); }
   async getMiniGameBlocks(designId?: number): Promise<MiniGameBlock[]> { return []; }

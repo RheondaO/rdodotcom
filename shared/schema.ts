@@ -710,3 +710,13 @@ export type TestCase = typeof testCases.$inferSelect;
 
 export type InsertQualityIssue = z.infer<typeof insertQualityIssueSchema>;
 export type QualityIssue = typeof qualityIssues.$inferSelect;
+
+// User schema
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
