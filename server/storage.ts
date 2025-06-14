@@ -1469,10 +1469,19 @@ export class MemStorage implements IStorage {
     const newTestCase: TestCase = {
       id: this.currentId++,
       ...testCase,
+      description: testCase.description || "",
+      category: testCase.category || "functionality",
+      priority: testCase.priority || "medium",
+      status: testCase.status || "pending",
       steps: testCase.steps || [],
       expectedResult: testCase.expectedResult || "",
       actualResult: testCase.actualResult || "",
+      testedBy: testCase.testedBy || null,
+      testedAt: testCase.testedAt || null,
+      environment: testCase.environment || "development",
+      browserOrDevice: testCase.browserOrDevice || null,
       notes: testCase.notes || "",
+      taskId: testCase.taskId || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1506,13 +1515,23 @@ export class MemStorage implements IStorage {
   async createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue> {
     const newIssue: QualityIssue = {
       id: this.currentId++,
-      ...issue,
+      projectId: issue.projectId,
+      title: issue.title,
       description: issue.description || "",
+      category: issue.category || "bug",
+      severity: issue.severity || "medium",
+      status: issue.status || "open",
+      priority: issue.priority || "medium",
+      foundIn: issue.foundIn || "development",
+      assignedTo: issue.assignedTo || null,
       stepsToReproduce: issue.stepsToReproduce || [],
       expectedBehavior: issue.expectedBehavior || "",
       actualBehavior: issue.actualBehavior || "",
       workaround: issue.workaround || "",
       resolution: issue.resolution || "",
+      resolvedAt: issue.resolvedAt || null,
+      taskId: issue.taskId || null,
+      testCaseId: issue.testCaseId || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -1845,6 +1864,48 @@ export class DatabaseStorage implements IStorage {
 
   async deleteGoal(id: number): Promise<void> {
     await db.delete(goals).where(eq(goals.id, id));
+  }
+
+  // Test Cases Methods
+  async getAllTestCases(): Promise<TestCase[]> {
+    return this.memStorage.getAllTestCases();
+  }
+
+  async getTestCasesByProject(projectId: number): Promise<TestCase[]> {
+    return this.memStorage.getTestCasesByProject(projectId);
+  }
+
+  async createTestCase(testCase: InsertTestCase): Promise<TestCase> {
+    return this.memStorage.createTestCase(testCase);
+  }
+
+  async updateTestCase(id: number, updates: Partial<TestCase>): Promise<TestCase> {
+    return this.memStorage.updateTestCase(id, updates);
+  }
+
+  async deleteTestCase(id: number): Promise<void> {
+    return this.memStorage.deleteTestCase(id);
+  }
+
+  // Quality Issues Methods
+  async getAllQualityIssues(): Promise<QualityIssue[]> {
+    return this.memStorage.getAllQualityIssues();
+  }
+
+  async getQualityIssuesByProject(projectId: number): Promise<QualityIssue[]> {
+    return this.memStorage.getQualityIssuesByProject(projectId);
+  }
+
+  async createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue> {
+    return this.memStorage.createQualityIssue(issue);
+  }
+
+  async updateQualityIssue(id: number, updates: Partial<QualityIssue>): Promise<QualityIssue> {
+    return this.memStorage.updateQualityIssue(id, updates);
+  }
+
+  async deleteQualityIssue(id: number): Promise<void> {
+    return this.memStorage.deleteQualityIssue(id);
   }
 
   // Placeholder implementations for other methods (keeping existing MemStorage functionality)

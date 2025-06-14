@@ -112,6 +112,17 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     select: (data: any[]) => data || []
   });
 
+  // Fetch real testing data from API
+  const { data: testCases = [], isLoading: testCasesLoading } = useQuery({
+    queryKey: ['/api/test-cases'],
+    select: (data: any[]) => data || []
+  });
+
+  const { data: qualityIssues = [], isLoading: qualityIssuesLoading } = useQuery({
+    queryKey: ['/api/quality-issues'],
+    select: (data: any[]) => data || []
+  });
+
   const getStatusColor = (status: string) => {
     const colors = {
       planning: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
@@ -204,63 +215,32 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
   const testingTasks = tasks.filter(t => t.status === 'testing');
 
-  // Testing Template for AI Development Projects
-  const testingTemplate = {
-    designGaps: [
-      {
-        id: 1,
-        area: "User Experience",
-        issue: "Navigation flow unclear on mobile devices",
-        severity: "medium",
-        project: "Professional Portfolio",
-        status: "identified",
-        dateFound: "2025-06-03",
-        resolution: "",
-        testSteps: ["Navigate on mobile", "Check menu accessibility", "Verify responsive design"]
-      },
-      {
-        id: 2,
-        area: "Visual Design",
-        issue: "Color contrast insufficient for accessibility",
-        severity: "high",
-        project: "Really Obvious Media Lab",
-        status: "in_progress",
-        dateFound: "2025-06-01",
-        resolution: "Updating color palette to meet WCAG guidelines",
-        testSteps: ["Run accessibility audit", "Test with color blindness simulator", "Verify contrast ratios"]
-      }
-    ],
-    oversights: [
-      {
-        id: 1,
-        category: "Performance",
-        description: "Image optimization not implemented",
-        impact: "Slow page load times",
-        project: "Professional Portfolio",
-        priority: "high",
-        discoveredDuring: "Manual testing",
-        solution: "Implement next/image or similar optimization"
-      },
-      {
-        id: 2,
-        category: "SEO",
-        description: "Meta descriptions missing on key pages",
-        impact: "Poor search engine visibility",
-        project: "Really Obvious Media Lab",
-        priority: "medium",
-        discoveredDuring: "SEO audit",
-        solution: "Add dynamic meta descriptions"
-      }
-    ],
-    testChecklist: [
-      { category: "Functionality", items: ["All forms submit correctly", "Navigation works on all pages", "Search functionality accurate", "User authentication secure"] },
-      { category: "Design", items: ["Responsive on all devices", "Color contrast accessible", "Typography consistent", "Loading states present"] },
-      { category: "Performance", items: ["Page load under 3 seconds", "Images optimized", "Code minified", "CDN implemented"] },
-      { category: "SEO", items: ["Meta tags complete", "Alt text on images", "Structured data", "Sitemap generated"] },
-      { category: "Accessibility", items: ["Keyboard navigation", "Screen reader compatible", "Focus indicators", "ARIA labels"] },
-      { category: "Security", items: ["HTTPS enabled", "Input validation", "XSS protection", "Data encryption"] }
-    ]
+  // Calculate testing statistics from real data
+  const getTestingStats = () => {
+    const totalTests = testCases.length;
+    const passedTests = testCases.filter(tc => tc.status === 'passed').length;
+    const failedTests = testCases.filter(tc => tc.status === 'failed').length;
+    const pendingTests = testCases.filter(tc => tc.status === 'pending').length;
+    
+    const totalIssues = qualityIssues.length;
+    const openIssues = qualityIssues.filter(qi => qi.status === 'open').length;
+    const criticalIssues = qualityIssues.filter(qi => qi.severity === 'critical').length;
+    const highIssues = qualityIssues.filter(qi => qi.severity === 'high').length;
+    
+    return {
+      totalTests,
+      passedTests,
+      failedTests,
+      pendingTests,
+      passRate: totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0,
+      totalIssues,
+      openIssues,
+      criticalIssues,
+      highIssues
+    };
   };
+
+  const testingStats = getTestingStats();
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -823,7 +803,43 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </Card>
           )}
 
-          {/* Simple Test Lists */}
+          {/* Testing Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{testingStats.totalTests}</div>
+                  <div className="text-sm text-blue-600 dark:text-blue-400">Total Tests</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{testingStats.passRate}%</div>
+                  <div className="text-sm text-green-600 dark:text-green-400">Pass Rate</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{testingStats.openIssues}</div>
+                  <div className="text-sm text-orange-600 dark:text-orange-400">Open Issues</div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">{testingStats.criticalIssues}</div>
+                  <div className="text-sm text-red-600 dark:text-red-400">Critical Issues</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Real Test Cases and Quality Issues */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Portfolio Testing */}
             <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
