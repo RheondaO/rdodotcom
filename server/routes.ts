@@ -46,6 +46,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/ai/suggestions", async (req, res) => {
+    try {
+      const suggestions = await storage.getAISuggestionData();
+      res.json(suggestions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch AI suggestions" });
+    }
+  });
+
   // Auth status endpoint
 
 

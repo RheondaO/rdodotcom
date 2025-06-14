@@ -378,6 +378,101 @@ export class DatabaseStorage implements IStorage {
       .limit(5);
   }
 
+  // Enhanced AI suggestion analytics using real data patterns
+  async getAISuggestionData(): Promise<any> {
+    try {
+      // Get recent daily entries for pattern analysis
+      const recentEntries = await db.select().from(schema.dailyEntries)
+        .orderBy(desc(schema.dailyEntries.date))
+        .limit(30);
+
+      // Get habit completion patterns
+      const habitCompletion = await db.select().from(schema.habitLogs)
+        .where(gte(schema.habitLogs.date, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]))
+        .orderBy(desc(schema.habitLogs.date));
+
+      // Get active goals progress
+      const activeGoals = await db.select().from(schema.goals)
+        .where(eq(schema.goals.isCompleted, false))
+        .orderBy(desc(schema.goals.createdAt));
+
+      // Analyze patterns for intelligent suggestions
+      const suggestions = this.generateAISuggestions(recentEntries, habitCompletion, activeGoals);
+
+      return {
+        recentEntries: recentEntries.length,
+        habitCompletionRate: this.calculateHabitCompletionRate(habitCompletion),
+        activeGoalsCount: activeGoals.length,
+        suggestions,
+        lastAnalyzed: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('Error generating AI suggestions:', error);
+      return {
+        recentEntries: 0,
+        habitCompletionRate: 0,
+        activeGoalsCount: 0,
+        suggestions: [],
+        lastAnalyzed: new Date().toISOString(),
+      };
+    }
+  }
+
+  private generateAISuggestions(entries: any[], habits: any[], goals: any[]): string[] {
+    const suggestions: string[] = [];
+
+    // Sleep quality suggestions based on real data
+    const recentSleepQuality = entries.slice(0, 7).map(e => Number(e.sleepQuality || 0));
+    const avgSleepQuality = recentSleepQuality.reduce((a, b) => a + b, 0) / recentSleepQuality.length || 0;
+    
+    if (avgSleepQuality < 3 && avgSleepQuality > 0) {
+      suggestions.push("Consider establishing a consistent bedtime routine to improve sleep quality");
+    }
+
+    // Energy level suggestions
+    const recentEnergyLevels = entries.slice(0, 7).map(e => Number(e.energyLevel || 0));
+    const avgEnergyLevel = recentEnergyLevels.reduce((a, b) => a + b, 0) / recentEnergyLevels.length || 0;
+    
+    if (avgEnergyLevel < 3 && avgEnergyLevel > 0) {
+      suggestions.push("Try adding 20 minutes of morning exercise to boost energy levels");
+    }
+
+    // Water intake suggestions
+    const recentWaterIntake = entries.slice(0, 7).map(e => Number(e.waterIntake || 0));
+    const avgWaterIntake = recentWaterIntake.reduce((a, b) => a + b, 0) / recentWaterIntake.length || 0;
+    
+    if (avgWaterIntake < 8 && avgWaterIntake > 0) {
+      suggestions.push("Increase daily water intake to reach the recommended 8 glasses per day");
+    }
+
+    // Habit completion suggestions
+    if (habits.length > 0) {
+      const completionRate = this.calculateHabitCompletionRate(habits);
+      if (completionRate < 0.7) {
+        suggestions.push("Focus on completing 1-2 core habits consistently before adding new ones");
+      }
+    }
+
+    // Goal progress suggestions
+    if (goals.length > 5) {
+      suggestions.push("Consider prioritizing your top 3 goals to improve focus and completion rates");
+    }
+
+    // Default suggestions if no specific data patterns
+    if (suggestions.length === 0) {
+      suggestions.push("Start tracking your daily wellness metrics to receive personalized insights");
+      suggestions.push("Set your first wellness goal to begin your journey");
+    }
+
+    return suggestions.slice(0, 3); // Return top 3 suggestions
+  }
+
+  private calculateHabitCompletionRate(habits: any[]): number {
+    if (habits.length === 0) return 0;
+    const completedCount = habits.filter(h => h.completed).length;
+    return completedCount / habits.length;
+  }
+
   // Placeholder implementations for remaining methods
   async getAllGroceryLists(): Promise<GroceryList[]> { return []; }
   async createGroceryList(list: InsertGroceryList): Promise<GroceryList> { throw new Error('Not implemented'); }

@@ -103,7 +103,12 @@ export const goals = pgTable("goals", {
   targetDate: date("target_date"),
   isCompleted: boolean("is_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  categoryIdx: index("goals_category_idx").on(table.category),
+  completedIdx: index("goals_completed_idx").on(table.isCompleted),
+  targetDateIdx: index("goals_target_date_idx").on(table.targetDate),
+  createdAtIdx: index("goals_created_at_idx").on(table.createdAt),
+}));
 
 export const habits = pgTable("habits", {
   id: serial("id").primaryKey(),
@@ -124,7 +129,11 @@ export const habitLogs = pgTable("habit_logs", {
   completed: boolean("completed").default(false),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  habitIdIdx: index("habit_logs_habit_id_idx").on(table.habitId),
+  dateIdx: index("habit_logs_date_idx").on(table.date),
+  habitDateIdx: index("habit_logs_habit_date_idx").on(table.habitId, table.date),
+}));
 
 export const medications = pgTable("medications", {
   id: serial("id").primaryKey(),
