@@ -2012,11 +2012,40 @@ export class DatabaseStorage implements IStorage {
   private memStorage = new MemStorage();
 
   async getDailyEntry(date: string): Promise<DailyEntry | undefined> {
-    return this.memStorage.getDailyEntry(date);
+    try {
+      const result = await db.select().from(dailyEntries).where(eq(dailyEntries.date, date));
+      return result[0] || undefined;
+    } catch (error) {
+      console.error('Error fetching daily entry:', error);
+      return undefined;
+    }
   }
 
   async createOrUpdateDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
-    return this.memStorage.createOrUpdateDailyEntry(entry);
+    try {
+      // Try to find existing entry
+      const existing = await this.getDailyEntry(entry.date);
+      
+      if (existing) {
+        // Update existing entry
+        const [updated] = await db
+          .update(dailyEntries)
+          .set({ ...entry, updatedAt: new Date() })
+          .where(eq(dailyEntries.date, entry.date))
+          .returning();
+        return updated;
+      } else {
+        // Create new entry
+        const [created] = await db
+          .insert(dailyEntries)
+          .values({ ...entry, createdAt: new Date(), updatedAt: new Date() })
+          .returning();
+        return created;
+      }
+    } catch (error) {
+      console.error('Error creating/updating daily entry:', error);
+      throw error;
+    }
   }
 
   async getAllBills(): Promise<Bill[]> {

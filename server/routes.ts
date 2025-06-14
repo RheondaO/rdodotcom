@@ -47,6 +47,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth status endpoint
+
+
+  // Debug endpoint to check database entries
+  app.get("/api/debug/daily-entries", async (req, res) => {
+    try {
+      const { pool } = await import('./db.js');
+      const result = await pool.query("SELECT date, water_intake, exercise_completed, created_at FROM daily_entries ORDER BY date DESC LIMIT 10");
+      res.json({
+        count: result.rows.length,
+        entries: result.rows
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch debug data" });
+    }
+  });
+
   app.get("/api/auth/status", (req: AuthenticatedRequest, res) => {
     res.json({ 
       authenticated: !!req.user,
