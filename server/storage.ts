@@ -384,7 +384,11 @@ export class MemStorage implements IStorage {
 
     const recentGoals = Array.from(this.goals.values())
       .filter(goal => goal.isCompleted)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort((a, b) => {
+        const dateA = b.createdAt ? new Date(b.createdAt) : new Date();
+        const dateB = a.createdAt ? new Date(a.createdAt) : new Date();
+        return dateA.getTime() - dateB.getTime();
+      })
       .slice(0, 2)
       .map(goal => ({
         id: goal.id,
@@ -680,6 +684,11 @@ export class MemStorage implements IStorage {
     const newSession: FocusSession = {
       id: this.currentId++,
       ...session,
+      notes: session.notes || null,
+      actualDuration: session.actualDuration || null,
+      endTime: session.endTime || null,
+      taskDescription: session.taskDescription || null,
+      wasSuccessful: session.wasSuccessful || false,
       createdAt: new Date()
     };
     this.focusSessions.set(newSession.id, newSession);
@@ -734,6 +743,8 @@ export class MemStorage implements IStorage {
     const newEntry: IncomeEntry = {
       id: this.currentId++,
       ...entry,
+      description: entry.description || null,
+      category: entry.category || null,
       createdAt: new Date()
     };
     this.incomeEntries.set(newEntry.id, newEntry);
@@ -921,6 +932,10 @@ export class MemStorage implements IStorage {
     const newGoal: Goal = {
       id: this.currentId++,
       ...goal,
+      isCompleted: goal.isCompleted || false,
+      description: goal.description || null,
+      currentValue: goal.currentValue || null,
+      isActive: goal.isActive || true,
       createdAt: new Date()
     };
     this.goals.set(newGoal.id, newGoal);
@@ -951,6 +966,10 @@ export class MemStorage implements IStorage {
     const newMedication: Medication = {
       id: this.currentId++,
       ...medication,
+      isActive: medication.isActive || true,
+      dosage: medication.dosage || null,
+      frequency: medication.frequency || null,
+      reminderTimes: medication.reminderTimes || null,
       createdAt: new Date()
     };
     this.medications.set(newMedication.id, newMedication);
@@ -981,6 +1000,8 @@ export class MemStorage implements IStorage {
     const newList: GroceryList = {
       id: this.currentId++,
       ...list,
+      isRecurring: list.isRecurring || false,
+      isTemplate: list.isTemplate || false,
       createdAt: new Date()
     };
     this.groceryLists.set(newList.id, newList);
