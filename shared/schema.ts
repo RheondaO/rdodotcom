@@ -1,6 +1,18 @@
-import { pgTable, text, serial, integer, boolean, decimal, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, decimal, timestamp, date, time, jsonb, index, unique, check } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// User management table
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  role: text("role").default("user"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  usernameIdx: index("users_username_idx").on(table.username),
+}));
 
 export const dailyEntries = pgTable("daily_entries", {
   id: serial("id").primaryKey(),
@@ -14,16 +26,16 @@ export const dailyEntries = pgTable("daily_entries", {
   dinnerCompleted: boolean("dinner_completed").default(false),
   napTaken: boolean("nap_taken").default(false),
   napDuration: integer("nap_duration"), // minutes
-  wakeUpTime: text("wake_up_time"), // HH:MM format
+  wakeUpTime: time("wake_up_time"), // proper time type
   sleepHours: decimal("sleep_hours", { precision: 3, scale: 1 }), // hours with decimal
   sleepQuality: integer("sleep_quality"), // 1-5 rating
   mood: text("mood"), // happy, sad, neutral, anxious, excited, etc.
   energyLevel: integer("energy_level"), // 1-5 rating
   stressLevel: integer("stress_level"), // 1-5 rating
-  symptoms: text("symptoms"), // JSON array string
-  medicationsTaken: text("medications_taken"), // JSON array string
+  symptoms: jsonb("symptoms"), // JSONB for better performance
+  medicationsTaken: jsonb("medications_taken"), // JSONB for better performance
   periodFlow: text("period_flow"), // none, light, medium, heavy
-  periodSymptoms: text("period_symptoms"), // JSON array string
+  periodSymptoms: jsonb("period_symptoms"), // JSONB for better performance
   // Work & Screen Time
   workHours: decimal("work_hours", { precision: 3, scale: 1 }).default("0"),
   tvHours: decimal("tv_hours", { precision: 3, scale: 1 }).default("0"),
@@ -34,12 +46,16 @@ export const dailyEntries = pgTable("daily_entries", {
   grocerySpent: decimal("grocery_spent", { precision: 8, scale: 2 }).default("0"),
   dailyIncome: decimal("daily_income", { precision: 8, scale: 2 }).default("0"),
   // Habits (date-specific completion tracking)
-  habitCompletions: text("habit_completions"), // JSON string of habit IDs that were completed
+  habitCompletions: jsonb("habit_completions"), // JSONB for better performance
   // Tasks (date-specific todo items)
-  todoItems: text("todo_items"), // JSON string of todo items for this date
+  todoItems: jsonb("todo_items"), // JSONB for better performance
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Add indexes for performance
+  dateIdx: index("daily_entries_date_idx").on(table.date),
+  createdAtIdx: index("daily_entries_created_at_idx").on(table.createdAt),
+}));
 
 export const bills = pgTable("bills", {
   id: serial("id").primaryKey(),
