@@ -382,6 +382,17 @@ export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }
   const miniGameData = getMiniGamePerformance();
   const performanceInsights = calculatePerformanceInsights();
 
+  if (postsLoading || analyticsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>
+          <p className="text-gray-600">Loading social media data...</p>
+        </div>
+      </div>
+    );
+  }
+
   const COLORS = ['#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#F97316', '#EF4444'];
 
   return (
@@ -845,7 +856,7 @@ export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }
                         </p>
                         {post.hashtags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {post.hashtags.map((tag, index) => (
+                            {post.hashtags.map((tag: string, index: number) => (
                               <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                                 #{tag}
                               </span>

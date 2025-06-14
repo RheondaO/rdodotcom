@@ -59,7 +59,11 @@ import {
   type SocialMediaAnalytics,
   type InsertSocialMediaAnalytics,
   type PerformanceInsights,
-  type InsertPerformanceInsights
+  type InsertPerformanceInsights,
+  type TestCase,
+  type InsertTestCase,
+  type QualityIssue,
+  type InsertQualityIssue
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";

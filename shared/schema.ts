@@ -341,6 +341,51 @@ export const appTimeEntries = pgTable("app_time_entries", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Testing & QA Tables
+export const testCases = pgTable("test_cases", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => appProjects.id),
+  taskId: integer("task_id").references(() => appTasks.id),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  category: text("category").notNull().default("functionality"), // functionality, design, performance, seo, accessibility, security
+  priority: text("priority").notNull().default("medium"), // low, medium, high, critical
+  status: text("status").notNull().default("pending"), // pending, passed, failed, blocked, skipped
+  steps: text("steps").array().notNull().default([]),
+  expectedResult: text("expected_result").notNull().default(""),
+  actualResult: text("actual_result").notNull().default(""),
+  testedBy: text("tested_by"),
+  testedAt: timestamp("tested_at"),
+  environment: text("environment").notNull().default("development"), // development, staging, production
+  browserOrDevice: text("browser_or_device"),
+  notes: text("notes").notNull().default(""),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const qualityIssues = pgTable("quality_issues", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => appProjects.id),
+  taskId: integer("task_id").references(() => appTasks.id),
+  testCaseId: integer("test_case_id").references(() => testCases.id),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  category: text("category").notNull().default("bug"), // bug, design_gap, performance, accessibility, security, usability
+  severity: text("severity").notNull().default("medium"), // low, medium, high, critical
+  status: text("status").notNull().default("open"), // open, in_progress, resolved, closed, wont_fix
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  foundIn: text("found_in").notNull().default("development"), // development, staging, production
+  assignedTo: text("assigned_to"),
+  stepsToReproduce: text("steps_to_reproduce").array().notNull().default([]),
+  expectedBehavior: text("expected_behavior").notNull().default(""),
+  actualBehavior: text("actual_behavior").notNull().default(""),
+  workaround: text("workaround").notNull().default(""),
+  resolution: text("resolution").notNull().default(""),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Social Media Posts Table
 export const socialMediaPosts = pgTable("social_media_posts", {
   id: serial("id").primaryKey(),
@@ -544,6 +589,18 @@ export const insertPerformanceInsightsSchema = createInsertSchema(performanceIns
   id: true,
 });
 
+export const insertTestCaseSchema = createInsertSchema(testCases).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertQualityIssueSchema = createInsertSchema(qualityIssues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Type exports
 export type InsertDailyEntry = z.infer<typeof insertDailyEntrySchema>;
 export type DailyEntry = typeof dailyEntries.$inferSelect;
@@ -628,3 +685,9 @@ export type SocialMediaAnalytics = typeof socialMediaAnalytics.$inferSelect;
 
 export type InsertPerformanceInsights = z.infer<typeof insertPerformanceInsightsSchema>;
 export type PerformanceInsights = typeof performanceInsights.$inferSelect;
+
+export type InsertTestCase = z.infer<typeof insertTestCaseSchema>;
+export type TestCase = typeof testCases.$inferSelect;
+
+export type InsertQualityIssue = z.infer<typeof insertQualityIssueSchema>;
+export type QualityIssue = typeof qualityIssues.$inferSelect;
