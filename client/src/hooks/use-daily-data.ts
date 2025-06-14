@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "../lib/queryClient";
 
 import type { DailyEntry, InsertDailyEntry } from "@shared/schema";
 
