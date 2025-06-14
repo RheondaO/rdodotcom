@@ -762,7 +762,10 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Additional implementation methods
+}
+
+// Additional implementation methods for DatabaseStorage
+export class DatabaseStorageExtended extends DatabaseStorage {
   async createOrUpdateDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
     try {
       const existing = await this.getDailyEntry(entry.date);
@@ -970,4 +973,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new DatabaseStorageExtended();
