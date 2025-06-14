@@ -841,137 +841,126 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
           {/* Real Test Cases and Quality Issues */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Portfolio Testing */}
+            {/* Test Cases */}
             <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                  <Globe className="h-5 w-5" />
-                  Professional Portfolio Tests
+                  <CheckSquare className="h-5 w-5" />
+                  Test Cases
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        className={`rounded border-gray-300 ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                        disabled={isReadOnly}
-                      />
-                      <span className="text-sm">Mobile navigation works correctly</span>
-                    </div>
-                    <Badge variant="outline" className="text-red-500">Failed</Badge>
+                {testCasesLoading ? (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        className={`rounded border-gray-300 ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                        disabled={isReadOnly}
-                      />
-                      <span className="text-sm">Project showcase loads properly</span>
-                    </div>
-                    <Badge variant="outline" className="text-green-500">Passed</Badge>
+                ) : testCases.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No test cases found</p>
+                    <p className="text-sm">Create test cases to track testing progress</p>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        className={`rounded border-gray-300 ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                        disabled={isReadOnly}
-                      />
-                      <span className="text-sm">Contact form submits successfully</span>
-                    </div>
-                    <Badge variant="outline" className="text-yellow-500">Pending</Badge>
+                ) : (
+                  <div className="space-y-3">
+                    {testCases.slice(0, 5).map((testCase) => (
+                      <div key={testCase.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <input 
+                            type="checkbox" 
+                            checked={testCase.status === 'passed'}
+                            className={`rounded border-gray-300 ${
+                              isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
+                            disabled={isReadOnly}
+                          />
+                          <div>
+                            <span className="text-sm font-medium">{testCase.title}</span>
+                            <div className="text-xs text-gray-500">{testCase.category}</div>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className={
+                          testCase.status === 'passed' ? "text-green-500" :
+                          testCase.status === 'failed' ? "text-red-500" :
+                          testCase.status === 'blocked' ? "text-orange-500" :
+                          "text-yellow-500"
+                        }>
+                          {testCase.status}
+                        </Badge>
+                      </div>
+                    ))}
+                    {testCases.length > 5 && (
+                      <div className="text-center pt-2">
+                        <Button variant="ghost" size="sm">
+                          View all {testCases.length} test cases
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        className={`rounded border-gray-300 ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                        disabled={isReadOnly}
-                      />
-                      <span className="text-sm">Page load time under 3 seconds</span>
-                    </div>
-                    <Badge variant="outline" className="text-yellow-500">Pending</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        className={`rounded border-gray-300 ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                        disabled={isReadOnly}
-                      />
-                      <span className="text-sm">SEO meta tags complete</span>
-                    </div>
-                    <Badge variant="outline" className="text-green-500">Passed</Badge>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Media Lab Testing */}
-            <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
+            {/* Quality Issues */}
+            <Card className="border-red-100 dark:border-red-800 shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
-                  <Globe className="h-5 w-5" />
-                  Really Obvious Media Lab Tests
+                <CardTitle className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                  <Bug className="h-5 w-5" />
+                  Quality Issues
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        className={`rounded border-gray-300 ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                        disabled={isReadOnly}
-                      />
-                      <span className="text-sm">Animation performance smooth</span>
-                    </div>
-                    <Badge variant="outline" className="text-green-500">Passed</Badge>
+                {qualityIssuesLoading ? (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500"></div>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
-                      <span className="text-sm">Media gallery displays correctly</span>
-                    </div>
-                    <Badge variant="outline" className="text-red-500">Failed</Badge>
+                ) : qualityIssues.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Bug className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No quality issues found</p>
+                    <p className="text-sm">Great job! No issues to report</p>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
-                      <span className="text-sm">Content management system functional</span>
-                    </div>
-                    <Badge variant="outline" className="text-yellow-500">Pending</Badge>
+                ) : (
+                  <div className="space-y-3">
+                    {qualityIssues.slice(0, 5).map((issue) => (
+                      <div key={issue.id} className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border-l-4 border-red-400">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="text-sm font-medium">{issue.title}</h4>
+                            <p className="text-xs text-gray-500 mt-1">{issue.category}</p>
+                            {issue.description && (
+                              <p className="text-xs text-gray-600 mt-1">{issue.description}</p>
+                            )}
+                          </div>
+                          <div className="flex gap-1">
+                            <Badge variant="outline" className={
+                              issue.severity === 'critical' ? "text-red-600" :
+                              issue.severity === 'high' ? "text-orange-600" :
+                              issue.severity === 'medium' ? "text-yellow-600" :
+                              "text-gray-600"
+                            }>
+                              {issue.severity}
+                            </Badge>
+                            <Badge variant="outline" className={
+                              issue.status === 'open' ? "text-red-500" :
+                              issue.status === 'in_progress' ? "text-yellow-500" :
+                              issue.status === 'resolved' ? "text-green-500" :
+                              "text-gray-500"
+                            }>
+                              {issue.status.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {qualityIssues.length > 5 && (
+                      <div className="text-center pt-2">
+                        <Button variant="ghost" size="sm">
+                          View all {qualityIssues.length} issues
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
-                      <span className="text-sm">Cross-browser compatibility</span>
-                    </div>
-                    <Badge variant="outline" className="text-yellow-500">Pending</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <input type="checkbox" className="rounded border-gray-300" />
-                      <span className="text-sm">Accessibility standards met</span>
-                    </div>
-                    <Badge variant="outline" className="text-red-500">Failed</Badge>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
