@@ -1189,57 +1189,7 @@ export class MemStorage implements IStorage {
     this.groceryLists.delete(id);
   }
 
-  // Content Categories methods
-  async getAllContentCategories(): Promise<ContentCategory[]> {
-    return Array.from(this.contentCategories.values());
-  }
 
-  async getContentCategories(): Promise<ContentCategory[]> {
-    return this.getAllContentCategories();
-  }
-
-  async createContentCategory(category: InsertContentCategory): Promise<ContentCategory> {
-    const newCategory: ContentCategory = {
-      id: this.currentId++,
-      ...category,
-      description: category.description ?? null,
-      isActive: category.isActive ?? true,
-      color: category.color ?? null,
-      createdAt: new Date()
-    };
-    this.contentCategories.set(newCategory.id, newCategory);
-    return newCategory;
-  }
-
-  // Content Types methods
-  async getAllContentTypes(): Promise<ContentType[]> {
-    return Array.from(this.contentTypes.values());
-  }
-
-  async getContentTypes(): Promise<ContentType[]> {
-    return this.getAllContentTypes();
-  }
-
-  async createContentType(type: InsertContentType): Promise<ContentType> {
-    const newType: ContentType = {
-      id: this.currentId++,
-      ...type,
-      description: type.description ?? null,
-      isRecurring: type.isRecurring ?? true,
-      createdAt: new Date()
-    };
-    this.contentTypes.set(newType.id, newType);
-    return newType;
-  }
-
-  // Content Pieces methods
-  async getAllContentPieces(): Promise<ContentPiece[]> {
-    return Array.from(this.contentPieces.values());
-  }
-
-  async getContentPieces(): Promise<ContentPiece[]> {
-    return this.getAllContentPieces();
-  }
 
   async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> {
     const newPiece: ContentPiece = {
