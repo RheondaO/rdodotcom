@@ -152,6 +152,14 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
   const totalTodos = todaysTodos.length;
   const todoProgress = totalTodos > 0 ? (completedTodos / totalTodos) * 100 : 0;
 
+  // Calculate Content Studio metrics from real data
+  const totalDesignsNeeded = (miniGameBlocks as any[]).reduce((sum: number, block: any) => sum + (block.frequencyValue || 0), 0);
+  const completedDesigns = (miniGameDesigns as any[]).filter((design: any) => design.status === 'approved').length;
+  const inProgressDesigns = (miniGameDesigns as any[]).filter((design: any) => 
+    design.status === 'designed' || design.status === 'reviewed'
+  ).length;
+  const remainingDesigns = Math.max(0, totalDesignsNeeded - completedDesigns - inProgressDesigns);
+
   const startFocusSession = (type: string, duration: number) => {
     setActiveTimer({
       type,
@@ -295,25 +303,25 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                  1,592
+                  {totalDesignsNeeded || 0}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Total Designs Needed</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  1
+                  {completedDesigns}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                  0
+                  {inProgressDesigns}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">In Progress</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  1,591
+                  {remainingDesigns}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Remaining</div>
               </div>
