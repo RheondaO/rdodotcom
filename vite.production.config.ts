@@ -15,16 +15,21 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "server/public"),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          icons: ['lucide-react'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
         },
       },
     },
   },
   define: {
     'process.env.NODE_ENV': '"production"',
+  },
+  optimizeDeps: {
+    include: ['lucide-react'],
   },
 });
