@@ -1207,9 +1207,7 @@ export class MemStorage implements IStorage {
       designedDate: design.designedDate ?? null,
       reviewedDate: design.reviewedDate ?? null,
       approvedDate: design.approvedDate ?? null,
-      notes: design.notes ?? null,
-      tags: design.tags ?? [],
-      priority: design.priority ?? null,
+      designNotes: design.designNotes ?? null,
       version: design.version ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -1352,6 +1350,7 @@ export class MemStorage implements IStorage {
       status: post.status ?? "scheduled",
       publishedDate: post.publishedDate ?? null,
       postUrl: post.postUrl ?? null,
+      caption: post.caption ?? null,
       hashtags: post.hashtags ?? null,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -1440,7 +1439,18 @@ export class MemStorage implements IStorage {
   async createPerformanceInsights(insights: InsertPerformanceInsights): Promise<PerformanceInsights> {
     const newInsights: PerformanceInsights = {
       id: this.currentId++,
-      ...insights,
+      miniGameBlockId: insights.miniGameBlockId,
+      platform: insights.platform,
+      dayOfWeek: insights.dayOfWeek,
+      timeSlot: insights.timeSlot,
+      postType: insights.postType,
+      avgImpressions: insights.avgImpressions ?? 0,
+      avgReach: insights.avgReach ?? 0,
+      avgLikes: insights.avgLikes ?? 0,
+      avgComments: insights.avgComments ?? 0,
+      avgShares: insights.avgShares ?? 0,
+      avgEngagementRate: insights.avgEngagementRate ?? 0,
+      totalPosts: insights.totalPosts ?? 0,
       lastUpdated: new Date()
     };
     this.performanceInsights.set(newInsights.id, newInsights);
