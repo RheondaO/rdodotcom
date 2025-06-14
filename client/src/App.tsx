@@ -34,7 +34,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!authStatus?.authenticated || !authStatus?.isAdmin) {
-    window.location.href = '/landing';
+    window.location.href = '/';
     return null;
   }
 
@@ -61,7 +61,7 @@ function App() {
             <AuthCheck />
           </Route>
           <Route path="/">
-            <Dashboard />
+            <PublicView />
           </Route>
           <Route>
             <NotFoundPage />

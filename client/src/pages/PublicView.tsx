@@ -47,7 +47,7 @@ export default function PublicView() {
 
   const handleAdminLoginClick = () => {
     if (isAuthenticated && isAdmin) {
-      window.location.href = '/';
+      window.location.href = '/dashboard';
     } else {
       setShowLoginForm(true);
     }
