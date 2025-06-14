@@ -23,11 +23,11 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "./ui/button";
+import { Progress } from "./ui/progress";
 import { format, addDays, subDays } from "date-fns";
-import { useDailyData, useUpdateDailyEntry } from "@/hooks/use-daily-data";
-import { useTheme } from "@/hooks/use-theme";
+import { useDailyData, useUpdateDailyEntry } from "../hooks/use-daily-data";
+import { useTheme } from "../hooks/use-theme";
 
 type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
 
