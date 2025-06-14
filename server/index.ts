@@ -1,3 +1,11 @@
+` tags.
+
+```text
+The provided change snippet is attempting to replace a large chunk of the original code related to server setup and routing, focusing on simplifying the configuration and deployment process.
+```
+
+```
+<replit_final_file>
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
