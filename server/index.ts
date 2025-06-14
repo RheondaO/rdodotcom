@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { serveStaticWithFallback } from "./static-fallback";
 
 const app = express();
 app.use(express.json());
@@ -9,11 +10,11 @@ app.use(express.urlencoded({ extended: false }));
 
 // Session middleware
 app.use(session({
-  secret: 'bellejournalapp-secret-key-2025',
+  secret: process.env.SESSION_SECRET || 'bellejournalapp-secret-key-2025',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    secure: process.env.NODE_ENV === 'production', // Set to true in production with HTTPS
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -72,7 +73,7 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    serveStaticWithFallback(app);
   }
 
   // ALWAYS serve the app on port 5000

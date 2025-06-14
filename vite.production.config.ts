@@ -6,32 +6,25 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "client", "src"),
-      "@shared": path.resolve(__dirname, "shared"),
-      "@assets": path.resolve(__dirname, "attached_assets"),
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
   },
-  root: path.resolve(__dirname, "client"),
+  root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "server/public"),
     emptyOutDir: true,
     rollupOptions: {
-      external: [],
       output: {
         manualChunks: {
-          'lucide': ['lucide-react'],
-          'react': ['react', 'react-dom'],
-          'query': ['@tanstack/react-query'],
-        }
-      }
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+        },
+      },
     },
-    chunkSizeWarningLimit: 1000,
-    minify: 'esbuild',
   },
-  esbuild: {
-    target: 'es2020'
+  define: {
+    'process.env.NODE_ENV': '"production"',
   },
-  optimizeDeps: {
-    include: ['lucide-react', '@tanstack/react-query', 'react', 'react-dom']
-  }
 });
