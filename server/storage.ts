@@ -4,6 +4,8 @@ import {
   billPayments, 
   groceryItems,
   goals,
+  habits,
+  habitLogs,
   type DailyEntry, 
   type InsertDailyEntry,
   type Bill,
@@ -1915,6 +1917,8 @@ export class MemStorage implements IStorage {
 
 // Database Storage Implementation
 export class DatabaseStorage implements IStorage {
+  private memStorage = new MemStorage();
+  
   // Goals methods using database
   async getAllGoals(): Promise<Goal[]> {
     return await db.select().from(goals);
@@ -2461,42 +2465,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getHabitsAnalytics(startDate: string, endDate: string): Promise<any> {
-    // Get all habits from database
-    const allHabits = await db.select().from(habits);
-    
-    // Get habit logs for the date range
-    const habitLogsData = await db.select()
-      .from(habitLogs)
-      .where(
-        and(
-          gte(habitLogs.date, startDate),
-          lte(habitLogs.date, endDate)
-        )
+    try {
+      // Get habits from database using Drizzle ORM
+      const habitsData = await db.select().from(habits).where(eq(habits.isActive, true));
+      
+      // Get habit logs for the date range using raw SQL since date filtering is simpler
+      const { pool } = await import('./db.js');
+      const logsResult = await pool.query(
+        "SELECT * FROM habit_logs WHERE date >= $1 AND date <= $2", 
+        [startDate, endDate]
       );
 
-    const habitAnalytics = allHabits.map(habit => {
-      const logs = habitLogsData.filter(log => log.habitId === habit.id);
-      const completedLogs = logs.filter(log => log.completed);
-      const completionRate = logs.length > 0 ? (completedLogs.length / logs.length) * 100 : 0;
+      const habitAnalytics = habitsData.map((habit: any) => {
+        const logs = logsResult.rows.filter((log: any) => log.habit_id === habit.id);
+        const completedLogs = logs.filter((log: any) => log.completed);
+        const completionRate = logs.length > 0 ? (completedLogs.length / logs.length) * 100 : 0;
+
+        return {
+          id: habit.id,
+          name: habit.name,
+          category: habit.category,
+          currentStreak: habit.currentStreak || 0,
+          longestStreak: habit.longestStreak || 0,
+          completionRate: Math.round(completionRate),
+          totalCompletions: completedLogs.length,
+          totalDays: logs.length
+        };
+      });
 
       return {
-        id: habit.id,
-        name: habit.name,
-        category: habit.category,
-        currentStreak: habit.currentStreak,
-        longestStreak: habit.longestStreak,
-        completionRate: Math.round(completionRate),
-        totalCompletions: completedLogs.length,
-        totalDays: logs.length
+        habits: habitAnalytics,
+        avgCompletionRate: habitAnalytics.length > 0 ? 
+          Math.round(habitAnalytics.reduce((sum: number, h: any) => sum + h.completionRate, 0) / habitAnalytics.length) : 0,
+        topPerformer: habitAnalytics.sort((a: any, b: any) => b.completionRate - a.completionRate)[0]
       };
-    });
-
-    return {
-      habits: habitAnalytics,
-      avgCompletionRate: habitAnalytics.length > 0 ? 
-        Math.round(habitAnalytics.reduce((sum, h) => sum + h.completionRate, 0) / habitAnalytics.length) : 0,
-      topPerformer: habitAnalytics.sort((a, b) => b.completionRate - a.completionRate)[0]
-    };
+    } catch (error) {
+      console.error('Error in getHabitsAnalytics:', error);
+      return { habits: [], avgCompletionRate: 0, topPerformer: null };
+    }
   }
 
   async getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
