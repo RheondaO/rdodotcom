@@ -769,6 +769,10 @@ export class MemStorage implements IStorage {
     const newChallenge: Challenge = {
       id: this.currentId++,
       ...challenge,
+      isCompleted: challenge.isCompleted ?? false,
+      description: challenge.description ?? null,
+      currentValue: challenge.currentValue ?? null,
+      isActive: challenge.isActive ?? true,
       createdAt: new Date()
     };
     this.challenges.set(newChallenge.id, newChallenge);
@@ -809,12 +813,8 @@ export class MemStorage implements IStorage {
       isActive: project.isActive || true,
       priority: project.priority || "medium",
       startDate: project.startDate || null,
-      endDate: project.endDate || null,
       completedDate: project.completedDate || null,
       progress: project.progress || 0,
-      budget: project.budget || null,
-      actualCost: project.actualCost || null,
-      notes: project.notes || "",
       tags: project.tags || [],
       createdAt: new Date(),
       updatedAt: new Date()
@@ -858,7 +858,7 @@ export class MemStorage implements IStorage {
       completedDate: task.completedDate || null,
       estimatedHours: task.estimatedHours || null,
       actualHours: task.actualHours || null,
-      assignedTo: task.assignedTo || null,
+      assignee: task.assignee || null,
       dependencies: task.dependencies || [],
       comments: task.comments || "",
       createdAt: new Date(),
