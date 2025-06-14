@@ -2345,7 +2345,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllMiniGameBlocks(): Promise<MiniGameBlock[]> {
-    return this.memStorage.getAllMiniGameBlocks();
+    try {
+      const { pool } = await import('./db.js');
+      const result = await pool.query("SELECT * FROM mini_game_blocks WHERE is_active = true ORDER BY created_at DESC");
+      return result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        frequency: row.frequency,
+        frequencyValue: row.frequency_value,
+        color: row.color,
+        category: row.category,
+        isActive: row.is_active,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+    } catch (error) {
+      console.error('Error fetching mini game blocks:', error);
+      return [];
+    }
   }
 
   async createMiniGameBlock(block: InsertMiniGameBlock): Promise<MiniGameBlock> {
@@ -2361,7 +2379,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllMiniGameDesigns(): Promise<MiniGameDesign[]> {
-    return this.memStorage.getAllMiniGameDesigns();
+    try {
+      const { pool } = await import('./db.js');
+      const result = await pool.query("SELECT * FROM mini_game_designs ORDER BY created_at DESC");
+      return result.rows.map((row: any) => ({
+        id: row.id,
+        miniGameBlockId: row.mini_game_block_id,
+        title: row.title,
+        description: row.description,
+        designNotes: row.design_notes,
+        status: row.status,
+        targetDate: row.target_date,
+        designedDate: row.designed_date,
+        reviewedDate: row.reviewed_date,
+        approvedDate: row.approved_date,
+        version: row.version,
+        isTemplate: row.is_template,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+    } catch (error) {
+      console.error('Error fetching mini game designs:', error);
+      return [];
+    }
   }
 
   async getMiniGameDesignsByBlock(blockId: number): Promise<MiniGameDesign[]> {
