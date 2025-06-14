@@ -715,6 +715,7 @@ export class MemStorage implements IStorage {
     const newBudget: Budget = {
       id: this.currentId++,
       ...budget,
+      spent: budget.spent || null,
       createdAt: new Date()
     };
     this.budgets.set(newBudget.id, newBudget);
@@ -802,6 +803,19 @@ export class MemStorage implements IStorage {
     const newProject: AppProject = {
       id: this.currentId++,
       ...project,
+      status: project.status || "active",
+      description: project.description || "",
+      targetDate: project.targetDate || null,
+      isActive: project.isActive || true,
+      priority: project.priority || "medium",
+      startDate: project.startDate || null,
+      endDate: project.endDate || null,
+      completedDate: project.completedDate || null,
+      progress: project.progress || 0,
+      budget: project.budget || null,
+      actualCost: project.actualCost || null,
+      notes: project.notes || "",
+      tags: project.tags || [],
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -836,6 +850,17 @@ export class MemStorage implements IStorage {
     const newTask: AppTask = {
       id: this.currentId++,
       ...task,
+      status: task.status || "pending",
+      dueDate: task.dueDate || null,
+      description: task.description || "",
+      category: task.category || "",
+      priority: task.priority || "medium",
+      completedDate: task.completedDate || null,
+      estimatedHours: task.estimatedHours || null,
+      actualHours: task.actualHours || null,
+      assignedTo: task.assignedTo || null,
+      dependencies: task.dependencies || [],
+      comments: task.comments || "",
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -866,6 +891,10 @@ export class MemStorage implements IStorage {
     const newSprint: AppSprint = {
       id: this.currentId++,
       ...sprint,
+      status: sprint.status || "planning",
+      description: sprint.description || "",
+      goal: sprint.goal || "",
+      velocity: sprint.velocity || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -892,7 +921,14 @@ export class MemStorage implements IStorage {
     const entries = Array.from(this.appTimeEntries.values()).filter(entry => entry.projectId === projectId);
 
     if (startDate && endDate) {
-      return entries.filter(entry => entry.startTime >= startDate && entry.endTime <= endDate);
+      return entries.filter(entry => {
+        if (!entry.endTime) return false;
+        const entryStart = new Date(entry.startTime);
+        const entryEnd = new Date(entry.endTime);
+        const filterStart = new Date(startDate);
+        const filterEnd = new Date(endDate);
+        return entryStart >= filterStart && entryEnd <= filterEnd;
+      });
     }
 
     return entries;
@@ -902,6 +938,10 @@ export class MemStorage implements IStorage {
     const newEntry: AppTimeEntry = {
       id: this.currentId++,
       ...entry,
+      endTime: entry.endTime || null,
+      taskId: entry.taskId || null,
+      duration: entry.duration || 0,
+      billable: entry.billable || false,
       createdAt: new Date()
     };
     this.appTimeEntries.set(newEntry.id, newEntry);
