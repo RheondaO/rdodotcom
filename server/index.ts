@@ -61,7 +61,7 @@ app.use((req, res, next) => {
   });
 
   // Setup Vite in development, serve static files in production
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
