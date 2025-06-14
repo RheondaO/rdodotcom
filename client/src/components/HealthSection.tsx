@@ -1,8 +1,8 @@
 import { Heart, Plus, Edit, Moon, Utensils } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
 import WaterIntakeCard from "./WaterIntakeCard";
-import { useDailyData } from "@/hooks/use-daily-data";
+import { useDailyData } from "../hooks/use-daily-data";
 import { format, isToday, isYesterday, isTomorrow } from "date-fns";
 
 interface HealthSectionProps {
