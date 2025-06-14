@@ -258,7 +258,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
                     id="targetValue"
                     type="number"
                     value={newGoal.targetValue || ""}
-                    onChange={(e) => setNewGoal({ ...newGoal, targetValue: Number(e.target.value) })}
+                    onChange={(e) => setNewGoal({ ...newGoal, targetValue: e.target.value })}
                     placeholder="e.g., 12"
                     className="dark:bg-gray-800 dark:text-white"
                   />
@@ -484,8 +484,8 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: Goa
 
         {/* Goal Info */}
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>Created {format(new Date(goal.createdAt), 'MMM d, yyyy')}</span>
-          <span>Due {format(new Date(goal.targetDate), 'MMM d, yyyy')}</span>
+          <span>Created {goal.createdAt ? format(new Date(goal.createdAt as string), 'MMM d, yyyy') : 'Unknown'}</span>
+          <span>Due {goal.targetDate ? format(new Date(goal.targetDate as string), 'MMM d, yyyy') : 'No date set'}</span>
         </div>
       </div>
     </div>
