@@ -845,6 +845,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Content Management Suite API routes
+  app.get("/api/content-categories", async (req, res) => {
+    try {
+      const categories = await storage.getContentCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch content categories" });
+    }
+  });
+
+  app.get("/api/content-types", async (req, res) => {
+    try {
+      const contentTypes = await storage.getContentTypes();
+      res.json(contentTypes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch content types" });
+    }
+  });
+
+  app.get("/api/content-pieces", async (req, res) => {
+    try {
+      const contentPieces = await storage.getContentPieces();
+      res.json(contentPieces);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch content pieces" });
+    }
+  });
+
+  app.get("/api/content-progress", async (req, res) => {
+    try {
+      const contentProgress = await storage.getContentProgress();
+      res.json(contentProgress);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch content progress" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

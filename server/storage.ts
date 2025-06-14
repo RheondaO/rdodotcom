@@ -148,19 +148,23 @@ export interface IStorage {
 
   // Content Categories
   getAllContentCategories(): Promise<ContentCategory[]>;
+  getContentCategories(): Promise<ContentCategory[]>;
   createContentCategory(category: InsertContentCategory): Promise<ContentCategory>;
 
   // Content Types
   getAllContentTypes(): Promise<ContentType[]>;
+  getContentTypes(): Promise<ContentType[]>;
   createContentType(type: InsertContentType): Promise<ContentType>;
 
   // Content Pieces
   getAllContentPieces(): Promise<ContentPiece[]>;
+  getContentPieces(): Promise<ContentPiece[]>;
   createContentPiece(piece: InsertContentPiece): Promise<ContentPiece>;
   updateContentPiece(id: number, updates: Partial<ContentPiece>): Promise<ContentPiece>;
 
   // Content Progress
   getAllContentProgress(): Promise<ContentProgress[]>;
+  getContentProgress(): Promise<ContentProgress[]>;
   createContentProgress(progress: InsertContentProgress): Promise<ContentProgress>;
 
   // App Development
@@ -1088,6 +1092,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.contentCategories.values());
   }
 
+  async getContentCategories(): Promise<ContentCategory[]> {
+    return this.getAllContentCategories();
+  }
+
   async createContentCategory(category: InsertContentCategory): Promise<ContentCategory> {
     const newCategory: ContentCategory = {
       id: this.currentId++,
@@ -1106,6 +1114,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.contentTypes.values());
   }
 
+  async getContentTypes(): Promise<ContentType[]> {
+    return this.getAllContentTypes();
+  }
+
   async createContentType(type: InsertContentType): Promise<ContentType> {
     const newType: ContentType = {
       id: this.currentId++,
@@ -1121,6 +1133,10 @@ export class MemStorage implements IStorage {
   // Content Pieces methods
   async getAllContentPieces(): Promise<ContentPiece[]> {
     return Array.from(this.contentPieces.values());
+  }
+
+  async getContentPieces(): Promise<ContentPiece[]> {
+    return this.getAllContentPieces();
   }
 
   async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> {
@@ -1157,6 +1173,10 @@ export class MemStorage implements IStorage {
   // Content Progress methods
   async getAllContentProgress(): Promise<ContentProgress[]> {
     return Array.from(this.contentProgress.values());
+  }
+
+  async getContentProgress(): Promise<ContentProgress[]> {
+    return this.getAllContentProgress();
   }
 
   async createContentProgress(progress: InsertContentProgress): Promise<ContentProgress> {
