@@ -484,8 +484,8 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: Goa
 
         {/* Goal Info */}
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>Created {goal.createdAt ? format(new Date(goal.createdAt as string), 'MMM d, yyyy') : 'Unknown'}</span>
-          <span>Due {goal.targetDate ? format(new Date(goal.targetDate as string), 'MMM d, yyyy') : 'No date set'}</span>
+          <span>Created {goal.createdAt ? format(goal.createdAt, 'MMM d, yyyy') : 'Unknown'}</span>
+          <span>Due {goal.targetDate ? format(goal.targetDate, 'MMM d, yyyy') : 'No date set'}</span>
         </div>
       </div>
     </div>

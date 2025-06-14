@@ -289,7 +289,7 @@ const COLORS = ['#8B5CF6', '#06D6A0', '#FFD23F', '#EE6C4D'];
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {habitsData?.habits?.map((habit) => (
+                  {habitsData?.habits?.map((habit: any) => (
                     <div key={habit.id} className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{habit.name}</span>
