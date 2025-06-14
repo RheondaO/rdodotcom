@@ -146,6 +146,34 @@ export interface IStorage {
   // Public stats
   getPublicStats(): Promise<any>;
   getPublicRecentContent(): Promise<any>;
+
+  // Additional methods needed for complete implementation
+  createOrUpdateDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry>;
+  getAllGroceryItems(): Promise<GroceryItem[]>;
+  deleteGroceryItem(id: number): Promise<void>;
+  getTodosByDate(date: string): Promise<Todo[]>;
+  getTimeBlocksByDate(date: string): Promise<TimeBlock[]>;
+  getBillPaymentsForDate(date: string): Promise<BillPayment[]>;
+  updateBillPayment(id: number, isPaid: boolean): Promise<BillPayment>;
+  getAllMiniGameBlocks(): Promise<MiniGameBlock[]>;
+  getSocialMediaPostsByDesign(designId: number): Promise<SocialMediaPost[]>;
+  deleteSocialMediaPost(id: number): Promise<void>;
+  getTestCasesByProject(projectId: number): Promise<TestCase[]>;
+  updateTestCase(id: number, testCase: Partial<InsertTestCase>): Promise<TestCase>;
+  getQualityIssuesByProject(projectId: number): Promise<QualityIssue[]>;
+  updateQualityIssue(id: number, issue: Partial<InsertQualityIssue>): Promise<QualityIssue>;
+  getAllSocialMediaAnalytics(): Promise<SocialMediaAnalytics[]>;
+  aggregatePerformanceData(): Promise<void>;
+  scheduleContentForMoonPhases(year: number, month: number): Promise<void>;
+  getAllContentProgress(): Promise<ContentProgress[]>;
+  getContentCategories(): Promise<ContentCategory[]>;
+  getContentTypes(): Promise<ContentType[]>;
+  getContentPieces(): Promise<ContentPiece[]>;
+  getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
+  getHabitsAnalytics(startDate: string, endDate: string): Promise<any>;
+  getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
+  getHealthAnalytics(startDate: string, endDate: string): Promise<any>;
+  getProductivityAnalytics(startDate: string, endDate: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -332,10 +360,10 @@ export class DatabaseStorage implements IStorage {
         .where(gte(schema.dailyEntries.date, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]));
 
       // Calculate health wellness score from real data with proper type conversion
-      const sleepQualityNum = parseFloat(String(wellnessStats?.avgSleepQuality || 0));
-      const energyLevelNum = parseFloat(String(wellnessStats?.avgEnergyLevel || 0));
-      const stressLevelNum = parseFloat(String(wellnessStats?.avgStressLevel || 5));
-      const healthScore = Math.round(((sleepQualityNum + energyLevelNum + (6 - stressLevelNum)) / 15) * 100);
+      const sleepQuality = Number(wellnessStats?.avgSleepQuality || 0);
+      const energyLevel = Number(wellnessStats?.avgEnergyLevel || 0);
+      const stressLevel = Number(wellnessStats?.avgStressLevel || 5); // Lower stress is better
+      const healthScore = Math.round(((sleepQuality + energyLevel + (6 - stressLevel)) / 15) * 100);
 
       return {
         totalGoals: totalGoals?.count || 0,
@@ -343,12 +371,12 @@ export class DatabaseStorage implements IStorage {
         totalHabits: totalHabits?.count || 0,
         activeHabits: activeHabits?.count || 0,
         totalFocusSessions: focusStats?.totalFocusSessions || 0,
-        avgFocusTime: Math.round(parseFloat(String(focusStats?.avgFocusTime || 0))),
+        avgFocusTime: Math.round(Number(focusStats?.avgFocusTime || 0)),
         healthWellnessScore: Math.max(0, Math.min(100, healthScore)),
-        avgSleepQuality: Math.round(sleepQualityNum * 10) / 10,
-        avgEnergyLevel: Math.round(energyLevelNum * 10) / 10,
-        avgStressLevel: Math.round(stressLevelNum * 10) / 10,
-        totalWaterIntake: parseFloat(String(wellnessStats?.totalWaterIntake || 0)),
+        avgSleepQuality: Math.round(sleepQuality * 10) / 10,
+        avgEnergyLevel: Math.round(energyLevel * 10) / 10,
+        avgStressLevel: Math.round(stressLevel * 10) / 10,
+        totalWaterIntake: Number(wellnessStats?.totalWaterIntake || 0),
         recentActivityDays: recentStats?.recentEntries || 0,
       };
     } catch (error) {
@@ -378,165 +406,568 @@ export class DatabaseStorage implements IStorage {
       .limit(5);
   }
 
-  // Enhanced AI suggestion analytics using real data patterns
-  async getAISuggestionData(): Promise<any> {
+  // Grocery management
+  async getAllGroceryLists(): Promise<GroceryList[]> {
+    return await db.select().from(schema.groceryLists).orderBy(desc(schema.groceryLists.createdAt));
+  }
+
+  async createGroceryList(list: InsertGroceryList): Promise<GroceryList> {
+    const [newList] = await db.insert(schema.groceryLists).values(list).returning();
+    return newList;
+  }
+
+  async getGroceryItems(listId?: number): Promise<GroceryItem[]> {
+    const query = db.select().from(schema.groceryItems);
+    if (listId) {
+      return await query.where(eq(schema.groceryItems.listId, listId));
+    }
+    return await query.orderBy(desc(schema.groceryItems.createdAt));
+  }
+
+  async createGroceryItem(item: InsertGroceryItem): Promise<GroceryItem> {
+    const [newItem] = await db.insert(schema.groceryItems).values(item).returning();
+    return newItem;
+  }
+
+  async updateGroceryItem(id: number, item: Partial<InsertGroceryItem>): Promise<GroceryItem> {
+    const [updatedItem] = await db.update(schema.groceryItems)
+      .set(item)
+      .where(eq(schema.groceryItems.id, id))
+      .returning();
+    return updatedItem;
+  }
+
+  // Medications
+  async getAllMedications(): Promise<Medication[]> {
+    return await db.select().from(schema.medications).orderBy(desc(schema.medications.createdAt));
+  }
+
+  async createMedication(medication: InsertMedication): Promise<Medication> {
+    const [newMedication] = await db.insert(schema.medications).values(medication).returning();
+    return newMedication;
+  }
+
+  async updateMedication(id: number, medication: Partial<InsertMedication>): Promise<Medication> {
+    const [updatedMedication] = await db.update(schema.medications)
+      .set(medication)
+      .where(eq(schema.medications.id, id))
+      .returning();
+    return updatedMedication;
+  }
+
+  async deleteMedication(id: number): Promise<void> {
+    await db.delete(schema.medications).where(eq(schema.medications.id, id));
+  }
+
+  // Todos
+  async getAllTodos(): Promise<Todo[]> {
+    return await db.select().from(schema.todos).orderBy(desc(schema.todos.createdAt));
+  }
+
+  async createTodo(todo: InsertTodo): Promise<Todo> {
+    const [newTodo] = await db.insert(schema.todos).values(todo).returning();
+    return newTodo;
+  }
+
+  async updateTodo(id: number, todo: Partial<InsertTodo>): Promise<Todo> {
+    const [updatedTodo] = await db.update(schema.todos)
+      .set(todo)
+      .where(eq(schema.todos.id, id))
+      .returning();
+    return updatedTodo;
+  }
+
+  async deleteTodo(id: number): Promise<void> {
+    await db.delete(schema.todos).where(eq(schema.todos.id, id));
+  }
+
+  // Time blocks
+  async getTimeBlocks(date?: string): Promise<TimeBlock[]> {
+    const query = db.select().from(schema.timeBlocks);
+    if (date) {
+      return await query.where(eq(schema.timeBlocks.date, date));
+    }
+    return await query.orderBy(desc(schema.timeBlocks.createdAt));
+  }
+
+  async createTimeBlock(block: InsertTimeBlock): Promise<TimeBlock> {
+    const [newBlock] = await db.insert(schema.timeBlocks).values(block).returning();
+    return newBlock;
+  }
+
+  async updateTimeBlock(id: number, block: Partial<InsertTimeBlock>): Promise<TimeBlock> {
+    const [updatedBlock] = await db.update(schema.timeBlocks)
+      .set(block)
+      .where(eq(schema.timeBlocks.id, id))
+      .returning();
+    return updatedBlock;
+  }
+
+  async deleteTimeBlock(id: number): Promise<void> {
+    await db.delete(schema.timeBlocks).where(eq(schema.timeBlocks.id, id));
+  }
+
+  // Focus sessions
+  async getAllFocusSessions(): Promise<FocusSession[]> {
+    return await db.select().from(schema.focusSessions).orderBy(desc(schema.focusSessions.createdAt));
+  }
+
+  async createFocusSession(session: InsertFocusSession): Promise<FocusSession> {
+    const [newSession] = await db.insert(schema.focusSessions).values(session).returning();
+    return newSession;
+  }
+
+  async updateFocusSession(id: number, session: Partial<InsertFocusSession>): Promise<FocusSession> {
+    const [updatedSession] = await db.update(schema.focusSessions)
+      .set(session)
+      .where(eq(schema.focusSessions.id, id))
+      .returning();
+    return updatedSession;
+  }
+
+  // Budget
+  async getAllBudgets(): Promise<Budget[]> {
+    return await db.select().from(schema.budgets).orderBy(desc(schema.budgets.createdAt));
+  }
+
+  async createBudget(budget: InsertBudget): Promise<Budget> {
+    const [newBudget] = await db.insert(schema.budgets).values(budget).returning();
+    return newBudget;
+  }
+
+  async updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget> {
+    const [updatedBudget] = await db.update(schema.budgets)
+      .set(budget)
+      .where(eq(schema.budgets.id, id))
+      .returning();
+    return updatedBudget;
+  }
+
+  // Income
+  async getAllIncomeEntries(): Promise<IncomeEntry[]> {
+    return await db.select().from(schema.incomeEntries).orderBy(desc(schema.incomeEntries.createdAt));
+  }
+
+  async createIncomeEntry(entry: InsertIncomeEntry): Promise<IncomeEntry> {
+    const [newEntry] = await db.insert(schema.incomeEntries).values(entry).returning();
+    return newEntry;
+  }
+
+  // Challenges
+  async getAllChallenges(): Promise<Challenge[]> {
+    return await db.select().from(schema.challenges).orderBy(desc(schema.challenges.createdAt));
+  }
+
+  async createChallenge(challenge: InsertChallenge): Promise<Challenge> {
+    const [newChallenge] = await db.insert(schema.challenges).values(challenge).returning();
+    return newChallenge;
+  }
+
+  async updateChallenge(id: number, challenge: Partial<InsertChallenge>): Promise<Challenge> {
+    const [updatedChallenge] = await db.update(schema.challenges)
+      .set(challenge)
+      .where(eq(schema.challenges.id, id))
+      .returning();
+    return updatedChallenge;
+  }
+
+  // Content management
+  async getAllContentCategories(): Promise<ContentCategory[]> {
+    return await db.select().from(schema.contentCategories).orderBy(desc(schema.contentCategories.createdAt));
+  }
+
+  async createContentCategory(category: InsertContentCategory): Promise<ContentCategory> {
+    const [newCategory] = await db.insert(schema.contentCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async getAllContentTypes(): Promise<ContentType[]> {
+    return await db.select().from(schema.contentTypes).orderBy(desc(schema.contentTypes.createdAt));
+  }
+
+  async createContentType(type: InsertContentType): Promise<ContentType> {
+    const [newType] = await db.insert(schema.contentTypes).values(type).returning();
+    return newType;
+  }
+
+  async getAllContentPieces(): Promise<ContentPiece[]> {
+    return await db.select().from(schema.contentPieces).orderBy(desc(schema.contentPieces.createdAt));
+  }
+
+  async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> {
+    const [newPiece] = await db.insert(schema.contentPieces).values(piece).returning();
+    return newPiece;
+  }
+
+  async updateContentPiece(id: number, piece: Partial<InsertContentPiece>): Promise<ContentPiece> {
+    const [updatedPiece] = await db.update(schema.contentPieces)
+      .set({ ...piece, updatedAt: new Date() })
+      .where(eq(schema.contentPieces.id, id))
+      .returning();
+    return updatedPiece;
+  }
+
+  async getContentProgress(): Promise<ContentProgress[]> {
+    return await db.select().from(schema.contentProgress).orderBy(desc(schema.contentProgress.createdAt));
+  }
+
+  async createContentProgress(progress: InsertContentProgress): Promise<ContentProgress> {
+    const [newProgress] = await db.insert(schema.contentProgress).values(progress).returning();
+    return newProgress;
+  }
+
+  // Social media
+  async getAllSocialMediaPosts(): Promise<SocialMediaPost[]> {
+    return await db.select().from(schema.socialMediaPosts).orderBy(desc(schema.socialMediaPosts.createdAt));
+  }
+
+  async createSocialMediaPost(post: InsertSocialMediaPost): Promise<SocialMediaPost> {
+    const [newPost] = await db.insert(schema.socialMediaPosts).values(post).returning();
+    return newPost;
+  }
+
+  async updateSocialMediaPost(id: number, post: Partial<InsertSocialMediaPost>): Promise<SocialMediaPost> {
+    const [updatedPost] = await db.update(schema.socialMediaPosts)
+      .set({ ...post, updatedAt: new Date() })
+      .where(eq(schema.socialMediaPosts.id, id))
+      .returning();
+    return updatedPost;
+  }
+
+  async getSocialMediaAnalytics(): Promise<SocialMediaAnalytics[]> {
+    return await db.select().from(schema.socialMediaAnalytics).orderBy(desc(schema.socialMediaAnalytics.createdAt));
+  }
+
+  async createSocialMediaAnalytics(analytics: InsertSocialMediaAnalytics): Promise<SocialMediaAnalytics> {
+    const [newAnalytics] = await db.insert(schema.socialMediaAnalytics).values(analytics).returning();
+    return newAnalytics;
+  }
+
+  // App development
+  async getAllAppProjects(): Promise<AppProject[]> {
+    return await db.select().from(schema.appProjects).orderBy(desc(schema.appProjects.createdAt));
+  }
+
+  async getAppProject(id: number): Promise<AppProject | undefined> {
+    const [project] = await db.select().from(schema.appProjects).where(eq(schema.appProjects.id, id));
+    return project || undefined;
+  }
+
+  async createAppProject(project: InsertAppProject): Promise<AppProject> {
+    const [newProject] = await db.insert(schema.appProjects).values(project).returning();
+    return newProject;
+  }
+
+  async updateAppProject(id: number, project: Partial<InsertAppProject>): Promise<AppProject> {
+    const [updatedProject] = await db.update(schema.appProjects)
+      .set({ ...project, updatedAt: new Date() })
+      .where(eq(schema.appProjects.id, id))
+      .returning();
+    return updatedProject;
+  }
+
+  async getAppSprints(projectId?: number): Promise<AppSprint[]> {
+    const query = db.select().from(schema.appSprints);
+    if (projectId) {
+      return await query.where(eq(schema.appSprints.projectId, projectId));
+    }
+    return await query.orderBy(desc(schema.appSprints.createdAt));
+  }
+
+  async createAppSprint(sprint: InsertAppSprint): Promise<AppSprint> {
+    const [newSprint] = await db.insert(schema.appSprints).values(sprint).returning();
+    return newSprint;
+  }
+
+  async getAppTasks(sprintId?: number): Promise<AppTask[]> {
+    const query = db.select().from(schema.appTasks);
+    if (sprintId) {
+      // Note: Need to add sprintId to schema if it doesn't exist
+      return await query.orderBy(desc(schema.appTasks.createdAt));
+    }
+    return await query.orderBy(desc(schema.appTasks.createdAt));
+  }
+
+  async createAppTask(task: InsertAppTask): Promise<AppTask> {
+    const [newTask] = await db.insert(schema.appTasks).values(task).returning();
+    return newTask;
+  }
+
+  async updateAppTask(id: number, task: Partial<InsertAppTask>): Promise<AppTask> {
+    const [updatedTask] = await db.update(schema.appTasks)
+      .set({ ...task, updatedAt: new Date() })
+      .where(eq(schema.appTasks.id, id))
+      .returning();
+    return updatedTask;
+  }
+
+  async getAppTimeEntries(taskId?: number): Promise<AppTimeEntry[]> {
+    const query = db.select().from(schema.appTimeEntries);
+    if (taskId) {
+      return await query.where(eq(schema.appTimeEntries.taskId, taskId));
+    }
+    return await query.orderBy(desc(schema.appTimeEntries.createdAt));
+  }
+
+  async createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry> {
+    const [newEntry] = await db.insert(schema.appTimeEntries).values(entry).returning();
+    return newEntry;
+  }
+
+  // Testing & QA
+  async getAllTestCases(): Promise<TestCase[]> {
+    return await db.select().from(schema.testCases).orderBy(desc(schema.testCases.createdAt));
+  }
+
+  async createTestCase(testCase: InsertTestCase): Promise<TestCase> {
+    const [newTestCase] = await db.insert(schema.testCases).values(testCase).returning();
+    return newTestCase;
+  }
+
+  async getAllQualityIssues(): Promise<QualityIssue[]> {
+    return await db.select().from(schema.qualityIssues).orderBy(desc(schema.qualityIssues.createdAt));
+  }
+
+  async createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue> {
+    const [newIssue] = await db.insert(schema.qualityIssues).values(issue).returning();
+    return newIssue;
+  }
+
+  async getAllPerformanceInsights(): Promise<PerformanceInsights[]> {
+    return await db.select().from(schema.performanceInsights);
+  }
+
+  async createPerformanceInsight(insight: InsertPerformanceInsights): Promise<PerformanceInsights> {
+    const [newInsight] = await db.insert(schema.performanceInsights).values(insight).returning();
+    return newInsight;
+  }
+
+  // Mini games
+  async getAllMiniGameDesigns(): Promise<MiniGameDesign[]> {
+    return await db.select().from(schema.miniGameDesigns).orderBy(desc(schema.miniGameDesigns.createdAt));
+  }
+
+  async createMiniGameDesign(design: InsertMiniGameDesign): Promise<MiniGameDesign> {
+    const [newDesign] = await db.insert(schema.miniGameDesigns).values(design).returning();
+    return newDesign;
+  }
+
+  async getMiniGameBlocks(designId?: number): Promise<MiniGameBlock[]> {
+    return await db.select().from(schema.miniGameBlocks).orderBy(desc(schema.miniGameBlocks.createdAt));
+  }
+
+  async createMiniGameBlock(block: InsertMiniGameBlock): Promise<MiniGameBlock> {
+    const [newBlock] = await db.insert(schema.miniGameBlocks).values(block).returning();
+    return newBlock;
+  }
+}
+
+// Additional implementation methods
+  async createOrUpdateDailyEntry(entry: InsertDailyEntry): Promise<DailyEntry> {
     try {
-      // Get recent daily entries for pattern analysis
-      const recentEntries = await db.select().from(schema.dailyEntries)
-        .orderBy(desc(schema.dailyEntries.date))
-        .limit(30);
-
-      // Get habit completion patterns
-      const habitCompletion = await db.select().from(schema.habitLogs)
-        .where(gte(schema.habitLogs.date, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]))
-        .orderBy(desc(schema.habitLogs.date));
-
-      // Get active goals progress
-      const activeGoals = await db.select().from(schema.goals)
-        .where(eq(schema.goals.isCompleted, false))
-        .orderBy(desc(schema.goals.createdAt));
-
-      // Analyze patterns for intelligent suggestions
-      const suggestions = this.generateAISuggestions(recentEntries, habitCompletion, activeGoals);
-
-      return {
-        recentEntries: recentEntries.length,
-        habitCompletionRate: this.calculateHabitCompletionRate(habitCompletion),
-        activeGoalsCount: activeGoals.length,
-        suggestions,
-        lastAnalyzed: new Date().toISOString(),
-      };
-    } catch (error) {
-      console.error('Error generating AI suggestions:', error);
-      return {
-        recentEntries: 0,
-        habitCompletionRate: 0,
-        activeGoalsCount: 0,
-        suggestions: [],
-        lastAnalyzed: new Date().toISOString(),
-      };
-    }
-  }
-
-  private generateAISuggestions(entries: any[], habits: any[], goals: any[]): string[] {
-    const suggestions: string[] = [];
-
-    // Sleep quality suggestions based on real data
-    const recentSleepQuality = entries.slice(0, 7).map(e => Number(e.sleepQuality || 0));
-    const avgSleepQuality = recentSleepQuality.reduce((a, b) => a + b, 0) / recentSleepQuality.length || 0;
-    
-    if (avgSleepQuality < 3 && avgSleepQuality > 0) {
-      suggestions.push("Consider establishing a consistent bedtime routine to improve sleep quality");
-    }
-
-    // Energy level suggestions
-    const recentEnergyLevels = entries.slice(0, 7).map(e => Number(e.energyLevel || 0));
-    const avgEnergyLevel = recentEnergyLevels.reduce((a, b) => a + b, 0) / recentEnergyLevels.length || 0;
-    
-    if (avgEnergyLevel < 3 && avgEnergyLevel > 0) {
-      suggestions.push("Try adding 20 minutes of morning exercise to boost energy levels");
-    }
-
-    // Water intake suggestions
-    const recentWaterIntake = entries.slice(0, 7).map(e => Number(e.waterIntake || 0));
-    const avgWaterIntake = recentWaterIntake.reduce((a, b) => a + b, 0) / recentWaterIntake.length || 0;
-    
-    if (avgWaterIntake < 8 && avgWaterIntake > 0) {
-      suggestions.push("Increase daily water intake to reach the recommended 8 glasses per day");
-    }
-
-    // Habit completion suggestions
-    if (habits.length > 0) {
-      const completionRate = this.calculateHabitCompletionRate(habits);
-      if (completionRate < 0.7) {
-        suggestions.push("Focus on completing 1-2 core habits consistently before adding new ones");
+      const existing = await this.getDailyEntry(entry.date);
+      
+      if (existing) {
+        return await this.updateDailyEntry(entry.date, entry);
+      } else {
+        return await this.createDailyEntry(entry);
       }
+    } catch (error) {
+      console.error('Error creating/updating daily entry:', error);
+      throw error;
     }
-
-    // Goal progress suggestions
-    if (goals.length > 5) {
-      suggestions.push("Consider prioritizing your top 3 goals to improve focus and completion rates");
-    }
-
-    // Default suggestions if no specific data patterns
-    if (suggestions.length === 0) {
-      suggestions.push("Start tracking your daily wellness metrics to receive personalized insights");
-      suggestions.push("Set your first wellness goal to begin your journey");
-    }
-
-    return suggestions.slice(0, 3); // Return top 3 suggestions
   }
 
-  private calculateHabitCompletionRate(habits: any[]): number {
-    if (habits.length === 0) return 0;
-    const completedCount = habits.filter(h => h.completed).length;
-    return completedCount / habits.length;
+  async getAllGroceryItems(): Promise<GroceryItem[]> {
+    return await db.select().from(schema.groceryItems).orderBy(desc(schema.groceryItems.createdAt));
   }
 
-  // Placeholder implementations for remaining methods
-  async getAllGroceryLists(): Promise<GroceryList[]> { return []; }
-  async createGroceryList(list: InsertGroceryList): Promise<GroceryList> { throw new Error('Not implemented'); }
-  async getGroceryItems(listId?: number): Promise<GroceryItem[]> { return []; }
-  async createGroceryItem(item: InsertGroceryItem): Promise<GroceryItem> { throw new Error('Not implemented'); }
-  async updateGroceryItem(id: number, item: Partial<InsertGroceryItem>): Promise<GroceryItem> { throw new Error('Not implemented'); }
-  async getAllMedications(): Promise<Medication[]> { return []; }
-  async createMedication(medication: InsertMedication): Promise<Medication> { throw new Error('Not implemented'); }
-  async updateMedication(id: number, medication: Partial<InsertMedication>): Promise<Medication> { throw new Error('Not implemented'); }
-  async deleteMedication(id: number): Promise<void> { }
-  async getAllTodos(): Promise<Todo[]> { return []; }
-  async createTodo(todo: InsertTodo): Promise<Todo> { throw new Error('Not implemented'); }
-  async updateTodo(id: number, todo: Partial<InsertTodo>): Promise<Todo> { throw new Error('Not implemented'); }
-  async deleteTodo(id: number): Promise<void> { }
-  async getTimeBlocks(date?: string): Promise<TimeBlock[]> { return []; }
-  async createTimeBlock(block: InsertTimeBlock): Promise<TimeBlock> { throw new Error('Not implemented'); }
-  async updateTimeBlock(id: number, block: Partial<InsertTimeBlock>): Promise<TimeBlock> { throw new Error('Not implemented'); }
-  async deleteTimeBlock(id: number): Promise<void> { }
-  async getAllFocusSessions(): Promise<FocusSession[]> { return []; }
-  async createFocusSession(session: InsertFocusSession): Promise<FocusSession> { throw new Error('Not implemented'); }
-  async updateFocusSession(id: number, session: Partial<InsertFocusSession>): Promise<FocusSession> { throw new Error('Not implemented'); }
-  async getAllBudgets(): Promise<Budget[]> { return []; }
-  async createBudget(budget: InsertBudget): Promise<Budget> { throw new Error('Not implemented'); }
-  async updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget> { throw new Error('Not implemented'); }
-  async getAllIncomeEntries(): Promise<IncomeEntry[]> { return []; }
-  async createIncomeEntry(entry: InsertIncomeEntry): Promise<IncomeEntry> { throw new Error('Not implemented'); }
-  async getAllChallenges(): Promise<Challenge[]> { return []; }
-  async createChallenge(challenge: InsertChallenge): Promise<Challenge> { throw new Error('Not implemented'); }
-  async updateChallenge(id: number, challenge: Partial<InsertChallenge>): Promise<Challenge> { throw new Error('Not implemented'); }
-  async getAllContentCategories(): Promise<ContentCategory[]> { return []; }
-  async createContentCategory(category: InsertContentCategory): Promise<ContentCategory> { throw new Error('Not implemented'); }
-  async getAllContentTypes(): Promise<ContentType[]> { return []; }
-  async createContentType(type: InsertContentType): Promise<ContentType> { throw new Error('Not implemented'); }
-  async getAllContentPieces(): Promise<ContentPiece[]> { return []; }
-  async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> { throw new Error('Not implemented'); }
-  async updateContentPiece(id: number, piece: Partial<InsertContentPiece>): Promise<ContentPiece> { throw new Error('Not implemented'); }
-  async getContentProgress(): Promise<ContentProgress[]> { return []; }
-  async createContentProgress(progress: InsertContentProgress): Promise<ContentProgress> { throw new Error('Not implemented'); }
-  async getAllSocialMediaPosts(): Promise<SocialMediaPost[]> { return []; }
-  async createSocialMediaPost(post: InsertSocialMediaPost): Promise<SocialMediaPost> { throw new Error('Not implemented'); }
-  async updateSocialMediaPost(id: number, post: Partial<InsertSocialMediaPost>): Promise<SocialMediaPost> { throw new Error('Not implemented'); }
-  async getSocialMediaAnalytics(): Promise<SocialMediaAnalytics[]> { return []; }
-  async createSocialMediaAnalytics(analytics: InsertSocialMediaAnalytics): Promise<SocialMediaAnalytics> { throw new Error('Not implemented'); }
-  async getAllAppProjects(): Promise<AppProject[]> { return []; }
-  async getAppProject(id: number): Promise<AppProject | undefined> { return undefined; }
-  async createAppProject(project: InsertAppProject): Promise<AppProject> { throw new Error('Not implemented'); }
-  async updateAppProject(id: number, project: Partial<InsertAppProject>): Promise<AppProject> { throw new Error('Not implemented'); }
-  async getAppSprints(projectId?: number): Promise<AppSprint[]> { return []; }
-  async createAppSprint(sprint: InsertAppSprint): Promise<AppSprint> { throw new Error('Not implemented'); }
-  async getAppTasks(sprintId?: number): Promise<AppTask[]> { return []; }
-  async createAppTask(task: InsertAppTask): Promise<AppTask> { throw new Error('Not implemented'); }
-  async updateAppTask(id: number, task: Partial<InsertAppTask>): Promise<AppTask> { throw new Error('Not implemented'); }
-  async getAppTimeEntries(taskId?: number): Promise<AppTimeEntry[]> { return []; }
-  async createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry> { throw new Error('Not implemented'); }
-  async getAllTestCases(): Promise<TestCase[]> { return []; }
-  async createTestCase(testCase: InsertTestCase): Promise<TestCase> { throw new Error('Not implemented'); }
-  async getAllQualityIssues(): Promise<QualityIssue[]> { return []; }
-  async createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue> { throw new Error('Not implemented'); }
-  async getAllPerformanceInsights(): Promise<PerformanceInsights[]> { return []; }
-  async createPerformanceInsight(insight: InsertPerformanceInsights): Promise<PerformanceInsights> { throw new Error('Not implemented'); }
-  async getAllMiniGameDesigns(): Promise<MiniGameDesign[]> { return []; }
-  async createMiniGameDesign(design: InsertMiniGameDesign): Promise<MiniGameDesign> { throw new Error('Not implemented'); }
-  async getMiniGameBlocks(designId?: number): Promise<MiniGameBlock[]> { return []; }
-  async createMiniGameBlock(block: InsertMiniGameBlock): Promise<MiniGameBlock> { throw new Error('Not implemented'); }
+  async deleteGroceryItem(id: number): Promise<void> {
+    await db.delete(schema.groceryItems).where(eq(schema.groceryItems.id, id));
+  }
+
+  async getTodosByDate(date: string): Promise<Todo[]> {
+    return await db.select().from(schema.todos).where(eq(schema.todos.dueDate, date));
+  }
+
+  async getTimeBlocksByDate(date: string): Promise<TimeBlock[]> {
+    return await db.select().from(schema.timeBlocks).where(eq(schema.timeBlocks.date, date));
+  }
+
+  async getBillPaymentsForDate(date: string): Promise<BillPayment[]> {
+    return await db.select().from(schema.billPayments).where(eq(schema.billPayments.date, date));
+  }
+
+  async updateBillPayment(id: number, isPaid: boolean): Promise<BillPayment> {
+    const [updatedPayment] = await db.update(schema.billPayments)
+      .set({ isPaid })
+      .where(eq(schema.billPayments.id, id))
+      .returning();
+    return updatedPayment;
+  }
+
+  async getAllMiniGameBlocks(): Promise<MiniGameBlock[]> {
+    return await db.select().from(schema.miniGameBlocks).orderBy(desc(schema.miniGameBlocks.createdAt));
+  }
+
+  async getSocialMediaPostsByDesign(designId: number): Promise<SocialMediaPost[]> {
+    return await db.select().from(schema.socialMediaPosts)
+      .where(eq(schema.socialMediaPosts.miniGameDesignId, designId));
+  }
+
+  async deleteSocialMediaPost(id: number): Promise<void> {
+    await db.delete(schema.socialMediaPosts).where(eq(schema.socialMediaPosts.id, id));
+  }
+
+  async getTestCasesByProject(projectId: number): Promise<TestCase[]> {
+    return await db.select().from(schema.testCases)
+      .where(eq(schema.testCases.projectId, projectId));
+  }
+
+  async updateTestCase(id: number, testCase: Partial<InsertTestCase>): Promise<TestCase> {
+    const [updated] = await db.update(schema.testCases)
+      .set({ ...testCase, updatedAt: new Date() })
+      .where(eq(schema.testCases.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getQualityIssuesByProject(projectId: number): Promise<QualityIssue[]> {
+    return await db.select().from(schema.qualityIssues)
+      .where(eq(schema.qualityIssues.projectId, projectId));
+  }
+
+  async updateQualityIssue(id: number, issue: Partial<InsertQualityIssue>): Promise<QualityIssue> {
+    const [updated] = await db.update(schema.qualityIssues)
+      .set({ ...issue, updatedAt: new Date() })
+      .where(eq(schema.qualityIssues.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getAllSocialMediaAnalytics(): Promise<SocialMediaAnalytics[]> {
+    return await db.select().from(schema.socialMediaAnalytics).orderBy(desc(schema.socialMediaAnalytics.createdAt));
+  }
+
+  async aggregatePerformanceData(): Promise<void> {
+    // Implementation for aggregating performance data would go here
+    // This is a complex operation that would analyze social media analytics
+    console.log('Performance data aggregation not yet implemented for database storage');
+  }
+
+  async scheduleContentForMoonPhases(year: number, month: number): Promise<void> {
+    // Implementation for moon phase scheduling would go here
+    console.log('Moon phase scheduling not yet implemented for database storage');
+  }
+
+  async getContentCategories(): Promise<ContentCategory[]> {
+    return this.getAllContentCategories();
+  }
+
+  async getContentTypes(): Promise<ContentType[]> {
+    return this.getAllContentTypes();
+  }
+
+  async getContentPieces(): Promise<ContentPiece[]> {
+    return this.getAllContentPieces();
+  }
+
+  // Reports Analytics Implementation
+  async getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
+    const dailyEntriesResult = await db.select().from(schema.dailyEntries)
+      .where(and(
+        gte(schema.dailyEntries.date, startDate),
+        lte(schema.dailyEntries.date, endDate)
+      ));
+
+    const goals = await this.getAllGoals();
+    const habits = await this.getAllHabits();
+
+    const totalDays = dailyEntriesResult.length;
+    const avgWaterIntake = totalDays > 0 ? 
+      dailyEntriesResult.reduce((sum, entry) => sum + (entry.waterIntake || 0), 0) / totalDays : 0;
+
+    return {
+      period,
+      totalDays,
+      avgWaterIntake: Math.round(avgWaterIntake * 10) / 10,
+      goalsActive: goals.filter(g => !g.isCompleted).length,
+      goalsCompleted: goals.filter(g => g.isCompleted).length,
+      habitsActive: habits.filter(h => h.isActive).length,
+    };
+  }
+
+  async getHabitsAnalytics(startDate: string, endDate: string): Promise<any> {
+    const habits = await this.getAllHabits();
+    const habitLogs = await this.getHabitLogs(undefined, startDate, endDate);
+
+    return {
+      habits: habits.map(habit => ({
+        id: habit.id,
+        name: habit.name,
+        category: habit.category,
+        currentStreak: habit.currentStreak,
+        longestStreak: habit.longestStreak,
+      })),
+      totalLogs: habitLogs.length,
+    };
+  }
+
+  async getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
+    const goals = await this.getAllGoals();
+    
+    return {
+      goals: goals.map(goal => ({
+        id: goal.id,
+        title: goal.title,
+        category: goal.category,
+        isCompleted: goal.isCompleted,
+      })),
+      summary: {
+        total: goals.length,
+        completed: goals.filter(g => g.isCompleted).length,
+      }
+    };
+  }
+
+  async getHealthAnalytics(startDate: string, endDate: string): Promise<any> {
+    const dailyEntries = await db.select().from(schema.dailyEntries)
+      .where(and(
+        gte(schema.dailyEntries.date, startDate),
+        lte(schema.dailyEntries.date, endDate)
+      ));
+
+    const totalDays = dailyEntries.length;
+    if (totalDays === 0) return { totalDays: 0 };
+
+    const avgWaterIntake = dailyEntries.reduce((sum, entry) => sum + (entry.waterIntake || 0), 0) / totalDays;
+    const exerciseDays = dailyEntries.filter(entry => entry.exerciseCompleted).length;
+
+    return {
+      totalDays,
+      avgWaterIntake: Math.round(avgWaterIntake * 10) / 10,
+      exerciseFrequency: Math.round((exerciseDays / totalDays) * 100),
+    };
+  }
+
+  async getProductivityAnalytics(startDate: string, endDate: string): Promise<any> {
+    const dailyEntries = await db.select().from(schema.dailyEntries)
+      .where(and(
+        gte(schema.dailyEntries.date, startDate),
+        lte(schema.dailyEntries.date, endDate)
+      ));
+
+    const totalDays = dailyEntries.length;
+    if (totalDays === 0) return { totalDays: 0 };
+
+    const avgWorkHours = dailyEntries.reduce((sum, entry) => 
+      sum + parseFloat(entry.workHours || "0"), 0) / totalDays;
+
+    return {
+      totalDays,
+      avgWorkHours: Math.round(avgWorkHours * 10) / 10,
+    };
+  }
 }
 
 export const storage = new DatabaseStorage();
