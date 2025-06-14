@@ -66,7 +66,7 @@ import {
   type InsertQualityIssue
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // Daily Entries
@@ -2461,7 +2461,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getHabitsAnalytics(startDate: string, endDate: string): Promise<any> {
-    return this.memStorage.getHabitsAnalytics(startDate, endDate);
+    // Get all habits from database
+    const allHabits = await db.select().from(habits);
+    
+    // Get habit logs for the date range
+    const habitLogsData = await db.select()
+      .from(habitLogs)
+      .where(
+        and(
+          gte(habitLogs.date, startDate),
+          lte(habitLogs.date, endDate)
+        )
+      );
+
+    const habitAnalytics = allHabits.map(habit => {
+      const logs = habitLogsData.filter(log => log.habitId === habit.id);
+      const completedLogs = logs.filter(log => log.completed);
+      const completionRate = logs.length > 0 ? (completedLogs.length / logs.length) * 100 : 0;
+
+      return {
+        id: habit.id,
+        name: habit.name,
+        category: habit.category,
+        currentStreak: habit.currentStreak,
+        longestStreak: habit.longestStreak,
+        completionRate: Math.round(completionRate),
+        totalCompletions: completedLogs.length,
+        totalDays: logs.length
+      };
+    });
+
+    return {
+      habits: habitAnalytics,
+      avgCompletionRate: habitAnalytics.length > 0 ? 
+        Math.round(habitAnalytics.reduce((sum, h) => sum + h.completionRate, 0) / habitAnalytics.length) : 0,
+      topPerformer: habitAnalytics.sort((a, b) => b.completionRate - a.completionRate)[0]
+    };
   }
 
   async getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
