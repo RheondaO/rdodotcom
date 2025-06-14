@@ -315,36 +315,7 @@ export class MemStorage implements IStorage {
       dueDate: 20
     });
 
-    // Initialize with sample habits
-    this.createHabit({
-      name: "Morning Meditation",
-      description: "10 minutes of mindfulness meditation",
-      category: "wellness",
-      targetFrequency: 1,
-      currentStreak: 7,
-      longestStreak: 21,
-      isActive: true
-    });
 
-    this.createHabit({
-      name: "Read for 30 Minutes",
-      description: "Read books or educational content",
-      category: "personal",
-      targetFrequency: 1,
-      currentStreak: 12,
-      longestStreak: 18,
-      isActive: true
-    });
-
-    this.createHabit({
-      name: "Daily Exercise",
-      description: "Any form of physical activity",
-      category: "health",
-      targetFrequency: 1,
-      currentStreak: 5,
-      longestStreak: 30,
-      isActive: true
-    });
   }
 
   // Public data methods (no sensitive information)
