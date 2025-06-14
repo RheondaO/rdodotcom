@@ -36,16 +36,19 @@ export default function AdminLoginForm({ onClose, onSuccess }: AdminLoginFormPro
 
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast({
         title: "Login Successful",
         description: "Welcome back, admin!",
       });
       
-      // Invalidate auth status query to refresh authentication state
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/status'] });
+      // Invalidate and refetch auth status query to refresh authentication state
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/status'] });
       
-      onSuccess();
+      // Wait a moment for the auth state to update, then redirect
+      setTimeout(() => {
+        onSuccess();
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
