@@ -160,6 +160,50 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
   ).length;
   const remainingDesigns = Math.max(0, totalDesignsNeeded - completedDesigns - inProgressDesigns);
 
+  // Calculate health score from real daily entry data
+  const calculateHealthScore = () => {
+    if (!dailyEntry) return 0;
+    
+    let healthFactors = 0;
+    let totalFactors = 0;
+    
+    // Water intake (target: 8 glasses)
+    if (dailyEntry.waterIntake !== undefined) {
+      healthFactors += Math.min(dailyEntry.waterIntake / 8, 1);
+      totalFactors += 1;
+    }
+    
+    // Sleep (target: 7-9 hours, optimal at 8)
+    if (dailyEntry.sleepHours !== undefined) {
+      const sleepScore = dailyEntry.sleepHours >= 7 && dailyEntry.sleepHours <= 9 ? 1 : 
+                       Math.max(0, 1 - Math.abs(dailyEntry.sleepHours - 8) * 0.2);
+      healthFactors += sleepScore;
+      totalFactors += 1;
+    }
+    
+    // Exercise (target: at least 30 minutes)
+    if (dailyEntry.exerciseMinutes !== undefined) {
+      healthFactors += Math.min(dailyEntry.exerciseMinutes / 30, 1);
+      totalFactors += 1;
+    }
+    
+    // Mood (1-5 scale, normalized)
+    if (dailyEntry.mood !== undefined) {
+      healthFactors += (dailyEntry.mood - 1) / 4; // Convert 1-5 to 0-1
+      totalFactors += 1;
+    }
+    
+    // Energy (1-5 scale, normalized)
+    if (dailyEntry.energy !== undefined) {
+      healthFactors += (dailyEntry.energy - 1) / 4; // Convert 1-5 to 0-1
+      totalFactors += 1;
+    }
+    
+    return totalFactors > 0 ? Math.round((healthFactors / totalFactors) * 100) : 0;
+  };
+  
+  const healthScore = calculateHealthScore();
+
   const startFocusSession = (type: string, duration: number) => {
     setActiveTimer({
       type,
