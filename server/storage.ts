@@ -750,7 +750,8 @@ export class MemStorage implements IStorage {
     const newProject: AppProject = {
       id: this.currentId++,
       ...project,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.appProjects.set(newProject.id, newProject);
     return newProject;
@@ -762,7 +763,7 @@ export class MemStorage implements IStorage {
       throw new Error("App project not found");
     }
 
-    const updated = { ...project, ...updates };
+    const updated = { ...project, ...updates, updatedAt: new Date() };
     this.appProjects.set(id, updated);
     return updated;
   }
@@ -783,7 +784,8 @@ export class MemStorage implements IStorage {
     const newTask: AppTask = {
       id: this.currentId++,
       ...task,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.appTasks.set(newTask.id, newTask);
     return newTask;
@@ -795,7 +797,7 @@ export class MemStorage implements IStorage {
       throw new Error("App task not found");
     }
 
-    const updated = { ...task, ...updates };
+    const updated = { ...task, ...updates, updatedAt: new Date() };
     this.appTasks.set(id, updated);
     return updated;
   }
@@ -812,7 +814,8 @@ export class MemStorage implements IStorage {
     const newSprint: AppSprint = {
       id: this.currentId++,
       ...sprint,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.appSprints.set(newSprint.id, newSprint);
     return newSprint;
@@ -824,7 +827,7 @@ export class MemStorage implements IStorage {
       throw new Error("App sprint not found");
     }
 
-    const updated = { ...sprint, ...updates };
+    const updated = { ...sprint, ...updates, updatedAt: new Date() };
     this.appSprints.set(id, updated);
     return updated;
   }
@@ -924,7 +927,7 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async deleteMedication(medication: number): Promise<void> {
+  async deleteMedication(id: number): Promise<void> {
     this.medications.delete(id);
   }
 
@@ -1154,8 +1157,8 @@ export class MemStorage implements IStorage {
           status: 'designed',
           targetDate: date.toISOString().split('T')[0],
           designedDate: new Date().toISOString().split('T')[0],
-          reviewedDate: null,
-          approvedDate: null,
+          reviewedDate: undefined,
+          approvedDate: undefined,
           version: 1,
           isTemplate: false
         };
