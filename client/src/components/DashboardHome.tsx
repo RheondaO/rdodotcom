@@ -52,6 +52,15 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
     queryKey: ['/api/medications'],
   });
   
+  // Fetch mini-game blocks and designs for Content Studio Overview
+  const { data: miniGameBlocks = [] } = useQuery({
+    queryKey: ['/api/mini-game-blocks'],
+  });
+  
+  const { data: miniGameDesigns = [] } = useQuery({
+    queryKey: ['/api/mini-game-designs'],
+  });
+  
   const [activeTimer, setActiveTimer] = useState<{
     type: string;
     startTime: Date;
