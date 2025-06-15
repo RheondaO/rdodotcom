@@ -833,6 +833,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bulk create projects (for initial setup without notifications)
+  app.post("/api/app-projects/bulk-create", async (req, res) => {
+    try {
+      const { projects } = req.body;
+      const createdProjects = [];
+      
+      for (const projectData of projects) {
+        try {
+          // Check if project already exists by name
+          const existing = await storage.getAppProjectByName(projectData.name);
+          if (!existing) {
+            const project = await storage.createAppProject(projectData);
+            createdProjects.push(project);
+          }
+        } catch (error) {
+          // Silently skip projects that fail to create
+          console.log(`Project ${projectData.name} creation skipped`);
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        created: createdProjects.length,
+        projects: createdProjects 
+      });
+    } catch (error) {
+      res.status(400).json({ error: "Invalid bulk project data" });
+    }
+  });
+
   // App Development - Tasks
   app.post('/api/app-tasks', async (req, res) => {
     try {

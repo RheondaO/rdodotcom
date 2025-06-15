@@ -346,13 +346,19 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             }
           ];
 
-          // Create projects one by one
-          for (const project of exampleProjects) {
-            try {
-              await createProjectMutation.mutateAsync(project);
-            } catch (error) {
-              console.log(`Project ${project.name} may already exist`);
+          // Silently create projects without triggering toast notifications
+          try {
+            const response = await fetch('/api/app-projects/bulk-create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ projects: exampleProjects })
+            });
+            
+            if (response.ok) {
+              queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
             }
+          } catch (error) {
+            console.log('Example projects creation skipped - may already exist');
           }
         }
 
