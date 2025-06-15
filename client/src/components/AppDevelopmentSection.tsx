@@ -1,52 +1,34 @@
+The code is modified to use client-side constants instead of API calls in the AppDevelopmentSection component.
+```
+
+```replit_final_file
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Badge } from "./ui/badge";
+import { Progress } from "./ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { Label } from "./ui/label";
 import { 
-  Code2, 
-  GitBranch,
-  Clock,
-  BarChart3,
-  Timer,
-  Eye,
-  GitCommit,
-  History,
-  FileText,
-  Calendar,
-  User,
-  Plus,
-  Globe,
-  Smartphone,
-  Database,
-  Bot,
-  Gamepad2,
-  ShoppingCart,
-  CreditCard,
-  BookOpen,
-  Music,
-  Camera,
-  MessageSquare,
-  TrendingUp,
-  Activity,
-  Bug,
-  Target,
-  Zap,
-  CheckCircle2,
-  AlertTriangle,
-  Users
+  Plus, Edit, Trash2, Clock, Target, Code, GitBranch, 
+  CheckCircle, AlertCircle, Timer, Play, Pause, Square,
+  Folder, FileText, Bug, Lightbulb, Wrench, TestTube,
+  Users, Calendar, TrendingUp, Activity, Zap, Star,
+  Settings, Database, Cloud, Shield, Smartphone
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
+import { toast } from "../hooks/use-toast";
+import { 
+  TECH_STACK_OPTIONS, 
+  PROJECT_CATEGORIES, 
+  PRIORITY_LEVELS, 
+  TASK_CATEGORIES 
+} from "../lib/constants";
 
 interface AppDevelopmentSectionProps {
   selectedDate: Date;
@@ -80,6 +62,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const activeCommits = Array.isArray(gitCommits) ? gitCommits.slice(0, 5) : [];
   const totalCommits = Array.isArray(gitCommits) ? gitCommits.length : 0;
+
+  // Use constants from client-side constants file
+  const techStackOptions = TECH_STACK_OPTIONS;
+  const categoryOptions = PROJECT_CATEGORIES;
+  const priorityOptions = PRIORITY_LEVELS;
+  const taskCategories = TASK_CATEGORIES;
 
   return (
     <div className="space-y-6">
@@ -190,7 +178,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Belle Journal App</h2>
             <p className="text-gray-600 dark:text-gray-400">Development Activity & Git Commits</p>
           </div>
-          
+
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <GitCommit className="h-5 w-5" />
@@ -222,7 +210,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
                       <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
@@ -240,7 +228,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                               </span>
                             </div>
                           </div>
-                          
+
                           <div className="text-right flex-shrink-0">
                             <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                               {commit.hash.substring(0, 7)}

@@ -217,20 +217,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Combined dashboard data endpoint
   app.get("/api/dashboard/data", async (req, res) => {
     try {
-      const [goals, habits, todos, projects] = await Promise.all([
+      const today = new Date().toISOString().split('T')[0];
+      
+      const [goals, habits, todos, projects, dailyEntry, timeBlocks] = await Promise.all([
         storage.getAllGoals(),
         storage.getAllHabits(),
-        storage.getTodosByDate(new Date().toISOString().split('T')[0]),
-        storage.getAllAppProjects()
+        storage.getTodosByDate(today),
+        storage.getAllAppProjects(),
+        storage.getDailyEntry(today),
+        storage.getTimeBlocksByDate(today)
       ]);
       
       res.json({
-        goals,
+        goals: goals.slice(0, 5), // Recent goals only for dashboard
         habits,
         todaysTodos: todos,
-        projects: projects.slice(0, 5) // Recent projects only
+        projects: projects.slice(0, 5), // Recent projects only
+        dailyEntry: dailyEntry || null,
+        timeBlocks: timeBlocks.slice(0, 3) // Next 3 time blocks
       });
     } catch (error) {
+      console.error('Dashboard data fetch error:', error);
       res.status(500).json({ error: "Failed to fetch dashboard data" });
     }
   });

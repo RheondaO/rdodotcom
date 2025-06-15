@@ -1,3 +1,18 @@
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Badge } from './ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Label } from './ui/label';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, Eye, Heart, Share, MessageCircle, Bookmark, Users, Calendar, Award, PieChart as PieChartIcon, BarChart3, Instagram, Facebook, Twitter } from 'lucide-react';
+import { format } from 'date-fns';
+import { toast } from '../hooks/use-toast';
+import { SOCIAL_MEDIA_PLATFORMS, CONTENT_STATUSES } from "../lib/constants";
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -289,7 +304,7 @@ export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }
 
   const getDayOfWeekPerformance = () => {
     const dayData: Record<string, { impressions: number; engagement: number; posts: number }> = {};
-    
+
     daysOfWeek.forEach(day => {
       dayData[day] = { impressions: 0, engagement: 0, posts: 0 };
     });
@@ -314,7 +329,7 @@ export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }
 
   const getMiniGamePerformance = () => {
     const gameData: Record<string, { impressions: number; engagement: number; posts: number }> = {};
-    
+
     miniGameBlocks.forEach(game => {
       gameData[game.name] = { impressions: 0, engagement: 0, posts: 0 };
     });
@@ -322,7 +337,7 @@ export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }
     posts.forEach(post => {
       const design = miniGameDesigns.find(d => d.id === post.miniGameDesignId);
       if (!design) return;
-      
+
       const miniGame = miniGameBlocks.find(mg => mg.id === design.miniGameBlockId);
       if (!miniGame) return;
 

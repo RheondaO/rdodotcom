@@ -7,6 +7,9 @@ interface AppConfig {
   notifications: boolean;
   autoSave: boolean;
   compactMode: boolean;
+  enableCaching: boolean;
+  optimisticUpdates: boolean;
+  refreshInterval: number; // in milliseconds
 }
 
 const defaultConfig: AppConfig = {
@@ -14,7 +17,10 @@ const defaultConfig: AppConfig = {
   defaultView: 'dashboard',
   notifications: true,
   autoSave: true,
-  compactMode: false
+  compactMode: false,
+  enableCaching: true,
+  optimisticUpdates: true,
+  refreshInterval: 60000 // 1 minute
 };
 
 export function useAppConfig() {

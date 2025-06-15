@@ -13,6 +13,7 @@ import {
   Edit
 } from "lucide-react";
 import { format } from "date-fns";
+import { CONTENT_STATUSES } from "../lib/constants";
 
 interface ContentCategory {
   id: number;
@@ -91,7 +92,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     const inProgress = contentPieces.filter(cp => cp.status === 'draft' || cp.status === 'review').length;
     const scheduled = contentPieces.filter(cp => cp.status === 'scheduled').length;
     const published = contentPieces.filter(cp => cp.status === 'published').length;
-    
+
     return {
       totalContent,
       inProgress,
@@ -107,10 +108,10 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     const matchesSearch = searchQuery === "" || 
       content.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       content.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesCategory = selectedCategory === null || content.contentTypeId === selectedCategory;
     const matchesStatus = selectedStatus === null || content.status === selectedStatus;
-    
+
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -260,13 +261,9 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="idea">Idea</SelectItem>
-                  <SelectItem value="planning">Planning</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="review">Review</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
+                  {CONTENT_STATUSES.map(status => (
+                    <SelectItem key={status} value={status}>{status}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
