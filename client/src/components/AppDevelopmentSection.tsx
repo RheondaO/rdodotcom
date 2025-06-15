@@ -289,7 +289,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">App Development Suite</h2>
           <p className="text-gray-600 dark:text-gray-300">
             Project management & development tracking
-            {isReadOnly && <span className="ml-2 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs rounded-full">Read Only</span>}
           </p>
         </div>
       </div>
