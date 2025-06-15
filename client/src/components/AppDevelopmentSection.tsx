@@ -3,6 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,33 +24,62 @@ import {
   History,
   FileText,
   Calendar,
-  User
+  User,
+  Plus,
+  Globe,
+  Smartphone,
+  Monitor,
+  Database,
+  Lightbulb,
+  Bug,
+  Wrench,
+  CheckSquare,
+  AlertCircle,
+  Square
 } from "lucide-react";
 import FileChangeMonitor from "./FileChangeMonitor";
 import { format, formatDistanceToNow } from "date-fns";
+import { z } from "zod";
 
-// Git-focused interfaces
-interface GitCommit {
-  hash: string;
-  author: string;
-  email: string;
-  date: string;
-  message: string;
-  files: string[];
-  insertions: number;
-  deletions: number;
-  project?: string;
+// Interfaces
+interface AppProject {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  priority: string;
+  type: string;
+  technology_stack: string[];
+  repository_url?: string;
+  deployment_url?: string;
+  progress: number;
+  created_at: string;
+  updated_at: string;
+  tags?: string[];
 }
 
-interface GitProject {
-  name: string;
-  repository: string;
-  branch: string;
-  lastCommit: string;
-  totalCommits: number;
-  contributors: string[];
-  isActive: boolean;
-  deploymentUrl?: string;
+interface AppTask {
+  id: number;
+  project_id: number;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  assignee?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface AutoDetectedIssue {
+  id: number;
+  title: string;
+  description: string;
+  severity: string;
+  status: string;
+  file_path?: string;
+  line_number?: number;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AppDevelopmentSectionProps {
@@ -51,1243 +87,559 @@ interface AppDevelopmentSectionProps {
   isReadOnly?: boolean;
 }
 
+// Zod schemas
+const newProjectSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  description: z.string().min(1, "Description is required"),
+  type: z.string().min(1, "Type is required"),
+  status: z.string().default("planning"),
+  priority: z.string().default("medium"),
+  technology_stack: z.array(z.string()).default([]),
+  repository_url: z.string().optional(),
+  deployment_url: z.string().optional(),
+  tags: z.array(z.string()).default([])
+});
+
+const newTaskSchema = z.object({
+  title: z.string().min(1, "Task title is required"),
+  description: z.string().min(1, "Description is required"),
+  status: z.string().default("todo"),
+  priority: z.string().default("medium"),
+  project_id: z.number(),
+  assignee: z.string().optional()
+});
+
+type NewProjectForm = z.infer<typeof newProjectSchema>;
+type NewTaskForm = z.infer<typeof newTaskSchema>;
+
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "time" | "monitoring">("overview");
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'tasks' | 'monitoring'>('overview');
+  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
+  const [showNewTaskForm, setShowNewTaskForm] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [techStackInput, setTechStackInput] = useState('');
+  const [tagsInput, setTagsInput] = useState('');
 
-  // Replit environment detection
-  const [replitEnvironment, setReplitEnvironment] = useState<{
-    isReplit: boolean;
-    replId?: string;
-    replUrl?: string;
-    gitRepo?: string;
-  }>({ isReplit: false });
+  // Queries
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+    queryKey: ['/api/app-projects'],
+    enabled: !isReadOnly
+  });
 
-  // Automated session tracking state with persistent time tracking
-  const [activeSession, setActiveSession] = useState<{
-    id: number;
-    projectId: number;
-    startTime: Date;
-    lastActivity: Date;
-    totalElapsedSeconds: number; // Accumulated time across all sessions
-    currentSessionStart: Date;
-    changes: string[];
-    isActive: boolean;
-    replitData?: {
-      replId: string;
-      fileChanges: string[];
-      lastCommit?: string;
-    };
-  } | null>(null);
-  const [timeEntries, setTimeEntries] = useState<Array<{
-    id: number;
-    projectId: number;
-    taskDescription: string;
-    startTime: Date;
-    endTime: Date;
-    duration: number; // in minutes
-    date: string;
-    autoGenerated: boolean;
-    replitIntegrated: boolean;
-    fileChanges?: string[];
-  }>>([]);
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
+    queryKey: ['/api/app-tasks'],
+    enabled: !isReadOnly
+  });
 
-  // Form setup
-  const form = useForm<NewProjectForm>({
+  const { data: autoDetectedIssues = [], isLoading: issuesLoading } = useQuery({
+    queryKey: ['/api/auto-detected-issues'],
+    enabled: !isReadOnly
+  });
+
+  // Forms
+  const projectForm = useForm<NewProjectForm>({
     resolver: zodResolver(newProjectSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      projectType: "web",
-      status: "planning",
-      priority: "medium",
-      techStack: [],
+      name: '',
+      description: '',
+      type: 'web',
+      status: 'planning',
+      priority: 'medium',
+      technology_stack: [],
+      repository_url: '',
+      deployment_url: '',
       tags: []
     }
   });
 
-  // Fetch Git commits data
-  const { data: commits = [], isLoading: commitsLoading } = useQuery({
-    queryKey: ['/api/git/commits'],
-    queryFn: () => fetch('/api/git/commits').then(res => res.json()),
-    staleTime: 1 * 60 * 1000 // 1 minute for more real-time updates
-  });
-
-  // Fetch Git projects data
-  const { data: gitProjects = [], isLoading: projectsLoading } = useQuery({
-    queryKey: ['/api/git/projects'],
-    queryFn: () => fetch('/api/git/projects').then(res => res.json()),
-    staleTime: 2 * 60 * 1000 // 2 minutes
-  });
-
-  // Form schema for new task
-  const newTaskSchema = z.object({
-    projectId: z.number().min(1, "Project is required"),
-    title: z.string().min(1, "Task title is required"),
-    description: z.string().min(1, "Description is required"),
-    category: z.enum(["feature", "bug", "improvement", "documentation"]).default("feature"),
-    status: z.enum(["todo", "in_progress", "review", "testing", "done"]).default("todo"),
-    priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
-    estimatedHours: z.number().min(0).optional(),
-    dueDate: z.string().optional(),
-    assignee: z.string().optional()
-  });
-
-  type NewTaskForm = z.infer<typeof newTaskSchema>;
-
-  // Task form setup
   const taskForm = useForm<NewTaskForm>({
     resolver: zodResolver(newTaskSchema),
     defaultValues: {
-      projectId: selectedProject || (projects.length > 0 ? projects[0].id : undefined),
-      title: "",
-      description: "",
-      category: "feature", 
-      status: "todo",
-      priority: "medium"
+      title: '',
+      description: '',
+      status: 'todo',
+      priority: 'medium',
+      project_id: 0,
+      assignee: ''
     }
   });
 
-  // Create task mutation
-  const createTaskMutation = useMutation({
-    mutationFn: async (data: NewTaskForm) => {
-      const taskData = {
+  // Mutations
+  const createProjectMutation = useMutation({
+    mutationFn: (data: NewProjectForm) => apiRequest('/api/app-projects', {
+      method: 'POST',
+      body: JSON.stringify({
         ...data,
-        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined
-      };
-      return await fetch('/api/app-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(taskData)
-      }).then(res => res.json());
+        technology_stack: techStackInput.split(',').map(t => t.trim()).filter(Boolean),
+        tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean)
+      })
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      setShowNewProjectForm(false);
+      projectForm.reset();
+      setTechStackInput('');
+      setTagsInput('');
+      toast({
+        title: "Project created successfully",
+        description: "Your new project has been added to the development pipeline."
+      });
     },
+    onError: () => {
+      toast({
+        title: "Error creating project",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const createTaskMutation = useMutation({
+    mutationFn: (data: NewTaskForm) => apiRequest('/api/app-tasks', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setShowNewTaskForm(false);
       taskForm.reset();
-      if (isAdmin) {
-        toast({
-          title: "Success",
-          description: "Task created successfully!"
-        });
-      }
-    },
-    onError: (error) => {
-      if (isAdmin) {
-        toast({
-          title: "Error",
-          description: "Failed to create task. Please try again.",
-          variant: "destructive"
-        });
-      }
-    }
-  });
-
-  // Update task mutation
-  const updateTaskMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number, updates: Partial<AppTask> }) => {
-      return await fetch(`/api/app-tasks/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      }).then(res => res.json());
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-      if (isAdmin) {
-        toast({
-          title: "Success",
-          description: "Task updated successfully!"
-        });
-      }
-    },
-    onError: (error) => {
-      if (isAdmin) {
-        toast({
-          title: "Error",
-          description: "Failed to update task. Please try again.",
-          variant: "destructive"
-        });
-      }
-    }
-  });
-
-  // Detect Replit environment and auto-sync projects
-  useEffect(() => {
-    const detectReplitEnvironment = async () => {
-      const isReplit = !!(
-        import.meta.env.VITE_REPL_ID || 
-        window.location.hostname.includes('replit.app') ||
-        window.location.hostname.includes('repl.co') ||
-        document.querySelector('script[src*="replit"]')
-      );
-
-      if (isReplit) {
-        const replId = import.meta.env.VITE_REPL_ID || 'current-repl';
-        const replUrl = window.location.origin;
-        
-        setReplitEnvironment({
-          isReplit: true,
-          replId,
-          replUrl,
-          gitRepo: `https://replit.com/@${replId}`
-        });
-
-        // Auto-sync all Replit projects
-        try {
-          const response = await fetch('/api/replit/sync-projects');
-          if (response.ok) {
-            const syncedProjects = await response.json();
-            
-            // Refresh projects list to show newly synced projects
-            queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
-            
-            if (isAdmin) {
-              toast({
-                title: "Replit Projects Synced",
-                description: `Found and synced ${syncedProjects.length} Replit apps including CommunityPulse, PersonalPortfolio, and others`,
-              });
-            }
-          }
-        } catch (error) {
-          console.log('Project sync will happen on first creation');
-        }
-
-        // Environment detected - ready for dynamic project creation
-      }
-    };
-
-    detectReplitEnvironment();
-  }, []);
-
-  // Derived data for calculations
-  // Projects are only active if they have tasks
-  const activeProjects = projects.filter((p: AppProject) => {
-    const projectTasks = tasks.filter((t: AppTask) => t.projectId === p.id);
-    return p.isActive && projectTasks.length > 0;
-  });
-  
-  const openTasks = tasks.filter((t: AppTask) => t.status !== 'done');
-  const totalHoursLogged = tasks.reduce((sum: number, t: AppTask) => sum + (t.actualHours || 0), 0);
-  
-  // Calculate average progress based on task completion
-  const avgProgress = activeProjects.length > 0 
-    ? Math.round(activeProjects.reduce((sum: number, p: AppProject) => {
-        const projectTasks = tasks.filter((t: AppTask) => t.projectId === p.id);
-        const completedTasks = projectTasks.filter((t: AppTask) => t.status === 'done');
-        const projectProgress = projectTasks.length > 0 ? (completedTasks.length / projectTasks.length) * 100 : 0;
-        return sum + projectProgress;
-      }, 0) / activeProjects.length)
-    : 0;
-
-  // Create project mutation
-  const createProjectMutation = useMutation({
-    mutationFn: async (data: NewProjectForm) => {
-      const projectData = {
-        ...data,
-        repositoryUrl: data.repositoryUrl || undefined,
-        deploymentUrl: data.deploymentUrl || undefined,
-        targetDate: data.targetDate ? new Date(data.targetDate).toISOString() : undefined,
-        techStack: data.techStack.length > 0 ? data.techStack : [],
-        tags: data.tags.length > 0 ? data.tags : []
-      };
-      
-      // Create project
-      const response = await fetch('/api/app-projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(projectData)
+      toast({
+        title: "Task created successfully",
+        description: "Your new task has been added to the project."
       });
-      const project = await response.json();
-      
-      // Create initial task for the project to ensure it's active
-      const initialTask = {
-        projectId: project.id,
-        title: "Project Setup",
-        description: `Set up the initial structure and configuration for ${project.name}`,
-        status: "todo",
-        priority: "medium",
-        category: "feature",
-        estimatedHours: 2
-      };
-      
-      await fetch('/api/app-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(initialTask)
+    },
+    onError: () => {
+      toast({
+        title: "Error creating task",
+        description: "Please try again later.",
+        variant: "destructive"
       });
-      
-      return project;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-      setShowNewProjectForm(false);
-      form.reset();
-      setTechStackInput("");
-      setTagsInput("");
-      if (isAdmin) {
-        toast({
-          title: "Success",
-          description: "Project created with initial task!"
-        });
-      }
-    },
-    onError: (error) => {
-      if (isAdmin) {
-        toast({
-          title: "Error",
-          description: "Failed to create project. Please try again.",
-          variant: "destructive"
-        });
-      }
     }
   });
 
-  // Fetch real testing data from API
-  const { data: testCases = [], isLoading: testCasesLoading } = useQuery({
-    queryKey: ['/api/test-cases'],
-    select: (data: any[]) => data || []
-  });
-
-  const { data: qualityIssues = [], isLoading: qualityIssuesLoading } = useQuery({
-    queryKey: ['/api/quality-issues'],
-    select: (data: any[]) => data || []
-  });
-
-  const getStatusColor = (status: string) => {
-    const colors = {
-      planning: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-      in_progress: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-      testing: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-      deployed: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-      on_hold: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-      todo: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-      review: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-      done: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-    };
-    return colors[status as keyof typeof colors] || colors.planning;
+  const handleProjectSubmit = (data: NewProjectForm) => {
+    createProjectMutation.mutate(data);
   };
 
-
-
-  const getProjectIcon = (type: string) => {
-    const icons = {
-      web: Globe,
-      mobile: Smartphone,
-      desktop: Monitor,
-      api: Database
-    };
-    const Icon = icons[type as keyof typeof icons] || Globe;
-    return <Icon className="h-4 w-4" />;
-  };
-
-  const getCategoryIcon = (category: string) => {
-    const icons = {
-      feature: Lightbulb,
-      bug: Bug,
-      improvement: Wrench,
-      documentation: FileText
-    };
-    const Icon = icons[category as keyof typeof icons] || Lightbulb;
-    return <Icon className="h-4 w-4" />;
-  };
-
-  // Enhanced automated session detection with persistent database storage
-  useEffect(() => {
-    let activityInterval: NodeJS.Timeout;
-    let inactivityTimeout: NodeJS.Timeout;
-    let fileWatcher: NodeJS.Timeout;
-
-    const startOrResumeSession = async () => {
-      const now = new Date();
-      
-      if (!activeSession && selectedProject && replitEnvironment.isReplit) {
-        try {
-          // Check for existing active session in database
-          const response = await fetch(`/api/replit-sessions/active/${selectedProject}/${replitEnvironment.replId}`);
-          let dbSession = null;
-          
-          if (response.ok) {
-            dbSession = await response.json();
-          }
-          
-          if (dbSession) {
-            // Resume existing session
-            const elapsedSeconds = Math.floor((now.getTime() - new Date(dbSession.sessionStart).getTime()) / 1000);
-            setActiveSession({
-              id: dbSession.id,
-              projectId: selectedProject,
-              startTime: new Date(dbSession.sessionStart),
-              lastActivity: now,
-              totalElapsedSeconds: dbSession.totalDuration + elapsedSeconds,
-              currentSessionStart: new Date(dbSession.sessionStart),
-              changes: dbSession.changes || [],
-              isActive: true,
-              replitData: {
-                replId: replitEnvironment.replId || 'unknown',
-                fileChanges: dbSession.fileChanges || [],
-                lastCommit: undefined
-              }
-            });
-            
-            // Update last activity in database
-            await fetch(`/api/replit-sessions/${dbSession.id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                lastActivity: now,
-                totalDuration: dbSession.totalDuration + elapsedSeconds
-              })
-            });
-          } else {
-            // Create new session in database
-            const sessionData = {
-              projectId: selectedProject,
-              replId: replitEnvironment.replId || 'unknown',
-              sessionStart: now,
-              totalDuration: 0,
-              lastActivity: now,
-              changes: [],
-              fileChanges: [],
-              isActive: true,
-              autoEnded: false
-            };
-            
-            const createResponse = await fetch('/api/replit-sessions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(sessionData)
-            });
-            
-            if (createResponse.ok) {
-              const newDbSession = await createResponse.json();
-              setActiveSession({
-                id: newDbSession.id,
-                projectId: selectedProject,
-                startTime: now,
-                lastActivity: now,
-                totalElapsedSeconds: 0,
-                currentSessionStart: now,
-                changes: [],
-                isActive: true,
-                replitData: {
-                  replId: replitEnvironment.replId || 'unknown',
-                  fileChanges: [],
-                  lastCommit: undefined
-                }
-              });
-            }
-          }
-        } catch (error) {
-          console.error('Failed to manage session:', error);
-        }
-      }
-    };
-
-    const detectActivity = async () => {
-      const now = new Date();
-      await startOrResumeSession();
-      
-      // Update last activity if session is active
-      if (activeSession) {
-        const currentSessionElapsed = Math.floor((now.getTime() - activeSession.currentSessionStart.getTime()) / 1000);
-        const newTotalSeconds = activeSession.totalElapsedSeconds + currentSessionElapsed;
-        
-        setActiveSession(prev => prev ? { 
-          ...prev, 
-          lastActivity: now,
-          totalElapsedSeconds: newTotalSeconds,
-          currentSessionStart: now // Reset current session timer
-        } : null);
-        
-        // Update database every 30 seconds to prevent data loss
-        if (newTotalSeconds % 30 === 0) {
-          try {
-            await fetch(`/api/replit-sessions/${activeSession.id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                lastActivity: now,
-                totalDuration: newTotalSeconds
-              })
-            });
-          } catch (error) {
-            console.error('Failed to update session:', error);
-          }
-        }
-        
-        // Clear previous inactivity timeout
-        if (inactivityTimeout) clearTimeout(inactivityTimeout);
-        
-        // Set new inactivity timeout (1 hour)
-        inactivityTimeout = setTimeout(async () => {
-          await endAutomatedSession();
-        }, 60 * 60 * 1000); // 1 hour
-      }
-    };
-
-    // Enhanced file change monitoring for Replit environment
-    const monitorReplitChanges = () => {
-      if (replitEnvironment.isReplit && activeSession) {
-        // Monitor for real file changes by checking document title, URL changes, etc.
-        const observer = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            if (mutation.type === 'childList' || mutation.type === 'attributes') {
-              const now = new Date();
-              const changeDescription = `File activity detected in ${replitEnvironment.replId}`;
-              
-              setActiveSession(prev => prev ? {
-                ...prev,
-                lastActivity: now,
-                changes: [...prev.changes, changeDescription],
-                replitData: prev.replitData ? {
-                  ...prev.replitData,
-                  fileChanges: [...prev.replitData.fileChanges, changeDescription]
-                } : undefined
-              } : null);
-            }
-          });
-        });
-
-        // Watch for changes in the document that might indicate file editing
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['data-file', 'data-changed']
-        });
-
-        return () => observer.disconnect();
-      }
-    };
-
-    // Check for activity every 30 seconds when there's an active session
-    if (activeSession) {
-      activityInterval = setInterval(detectActivity, 30000);
-    }
-
-    // Simulate activity detection (in a real app, this would monitor file changes, keyboard/mouse activity)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        detectActivity();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', detectActivity);
-    window.addEventListener('click', detectActivity);
-    window.addEventListener('keydown', detectActivity);
-
-    return () => {
-      if (activityInterval) clearInterval(activityInterval);
-      if (inactivityTimeout) clearTimeout(inactivityTimeout);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', detectActivity);
-      window.removeEventListener('click', detectActivity);
-      window.removeEventListener('keydown', detectActivity);
-    };
-  }, [activeSession, selectedProject]);
-
-  // Automated session management
-  const generateTaskDescription = (changes: string[], duration: number, replitData?: any): string => {
-    const defaultActions = [
-      "Updated component styling",
-      "Fixed functionality issues", 
-      "Improved user interface",
-      "Added new features",
-      "Optimized performance",
-      "Updated database queries",
-      "Enhanced error handling",
-      "Implemented user feedback"
-    ];
-
-    // If we have real Replit file changes, use those
-    if (replitData?.fileChanges && replitData.fileChanges.length > 0) {
-      const recentChanges = replitData.fileChanges.slice(-3); // Last 3 changes
-      return `Replit development: ${recentChanges.join(", ")}`;
-    }
-
-    if (changes.length > 0) {
-      return changes.join(", ");
-    }
-
-    // Generate contextual description based on duration and environment
-    const prefix = replitEnvironment.isReplit ? "Replit development: " : "";
-    const actionsCount = Math.min(Math.floor(duration / 15) + 1, 4); // 1 action per 15 minutes, max 4
-    const selectedActions = defaultActions.slice(0, actionsCount);
-    
-    return prefix + selectedActions.join(", ");
-  };
-
-  const endAutomatedSession = async () => {
-    if (!activeSession) return;
-
-    const endTime = new Date();
-    const totalDurationMinutes = Math.floor(activeSession.totalElapsedSeconds / 60);
-
-    if (totalDurationMinutes >= 5) { // Only log sessions longer than 5 minutes
-      const taskDescription = generateTaskDescription(
-        activeSession.changes, 
-        totalDurationMinutes, 
-        activeSession.replitData
-      );
-
-      // End session in database
-      try {
-        await fetch(`/api/replit-sessions/${activeSession.id}/end`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            summary: `Auto-ended after 1 hour of inactivity. ${taskDescription}`
-          })
-        });
-      } catch (error) {
-        console.error('Failed to end session in database:', error);
-      }
-
-      const newEntry = {
-        id: timeEntries.length + 1,
-        projectId: activeSession.projectId,
-        taskDescription,
-        startTime: activeSession.startTime,
-        endTime,
-        duration: totalDurationMinutes,
-        date: format(selectedDate, 'yyyy-MM-dd'),
-        autoGenerated: true,
-        replitIntegrated: replitEnvironment.isReplit,
-        fileChanges: activeSession.replitData?.fileChanges
-      };
-
-      setTimeEntries([...timeEntries, newEntry]);
-
-      if (isAdmin) {
-        toast({
-          title: replitEnvironment.isReplit ? "Replit Session Completed" : "Work Session Completed",
-          description: `Logged ${totalDurationMinutes} minutes: ${taskDescription}`,
-        });
-      }
-    }
-
-    setActiveSession(null);
-  };
-
-  const manuallyEndSession = () => {
-    if (activeSession) {
-      endAutomatedSession();
-    }
-  };
-
-  const addChangeToSession = (changeDescription: string) => {
-    if (activeSession) {
-      setActiveSession(prev => prev ? {
-        ...prev,
-        changes: [...prev.changes, changeDescription],
-        lastActivity: new Date()
-      } : null);
-    }
-  };
-
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Form submission handler
-  const onSubmit = (data: NewProjectForm) => {
-    const formData = {
-      ...data,
-      techStack: techStackInput ? techStackInput.split(',').map((s: string) => s.trim()).filter((s: string) => s) : [],
-      tags: tagsInput ? tagsInput.split(',').map((s: string) => s.trim()).filter((s: string) => s) : []
-    };
-    createProjectMutation.mutate(formData);
-  };
-
-  // Task form submission handler
-  const onTaskSubmit = (data: NewTaskForm) => {
+  const handleTaskSubmit = (data: NewTaskForm) => {
     createTaskMutation.mutate(data);
   };
 
-  // Handle task status update
-  const handleTaskStatusUpdate = (taskId: number, newStatus: string) => {
-    updateTaskMutation.mutate({
-      id: taskId,
-      updates: { status: newStatus as AppTask['status'] }
-    });
-  };
-
-  // Helper function to add tech stack item
-  const addTechStackItem = (item: string) => {
-    if (item.trim()) {
-      const currentStack = techStackInput ? techStackInput.split(',').map((s: string) => s.trim()) : [];
-      if (!currentStack.includes(item.trim())) {
-        setTechStackInput(currentStack.concat(item.trim()).join(', '));
-      }
+  // Helper functions
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'in_progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'on_hold': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'cancelled': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
     }
   };
 
-  // Helper function to add tag
-  const addTag = (tag: string) => {
-    if (tag.trim()) {
-      const currentTags = tagsInput ? tagsInput.split(',').map((s: string) => s.trim()) : [];
-      if (!currentTags.includes(tag.trim())) {
-        setTagsInput(currentTags.concat(tag.trim()).join(', '));
-      }
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'low': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
     }
   };
 
-  const projectTasks = selectedProject ? tasks.filter((t: AppTask) => t.projectId === selectedProject) : tasks;
-  const testingTasks = tasks.filter((t: AppTask) => t.status === 'testing');
-
-  // Calculate testing statistics from real data
-  const getTestingStats = () => {
-    const totalTests = testCases.length;
-    const passedTests = testCases.filter(tc => tc.status === 'passed').length;
-    const failedTests = testCases.filter(tc => tc.status === 'failed').length;
-    const pendingTests = testCases.filter(tc => tc.status === 'pending').length;
-
-    const totalIssues = qualityIssues.length;
-    const openIssues = qualityIssues.filter(qi => qi.status === 'open').length;
-    const criticalIssues = qualityIssues.filter(qi => qi.severity === 'critical').length;
-    const highIssues = qualityIssues.filter(qi => qi.severity === 'high').length;
-
-    return {
-      totalTests,
-      passedTests,
-      failedTests,
-      pendingTests,
-      passRate: totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0,
-      totalIssues,
-      openIssues,
-      criticalIssues,
-      highIssues
-    };
+  const getProjectIcon = (type: string) => {
+    switch (type) {
+      case 'web': return Globe;
+      case 'mobile': return Smartphone;
+      case 'desktop': return Monitor;
+      case 'api': return Database;
+      default: return Code2;
+    }
   };
 
-  const testingStats = getTestingStats();
+  const getIssueIcon = (severity: string) => {
+    switch (severity) {
+      case 'high': return AlertCircle;
+      case 'medium': return Bug;
+      case 'low': return Wrench;
+      default: return Lightbulb;
+    }
+  };
 
-    const triggerDeployment = (changeId: number) => {
-        // Placeholder for deployment logic
-        // Replace with your actual deployment trigger mechanism
-        if (isAdmin) {
-            toast({
-                title: "Deployment Triggered",
-                description: `Deployment triggered for change ID: ${changeId}`,
-            });
-        }
-    };
+  const activeProjects = projects.filter((project: AppProject) => project.status !== 'completed' && project.status !== 'cancelled');
+  const completedProjects = projects.filter((project: AppProject) => project.status === 'completed');
+
+  const getProjectTasks = (projectId: number) => {
+    return tasks.filter((task: AppTask) => task.project_id === projectId);
+  };
+
+  const getProjectProgress = (project: AppProject) => {
+    const projectTasks = getProjectTasks(project.id);
+    if (projectTasks.length === 0) return 0;
+    const completedTasks = projectTasks.filter((task: AppTask) => task.status === 'completed');
+    return Math.round((completedTasks.length / projectTasks.length) * 100);
+  };
+
+  if (isReadOnly) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center">
+            <Code2 className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">App Development Suite</h2>
+            <p className="text-gray-600 dark:text-gray-300">Read-only view</p>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Development Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 dark:text-gray-300">
+              Development data is only available when logged in.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="w-20 h-20 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-3xl flex items-center justify-center mx-auto shadow-lg">
-          <Code2 className="h-10 w-10 text-white" />
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center">
+          <Code2 className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent mb-2">
-            App Development
-          </h1>
-          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
-            Manage your development projects with professional project management tools similar to Asana and Jira.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">App Development Suite</h2>
+          <p className="text-gray-600 dark:text-gray-300">Project management & development tracking</p>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex justify-center">
-        <div className="flex items-center space-x-2 bg-white/60 dark:bg-gray-800/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
-          {[
-            { key: "overview", label: "Overview", icon: BarChart3 },
-            { key: "projects", label: "Git Projects", icon: GitBranch },
-            { key: "time", label: "Time Tracking", icon: Timer },
-            { key: "monitoring", label: "File Monitor", icon: Eye }
-          ].map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveView(tab.key as any)}
-                className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                  activeView === tab.key
-                    ? "bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-sm"
-                    : "text-muted-foreground hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+      {/* File Change Monitor */}
+      <FileChangeMonitor />
+
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+        {[
+          { id: 'overview', label: 'Overview', icon: BarChart3 },
+          { id: 'projects', label: 'Projects', icon: Code2 },
+          { id: 'tasks', label: 'Tasks', icon: FileText },
+          { id: 'monitoring', label: 'Monitoring', icon: Eye }
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                activeTab === tab.id
+                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Overview */}
-      {activeView === "overview" && (
-        <div className="space-y-8">
-          {/* Git Repository Status */}
-          <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
-                <GitBranch className="h-3 w-3 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  Git Integration Active
-                </p>
-                <p className="text-xs text-blue-700 dark:text-blue-300">
-                  Tracking commits and changes across all repositories
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                <span className="text-xs text-blue-600 dark:text-blue-400">Live</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Git Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Active Repositories</p>
-                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {gitProjects.filter((p: GitProject) => p.isActive).length}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
-                    <GitBranch className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Total Commits</p>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {commits.length}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
-                    <GitCommit className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-green-100 dark:border-green-800 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Today's Commits</p>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {commits.filter((c: GitCommit) => 
-                        format(new Date(c.date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
-                      ).length}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Contributors</p>
-                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                      {new Set(commits.map((c: GitCommit) => c.author)).size}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-amber-500 rounded-xl flex items-center justify-center">
-                    <User className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Current Projects */}
-          <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Project Stats */}
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
+              <CardTitle className="flex items-center gap-2">
                 <Code2 className="h-5 w-5" />
                 Active Projects
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {projectsLoading ? (
-                <div className="space-y-4">
-                  {[...Array(2)].map((_, i) => (
-                    <div key={i} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl animate-pulse">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
-                          <div>
-                            <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-32 mb-2"></div>
-                            <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-24"></div>
-                          </div>
-                        </div>
-                        <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-20"></div>
-                      </div>
-                      <div className="h-2 bg-gray-300 dark:bg-gray-600 rounded w-full mb-3"></div>
-                      <div className="grid grid-cols-4 gap-4">
-                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : activeProjects.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Code2 className="h-8 w-8 text-purple-400 dark:text-purple-300" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    No Active Projects
-                  </h3>
-                  <p className="text-muted-foreground dark:text-gray-400 mb-4 max-w-sm mx-auto">
-                    There are currently no active app projects in development. Create your first project to get started.
-                  </p>
-                  {!isReadOnly && (
-                    <Button 
-                      onClick={() => setShowNewProjectForm(true)}
-                      size="sm"
-                      className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Project
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {activeProjects.map((project) => (
-                    <div key={project.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
-                          {getProjectIcon(project.projectType)}
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{project.name}</h4>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400">{project.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getStatusColor(project.status)}>
-                          {project.status.replace('_', ' ')}
-                        </Badge>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                {activeProjects.length}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {completedProjects.length} completed
+              </p>
+            </CardContent>
+          </Card>
 
-                      </div>
-                    </div>
+          {/* Task Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Open Tasks
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                {tasks.filter((task: AppTask) => task.status !== 'completed').length}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {tasks.filter((task: AppTask) => task.status === 'completed').length} completed
+              </p>
+            </CardContent>
+          </Card>
 
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-muted-foreground dark:text-gray-400">Progress</span>
-                          <span className="font-medium">{project.progress}%</span>
-                        </div>
-                        <Progress value={project.progress} className="h-2" />
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
-                          <span className="ml-1 font-medium">{project.actualHours}/{project.estimatedHours || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Tasks:</span>
-                          <span className="ml-1 font-medium">{tasks.filter(t => t.projectId === project.id).length}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Type:</span>
-                          <span className="ml-1 font-medium capitalize">{project.projectType}</span>
-                        </div>
-                      </div>
-
-                      {project.techStack.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {project.techStack.map((tech: string, index: number) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {tech}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="flex gap-2 mt-3">
-                        {project.deploymentUrl && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            disabled={isReadOnly}
-                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                          >
-                            <Link className="h-4 w-4 mr-1" />
-                            Live Site
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  ))}
-                </div>
-              )}
+          {/* Issues Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bug className="h-5 w-5" />
+                Issues
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                {autoDetectedIssues.filter((issue: AutoDetectedIssue) => issue.status !== 'resolved').length}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {autoDetectedIssues.filter((issue: AutoDetectedIssue) => issue.status === 'resolved').length} resolved
+              </p>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* Git Projects View */}
-      {activeView === "projects" && (
+      {/* Projects Tab */}
+      {activeTab === 'projects' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Git Projects & Commits</h2>
-            <div className="flex gap-2">
-              <select
-                value={selectedProject || ""}
-                onChange={(e) => setSelectedProject(e.target.value || null)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
-              >
-                <option value="">All Projects</option>
-                {gitProjects.map((project: GitProject) => (
-                  <option key={project.name} value={project.name}>{project.name}</option>
-                ))}
-              </select>
-            </div>
+            <h3 className="text-lg font-semibold">Projects</h3>
+            <Button
+              onClick={() => setShowNewProjectForm(true)}
+              className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Project
+            </Button>
           </div>
 
-          {/* Git Projects and Commits */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Git Projects */}
-            <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                  <GitBranch className="h-5 w-5" />
-                  Active Repositories ({gitProjects.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {projectsLoading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl animate-pulse">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projectsLoading ? (
+              [...Array(6)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader>
+                    <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-5/6"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : projects.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Code2 className="h-8 w-8 text-blue-400 dark:text-blue-300" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No projects yet</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">Get started by creating your first project</p>
+                <Button
+                  onClick={() => setShowNewProjectForm(true)}
+                  className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Project
+                </Button>
+              </div>
+            ) : (
+              projects.map((project: AppProject) => {
+                const ProjectIcon = getProjectIcon(project.type);
+                const progress = getProjectProgress(project);
+                
+                return (
+                  <Card key={project.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                          <ProjectIcon className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{project.name}</CardTitle>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                ) : gitProjects.length === 0 ? (
-                  <div className="text-center py-8">
-                    <GitBranch className="h-12 w-12 text-muted-foreground dark:text-gray-500 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm text-muted-foreground dark:text-gray-500">No Git repositories detected</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {gitProjects.map((project: GitProject) => (
-                      <div 
-                        key={project.name} 
-                        className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                          selectedProject === project.name 
-                            ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-700' 
-                            : 'bg-white/60 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800'
-                        }`}
-                        onClick={() => setSelectedProject(selectedProject === project.name ? null : project.name)}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                              {project.name}
-                            </h4>
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="outline" className="text-xs">
-                                {project.branch}
-                              </Badge>
-                              <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                {project.totalCommits} commits
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground dark:text-gray-500">
-                              Last commit: {formatDistanceToNow(new Date(project.lastCommit))} ago
-                            </p>
-                            <p className="text-xs text-muted-foreground dark:text-gray-500">
-                              Contributors: {project.contributors.join(', ')}
-                            </p>
-                          </div>
-                          {project.deploymentUrl && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(project.deploymentUrl, '_blank');
-                              }}
-                              className="text-green-600 border-green-300 hover:bg-green-50"
-                            >
-                              <GitBranch className="h-3 w-3 mr-1" />
-                              Live
-                            </Button>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                        {project.description}
+                      </p>
+                      
+                      <div className="flex gap-2 mb-4">
+                        <Badge className={getStatusColor(project.status)}>
+                          {project.status.replace('_', ' ')}
+                        </Badge>
+                        <Badge className={getPriorityColor(project.priority)}>
+                          {project.priority}
+                        </Badge>
+                      </div>
+
+                      <div className="mb-4">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Progress</span>
+                          <span>{progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-blue-400 to-cyan-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {project.technology_stack && project.technology_stack.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {project.technology_stack.slice(0, 3).map((tech, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {tech}
+                            </Badge>
+                          ))}
+                          {project.technology_stack.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{project.technology_stack.length - 3}
+                            </Badge>
                           )}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      )}
 
-            {/* Recent Commits */}
-            <Card className="border-green-100 dark:border-green-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
-                  <History className="h-5 w-5" />
-                  Recent Commits
-                  {selectedProject && (
-                    <Badge variant="outline" className="ml-2">
-                      {selectedProject}
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {commitsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg animate-pulse">
-                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                      <div className="flex gap-2">
+                        {project.repository_url && (
+                          <Button size="sm" variant="outline" asChild>
+                            <a href={project.repository_url} target="_blank" rel="noopener noreferrer">
+                              <GitBranch className="h-4 w-4 mr-1" />
+                              Repo
+                            </a>
+                          </Button>
+                        )}
+                        {project.deployment_url && (
+                          <Button size="sm" variant="outline" asChild>
+                            <a href={project.deployment_url} target="_blank" rel="noopener noreferrer">
+                              <Globe className="h-4 w-4 mr-1" />
+                              Live
+                            </a>
+                          </Button>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {commits
-                      .filter((commit: GitCommit) => !selectedProject || commit.project === selectedProject)
-                      .slice(0, 20)
-                      .map((commit: GitCommit) => (
-                        <div key={commit.hash} className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
-                              <GitCommit className="h-4 w-4 text-white" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                {commit.message}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs text-muted-foreground dark:text-gray-500">
-                                  {commit.author}
-                                </span>
-                                <span className="text-xs text-muted-foreground dark:text-gray-500">
-                                  {formatDistanceToNow(new Date(commit.date))} ago
-                                </span>
-                                <Badge variant="outline" className="text-xs">
-                                  {commit.hash}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs text-green-600 dark:text-green-400">
-                                  +{commit.insertions}
-                                </span>
-                                <span className="text-xs text-red-600 dark:text-red-400">
-                                  -{commit.deletions}
-                                </span>
-                                <span className="text-xs text-muted-foreground dark:text-gray-500">
-                                  {commit.files.length} file{commit.files.length !== 1 ? 's' : ''}
-                                </span>
-                              </div>
-                              {commit.files.length > 0 && (
-                                <div className="mt-2">
-                                  <details className="text-xs">
-                                    <summary className="cursor-pointer text-blue-600 dark:text-blue-400 hover:underline">
-                                      Modified files ({commit.files.length})
-                                    </summary>
-                                    <div className="mt-1 pl-2 border-l-2 border-gray-200 dark:border-gray-700">
-                                      {commit.files.slice(0, 5).map((file, index) => (
-                                        <div key={index} className="text-muted-foreground dark:text-gray-500 truncate">
-                                          {file}
-                                        </div>
-                                      ))}
-                                      {commit.files.length > 5 && (
-                                        <div className="text-muted-foreground dark:text-gray-500">
-                                          ... and {commit.files.length - 5} more
-                                        </div>
-                                      )}
-                                    </div>
-                                  </details>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </div>
         </div>
       )}
 
-      {/* Tasks View */}
-      {activeView === "tasks" && (
+      {/* Tasks Tab */}
+      {activeTab === 'tasks' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tasks</h2>
-              {selectedProject && (
-                <Badge variant="outline" className="text-sm">
-                  {projects.find(p => p.id === selectedProject)?.name}
-                </Badge>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <select
-                value={selectedProject || ""}
-                onChange={(e) => setSelectedProject(e.target.value ? Number(e.target.value) : null)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
-              >
-                <option value="">All Projects</option>
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-              <Button 
-                onClick={() => setShowNewTaskForm(true)}
-                disabled={isReadOnly}
-                className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Task
-              </Button>
-            </div>
+            <h3 className="text-lg font-semibold">Tasks</h3>
+            <Button
+              onClick={() => setShowNewTaskForm(true)}
+              className="bg-gradient-to-r from-green-400 to-blue-500 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Task
+            </Button>
           </div>
 
-          {/* Auto-detected Issues from Database */}
+          <div className="space-y-4">
+            {tasksLoading ? (
+              [...Array(5)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="pt-6">
+                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : tasks.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-8 w-8 text-green-400 dark:text-green-300" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No tasks yet</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">Create your first task to get started</p>
+                <Button
+                  onClick={() => setShowNewTaskForm(true)}
+                  className="bg-gradient-to-r from-green-400 to-blue-500 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Task
+                </Button>
+              </div>
+            ) : (
+              tasks.map((task: AppTask) => {
+                const project = projects.find((p: AppProject) => p.id === task.project_id);
+                
+                return (
+                  <Card key={task.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                            {task.title}
+                          </h4>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
+                            {task.description}
+                          </p>
+                          
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge className={getStatusColor(task.status)}>
+                              {task.status.replace('_', ' ')}
+                            </Badge>
+                            <Badge className={getPriorityColor(task.priority)}>
+                              {task.priority}
+                            </Badge>
+                            {project && (
+                              <Badge variant="outline">
+                                {project.name}
+                              </Badge>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {format(new Date(task.created_at), 'MMM d, yyyy')}
+                            </span>
+                            {task.assignee && (
+                              <span className="flex items-center gap-1">
+                                <User className="h-4 w-4" />
+                                {task.assignee}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Monitoring Tab */}
+      {activeTab === 'monitoring' && (
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold">System Monitoring</h3>
+          
+          {/* Auto-detected Issues */}
           <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
                 <AlertCircle className="h-5 w-5" />
-                Identified Gaps & Issues ({autoDetectedIssues.length})
+                Identified Issues ({autoDetectedIssues.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1306,923 +658,166 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <div className="w-16 h-16 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <CheckSquare className="h-8 w-8 text-green-400 dark:text-green-300" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    No Issues Found
-                  </h3>
-                  <p className="text-muted-foreground dark:text-gray-400 mb-4 max-w-sm mx-auto">
-                    Great! No auto-detected issues or gaps found in your projects. The system will automatically detect new issues as you develop.
-                  </p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">All Clear!</h3>
+                  <p className="text-gray-600 dark:text-gray-300">No issues detected in your development environment.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {autoDetectedIssues.map((issue: AutoDetectedIssue) => (
-                    <div key={issue.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-orange-400">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline" className="text-orange-700 border-orange-300">
-                              {issue.category}
-                            </Badge>
-                            <Badge className={
-                              issue.severity === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                              issue.severity === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                              issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                              'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-                            }>
-                              {issue.severity} priority
-                            </Badge>
-                            {issue.autoDetected && (
-                              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                                Auto-detected
-                              </Badge>
-                            )}
+                  {autoDetectedIssues.map((issue: AutoDetectedIssue) => {
+                    const IssueIcon = getIssueIcon(issue.severity);
+                    
+                    return (
+                      <div key={issue.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg ${
+                            issue.severity === 'high' ? 'bg-red-100 dark:bg-red-900/30' :
+                            issue.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                            'bg-blue-100 dark:bg-blue-900/30'
+                          }`}>
+                            <IssueIcon className={`h-4 w-4 ${
+                              issue.severity === 'high' ? 'text-red-600 dark:text-red-400' :
+                              issue.severity === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
+                              'text-blue-600 dark:text-blue-400'
+                            }`} />
                           </div>
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                            {issue.title}
-                          </h4>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
-                            {issue.description}
-                          </p>
-                          <div className="text-xs text-muted-foreground dark:text-gray-500 space-y-1">
-                            {issue.estimatedEffort && (
-                              <div><span className="font-medium">Estimated Effort:</span> {issue.estimatedEffort}</div>
-                            )}
-                            {issue.blockedFeatures.length > 0 && (
-                              <div><span className="font-medium">Blocked Features:</span> {issue.blockedFeatures.join(', ')}</div>
-                            )}
-                            <div><span className="font-medium">Suggested Solution:</span> {issue.suggestedSolution}</div>
-                            {issue.detectionSource && (
-                              <div><span className="font-medium">Source:</span> {issue.detectionSource}</div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Badge className={
-                            issue.status === 'identified' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                            issue.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                            issue.status === 'resolved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                            'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
-                          }>
-                            {issue.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2 mt-3">
-                        <Button 
-                          size="sm" 
-                          className="bg-gradient-to-r from-orange-400 to-red-500 text-white"
-                          disabled={isReadOnly}
-                          onClick={() => {
-                            // Update issue status to in_progress
-                            fetch(`/api/auto-detected-issues/${issue.id}`, {
-                              method: 'PUT',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ status: 'in_progress' })
-                            }).then(() => {
-                              queryClient.invalidateQueries({ queryKey: ['/api/auto-detected-issues'] });
-                            });
-                          }}
-                        >
-                          <Wrench className="h-4 w-4 mr-1" />
-                          Start Fixing
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          disabled={isReadOnly}
-                          className={`text-green-600 border-green-300 hover:bg-green-50 ${
-                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          onClick={() => {
-                            // Update issue status to resolved
-                            fetch(`/api/auto-detected-issues/${issue.id}`, {
-                              method: 'PUT',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ status: 'resolved' })
-                            }).then(() => {
-                              queryClient.invalidateQueries({ queryKey: ['/api/auto-detected-issues'] });
-                            });
-                          }}
-                        >
-                          <CheckSquare className="h-4 w-4 mr-1" />
-                          Mark Complete
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          disabled={isReadOnly}
-                          className={`text-gray-600 hover:bg-gray-50 ${
-                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          onClick={() => {
-                            if (confirm('Are you sure you want to delete this issue?')) {
-                              fetch(`/api/auto-detected-issues/${issue.id}`, {
-                                method: 'DELETE'
-                              }).then(() => {
-                                queryClient.invalidateQueries({ queryKey: ['/api/auto-detected-issues'] });
-                              });
-                            }
-                          }}
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      
-
-      {/* Tasks View */}
-      {activeView === "tasks" && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tasks</h2>
-              {selectedProject && (
-                <Badge variant="outline" className="text-sm">
-                  {projects.find(p => p.id === selectedProject)?.name}
-                </Badge>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <select
-                value={selectedProject || ""}
-                onChange={(e) => setSelectedProject(e.target.value ? Number(e.target.value) : null)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
-              >
-                <option value="">All Projects</option>
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-              <Button 
-                onClick={() => setShowNewTaskForm(true)}
-                disabled={isReadOnly}
-                className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Task
-              </Button>
-            </div>
-          </div>
-
-          {tasksLoading ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} className="border-blue-100 dark:border-blue-800 shadow-lg animate-pulse">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
-                        <div>
-                          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-32 mb-2"></div>
-                          <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-24"></div>
-                        </div>
-                      </div>
-                      <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-16"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : projectTasks.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <CheckSquare className="h-10 w-10 text-blue-400 dark:text-blue-300" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                {selectedProject ? "No Tasks in This Project" : "No Tasks Yet"}
-              </h3>
-              <p className="text-muted-foreground dark:text-gray-400 mb-6 max-w-md mx-auto">
-                {selectedProject 
-                  ? "This project doesn't have any tasks yet. Create your first task to start organizing your work."
-                  : "You haven't created any tasks across your projects. Tasks help you break down your projects into manageable pieces."
-                }
-              </p>
-              {!isReadOnly && (
-                <Button 
-                  onClick={() => setShowNewTaskForm(true)}
-                  className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Task
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {projectTasks.map((task) => (
-                <Card key={task.id} className="border-blue-100 dark:border-blue-800 shadow-lg">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
-                          {getCategoryIcon(task.category)}
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400">{task.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getStatusColor(task.status)}>
-                          {task.status.replace('_', ' ')}
-                        </Badge>
-                        <Badge variant="outline" className="capitalize">
-                          {task.category}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Category:</span>
-                        <span className="ml-1 font-medium capitalize">{task.category}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
-                        <span className="ml-1 font-medium">{task.actualHours}/{task.estimatedHours || 'N/A'}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Project:</span>
-                        <span className="ml-1 font-medium">
-                          {projects.find(p => p.id === task.projectId)?.name}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Due:</span>
-                        <span className="ml-1 font-medium">
-                          {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {task.comments && (
-                      <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-sm">
-                        <span className="text-muted-foreground dark:text-gray-400">Notes:</span>
-                        <span className="ml-1">{task.comments}</span>
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 mt-3">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={isReadOnly}
-                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                      >
-                        Edit
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={isReadOnly}
-                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                      >
-                        <Timer className="h-4 w-4 mr-1" />
-                        Log Time
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Testing Queue View */}
-      {activeView === "testing" && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Testing Queue & Completion Verification</h2>
-            <div className="flex gap-2">
-              <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                {/* Mock count - would be dynamic */}
-                3 items pending
-              </Badge>
-              <Button 
-                variant="outline"
-                disabled={isReadOnly}
-                className={`text-green-600 border-green-300 hover:bg-green-50 ${
-                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <CheckSquare className="h-4 w-4 mr-2" />
-                Verify All Complete
-              </Button>
-            </div>
-          </div>
-
-          {/* Testing Queue - Items Pending Completion Verification */}
-          <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                <CheckSquare className="h-5 w-5" />
-                Items Awaiting Admin Verification
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Example testing queue items - would be populated from changes and gaps */}
-                {[
-                  {
-                    id: 1,
-                    type: "performance_fix",
-                    title: "Compression middleware implementation",
-                    description: "Verify that gzip compression is working and improving load times",
-                    expectedOutcome: "Page load times reduced by 20-30%",
-                    testSteps: [
-                      "Check network tab for compressed responses",
-                      "Measure load time before/after",
-                      "Verify all endpoints return compressed content"
-                    ],
-                    completed: false,
-                    completedAt: null,
-                    completedBy: null
-                  },
-                  {
-                    id: 2,
-                    type: "feature_completion",
-                    title: "Database query optimization with caching",
-                    description: "Confirm that caching headers are properly set and reducing database load",
-                    expectedOutcome: "Reduced database queries on public endpoints",
-                    testSteps: [
-                      "Monitor database query count",
-                      "Check response headers for cache-control",
-                      "Verify 5-minute cache duration on public data"
-                    ],
-                    completed: false,
-                    completedAt: null,
-                    completedBy: null
-                  },
-                  {
-                    id: 3,
-                    type: "deployment_verification",
-                    title: "Production deployment configuration",
-                    description: "Ensure deployment runs smoothly with new build configuration",
-                    expectedOutcome: "Successful deployment without errors",
-                    testSteps: [
-                      "Deploy to production",
-                      "Verify all services start correctly",
-                      "Check application functionality post-deploy"
-                    ],
-                    completed: false,
-                    completedAt: null,
-                    completedBy: null
-                  }
-                ].map((item) => (
-                  <div key={item.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-blue-400">
-                    <div className="flex items-start gap-4">
-                      <div className="pt-1">
-                        <input 
-                          type="checkbox" 
-                          checked={item.completed}
-                          className={`w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${
-                            isReadOnly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                          }`}
-                          disabled={isReadOnly}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="capitalize text-blue-700 border-blue-300">
-                            {item.type.replace('_', ' ')}
-                          </Badge>
-                          {item.completed && (
-                            <Badge className="bg-green-100 text-green-700">
-                              ✓ Completed
-                            </Badge>
-                          )}
-                        </div>
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                          {item.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
-                          {item.description}
-                        </p>
-
-                        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3 mb-3">
-                          <div className="text-sm">
-                            <div className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                              Expected Outcome:
-                            </div>
-                            <div className="text-blue-700 dark:text-blue-300 mb-2">
-                              {item.expectedOutcome}
-                            </div>
-                            <div className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                              Test Steps:
-                            </div>
-                            <ul className="text-blue-700 dark:text-blue-300 text-xs space-y-1">
-                              {item.testSteps.map((step, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <span className="text-blue-500 mt-1">•</span>
-                                  <span>{step}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-
-                        {item.completed && (
-                          <div className="text-xs text-green-600 dark:text-green-400">
-                            ✓ Completed {item.completedAt ? format(new Date(item.completedAt), 'MMM dd, yyyy') : 'recently'}
-                            {item.completedBy && ` by ${item.completedBy}`}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Testing Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
-              <CardContent className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{testingStats.totalTests}</div>
-                  <div className="text-sm text-blue-600 dark:text-blue-400">Total Tests</div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
-              <CardContent className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{testingStats.passRate}%</div>
-                  <div className="text-sm text-green-600 dark:text-green-400">Pass Rate</div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
-              <CardContent className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{testingStats.openIssues}</div>
-                  <div className="text-sm text-orange-600 dark:text-orange-400">Open Issues</div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
-              <CardContent className="p-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">{testingStats.criticalIssues}</div>
-                  <div className="text-sm text-red-600 dark:text-red-400">Critical Issues</div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Real Test Cases and Quality Issues */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Test Cases */}
-            <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                  <CheckSquare className="h-5 w-5" />
-                  Test Cases
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {testCasesLoading ? (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                  </div>
-                ) : testCases.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <CheckSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No test cases found</p>
-                    <p className="text-sm">Create test cases to track testing progress</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {testCases.slice(0, 5).map((testCase) => (
-                      <div key={testCase.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <input 
-                            type="checkbox" 
-                            checked={testCase.status === 'passed'}
-                            className={`rounded border-gray-300 ${
-                              isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
-                            disabled={isReadOnly}
-                          />
-                          <div>
-                            <span className="text-sm font-medium">{testCase.title}</span>
-                            <div className="text-xs text-gray-500">{testCase.category}</div>
-                          </div>
-                        </div>
-                        <Badge variant="outline" className={
-                          testCase.status === 'passed' ? "text-green-500" :
-                          testCase.status === 'failed' ? "text-red-500" :
-                          testCase.status === 'blocked' ? "text-orange-500" :
-                          "text-yellow-500"
-                        }>
-                          {testCase.status}
-                        </Badge>
-                      </div>
-                    ))}
-                    {testCases.length > 5 && (
-                      <div className="text-center pt-2">
-                        <Button variant="ghost" size="sm">
-                          View all {testCases.length} test cases
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Quality Issues */}
-            <Card className="border-red-100 dark:border-red-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-red-600 dark:text-red-400">
-                  <Bug className="h-5 w-5" />
-                  Quality Issues
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {qualityIssuesLoading ? (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500"></div>
-                  </div>
-                ) : qualityIssues.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Bug className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No quality issues found</p>
-                    <p className="text-sm">Great job! No issues to report</p>
-                  ```tool_code
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {qualityIssues.slice(0, 5).map((issue) => (
-                      <div key={issue.id} className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border-l-4 border-red-400">
-                        <div className="flex items-start justify-between">
+                          
                           <div className="flex-1">
-                            <h4 className="text-sm font-medium">{issue.title}</h4>
-                            <p className="text-xs text-gray-500 mt-1">{issue.category}</p>
-                            {issue.description && (
-                              <p className="text-xs text-gray-600 mt-1">{issue.description}</p>
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-medium text-gray-900 dark:text-white">
+                                {issue.title}
+                              </h4>
+                              <Badge className={`${
+                                issue.severity === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                                issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                              }`}>
+                                {issue.severity}
+                              </Badge>
+                              <Badge className={getStatusColor(issue.status)}>
+                                {issue.status.replace('_', ' ')}
+                              </Badge>
+                            </div>
+                            
+                            <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
+                              {issue.description}
+                            </p>
+                            
+                            {(issue.file_path || issue.line_number) && (
+                              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                <FileText className="h-3 w-3" />
+                                {issue.file_path && <span>{issue.file_path}</span>}
+                                {issue.line_number && <span>Line {issue.line_number}</span>}
+                              </div>
                             )}
-                          </div>
-                          <div className="flex gap-1">
-                            <Badge variant="outline" className={
-                              issue.severity === 'critical' ? "text-red-600" :
-                              issue.severity === 'high' ? "text-orange-600" :
-                              issue.severity === 'medium' ? "text-yellow-600" :
-                              "text-gray-600"
-                            }>
-                              {issue.severity}
-                            </Badge>
-                            <Badge variant="outline" className={
-                              issue.status === 'open' ? "text-red-500" :
-                              issue.status === 'in_progress' ? "text-yellow-500" :
-                              issue.status === 'resolved' ? "text-green-500" :
-                              "text-gray-500"
-                            }>
-                              {issue.status.replace('_', ' ')}
-                            </Badge>
+
+                            <div className="flex gap-2 mt-3">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                disabled={isReadOnly}
+                                className={`text-green-600 border-green-300 hover:bg-green-50 ${
+                                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                                onClick={() => {
+                                  // Update issue status to resolved
+                                  fetch(`/api/auto-detected-issues/${issue.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ status: 'resolved' })
+                                  }).then(() => {
+                                    queryClient.invalidateQueries({ queryKey: ['/api/auto-detected-issues'] });
+                                  });
+                                }}
+                              >
+                                <CheckSquare className="h-4 w-4 mr-1" />
+                                Mark Resolved
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    ))}
-                    {qualityIssues.length > 5 && (
-                      <div className="text-center pt-2">
-                        <Button variant="ghost" size="sm">
-                          View all {qualityIssues.length} issues
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-
-        </div>
-      )}
-
-      {/* Time Tracking View */}
-      {activeView === "time" && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Time Tracking</h2>
-            {!activeSession && (
-              <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                Auto-tracking enabled
-              </Badge>
-            )}
-          </div>
-
-          <Card className="border-green-100 dark:border-green-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
-                <Timer className="h-5 w-5" />
-                Time Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {projects.map((project) => (
-                  <div key={project.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
-                        {getProjectIcon(project.projectType)}
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{project.name}</h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">
-                          {project.actualHours}h logged
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground dark:text-gray-400">Progress</span>
-                        <span className="font-medium">
-                          {project.estimatedHours ? 
-                            `${Math.round((project.actualHours / project.estimatedHours) * 100)}%` : 
-                            'No estimate'
-                          }
-                        </span>
-                      </div>
-                      {project.estimatedHours && (
-                        <Progress value={(project.actualHours / project.estimatedHours) * 100} className="h-2" />
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Automated Session Tracking */}
-          <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                <Clock className="h-5 w-5" />
-                Automated Session Tracking
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!activeSession ? (
-                <div className="space-y-6">
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Clock className="h-8 w-8 text-blue-400 dark:text-blue-300" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      No Active Session
-                    </h3>
-                    <p className="text-muted-foreground dark:text-gray-400 mb-4 max-w-sm mx-auto">
-                      {replitEnvironment.isReplit 
-                        ? "Replit-integrated work sessions are automatically detected when you're active. Select a project to begin tracking."
-                        : "Work sessions are automatically detected when you're active. Select a project to begin tracking."
-                      }
-                    </p>
-                    {replitEnvironment.isReplit && (
-                      <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-lg mb-4">
-                        <p className="text-sm text-green-700 dark:text-green-300 flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <strong>Replit Integration Active:</strong> File changes and development activity automatically tracked
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Active Project</label>
-                    <select
-                      className={`w-full p-3 border rounded-lg dark:bg-gray-800 dark:border-gray-600 ${
-                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                      value={selectedProject || ""}
-                      onChange={(e) => setSelectedProject(Number(e.target.value))}
-                      disabled={isReadOnly}
-                    >
-                      <option value="">Select a project</option>
-                      {activeProjects.map(project => (
-                        <option key={project.id} value={project.id}>
-                          {project.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {selectedProject && (
-                    <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
-                        <strong>Auto-detection active:</strong> A work session will automatically start when you begin working on this project.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center p-8">
-                  <div className="text-6xl font-mono font-bold text-green-600 dark:text-green-400 mb-4">
-                    {formatTime(activeSession.totalElapsedSeconds)}
-                  </div>
-                  <div className="space-y-2 mb-6">
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {replitEnvironment.isReplit ? "Replit-Integrated Session" : "Auto-detected Session"}
-                    </p>
-                    <p className="text-muted-foreground dark:text-gray-400">
-                      {projects.find(p => p.id === activeSession.projectId)?.name || "Unknown project"}
-                    </p>
-                    {activeSession.replitData && (
-                      <p className="text-sm text-green-600 dark:text-green-400">
-                        Repl: {activeSession.replitData.replId}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-500">
-                      Last activity: {format(activeSession.lastActivity, 'HH:mm:ss')}
-                    </p>
-                  </div>
-                  
-                  {activeSession.changes.length > 0 && (
-                    <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                      <p className="text-sm font-medium mb-1">Detected Changes:</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {activeSession.changes.join(", ")}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex gap-2 justify-center">
-                    <Button 
-                      onClick={manuallyEndSession}
-                      disabled={isReadOnly}
-                      variant="destructive"
-                      className={`bg-red-500 hover:bg-red-600 ${
-                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      <Square className="h-4 w-4 mr-2" />
-                      End Session
-                    </Button>
-                    <Button 
-                      onClick={() => addChangeToSession("Manual update logged")}
-                      disabled={isReadOnly}
-                      variant="outline"
-                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Log Change
-                    </Button>
-                  </div>
-                  
-                  <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                    <p className="text-xs text-green-700 dark:text-green-300">
-                      Session will auto-end after 1 hour of inactivity
-                    </p>
-                  </div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
           </Card>
-
-          {/* Time Entries */}
-          {timeEntries.length > 0 && (
-            <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
-                  <BarChart3 className="h-5 w-5" />
-                  Today's Sessions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {timeEntries.map((entry) => (
-                    <div key={entry.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-gray-900 dark:text-white">
-                              {entry.taskDescription || "Development session"}
-                            </h4>
-                            {entry.autoGenerated && (
-                              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-                                Auto-generated
-                              </Badge>
-                            )}
-                            {entry.replitIntegrated && (
-                              <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
-                                Replit
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400">
-                            {projects.find(p => p.id === entry.projectId)?.name || "No project"}
-                          </p>
-                          {entry.autoGenerated && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              Based on detected activity and changes
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold text-green-600 dark:text-green-400">
-                            {entry.duration}m
-                          </div>
-                          <div className="text-xs text-muted-foreground dark:text-gray-400">
-                            {format(entry.startTime, 'HH:mm')} - {format(entry.endTime, 'HH:mm')}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                    <div className="font-semibold text-green-700 dark:text-green-400">
-                      Total today: {timeEntries.reduce((sum, entry) => sum + entry.duration, 0)} minutes
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       )}
 
-      {/* File Monitoring View */}
-      {activeView === "monitoring" && (
-        <FileChangeMonitor isReadOnly={isReadOnly} />
-      )}
-
-      {/* New Project Form Dialog */}
+      {/* New Project Dialog */}
       <Dialog open={showNewProjectForm} onOpenChange={setShowNewProjectForm}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
           </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Project Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="My Awesome App" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="projectType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Project Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="web">Web Application</SelectItem>
-                          <SelectItem value="mobile">Mobile App</SelectItem>
-                          <SelectItem value="desktop">Desktop App</SelectItem>
-                          <SelectItem value="api">API/Backend</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
+          <Form {...projectForm}>
+            <form onSubmit={projectForm.handleSubmit(handleProjectSubmit)} className="space-y-4">
               <FormField
-                control={form.control}
-                name="description"
+                control={projectForm.control}
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Project Name</FormLabel>
                     <FormControl>
-                      <Textarea {...field} placeholder="Describe your project..." rows={3} />
+                      <Input {...field} placeholder="Enter project name" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={projectForm.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select project type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="web">Web Application</SelectItem>
+                        <SelectItem value="mobile">Mobile App</SelectItem>
+                        <SelectItem value="desktop">Desktop App</SelectItem>
+                        <SelectItem value="api">API/Backend</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
+                  control={projectForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="planning">Planning</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="testing">Testing</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={projectForm.control}
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
@@ -2237,37 +832,60 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           <SelectItem value="low">Low</SelectItem>
                           <SelectItem value="medium">Medium</SelectItem>
                           <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="urgent">Urgent</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="estimatedHours"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estimated Hours</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                          placeholder="40"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={projectForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Describe your project..."
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Technology Stack
+                  </label>
+                  <Input
+                    value={techStackInput}
+                    onChange={(e) => setTechStackInput(e.target.value)}
+                    placeholder="e.g., React, TypeScript, Node.js (comma-separated)"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Tags
+                  </label>
+                  <Input
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    placeholder="e.g., frontend, backend, mobile (comma-separated)"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
-                  name="repositoryUrl"
+                  control={projectForm.control}
+                  name="repository_url"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Repository URL (Optional)</FormLabel>
@@ -2278,55 +896,19 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     </FormItem>
                   )}
                 />
+
                 <FormField
-                  control={form.control}
-                  name="targetDate"
+                  control={projectForm.control}
+                  name="deployment_url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Target Date (Optional)</FormLabel>
+                      <FormLabel>Deployment URL (Optional)</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input {...field} placeholder="https://myapp.com" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
-                />
-              </div>
-
-              <div>
-                <FormLabel>Tech Stack (Optional)</FormLabel>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    value={techStackInput}
-                    onChange={(e) => setTechStackInput(e.target.value)}
-                    placeholder="React, Node.js, PostgreSQL (comma separated)"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => addTechStackItem("React")}
-                    size="sm"
-                  >
-                    + React
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => addTechStackItem("Node.js")}
-                    size="sm"
-                  >
-                    + Node.js
-                  </Button>
-                </div>
-              </div>
-
-              <div>
-                <FormLabel>Tags (Optional)</FormLabel>
-                <Input
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                  placeholder="frontend, backend, api (comma separated)"
-                  className="mt-1"
                 />
               </div>
 
@@ -2341,7 +923,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <Button 
                   type="submit" 
                   disabled={createProjectMutation.isPending}
-                  className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                  className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
                 >
                   {createProjectMutation.isPending ? "Creating..." : "Create Project"}
                 </Button>
@@ -2351,63 +933,38 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </DialogContent>
       </Dialog>
 
-      {/* New Task Form Dialog */}
+      {/* New Task Dialog */}
       <Dialog open={showNewTaskForm} onOpenChange={setShowNewTaskForm}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Task</DialogTitle>
           </DialogHeader>
           <Form {...taskForm}>
-            <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={taskForm.control}
-                  name="projectId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Project</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select project" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {projects.map(project => (
-                            <SelectItem key={project.id} value={project.id.toString()}>
-                              {project.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={taskForm.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="feature">Feature</SelectItem>
-                          <SelectItem value="bug">Bug Fix</SelectItem>
-                          <SelectItem value="improvement">Improvement</SelectItem>
-                          <SelectItem value="documentation">Documentation</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <form onSubmit={taskForm.handleSubmit(handleTaskSubmit)} className="space-y-4">
+              <FormField
+                control={taskForm.control}
+                name="project_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a project" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {projects.map((project: AppProject) => (
+                          <SelectItem key={project.id} value={project.id.toString()}>
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={taskForm.control}
@@ -2416,7 +973,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <FormItem>
                     <FormLabel>Task Title</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Implement user authentication" />
+                      <Input {...field} placeholder="Enter task title" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -2430,14 +987,41 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea {...field} placeholder="Describe the task in detail..." rows={3} />
+                      <Textarea 
+                        {...field} 
+                        placeholder="Describe the task..."
+                        rows={3}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={taskForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="todo">To Do</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="completed">Completed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={taskForm.control}
                   name="priority"
@@ -2454,40 +1038,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           <SelectItem value="low">Low</SelectItem>
                           <SelectItem value="medium">Medium</SelectItem>
                           <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="urgent">Urgent</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={taskForm.control}
-                  name="estimatedHours"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estimated Hours</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          {...field}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                          placeholder="8"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={taskForm.control}
-                  name="dueDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Due Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -2528,7 +1080,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           </Form>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
