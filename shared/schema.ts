@@ -740,8 +740,9 @@ export const insertReplitSessionSchema = createInsertSchema(replitSessions).omit
 });
 
 export type InsertReplitSession = z.infer<typeof insertReplitSessionSchema>;
+export type ReplitSession = typeof replitSessions.$inferSelect;
 
-// Auto-detected gaps and issues table
+// Auto-detected gaps and issues table for AI coding
 export const autoDetectedIssues = pgTable("auto_detected_issues", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").references(() => appProjects.id),
@@ -759,9 +760,12 @@ export const autoDetectedIssues = pgTable("auto_detected_issues", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export type AutoDetectedIssue = typeof autoDetectedIssues.$inferSelect;
-export type InsertAutoDetectedIssue = z.infer<typeof createInsertSchema(autoDetectedIssues).omit({
+export const insertAutoDetectedIssueSchema = createInsertSchema(autoDetectedIssues).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-})>;
+});
+
+export type AutoDetectedIssue = typeof autoDetectedIssues.$inferSelect;
+export type InsertAutoDetectedIssue = z.infer<typeof insertAutoDetectedIssueSchema>;
+
