@@ -6,7 +6,7 @@ import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -97,8 +97,13 @@ export default function MinimalAppSuite() {
       projectForm.reset();
       toast({ title: "Project created successfully" });
     },
-    onError: () => {
-      toast({ title: "Failed to create project", variant: "destructive" });
+    onError: (error: any) => {
+      console.error('Project creation error:', error);
+      toast({ 
+        title: "Failed to create project", 
+        description: error.message || "Please try again",
+        variant: "destructive" 
+      });
     }
   });
 
@@ -177,9 +182,13 @@ export default function MinimalAppSuite() {
 
   // Form handlers
   const onProjectSubmit = (data: any) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form errors:', projectForm.formState.errors);
+    
     if (editingProject) {
       updateProjectMutation.mutate({ id: editingProject.id, ...data });
     } else {
+      console.log('Creating new project...');
       createProjectMutation.mutate(data);
     }
   };
@@ -254,6 +263,9 @@ export default function MinimalAppSuite() {
                 <DialogTitle>
                   {editingProject ? "Edit Project" : "Create New Project"}
                 </DialogTitle>
+                <DialogDescription>
+                  {editingProject ? "Update your project details" : "Add a new development project to track"}
+                </DialogDescription>
               </DialogHeader>
               <Form {...projectForm}>
                 <form onSubmit={projectForm.handleSubmit(onProjectSubmit)} className="space-y-4">
@@ -448,6 +460,9 @@ export default function MinimalAppSuite() {
                   <DialogTitle>
                     {editingTask ? "Edit Task" : "Create New Task"}
                   </DialogTitle>
+                  <DialogDescription>
+                    {editingTask ? "Update task details and status" : "Add a new task to your project"}
+                  </DialogDescription>
                 </DialogHeader>
                 <Form {...taskForm}>
                   <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-4">
