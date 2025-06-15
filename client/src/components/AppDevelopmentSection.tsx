@@ -1001,7 +1001,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         <Progress value={project.progress} className="h-2" />
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                         <div>
                           <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
                           <span className="ml-1 font-medium">{project.actualHours}/{project.estimatedHours || 'N/A'}</span>
@@ -1013,12 +1013,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         <div>
                           <span className="text-muted-foreground dark:text-gray-400">Type:</span>
                           <span className="ml-1 font-medium capitalize">{project.projectType}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Target:</span>
-                          <span className="ml-1 font-medium">
-                            {project.targetDate ? format(new Date(project.targetDate), 'MMM dd') : 'TBD'}
-                          </span>
                         </div>
                       </div>
 
