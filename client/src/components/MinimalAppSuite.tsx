@@ -90,7 +90,7 @@ export default function MinimalAppSuite() {
 
   // Mutations
   const createProjectMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/app-projects', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/app-projects', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
       setIsProjectDialogOpen(false);
@@ -108,7 +108,7 @@ export default function MinimalAppSuite() {
   });
 
   const updateProjectMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/app-projects/${id}`, 'PUT', data),
+    mutationFn: ({ id, ...data }: any) => apiRequest('PUT', `/api/app-projects/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
       setEditingProject(null);
@@ -117,7 +117,7 @@ export default function MinimalAppSuite() {
   });
 
   const deleteProjectMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/app-projects/${id}`, 'DELETE'),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/app-projects/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
@@ -127,7 +127,7 @@ export default function MinimalAppSuite() {
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/app-tasks', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/app-tasks', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setIsTaskDialogOpen(false);
@@ -140,7 +140,7 @@ export default function MinimalAppSuite() {
   });
 
   const updateTaskMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/app-tasks/${id}`, 'PUT', data),
+    mutationFn: ({ id, ...data }: any) => apiRequest('PUT', `/api/app-tasks/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setEditingTask(null);
@@ -149,7 +149,7 @@ export default function MinimalAppSuite() {
   });
 
   const deleteTaskMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/app-tasks/${id}`, 'DELETE'),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/app-tasks/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       toast({ title: "Task deleted successfully" });
