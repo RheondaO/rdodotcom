@@ -102,6 +102,23 @@ interface AppTask {
   updatedAt: string;
 }
 
+interface AutoDetectedIssue {
+  id: number;
+  projectId?: number;
+  category: string;
+  title: string;
+  description: string;
+  severity: "low" | "medium" | "high" | "critical";
+  estimatedEffort?: string;
+  blockedFeatures: string[];
+  suggestedSolution: string;
+  status: "identified" | "in_progress" | "resolved" | "dismissed";
+  autoDetected: boolean;
+  detectionSource?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface AppDevelopmentSectionProps {
   selectedDate: Date;
   isReadOnly?: boolean;
@@ -180,6 +197,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['/api/app-tasks'],
     queryFn: () => fetch('/api/app-tasks').then(res => res.json()),
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  });
+
+  // Fetch auto-detected issues from API
+  const { data: autoDetectedIssues = [], isLoading: issuesLoading } = useQuery({
+    queryKey: ['/api/auto-detected-issues'],
+    queryFn: () => fetch('/api/auto-detected-issues').then(res => res.json()),
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
@@ -1324,115 +1348,156 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </div>
           </div>
 
-          {/* Auto-detected Gaps */}
+          {/* Auto-detected Issues from Database */}
           <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
                 <AlertCircle className="h-5 w-5" />
-                Identified Gaps & Issues
+                Identified Gaps & Issues ({autoDetectedIssues.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {/* Example auto-detected gaps - would be populated from AI analysis */}
-                {[
-                  {
-                    id: 1,
-                    category: "Missing Functionality",
-                    title: "RotationONLY Content Studio Suite not established",
-                    description: "The content rotation system needs to be reestablished with proper scheduling and automation",
-                    severity: "high",
-                    estimatedEffort: "4-6 hours",
-                    blockedFeatures: ["Content automation", "Scheduled publishing"],
-                    suggestedSolution: "Implement content rotation pipeline with moon phase scheduling integration",
-                    status: "identified"
-                  },
-                  {
-                    id: 2,
-                    category: "Performance Issue",
-                    title: "App slower than anticipated in deployment",
-                    description: "Deployment performance is below expected benchmarks, affecting user experience",
-                    severity: "high",
-                    estimatedEffort: "2-3 hours",
-                    blockedFeatures: ["Fast user interactions", "Real-time updates"],
-                    suggestedSolution: "Already implemented compression and caching - needs verification",
-                    status: "in_progress"
-                  },
-                  {
-                    id: 3,
-                    category: "Integration Gap",
-                    title: "Automated change tracking system missing",
-                    description: "Need system to automatically list changes and updates for admin review",
-                    severity: "medium",
-                    estimatedEffort: "3-4 hours",
-                    blockedFeatures: ["Auto-change detection", "Admin workflow"],
-                    suggestedSolution: "Integrate git hooks and file monitoring for change detection",
-                    status: "identified"
-                  }
-                ].map((gap) => (
-                  <div key={gap.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-orange-400">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="text-orange-700 border-orange-300">
-                            {gap.category}
-                          </Badge>
-                          <Badge className={
-                            gap.severity === 'high' ? 'bg-red-100 text-red-700' :
-                            gap.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
-                          }>
-                            {gap.severity} priority
-                          </Badge>
-                        </div>
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                          {gap.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
-                          {gap.description}
-                        </p>
-                        <div className="text-xs text-muted-foreground dark:text-gray-500 space-y-1">
-                          <div><span className="font-medium">Estimated Effort:</span> {gap.estimatedEffort}</div>
-                          <div><span className="font-medium">Blocked Features:</span> {gap.blockedFeatures.join(', ')}</div>
-                          <div><span className="font-medium">Suggested Solution:</span> {gap.suggestedSolution}</div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Badge className={
-                          gap.status === 'identified' ? 'bg-red-100 text-red-800' :
-                          gap.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                          gap.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                          'bg-gray-100 text-gray-800'
-                        }>
-                          {gap.status.replace('_', ' ')}
-                        </Badge>
-                      </div>
+              {issuesLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl animate-pulse">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-full"></div>
                     </div>
-
-                    <div className="flex gap-2 mt-3">
-                      <Button 
-                        size="sm" 
-                        className="bg-gradient-to-r from-orange-400 to-red-500 text-white"
-                        disabled={isReadOnly}
-                      >
-                        <Wrench className="h-4 w-4 mr-1" />
-                        Start Fixing
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={isReadOnly}
-                        className={`text-green-600 border-green-300 hover:bg-green-50 ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        <CheckSquare className="h-4 w-4 mr-1" />
-                        Mark Complete
-                      </Button>
-                    </div>
+                  ))}
+                </div>
+              ) : autoDetectedIssues.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <CheckSquare className="h-8 w-8 text-green-400 dark:text-green-300" />
                   </div>
-                ))}
-              </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No Issues Found
+                  </h3>
+                  <p className="text-muted-foreground dark:text-gray-400 mb-4 max-w-sm mx-auto">
+                    Great! No auto-detected issues or gaps found in your projects. The system will automatically detect new issues as you develop.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {autoDetectedIssues.map((issue: AutoDetectedIssue) => (
+                    <div key={issue.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-orange-400">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-orange-700 border-orange-300">
+                              {issue.category}
+                            </Badge>
+                            <Badge className={
+                              issue.severity === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                              issue.severity === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                              issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                              'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                            }>
+                              {issue.severity} priority
+                            </Badge>
+                            {issue.autoDetected && (
+                              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                Auto-detected
+                              </Badge>
+                            )}
+                          </div>
+                          <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                            {issue.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
+                            {issue.description}
+                          </p>
+                          <div className="text-xs text-muted-foreground dark:text-gray-500 space-y-1">
+                            {issue.estimatedEffort && (
+                              <div><span className="font-medium">Estimated Effort:</span> {issue.estimatedEffort}</div>
+                            )}
+                            {issue.blockedFeatures.length > 0 && (
+                              <div><span className="font-medium">Blocked Features:</span> {issue.blockedFeatures.join(', ')}</div>
+                            )}
+                            <div><span className="font-medium">Suggested Solution:</span> {issue.suggestedSolution}</div>
+                            {issue.detectionSource && (
+                              <div><span className="font-medium">Source:</span> {issue.detectionSource}</div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Badge className={
+                            issue.status === 'identified' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
+                            issue.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                            issue.status === 'resolved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                            'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+                          }>
+                            {issue.status.replace('_', ' ')}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 mt-3">
+                        <Button 
+                          size="sm" 
+                          className="bg-gradient-to-r from-orange-400 to-red-500 text-white"
+                          disabled={isReadOnly}
+                          onClick={() => {
+                            // Update issue status to in_progress
+                            fetch(`/api/auto-detected-issues/${issue.id}`, {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ status: 'in_progress' })
+                            }).then(() => {
+                              queryClient.invalidateQueries({ queryKey: ['/api/auto-detected-issues'] });
+                            });
+                          }}
+                        >
+                          <Wrench className="h-4 w-4 mr-1" />
+                          Start Fixing
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          disabled={isReadOnly}
+                          className={`text-green-600 border-green-300 hover:bg-green-50 ${
+                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          onClick={() => {
+                            // Update issue status to resolved
+                            fetch(`/api/auto-detected-issues/${issue.id}`, {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ status: 'resolved' })
+                            }).then(() => {
+                              queryClient.invalidateQueries({ queryKey: ['/api/auto-detected-issues'] });
+                            });
+                          }}
+                        >
+                          <CheckSquare className="h-4 w-4 mr-1" />
+                          Mark Complete
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          disabled={isReadOnly}
+                          className={`text-gray-600 hover:bg-gray-50 ${
+                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this issue?')) {
+                              fetch(`/api/auto-detected-issues/${issue.id}`, {
+                                method: 'DELETE'
+                              }).then(() => {
+                                queryClient.invalidateQueries({ queryKey: ['/api/auto-detected-issues'] });
+                              });
+                            }
+                          }}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -1544,15 +1609,25 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground dark:text-gray-400">Category:</span>
                         <span className="ml-1 font-medium capitalize">{task.category}</span>
                       </div>
                       <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
+                        <span className="ml-1 font-medium">{task.actualHours}/{task.estimatedHours || 'N/A'}</span>
+                      </div>
+                      <div>
                         <span className="text-muted-foreground dark:text-gray-400">Project:</span>
                         <span className="ml-1 font-medium">
                           {projects.find(p => p.id === task.projectId)?.name}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Due:</span>
+                        <span className="ml-1 font-medium">
+                          {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
                         </span>
                       </div>
                     </div>
@@ -1564,7 +1639,25 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                     )}
 
-
+                    <div className="flex gap-2 mt-3">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                      >
+                        <Timer className="h-4 w-4 mr-1" />
+                        Log Time
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}

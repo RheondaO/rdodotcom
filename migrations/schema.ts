@@ -560,6 +560,29 @@ export const socialMediaAnalytics = pgTable("social_media_analytics", {
 		}),
 ]);
 
+export const autoDetectedIssues = pgTable("auto_detected_issues", {
+	id: serial().primaryKey().notNull(),
+	projectId: integer("project_id"),
+	category: text().notNull(),
+	title: text().notNull(),
+	description: text().default('').notNull(),
+	severity: text().default('medium').notNull(),
+	estimatedEffort: text("estimated_effort"),
+	blockedFeatures: text("blocked_features").array().default([""]).notNull(),
+	suggestedSolution: text("suggested_solution").default('').notNull(),
+	status: text().default('identified').notNull(),
+	autoDetected: boolean("auto_detected").default(true),
+	detectionSource: text("detection_source"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.projectId],
+			foreignColumns: [appProjects.id],
+			name: "auto_detected_issues_project_id_app_projects_id_fk"
+		}),
+]);
+
 export const users = pgTable("users", {
 	id: serial().primaryKey().notNull(),
 	username: text().notNull(),

@@ -14,7 +14,7 @@ import type {
   SocialMediaPost, InsertSocialMediaPost, SocialMediaAnalytics, InsertSocialMediaAnalytics,
   AppProject, InsertAppProject, AppTask, InsertAppTask,
   AppTimeEntry, InsertAppTimeEntry, TestCase, InsertTestCase, QualityIssue, InsertQualityIssue,
-  ReplitSession, InsertReplitSession,
+  ReplitSession, InsertReplitSession, AutoDetectedIssue, InsertAutoDetectedIssue,
   PerformanceInsights, InsertPerformanceInsights, MiniGameDesign, InsertMiniGameDesign,
   MiniGameBlock, InsertMiniGameBlock
 } from "@shared/schema";
@@ -801,6 +801,34 @@ export class DatabaseStorage {
       .from(schema.replitSessions)
       .where(eq(schema.replitSessions.projectId, projectId))
       .orderBy(desc(schema.replitSessions.createdAt));
+  }
+
+  // Auto-detected Issues Management
+  async getAllAutoDetectedIssues(): Promise<AutoDetectedIssue[]> {
+    return await db.select().from(schema.autoDetectedIssues).orderBy(desc(schema.autoDetectedIssues.createdAt));
+  }
+
+  async getAutoDetectedIssuesByProject(projectId: number): Promise<AutoDetectedIssue[]> {
+    return await db.select().from(schema.autoDetectedIssues)
+      .where(eq(schema.autoDetectedIssues.projectId, projectId))
+      .orderBy(desc(schema.autoDetectedIssues.createdAt));
+  }
+
+  async createAutoDetectedIssue(issue: InsertAutoDetectedIssue): Promise<AutoDetectedIssue> {
+    const [newIssue] = await db.insert(schema.autoDetectedIssues).values(issue).returning();
+    return newIssue;
+  }
+
+  async updateAutoDetectedIssue(id: number, updates: Partial<InsertAutoDetectedIssue>): Promise<AutoDetectedIssue> {
+    const [updatedIssue] = await db.update(schema.autoDetectedIssues)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(schema.autoDetectedIssues.id, id))
+      .returning();
+    return updatedIssue;
+  }
+
+  async deleteAutoDetectedIssue(id: number): Promise<void> {
+    await db.delete(schema.autoDetectedIssues).where(eq(schema.autoDetectedIssues.id, id));
   }
 }
 

@@ -721,6 +721,7 @@ export type TestCase = typeof testCases.$inferSelect;
 export type InsertQualityIssue = z.infer<typeof insertQualityIssueSchema>;
 export type QualityIssue = typeof qualityIssues.$inferSelect;
 
+// User schemaAdding autoDetectedIssues table and types to the schema.```text
 // User schema
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -739,4 +740,28 @@ export const insertReplitSessionSchema = createInsertSchema(replitSessions).omit
 });
 
 export type InsertReplitSession = z.infer<typeof insertReplitSessionSchema>;
-export type ReplitSession = typeof replitSessions.$inferSelect;
+
+// Auto-detected gaps and issues table
+export const autoDetectedIssues = pgTable("auto_detected_issues", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => appProjects.id),
+  category: text("category").notNull(), // "Missing Functionality", "Performance Issue", "Integration Gap", etc.
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  severity: text("severity").notNull().default("medium"), // low, medium, high, critical
+  estimatedEffort: text("estimated_effort"), // "2-3 hours", "1-2 days", etc.
+  blockedFeatures: text("blocked_features").array().notNull().default([]),
+  suggestedSolution: text("suggested_solution").notNull().default(""),
+  status: text("status").notNull().default("identified"), // identified, in_progress, resolved, dismissed
+  autoDetected: boolean("auto_detected").default(true),
+  detectionSource: text("detection_source"), // "ai_analysis", "performance_monitoring", "user_report", etc.
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type AutoDetectedIssue = typeof autoDetectedIssues.$inferSelect;
+export type InsertAutoDetectedIssue = z.infer<typeof createInsertSchema(autoDetectedIssues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+})>;

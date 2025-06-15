@@ -943,6 +943,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Auto-detected Issues
+  app.get("/api/auto-detected-issues", async (req, res) => {
+    try {
+      const { projectId } = req.query;
+      if (projectId) {
+        const issues = await storage.getAutoDetectedIssuesByProject(parseInt(projectId as string));
+        res.json(issues);
+      } else {
+        const issues = await storage.getAllAutoDetectedIssues();
+        res.json(issues);
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch auto-detected issues" });
+    }
+  });
+
+  app.post("/api/auto-detected-issues", async (req, res) => {
+    try {
+      const issue = await storage.createAutoDetectedIssue(req.body);
+      res.json(issue);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid auto-detected issue data" });
+    }
+  });
+
+  app.put("/api/auto-detected-issues/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const issue = await storage.updateAutoDetectedIssue(id, updates);
+      res.json(issue);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update auto-detected issue" });
+    }
+  });
+
+  app.delete("/api/auto-detected-issues/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAutoDetectedIssue(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete auto-detected issue" });
+    }
+  });
+
+  // Create cross-app tracking tasks for existing projects
+  app.post("/api/create-cross-app-tracking-tasks", async (req, res) => {
+    try {
+      const projects = await storage.getAllAppProjects();
+      const tasksCreated = [];
+
+      for (const project of projects) {
+        // Check if project has Replit tag or is a known Replit app
+        const isReplitApp = project.tags?.includes('replit') || 
+                           ['CommunityPulse', 'PersonalPortfolio', 'Belle Journal'].includes(project.name);
+
+        if (isReplitApp) {
+          // Create task for enabling full cross-app tracking
+          const trackingTask = await storage.createAppTask({
+            projectId: project.id,
+            title: "Enable Full Cross-App Tracking",
+            description: `Implement comprehensive tracking for ${project.name} to monitor real-time file changes, development time, and live activity across all Replit apps`,
+            status: "todo",
+            priority: "medium",
+            category: "improvement",
+            estimatedHours: 3,
+            tags: ["replit-integration", "cross-app-tracking"]
+          });
+
+          tasksCreated.push({
+            project: project.name,
+            task: trackingTask.title,
+            id: trackingTask.id
+          });
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: `Created ${tasksCreated.length} cross-app tracking tasks`,
+        tasks: tasksCreated
+      });
+    } catch (error) {
+      console.error("Error creating cross-app tracking tasks:", error);
+      res.status(500).json({ error: "Failed to create cross-app tracking tasks" });
+    }
+  });
+
   // Medications
   app.get("/api/medications", async (req, res) => {
     try {
