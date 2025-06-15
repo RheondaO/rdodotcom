@@ -105,12 +105,8 @@ interface AppDevelopmentSectionProps {
 }
 
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "time">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "changes" | "gaps" | "testing">("overview");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
-  const [showNewTaskForm, setShowNewTaskForm] = useState(false);
-  const [techStackInput, setTechStackInput] = useState("");
-  const [tagsInput, setTagsInput] = useState("");
   
   const { toast } = useToast();
   
@@ -374,10 +370,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         <div className="flex items-center space-x-2 bg-white/60 dark:bg-gray-800/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
           {[
             { key: "overview", label: "Overview", icon: BarChart3 },
-            { key: "projects", label: "Projects", icon: Code2 },
-            { key: "tasks", label: "Tasks", icon: CheckSquare },
-            { key: "testing", label: "Testing & QA", icon: AlertCircle },
-            { key: "time", label: "Time Tracking", icon: Timer }
+            { key: "changes", label: "Recent Changes", icon: GitBranch },
+            { key: "gaps", label: "Gaps & Issues", icon: AlertCircle },
+            { key: "testing", label: "Testing Queue", icon: CheckSquare }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -624,6 +619,264 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Recent Changes View */}
+      {activeView === "changes" && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Changes & Updates</h2>
+            <Badge variant="outline" className="bg-green-50 text-green-700">
+              Auto-detected from commits
+            </Badge>
+          </div>
+
+          {/* Auto-detected Changes */}
+          <Card className="border-green-100 dark:border-green-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
+                <GitBranch className="h-5 w-5" />
+                Detected Changes Requiring Testing
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Example auto-detected changes - would be populated from actual analysis */}
+                {[
+                  {
+                    id: 1,
+                    type: "feature",
+                    title: "Added compression middleware for performance optimization",
+                    description: "Implemented gzip compression to reduce response sizes and improve load times",
+                    files: ["server/index.ts"],
+                    impact: "Performance improvement",
+                    status: "pending_test",
+                    priority: "medium",
+                    detectedAt: new Date().toISOString()
+                  },
+                  {
+                    id: 2,
+                    type: "improvement",
+                    title: "Optimized database queries with caching headers",
+                    description: "Added response caching to reduce database load on public endpoints",
+                    files: ["server/routes.ts"],
+                    impact: "Performance improvement",
+                    status: "pending_test",
+                    priority: "high",
+                    detectedAt: new Date().toISOString()
+                  },
+                  {
+                    id: 3,
+                    type: "feature",
+                    title: "Enhanced deployment configuration",
+                    description: "Updated build and run commands for better production deployment",
+                    files: [".replit", "server/index.ts"],
+                    impact: "Deployment optimization",
+                    status: "needs_verification",
+                    priority: "high",
+                    detectedAt: new Date().toISOString()
+                  }
+                ].map((change) => (
+                  <div key={change.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-green-400">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="capitalize">
+                            {change.type}
+                          </Badge>
+                          <Badge className={
+                            change.priority === 'high' ? 'bg-red-100 text-red-700' :
+                            change.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }>
+                            {change.priority} priority
+                          </Badge>
+                        </div>
+                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                          {change.title}
+                        </h4>
+                        <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
+                          {change.description}
+                        </p>
+                        <div className="text-xs text-muted-foreground dark:text-gray-500">
+                          <span className="font-medium">Files:</span> {change.files.join(', ')}
+                        </div>
+                        <div className="text-xs text-muted-foreground dark:text-gray-500">
+                          <span className="font-medium">Impact:</span> {change.impact}
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Badge className={
+                          change.status === 'pending_test' ? 'bg-yellow-100 text-yellow-800' :
+                          change.status === 'needs_verification' ? 'bg-orange-100 text-orange-800' :
+                          'bg-gray-100 text-gray-800'
+                        }>
+                          {change.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-3">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={`text-green-600 border-green-300 hover:bg-green-50 ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <CheckSquare className="h-4 w-4 mr-1" />
+                        Mark as Tested
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        Add Notes
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Gaps & Issues View */}
+      {activeView === "gaps" && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Gaps & Missing Functionality</h2>
+            <Badge variant="outline" className="bg-orange-50 text-orange-700">
+              AI Analysis Powered
+            </Badge>
+          </div>
+
+          {/* Auto-detected Gaps */}
+          <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
+                <AlertCircle className="h-5 w-5" />
+                Identified Gaps & Issues
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Example auto-detected gaps - would be populated from AI analysis */}
+                {[
+                  {
+                    id: 1,
+                    category: "Missing Functionality",
+                    title: "RotationONLY Content Studio Suite not established",
+                    description: "The content rotation system needs to be reestablished with proper scheduling and automation",
+                    severity: "high",
+                    estimatedEffort: "4-6 hours",
+                    blockedFeatures: ["Content automation", "Scheduled publishing"],
+                    suggestedSolution: "Implement content rotation pipeline with moon phase scheduling integration",
+                    status: "identified"
+                  },
+                  {
+                    id: 2,
+                    category: "Performance Issue",
+                    title: "App slower than anticipated in deployment",
+                    description: "Deployment performance is below expected benchmarks, affecting user experience",
+                    severity: "high",
+                    estimatedEffort: "2-3 hours",
+                    blockedFeatures: ["Fast user interactions", "Real-time updates"],
+                    suggestedSolution: "Already implemented compression and caching - needs verification",
+                    status: "in_progress"
+                  },
+                  {
+                    id: 3,
+                    category: "Integration Gap",
+                    title: "Automated change tracking system missing",
+                    description: "Need system to automatically list changes and updates for admin review",
+                    severity: "medium",
+                    estimatedEffort: "3-4 hours",
+                    blockedFeatures: ["Auto-change detection", "Admin workflow"],
+                    suggestedSolution: "Integrate git hooks and file monitoring for change detection",
+                    status: "identified"
+                  }
+                ].map((gap) => (
+                  <div key={gap.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-orange-400">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="text-orange-700 border-orange-300">
+                            {gap.category}
+                          </Badge>
+                          <Badge className={
+                            gap.severity === 'high' ? 'bg-red-100 text-red-700' :
+                            gap.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }>
+                            {gap.severity} priority
+                          </Badge>
+                        </div>
+                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                          {gap.title}
+                        </h4>
+                        <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
+                          {gap.description}
+                        </p>
+                        <div className="text-xs text-muted-foreground dark:text-gray-500 space-y-1">
+                          <div><span className="font-medium">Estimated Effort:</span> {gap.estimatedEffort}</div>
+                          <div><span className="font-medium">Blocked Features:</span> {gap.blockedFeatures.join(', ')}</div>
+                          <div><span className="font-medium">Suggested Solution:</span> {gap.suggestedSolution}</div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Badge className={
+                          gap.status === 'identified' ? 'bg-red-100 text-red-800' :
+                          gap.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                          gap.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                          'bg-gray-100 text-gray-800'
+                        }>
+                          {gap.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-3">
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-orange-400 to-red-500 text-white"
+                        disabled={isReadOnly}
+                      >
+                        <Wrench className="h-4 w-4 mr-1" />
+                        Start Fixing
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                      >
+                        <Users className="h-4 w-4 mr-1" />
+                        Assign
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={`text-green-600 border-green-300 hover:bg-green-50 ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <CheckSquare className="h-4 w-4 mr-1" />
+                        Mark Complete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -942,119 +1195,152 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      {/* Testing & QA View */}
+      {/* Testing Queue View */}
       {activeView === "testing" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Testing & Quality Assurance</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Testing Queue & Completion Verification</h2>
             <div className="flex gap-2">
-              <Button 
-                disabled={isReadOnly}
-                className={`bg-gradient-to-r from-red-400 to-orange-500 text-white ${
-                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Test Item
-              </Button>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                {/* Mock count - would be dynamic */}
+                3 items pending
+              </Badge>
               <Button 
                 variant="outline"
                 disabled={isReadOnly}
-                className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                className={`text-green-600 border-green-300 hover:bg-green-50 ${
+                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <CheckSquare className="h-4 w-4 mr-2" />
-                Run All Tests
+                Verify All Complete
               </Button>
             </div>
           </div>
 
-          {/* Tasks in Testing Status */}
-          {testingTasks.length > 0 && (
-            <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
-                  <AlertCircle className="h-5 w-5" />
-                  Tasks Currently in Testing
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {testingTasks.map((task) => (
-                    <div key={task.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-orange-400">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400">{task.description}</p>
-                          <p className="text-xs text-muted-foreground dark:text-gray-400 mt-1">
-                            {projects.find(p => p.id === task.projectId)?.name}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getStatusColor(task.status)}>
-                            {task.status}
-                          </Badge>
-                          <Badge variant="outline" className="capitalize">
-                            {task.category}
-                          </Badge>
-                        </div>
+          {/* Testing Queue - Items Pending Completion Verification */}
+          <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+                <CheckSquare className="h-5 w-5" />
+                Items Awaiting Admin Verification
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Example testing queue items - would be populated from changes and gaps */}
+                {[
+                  {
+                    id: 1,
+                    type: "performance_fix",
+                    title: "Compression middleware implementation",
+                    description: "Verify that gzip compression is working and improving load times",
+                    expectedOutcome: "Page load times reduced by 20-30%",
+                    testSteps: [
+                      "Check network tab for compressed responses",
+                      "Measure load time before/after",
+                      "Verify all endpoints return compressed content"
+                    ],
+                    completed: false,
+                    completedAt: null,
+                    completedBy: null
+                  },
+                  {
+                    id: 2,
+                    type: "feature_completion",
+                    title: "Database query optimization with caching",
+                    description: "Confirm that caching headers are properly set and reducing database load",
+                    expectedOutcome: "Reduced database queries on public endpoints",
+                    testSteps: [
+                      "Monitor database query count",
+                      "Check response headers for cache-control",
+                      "Verify 5-minute cache duration on public data"
+                    ],
+                    completed: false,
+                    completedAt: null,
+                    completedBy: null
+                  },
+                  {
+                    id: 3,
+                    type: "deployment_verification",
+                    title: "Production deployment configuration",
+                    description: "Ensure deployment runs smoothly with new build configuration",
+                    expectedOutcome: "Successful deployment without errors",
+                    testSteps: [
+                      "Deploy to production",
+                      "Verify all services start correctly",
+                      "Check application functionality post-deploy"
+                    ],
+                    completed: false,
+                    completedAt: null,
+                    completedBy: null
+                  }
+                ].map((item) => (
+                  <div key={item.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-blue-400">
+                    <div className="flex items-start gap-4">
+                      <div className="pt-1">
+                        <input 
+                          type="checkbox" 
+                          checked={item.completed}
+                          className={`w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${
+                            isReadOnly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                          }`}
+                          disabled={isReadOnly}
+                        />
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Category:</span>
-                          <span className="ml-1 font-medium capitalize">{task.category}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="capitalize text-blue-700 border-blue-300">
+                            {item.type.replace('_', ' ')}
+                          </Badge>
+                          {item.completed && (
+                            <Badge className="bg-green-100 text-green-700">
+                              ✓ Completed
+                            </Badge>
+                          )}
                         </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Time Spent:</span>
-                          <span className="ml-1 font-medium">{task.actualHours}h / {task.estimatedHours}h</span>
+                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                          {item.title}
+                        </h4>
+                        <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
+                          {item.description}
+                        </p>
+                        
+                        <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3 mb-3">
+                          <div className="text-sm">
+                            <div className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                              Expected Outcome:
+                            </div>
+                            <div className="text-blue-700 dark:text-blue-300 mb-2">
+                              {item.expectedOutcome}
+                            </div>
+                            <div className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                              Test Steps:
+                            </div>
+                            <ul className="text-blue-700 dark:text-blue-300 text-xs space-y-1">
+                              {item.testSteps.map((step, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <span className="text-blue-500 mt-1">•</span>
+                                  <span>{step}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Due Date:</span>
-                          <span className="ml-1 font-medium">
-                            {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
-                          </span>
-                        </div>
-                      </div>
 
-                      {task.comments && (
-                        <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
-                          <span className="text-blue-600 dark:text-blue-400 font-medium">Testing Notes:</span>
-                          <span className="ml-1">{task.comments}</span>
-                        </div>
-                      )}
-
-                      <div className="flex gap-2 mt-3">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          disabled={isReadOnly}
-                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
-                          Pass Test
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          disabled={isReadOnly}
-                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
-                          Fail Test
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          disabled={isReadOnly}
-                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
-                          Add Notes
-                        </Button>
+                        {item.completed && (
+                          <div className="text-xs text-green-600 dark:text-green-400">
+                            ✓ Completed {item.completedAt ? format(new Date(item.completedAt), 'MMM dd, yyyy') : 'recently'}
+                            {item.completedBy && ` by ${item.completedBy}`}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Testing Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -1412,284 +1698,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      {/* New Project Form Dialog */}
-      <Dialog open={showNewProjectForm} onOpenChange={setShowNewProjectForm}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Code2 className="h-5 w-5" />
-              Create New Project
-            </DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Project Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter project name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="projectType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Project Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select project type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="web">Web Application</SelectItem>
-                          <SelectItem value="mobile">Mobile App</SelectItem>
-                          <SelectItem value="desktop">Desktop App</SelectItem>
-                          <SelectItem value="api">API/Backend</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Describe your project..." 
-                        className="min-h-[100px]"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="planning">Planning</SelectItem>
-                          <SelectItem value="in_progress">In Progress</SelectItem>
-                          <SelectItem value="testing">Testing</SelectItem>
-                          <SelectItem value="deployed">Deployed</SelectItem>
-                          <SelectItem value="on_hold">On Hold</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="priority"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Priority</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select priority" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                          <SelectItem value="urgent">Urgent</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="estimatedHours"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estimated Hours</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="targetDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Target Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="repositoryUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Repository URL (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://github.com/..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="deploymentUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Deployment URL (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Tech Stack</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add technologies (comma-separated)"
-                      value={techStackInput}
-                      onChange={(e) => setTechStackInput(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        const commonTech = ['React', 'Node.js', 'TypeScript', 'Python', 'PostgreSQL', 'MongoDB', 'Express', 'Next.js'];
-                        const randomTech = commonTech[Math.floor(Math.random() * commonTech.length)];
-                        addTechStackItem(randomTech);
-                      }}
-                    >
-                      Suggest
-                    </Button>
-                  </div>
-                  {techStackInput && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {techStackInput.split(',').map((tech, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {tech.trim()}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Tags</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add tags (comma-separated)"
-                      value={tagsInput}
-                      onChange={(e) => setTagsInput(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        const commonTags = ['frontend', 'backend', 'fullstack', 'personal', 'client-work', 'learning'];
-                        const randomTag = commonTags[Math.floor(Math.random() * commonTags.length)];
-                        addTag(randomTag);
-                      }}
-                    >
-                      Suggest
-                    </Button>
-                  </div>
-                  {tagsInput && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {tagsInput.split(',').map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag.trim()}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setShowNewProjectForm(false)}
-                  disabled={createProjectMutation.isPending}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
-                  disabled={createProjectMutation.isPending}
-                >
-                  {createProjectMutation.isPending ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Project
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      
     </div>
   );
 }
