@@ -70,7 +70,6 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     { key: "habits" as ViewType, label: "Habits", icon: Zap },
     { key: "health" as ViewType, label: "Health", icon: Heart },
     { key: "productivity" as ViewType, label: "Productivity", icon: Briefcase },
-    { key: "apps" as ViewType, label: "App Development", icon: Code2 },
     { key: "reports" as ViewType, label: "Reports", icon: BarChart3 },
     { key: "sitemap" as ViewType, label: "Site Map", icon: Map },
   ];

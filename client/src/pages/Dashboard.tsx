@@ -25,7 +25,7 @@ import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
 
 function Dashboard() {
@@ -270,7 +270,7 @@ function Dashboard() {
           {activeView === "groceries" && <GrocerySection isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+
           {activeView === "sitemap" && (
             <SiteMapSection 
               onNavigate={(section: string) => setActiveView(section as ViewType)}
