@@ -655,116 +655,155 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </Button>
           </div>
 
-          {/* Auto-detected Changes */}
-          <Card className="border-green-100 dark:border-green-800 shadow-lg">
+          {/* Projects Grid */}
+          <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
-                <GitBranch className="h-5 w-5" />
-                Detected Changes Requiring Testing
+              <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
+                <Code2 className="h-5 w-5" />
+                All Projects ({projects.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {/* Example auto-detected changes - would be populated from actual analysis */}
-                {[
-                  {
-                    id: 1,
-                    type: "feature",
-                    title: "Added compression middleware for performance optimization",
-                    description: "Implemented gzip compression to reduce response sizes and improve load times",
-                    files: ["server/index.ts"],
-                    impact: "Performance improvement",
-                    status: "pending_test",
-                    priority: "medium",
-                    detectedAt: new Date().toISOString()
-                  },
-                  {
-                    id: 2,
-                    type: "improvement",
-                    title: "Optimized database queries with caching headers",
-                    description: "Added response caching to reduce database load on public endpoints",
-                    files: ["server/routes.ts"],
-                    impact: "Performance improvement",
-                    status: "pending_test",
-                    priority: "high",
-                    detectedAt: new Date().toISOString()
-                  },
-                  {
-                    id: 3,
-                    type: "feature",
-                    title: "Enhanced deployment configuration",
-                    description: "Updated build and run commands for better production deployment",
-                    files: [".replit", "server/index.ts"],
-                    impact: "Deployment optimization",
-                    status: "needs_verification",
-                    priority: "high",
-                    detectedAt: new Date().toISOString()
-                  }
-                ].map((change) => (
-                  <div key={change.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border-l-4 border-green-400">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="capitalize">
-                            {change.type}
-                          </Badge>
-                          <Badge className={
-                            change.priority === 'high' ? 'bg-red-100 text-red-700' :
-                            change.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
-                          }>
-                            {change.priority} priority
-                          </Badge>
-                        </div>
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                          {change.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
-                          {change.description}
-                        </p>
-                        <div className="text-xs text-muted-foreground dark:text-gray-500">
-                          <span className="font-medium">Files:</span> {change.files.join(', ')}
-                        </div>
-                        <div className="text-xs text-muted-foreground dark:text-gray-500">
-                          <span className="font-medium">Impact:</span> {change.impact}
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Badge className={
-                          change.status === 'pending_test' ? 'bg-yellow-100 text-yellow-800' :
-                          change.status === 'needs_verification' ? 'bg-orange-100 text-orange-800' :
-                          'bg-gray-100 text-gray-800'
-                        }>
-                          {change.status.replace('_', ' ')}
-                        </Badge>
-                      </div>
+              {projectsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-6 bg-white/60 dark:bg-gray-800/60 rounded-xl animate-pulse">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
                     </div>
+                  ))}
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="text-center py-12">
+                  <Code2 className="h-16 w-16 text-muted-foreground dark:text-gray-500 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium text-muted-foreground dark:text-gray-400 mb-2">No Projects Yet</h3>
+                  <p className="text-sm text-muted-foreground dark:text-gray-500 mb-4">
+                    Create your first project to start tracking development progress
+                  </p>
+                  <Button 
+                    onClick={() => setShowNewProjectForm(true)}
+                    disabled={isReadOnly}
+                    className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                      isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Project
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {projects.map((project) => (
+                    <div key={project.id} className="p-6 bg-white/60 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                            {project.name}
+                          </h4>
+                          <p className="text-sm text-muted-foreground dark:text-gray-400 mb-3">
+                            {project.description}
+                          </p>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge className={
+                              project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                              project.status === 'planning' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }>
+                              {project.status.replace('_', ' ')}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {project.projectType}
+                            </Badge>
+                            <Badge className={
+                              project.priority === 'high' ? 'bg-red-100 text-red-700' :
+                              project.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-gray-100 text-gray-700'
+                            }>
+                              {project.priority}
+                            </Badge>
+                          </div>
+                          
+                          {/* Progress Bar */}
+                          <div className="mb-3">
+                            <div className="flex justify-between text-xs text-muted-foreground dark:text-gray-500 mb-1">
+                              <span>Progress</span>
+                              <span>{project.progress}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                              <div 
+                                className="bg-gradient-to-r from-purple-400 to-indigo-500 h-2 rounded-full transition-all"
+                                style={{ width: `${project.progress}%` }}
+                              ></div>
+                            </div>
+                          </div>
 
-                    <div className="flex gap-2 mt-3">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={isReadOnly}
-                        className={`text-green-600 border-green-300 hover:bg-green-50 ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        <CheckSquare className="h-4 w-4 mr-1" />
-                        Mark as Tested
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={isReadOnly}
-                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                      >
-                        <FileText className="h-4 w-4 mr-1" />
-                        Add Notes
-                      </Button>
+                          {/* Time Tracking */}
+                          <div className="text-xs text-muted-foreground dark:text-gray-500 mb-3">
+                            <div className="flex justify-between">
+                              <span>Estimated: {project.estimatedHours}h</span>
+                              <span>Actual: {project.actualHours}h</span>
+                            </div>
+                          </div>
+
+                          {/* Tech Stack */}
+                          {project.techStack && project.techStack.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {project.techStack.slice(0, 3).map((tech, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tech}
+                                </Badge>
+                              ))}
+                              {project.techStack.length > 3 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{project.techStack.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 flex-wrap">
+                        <Button 
+                          size="sm"
+                          onClick={() => setSelectedProject(project.id)}
+                          disabled={isReadOnly}
+                          className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          View Details
+                        </Button>
+                        {project.repositoryUrl && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            disabled={isReadOnly}
+                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
+                            <GitBranch className="h-4 w-4 mr-1" />
+                            Repository
+                          </Button>
+                        )}
+                        {project.deploymentUrl && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            disabled={isReadOnly}
+                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
+                            <Link className="h-4 w-4 mr-1" />
+                            Live Site
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
