@@ -1564,16 +1564,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                     )}
 
-                    <div className="flex gap-2 mt-3">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={isReadOnly}
-                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                      >
-                        Edit
-                      </Button>
-                    </div>
+
                   </CardContent>
                 </Card>
               ))}
