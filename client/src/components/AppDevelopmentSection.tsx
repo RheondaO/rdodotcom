@@ -694,47 +694,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               </Button>
             )}
           </div>
-          
-          {/* Active Timer Display */}
-          <Card className="border-green-100 dark:border-green-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
-                <Timer className="h-5 w-5" />
-                Current Session
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <div className="text-4xl font-mono font-bold text-gray-900 dark:text-white mb-2">
-                  {formatTime(sessionTime)}
-                </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {isTimerActive ? 'Session in progress' : 'No active session'}
-                </p>
-                {!isReadOnly && (
-                  <div className="flex gap-2 justify-center">
-                    <Button
-                      variant={isTimerActive ? "destructive" : "default"}
-                      onClick={isTimerActive ? stopTimer : startTimer}
-                      className={!isTimerActive ? "bg-gradient-to-r from-green-400 to-emerald-500 text-white" : ""}
-                    >
-                      {isTimerActive ? (
-                        <>
-                          <Square className="h-4 w-4 mr-2" />
-                          Stop Session
-                        </>
-                      ) : (
-                        <>
-                          <Timer className="h-4 w-4 mr-2" />
-                          Start Session
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Today's Time Summary */}
           <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
