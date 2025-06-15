@@ -1544,14 +1544,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground dark:text-gray-400">Category:</span>
                         <span className="ml-1 font-medium capitalize">{task.category}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
-                        <span className="ml-1 font-medium">{task.actualHours}/{task.estimatedHours || 'N/A'}</span>
                       </div>
                       <div>
                         <span className="text-muted-foreground dark:text-gray-400">Project:</span>
@@ -1576,15 +1572,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
                       >
                         Edit
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={isReadOnly}
-                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                      >
-                        <Timer className="h-4 w-4 mr-1" />
-                        Log Time
                       </Button>
                     </div>
                   </CardContent>
