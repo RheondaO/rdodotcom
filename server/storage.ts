@@ -691,6 +691,22 @@ export class DatabaseStorage {
     return updatedTask;
   }
 
+  async updateAppProject(id: number, project: Partial<InsertAppProject>): Promise<AppProject> {
+    const [updatedProject] = await db.update(schema.appProjects)
+      .set({ ...project, updatedAt: new Date() })
+      .where(eq(schema.appProjects.id, id))
+      .returning();
+    return updatedProject;
+  }
+
+  async deleteAppProject(id: number): Promise<void> {
+    await db.delete(schema.appProjects).where(eq(schema.appProjects.id, id));
+  }
+
+  async deleteAppTask(id: number): Promise<void> {
+    await db.delete(schema.appTasks).where(eq(schema.appTasks.id, id));
+  }
+
 
 
   async getAppTimeEntriesByProject(projectId: number, startDate?: string, endDate?: string): Promise<AppTimeEntry[]> {

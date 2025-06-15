@@ -60,6 +60,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/app-projects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const project = await storage.updateAppProject(id, req.body);
+      res.json(project);
+    } catch (error) {
+      console.error('Error updating app project:', error);
+      res.status(500).json({ error: "Failed to update app project" });
+    }
+  });
+
+  app.delete("/api/app-projects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAppProject(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting app project:', error);
+      res.status(500).json({ error: "Failed to delete app project" });
+    }
+  });
+
   // Git commits endpoint
   app.get("/api/git/commits", async (req, res) => {
     try {
@@ -956,6 +978,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // App Development - Tasks
+  app.get('/api/app-tasks', async (req, res) => {
+    try {
+      const projectId = req.query.projectId ? parseInt(req.query.projectId as string) : undefined;
+      const tasks = projectId ? 
+        await storage.getAppTasksByProject(projectId) : 
+        await storage.getAppTasks();
+      res.json(tasks);
+    } catch (error) {
+      console.error('Error fetching app tasks:', error);
+      res.status(500).json({ error: 'Failed to fetch app tasks' });
+    }
+  });
+
   app.post('/api/app-tasks', async (req, res) => {
     try {
       const task = await storage.createAppTask(req.body);
@@ -974,6 +1009,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error updating app task:', error);
       res.status(500).json({ error: 'Failed to update app task' });
+    }
+  });
+
+  app.delete('/api/app-tasks/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAppTask(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting app task:', error);
+      res.status(500).json({ error: 'Failed to delete app task' });
     }
   });
 
