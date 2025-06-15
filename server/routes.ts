@@ -25,6 +25,41 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
+  // App Projects - Public access for development suite (before auth middleware)
+  app.get("/api/app-projects", async (req, res) => {
+    try {
+      const projects = await storage.getAllAppProjects();
+      res.json(projects);
+    } catch (error) {
+      console.error('Error fetching app projects:', error);
+      res.status(500).json({ error: "Failed to fetch app projects" });
+    }
+  });
+
+  app.post("/api/app-projects", async (req, res) => {
+    try {
+      console.log('Creating app project with data:', req.body);
+      
+      // Map frontend fields to database schema
+      const projectData = {
+        ...req.body,
+        projectType: req.body.type, // Map 'type' to 'projectType'
+        techStack: req.body.technology_stack || [], // Map 'technology_stack' to 'techStack'
+      };
+      
+      // Remove the original fields that don't match the schema
+      delete projectData.type;
+      delete projectData.technology_stack;
+      
+      const project = await storage.createAppProject(projectData);
+      console.log('Created project:', project);
+      res.json(project);
+    } catch (error) {
+      console.error('Error creating app project:', error);
+      res.status(500).json({ error: "Failed to create app project" });
+    }
+  });
+
   // Apply authentication middleware to all routes
   app.use(authenticateUser);
 
@@ -88,28 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // App Projects - Public access for development suite
-  app.get("/api/app-projects", async (req, res) => {
-    try {
-      const projects = await storage.getAllAppProjects();
-      res.json(projects);
-    } catch (error) {
-      console.error('Error fetching app projects:', error);
-      res.status(500).json({ error: "Failed to fetch app projects" });
-    }
-  });
 
-  app.post("/api/app-projects", async (req, res) => {
-    try {
-      console.log('Creating app project with data:', req.body);
-      const project = await storage.createAppProject(req.body);
-      console.log('Created project:', project);
-      res.json(project);
-    } catch (error) {
-      console.error('Error creating app project:', error);
-      res.status(500).json({ error: "Failed to create app project" });
-    }
-  });
 
   // Auth status endpoint
 
