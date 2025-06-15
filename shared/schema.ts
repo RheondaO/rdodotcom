@@ -342,19 +342,7 @@ export const appTasks = pgTable("app_tasks", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const appSprints = pgTable("app_sprints", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull().references(() => appProjects.id),
-  name: text("name").notNull(),
-  description: text("description").notNull().default(""),
-  status: text("status").notNull().default("planning"), // planning, active, completed
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
-  goal: text("goal").notNull().default(""),
-  velocity: integer("velocity").default(0), // story points completed
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+
 
 export const appTimeEntries = pgTable("app_time_entries", {
   id: serial("id").primaryKey(),
@@ -590,11 +578,7 @@ export const insertAppTaskSchema = createInsertSchema(appTasks).omit({
   updatedAt: true,
 });
 
-export const insertAppSprintSchema = createInsertSchema(appSprints).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+
 
 export const insertAppTimeEntrySchema = createInsertSchema(appTimeEntries).omit({
   id: true,
@@ -699,8 +683,7 @@ export type AppProject = typeof appProjects.$inferSelect;
 export type InsertAppTask = z.infer<typeof insertAppTaskSchema>;
 export type AppTask = typeof appTasks.$inferSelect;
 
-export type InsertAppSprint = z.infer<typeof insertAppSprintSchema>;
-export type AppSprint = typeof appSprints.$inferSelect;
+
 
 export type InsertAppTimeEntry = z.infer<typeof insertAppTimeEntrySchema>;
 export type AppTimeEntry = typeof appTimeEntries.$inferSelect;

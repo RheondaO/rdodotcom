@@ -446,18 +446,7 @@ export class DatabaseStorage {
     return updatedProject;
   }
 
-  async getAppSprints(projectId?: number): Promise<AppSprint[]> {
-    const query = db.select().from(schema.appSprints);
-    if (projectId) {
-      return await query.where(eq(schema.appSprints.projectId, projectId));
-    }
-    return await query.orderBy(desc(schema.appSprints.createdAt));
-  }
-
-  async createAppSprint(sprint: InsertAppSprint): Promise<AppSprint> {
-    const [newSprint] = await db.insert(schema.appSprints).values(sprint).returning();
-    return newSprint;
-  }
+  
 
 
   async getAllAppTasks(): Promise<AppTask[]> {

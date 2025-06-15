@@ -682,7 +682,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const replId = process.env.REPL_ID || req.headers['x-repl-id'] || 'unknown';
       const replUrl = process.env.REPL_URL || req.headers['x-repl-url'] || req.get('host');
-      
+
       res.json({
         isReplit: !!process.env.REPL_ID,
         replId,
@@ -698,15 +698,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/replit/file-change", async (req, res) => {
     try {
       const { path, type, size, author } = req.body;
-      
+
       // Log the file change event
       console.log(`Replit file change detected: ${type} - ${path}`);
-      
+
       // In a real implementation, you could:
       // 1. Store file changes in database
       // 2. Trigger automated testing
       // 3. Update project statistics
-      
+
       res.json({
         success: true,
         message: "File change recorded",
@@ -720,7 +720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/replit/project-stats", async (req, res) => {
     try {
       const replId = process.env.REPL_ID || 'unknown';
-      
+
       // Generate real-time project statistics
       const stats = {
         replId,
@@ -730,7 +730,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         techStack: ['React', 'TypeScript', 'Node.js', 'Express'],
         deploymentStatus: 'active'
       };
-      
+
       res.json(stats);
     } catch (error) {
       res.status(500).json({ error: "Failed to get project stats" });
@@ -858,9 +858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(400).json({ error: "Invalid quality issue data" });
     }
-  });
-
-  app.put("/api/quality-issues/:id", async (req, res) => {
+  });app.put("/api/quality-issues/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
