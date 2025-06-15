@@ -456,59 +456,136 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     return <Icon className="h-4 w-4" />;
   };
 
-  // Enhanced automated session detection with Replit integration
+  // Enhanced automated session detection with persistent database storage
   useEffect(() => {
     let activityInterval: NodeJS.Timeout;
     let inactivityTimeout: NodeJS.Timeout;
     let fileWatcher: NodeJS.Timeout;
 
-    const detectActivity = () => {
+    const startOrResumeSession = async () => {
       const now = new Date();
       
-      // If no active session and user is working, start one
-      if (!activeSession && selectedProject) {
-        // Check if there's a previous session for this project today to resume time tracking
-        const existingSession = timeEntries.find(entry => 
-          entry.projectId === selectedProject && 
-          entry.date === format(now, 'yyyy-MM-dd')
-        );
-        
-        const totalPreviousTime = timeEntries
-          .filter(entry => entry.projectId === selectedProject && entry.date === format(now, 'yyyy-MM-dd'))
-          .reduce((sum, entry) => sum + entry.duration, 0) * 60; // Convert minutes to seconds
-        
-        const newSession = {
-          id: Date.now(),
-          projectId: selectedProject,
-          startTime: now,
-          lastActivity: now,
-          totalElapsedSeconds: totalPreviousTime,
-          currentSessionStart: now,
-          changes: [] as string[],
-          isActive: true,
-          replitData: replitEnvironment.isReplit ? {
-            replId: replitEnvironment.replId || 'unknown',
-            fileChanges: [] as string[],
-            lastCommit: undefined
-          } : undefined
-        };
-        setActiveSession(newSession);
+      if (!activeSession && selectedProject && replitEnvironment.isReplit) {
+        try {
+          // Check for existing active session in database
+          const response = await fetch(`/api/replit-sessions/active/${selectedProject}/${replitEnvironment.replId}`);
+          let dbSession = null;
+          
+          if (response.ok) {
+            dbSession = await response.json();
+          }
+          
+          if (dbSession) {
+            // Resume existing session
+            const elapsedSeconds = Math.floor((now.getTime() - new Date(dbSession.sessionStart).getTime()) / 1000);
+            setActiveSession({
+              id: dbSession.id,
+              projectId: selectedProject,
+              startTime: new Date(dbSession.sessionStart),
+              lastActivity: now,
+              totalElapsedSeconds: dbSession.totalDuration + elapsedSeconds,
+              currentSessionStart: new Date(dbSession.sessionStart),
+              changes: dbSession.changes || [],
+              isActive: true,
+              replitData: {
+                replId: replitEnvironment.replId || 'unknown',
+                fileChanges: dbSession.fileChanges || [],
+                lastCommit: undefined
+              }
+            });
+            
+            // Update last activity in database
+            await fetch(`/api/replit-sessions/${dbSession.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                lastActivity: now,
+                totalDuration: dbSession.totalDuration + elapsedSeconds
+              })
+            });
+          } else {
+            // Create new session in database
+            const sessionData = {
+              projectId: selectedProject,
+              replId: replitEnvironment.replId || 'unknown',
+              sessionStart: now,
+              totalDuration: 0,
+              lastActivity: now,
+              changes: [],
+              fileChanges: [],
+              isActive: true,
+              autoEnded: false
+            };
+            
+            const createResponse = await fetch('/api/replit-sessions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(sessionData)
+            });
+            
+            if (createResponse.ok) {
+              const newDbSession = await createResponse.json();
+              setActiveSession({
+                id: newDbSession.id,
+                projectId: selectedProject,
+                startTime: now,
+                lastActivity: now,
+                totalElapsedSeconds: 0,
+                currentSessionStart: now,
+                changes: [],
+                isActive: true,
+                replitData: {
+                  replId: replitEnvironment.replId || 'unknown',
+                  fileChanges: [],
+                  lastCommit: undefined
+                }
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to manage session:', error);
+        }
       }
+    };
+
+    const detectActivity = async () => {
+      const now = new Date();
+      await startOrResumeSession();
       
       // Update last activity if session is active
       if (activeSession) {
+        const currentSessionElapsed = Math.floor((now.getTime() - activeSession.currentSessionStart.getTime()) / 1000);
+        const newTotalSeconds = activeSession.totalElapsedSeconds + currentSessionElapsed;
+        
         setActiveSession(prev => prev ? { 
           ...prev, 
           lastActivity: now,
-          totalElapsedSeconds: prev.totalElapsedSeconds + Math.floor((now.getTime() - prev.currentSessionStart.getTime()) / 1000)
+          totalElapsedSeconds: newTotalSeconds,
+          currentSessionStart: now // Reset current session timer
         } : null);
+        
+        // Update database every 30 seconds to prevent data loss
+        if (newTotalSeconds % 30 === 0) {
+          try {
+            await fetch(`/api/replit-sessions/${activeSession.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                lastActivity: now,
+                totalDuration: newTotalSeconds
+              })
+            });
+          } catch (error) {
+            console.error('Failed to update session:', error);
+          }
+        }
         
         // Clear previous inactivity timeout
         if (inactivityTimeout) clearTimeout(inactivityTimeout);
         
         // Set new inactivity timeout (1 hour)
-        inactivityTimeout = setTimeout(() => {
-          endAutomatedSession();
+        inactivityTimeout = setTimeout(async () => {
+          await endAutomatedSession();
         }, 60 * 60 * 1000); // 1 hour
       }
     };
