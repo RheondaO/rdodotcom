@@ -287,7 +287,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         });
 
         // Auto-create Belle Journal project if in Replit environment
-        if (projects.length === 0 || !projects.find(p => p.name.includes('Belle Journal'))) {
+        if (projects.length === 0 || !projects.find((p: AppProject) => p.name.includes('Belle Journal'))) {
           const belleJournalProject = {
             name: "Belle Journal - App Development Suite",
             description: "Professional project management and development tracking suite",
@@ -314,11 +314,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   }, []);
 
   // Derived data for calculations
-  const activeProjects = projects.filter(p => p.isActive);
-  const openTasks = tasks.filter(t => t.status !== 'done' && t.status !== 'completed');
-  const totalHoursLogged = projects.reduce((sum, p) => sum + (p.actualHours || 0), 0);
+  const activeProjects = projects.filter((p: AppProject) => p.isActive);
+  const openTasks = tasks.filter((t: AppTask) => t.status !== 'done' && t.status !== 'completed');
+  const totalHoursLogged = projects.reduce((sum: number, p: AppProject) => sum + (p.actualHours || 0), 0);
   const avgProgress = activeProjects.length > 0 
-    ? Math.round(activeProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / activeProjects.length)
+    ? Math.round(activeProjects.reduce((sum: number, p: AppProject) => sum + (p.progress || 0), 0) / activeProjects.length)
     : 0;
 
   // Create project mutation
@@ -653,8 +653,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     }
   };
 
-  const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
-  const testingTasks = tasks.filter(t => t.status === 'testing');
+  const projectTasks = selectedProject ? tasks.filter((t: AppTask) => t.projectId === selectedProject) : tasks;
+  const testingTasks = tasks.filter((t: AppTask) => t.status === 'testing');
 
   // Calculate testing statistics from real data
   const getTestingStats = () => {
@@ -815,7 +815,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <div>
                     <p className="text-sm text-muted-foreground dark:text-gray-400">Hours Logged</p>
                     <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {projects.reduce((sum, p) => sum + p.actualHours, 0)}h
+                      {projects.reduce((sum: number, p: AppProject) => sum + p.actualHours, 0)}h
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">

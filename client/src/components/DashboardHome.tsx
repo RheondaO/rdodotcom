@@ -85,7 +85,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
   const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
   
   // Parse habit completions from daily entry
-  const completedHabitIds = dailyEntry?.habitCompletions 
+  const completedHabitIds = dailyEntry?.habitCompletions && typeof dailyEntry.habitCompletions === 'string'
     ? JSON.parse(dailyEntry.habitCompletions) 
     : [];
 
