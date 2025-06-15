@@ -146,20 +146,15 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   // Fetch real project data from API
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useQuery({
     queryKey: ['/api/app-projects'],
-    select: (data: any[]) => data || []
+    queryFn: () => fetch('/api/app-projects').then(res => res.json()),
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
-
-  // Debug logging
-  useEffect(() => {
-    console.log('App Development - Projects data:', projects);
-    console.log('App Development - Projects loading:', projectsLoading);
-    console.log('App Development - Projects error:', projectsError);
-  }, [projects, projectsLoading, projectsError]);
 
   // Fetch real task data from API
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['/api/app-tasks'],
-    select: (data: any[]) => data || []
+    queryFn: () => fetch('/api/app-tasks').then(res => res.json()),
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
   // Derived data for calculations
