@@ -754,6 +754,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Replit Session Management
+  app.post("/api/replit-sessions", async (req, res) => {
+    try {
+      const data = insertReplitSessionSchema.parse(req.body);
+      const session = await storage.createReplitSession(data);
+      res.json(session);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid session data" });
+    }
+  });
+
+  app.get("/api/replit-sessions/active/:projectId/:replId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const replId = req.params.replId;
+      const session = await storage.getActiveReplitSession(projectId, replId);
+      res.json(session);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch active session" });
+    }
+  });
+
+  app.put("/api/replit-sessions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const session = await storage.updateReplitSession(id, updates);
+      res.json(session);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to update session" });
+    }
+  });
+
+  app.post("/api/replit-sessions/:id/end", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { summary } = req.body;
+      const session = await storage.endReplitSession(id, summary);
+      res.json(session);
+    } catch (error) {
+      res.status(400).json({ error: "Failed to end session" });
+    }
+  });
+
+  app.get("/api/replit-sessions/project/:projectId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const sessions = await storage.getReplitSessionsForProject(projectId);
+      res.json(sessions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch project sessions" });
+    }
+  });
+
   // Deployment automation
   app.post("/api/deploy", async (req, res) => {
     try {

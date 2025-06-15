@@ -12,8 +12,9 @@ import type {
   ContentCategory, InsertContentCategory, ContentType, InsertContentType,
   ContentPiece, InsertContentPiece, ContentProgress, InsertContentProgress,
   SocialMediaPost, InsertSocialMediaPost, SocialMediaAnalytics, InsertSocialMediaAnalytics,
-  AppProject, InsertAppProject, AppSprint, InsertAppSprint, AppTask, InsertAppTask,
+  AppProject, InsertAppProject, AppTask, InsertAppTask,
   AppTimeEntry, InsertAppTimeEntry, TestCase, InsertTestCase, QualityIssue, InsertQualityIssue,
+  ReplitSession, InsertReplitSession,
   PerformanceInsights, InsertPerformanceInsights, MiniGameDesign, InsertMiniGameDesign,
   MiniGameBlock, InsertMiniGameBlock
 } from "@shared/schema";
@@ -748,6 +749,58 @@ export class DatabaseStorage {
       totalDays,
       avgWorkHours: Math.round(avgWorkHours * 10) / 10,
     };
+  }
+
+  // Replit Session Management
+  async createReplitSession(session: InsertReplitSession): Promise<ReplitSession> {
+    const [newSession] = await db.insert(schema.replitSessions).values(session).returning();
+    return newSession;
+  }
+
+  async getReplitSession(id: number): Promise<ReplitSession | undefined> {
+    const [session] = await db.select().from(schema.replitSessions).where(eq(schema.replitSessions.id, id));
+    return session || undefined;
+  }
+
+  async getActiveReplitSession(projectId: number, replId: string): Promise<ReplitSession | undefined> {
+    const [session] = await db.select()
+      .from(schema.replitSessions)
+      .where(and(
+        eq(schema.replitSessions.projectId, projectId),
+        eq(schema.replitSessions.replId, replId),
+        eq(schema.replitSessions.isActive, true)
+      ))
+      .orderBy(desc(schema.replitSessions.createdAt))
+      .limit(1);
+    return session || undefined;
+  }
+
+  async updateReplitSession(id: number, updates: Partial<ReplitSession>): Promise<ReplitSession> {
+    const [updatedSession] = await db.update(schema.replitSessions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(schema.replitSessions.id, id))
+      .returning();
+    return updatedSession;
+  }
+
+  async endReplitSession(id: number, summary?: string): Promise<ReplitSession> {
+    const [endedSession] = await db.update(schema.replitSessions)
+      .set({ 
+        isActive: false, 
+        sessionEnd: new Date(),
+        summary,
+        updatedAt: new Date()
+      })
+      .where(eq(schema.replitSessions.id, id))
+      .returning();
+    return endedSession;
+  }
+
+  async getReplitSessionsForProject(projectId: number): Promise<ReplitSession[]> {
+    return await db.select()
+      .from(schema.replitSessions)
+      .where(eq(schema.replitSessions.projectId, projectId))
+      .orderBy(desc(schema.replitSessions.createdAt));
   }
 }
 

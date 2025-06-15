@@ -317,13 +317,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         }
 
         // Environment detected - ready for dynamic project creation
-
-        if (isAdmin) {
-          toast({
-            title: "Replit Environment Active",
-            description: `Connected to ${replId} - All apps will be auto-detected and displayed`,
-          });
-        }
       }
     };
 
@@ -500,15 +493,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           } : undefined
         };
         setActiveSession(newSession);
-        
-        if (isAdmin) {
-          toast({
-            title: replitEnvironment.isReplit ? "Replit Session Started" : "Work Session Started",
-            description: replitEnvironment.isReplit 
-              ? `Tracking development in Repl: ${replitEnvironment.replId}`
-              : "Automatically detected you're working on this project",
-          });
-        }
       }
       
       // Update last activity if session is active
