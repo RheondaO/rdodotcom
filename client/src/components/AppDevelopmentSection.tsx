@@ -684,15 +684,24 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Time Tracking & Hours Log</h3>
-            {!isReadOnly && (
-              <Button
-                onClick={() => setShowTimeTracker(true)}
-                className="bg-gradient-to-r from-green-400 to-emerald-500 text-white"
-              >
-                <Timer className="h-4 w-4 mr-2" />
-                Start Timer
-              </Button>
-            )}
+            <div className="flex items-center gap-3">
+              {/* Session Status Indicator - visible to all users */}
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isTimerActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <span className="text-sm text-muted-foreground">
+                  {isTimerActive ? `Session active: ${formatTime(sessionTime)}` : 'No active session'}
+                </span>
+              </div>
+              {!isReadOnly && (
+                <Button
+                  onClick={() => setShowTimeTracker(true)}
+                  className="bg-gradient-to-r from-green-400 to-emerald-500 text-white"
+                >
+                  <Timer className="h-4 w-4 mr-2" />
+                  Start Timer
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Today's Time Summary */}
