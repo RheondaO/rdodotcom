@@ -8,7 +8,8 @@ import {
   Plus, Edit, Heart, Brain, Dumbbell, Moon, 
   Sun, Coffee, BookOpen, Home, Car, ShoppingCart,
   Briefcase, Phone, Mail, Music, Camera, 
-  Gamepad2, Gift, Star, Zap, AlertCircle, Timer
+  Gamepad2, Gift, Star, Zap, AlertCircle, Timer,
+  Play, Pause, Award
 } from "lucide-react";
 import { format, isSameDay, isToday, addDays } from "date-fns";
 import { useAppConfig } from "../hooks/use-app-config";
@@ -662,8 +663,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                   onClick={() => !isReadOnly && onNavigate('health')}
                   disabled={isReadOnly}
                   size="sm"
-                  className={`w-```text
-full mt-2 bg-gradient-to-r from-orange-400 to-red-400 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`w-full mt-2 bg-gradient-to-r from-orange-400 to-red-400 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   Health Dashboard
                 </Button>
