@@ -192,7 +192,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   // Time tracking mutations
   const startTimerMutation = useMutation({
     mutationFn: (data: { projectId: number; description: string }) => 
-      apiRequest('/api/app-time-entries', data),
+      fetch('/api/app-time-entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-time-entries/active'] });
       setShowTimeTracker(false);
@@ -206,7 +210,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const stopTimerMutation = useMutation({
     mutationFn: (id: number) => 
-      apiRequest(`/api/app-time-entries/${id}/stop`, {}, 'PUT'),
+      fetch(`/api/app-time-entries/${id}/stop`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-time-entries/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/app-time-entries', format(selectedDate, 'yyyy-MM-dd')] });
@@ -219,11 +226,16 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   // Mutations
   const createProjectMutation = useMutation({
-    mutationFn: (data: NewProjectForm) => apiRequest('/api/app-projects', {
-      ...data,
-      technology_stack: techStackInput.split(',').map(t => t.trim()).filter(Boolean),
-      tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean)
-    }),
+    mutationFn: (data: NewProjectForm) => 
+      fetch('/api/app-projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          technology_stack: techStackInput.split(',').map(t => t.trim()).filter(Boolean),
+          tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean)
+        })
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
       setShowNewProjectForm(false);
@@ -245,7 +257,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: (data: NewTaskForm) => apiRequest('/api/app-tasks', data),
+    mutationFn: (data: NewTaskForm) => 
+      fetch('/api/app-tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setShowNewTaskForm(false);
@@ -686,9 +703,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <div className="flex items-center gap-3">
               {/* Session Status Indicator - visible to all users */}
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${isTimerActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <div className={`w-2 h-2 rounded-full ${activeTimeEntry ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                 <span className="text-sm text-muted-foreground">
-                  {isTimerActive ? `Session active: ${formatTime(sessionTime)}` : 'No active session'}
+                  {activeTimeEntry ? 'Session active' : 'No active session'}
                 </span>
               </div>
               {!isReadOnly && (
@@ -746,13 +763,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <CardContent>
               {timeEntries && timeEntries.length > 0 ? (
                 <div className="space-y-3">
-                  {timeEntries.slice(0, 5).map((entry) => (
+                  {timeEntries.slice(0, 5).map((entry: any) => (
                     <div key={entry.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-xl border">
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            Development Session
+                            {entry.description || 'Development Session'}
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
                             {format(new Date(entry.startTime), 'MMM dd, HH:mm')}
@@ -761,10 +778,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                       <div className="text-right">
                         <p className="font-mono font-bold text-gray-900 dark:text-white">
-                          {formatTime(entry.duration)}
+                          {formatTime(entry.duration || 0)}
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {entry.project || 'General'}
+                          Project #{entry.projectId}
                         </p>
                       </div>
                     </div>
@@ -1119,6 +1136,91 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Time Tracker Dialog */}
+      <Dialog open={showTimeTracker} onOpenChange={setShowTimeTracker}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Start Time Tracking Session</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Project</label>
+              <Select value={selectedProjectId || ''} onValueChange={setSelectedProjectId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.isArray(projects) && projects.map((project: any) => (
+                    <SelectItem key={project.id} value={project.id.toString()}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Description</label>
+              <Textarea
+                value={timeTrackingDescription}
+                onChange={(e) => setTimeTrackingDescription(e.target.value)}
+                placeholder="What are you working on?"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowTimeTracker(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedProjectId && timeTrackingDescription.trim()) {
+                    startTimerMutation.mutate({
+                      projectId: parseInt(selectedProjectId),
+                      description: timeTrackingDescription.trim()
+                    });
+                  }
+                }}
+                disabled={!selectedProjectId || !timeTrackingDescription.trim() || startTimerMutation.isPending}
+                className="bg-gradient-to-r from-green-400 to-emerald-500 text-white"
+              >
+                {startTimerMutation.isPending ? "Starting..." : "Start Timer"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Active Timer Control - Admin Only */}
+      {activeTimeEntry && !isReadOnly && (
+        <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="font-medium text-sm">Active Session</span>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => stopTimerMutation.mutate(activeTimeEntry.id)}
+              disabled={stopTimerMutation.isPending}
+            >
+              {stopTimerMutation.isPending ? "Stopping..." : "Stop"}
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground truncate">
+            {activeTimeEntry.description}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Started: {format(new Date(activeTimeEntry.startTime), 'h:mm a')}
+          </p>
+        </div>
+      )}
 
     </div>
   );
