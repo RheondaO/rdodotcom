@@ -166,10 +166,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         techStack: data.techStack.length > 0 ? data.techStack : [],
         tags: data.tags.length > 0 ? data.tags : []
       };
-      return apiRequest('/api/app-projects', {
+      return await fetch('/api/app-projects', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectData)
-      });
+      }).then(res => res.json());
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
@@ -597,88 +598,138 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {projects.map((project) => (
-              <Card key={project.id} className="border-purple-100 dark:border-purple-800 shadow-lg">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
-                        {getProjectIcon(project.projectType)}
+          {projectsLoading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="border-purple-100 dark:border-purple-800 shadow-lg animate-pulse">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
+                        <div>
+                          <div className="h-5 bg-gray-300 dark:bg-gray-600 rounded w-32 mb-2"></div>
+                          <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-16"></div>
+                        </div>
                       </div>
-                      <div>
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">{project.projectType}</p>
+                      <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-20"></div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="h-12 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                    <div className="h-2 bg-gray-300 dark:bg-gray-600 rounded w-full"></div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <Code2 className="h-10 w-10 text-purple-400 dark:text-purple-300" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No Projects Yet
+              </h3>
+              <p className="text-muted-foreground dark:text-gray-400 mb-6 max-w-md mx-auto">
+                There are currently no active app projects in development. Start by creating your first project to begin tracking your development work.
+              </p>
+              {!isReadOnly && (
+                <Button 
+                  onClick={() => setShowNewProjectForm(true)}
+                  className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Project
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {projects.map((project) => (
+                <Card key={project.id} className="border-purple-100 dark:border-purple-800 shadow-lg">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
+                          {getProjectIcon(project.projectType)}
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{project.name}</CardTitle>
+                          <p className="text-sm text-muted-foreground dark:text-gray-400">{project.projectType}</p>
+                        </div>
                       </div>
-                    </div>
-                    <Badge className={getStatusColor(project.status)}>
-                      {project.status.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">{project.description}</p>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Progress</span>
-                      <span className="font-medium">{project.progress}%</span>
-                    </div>
-                    <Progress value={project.progress} className="h-2" />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
-                      <span className="ml-1 font-medium">{project.actualHours}/{project.estimatedHours || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Type:</span>
-                      <Badge variant="outline" className="ml-1 capitalize">
-                        {project.projectType}
+                      <Badge className={getStatusColor(project.status)}>
+                        {project.status.replace('_', ' ')}
                       </Badge>
                     </div>
-                  </div>
-
-                  {project.techStack.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {project.techStack.slice(0, 3).map((tech: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {tech}
-                        </Badge>
-                      ))}
-                      {project.techStack.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{project.techStack.length - 3} more
-                        </Badge>
-                      )}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">{project.description}</p>
+                    
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Progress</span>
+                        <span className="font-medium">{project.progress}%</span>
+                      </div>
+                      <Progress value={project.progress} className="h-2" />
                     </div>
-                  )}
 
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => setSelectedProject(project.id)}
-                      disabled={isReadOnly}
-                      className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      Manage
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      disabled={isReadOnly}
-                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
+                        <span className="ml-1 font-medium">{project.actualHours}/{project.estimatedHours || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Type:</span>
+                        <Badge variant="outline" className="ml-1 capitalize">
+                          {project.projectType}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {project.techStack.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {project.techStack.slice(0, 3).map((tech: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {tech}
+                          </Badge>
+                        ))}
+                        {project.techStack.length > 3 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{project.techStack.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => setSelectedProject(project.id)}
+                        disabled={isReadOnly}
+                        className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        Manage
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -718,83 +769,128 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </div>
           </div>
 
-          <div className="space-y-4">
-            {projectTasks.map((task) => (
-              <Card key={task.id} className="border-blue-100 dark:border-blue-800 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
-                        {getCategoryIcon(task.category)}
+          {tasksLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="border-blue-100 dark:border-blue-800 shadow-lg animate-pulse">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
+                        <div>
+                          <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-32 mb-2"></div>
+                          <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-24"></div>
+                        </div>
+                      </div>
+                      <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-16"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : projectTasks.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <CheckSquare className="h-10 w-10 text-blue-400 dark:text-blue-300" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {selectedProject ? "No Tasks in This Project" : "No Tasks Yet"}
+              </h3>
+              <p className="text-muted-foreground dark:text-gray-400 mb-6 max-w-md mx-auto">
+                {selectedProject 
+                  ? "This project doesn't have any tasks yet. Create your first task to start organizing your work."
+                  : "You haven't created any tasks across your projects. Tasks help you break down your projects into manageable pieces."
+                }
+              </p>
+              {!isReadOnly && (
+                <Button 
+                  onClick={() => setShowNewTaskForm(true)}
+                  className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Task
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {projectTasks.map((task) => (
+                <Card key={task.id} className="border-blue-100 dark:border-blue-800 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
+                          {getCategoryIcon(task.category)}
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
+                          <p className="text-sm text-muted-foreground dark:text-gray-400">{task.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getStatusColor(task.status)}>
+                          {task.status.replace('_', ' ')}
+                        </Badge>
+                        <Badge variant="outline" className="capitalize">
+                          {task.category}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Category:</span>
+                        <span className="ml-1 font-medium capitalize">{task.category}</span>
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">{task.description}</p>
+                        <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
+                        <span className="ml-1 font-medium">{task.actualHours}/{task.estimatedHours || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Project:</span>
+                        <span className="ml-1 font-medium">
+                          {projects.find(p => p.id === task.projectId)?.name}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Due:</span>
+                        <span className="ml-1 font-medium">
+                          {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(task.status)}>
-                        {task.status.replace('_', ' ')}
-                      </Badge>
-                      <Badge variant="outline" className="capitalize">
-                        {task.category}
-                      </Badge>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Category:</span>
-                      <span className="ml-1 font-medium capitalize">{task.category}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
-                      <span className="ml-1 font-medium">{task.actualHours}/{task.estimatedHours || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Project:</span>
-                      <span className="ml-1 font-medium">
-                        {projects.find(p => p.id === task.projectId)?.name}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Due:</span>
-                      <span className="ml-1 font-medium">
-                        {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
-                      </span>
-                    </div>
-                  </div>
+                    {task.comments && (
+                      <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-sm">
+                        <span className="text-muted-foreground dark:text-gray-400">Notes:</span>
+                        <span className="ml-1">{task.comments}</span>
+                      </div>
+                    )}
 
-                  {task.comments && (
-                    <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-sm">
-                      <span className="text-muted-foreground dark:text-gray-400">Notes:</span>
-                      <span className="ml-1">{task.comments}</span>
+                    <div className="flex gap-2 mt-3">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                      >
+                        Edit
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        disabled={isReadOnly}
+                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                      >
+                        <Timer className="h-4 w-4 mr-1" />
+                        Log Time
+                      </Button>
                     </div>
-                  )}
-
-                  <div className="flex gap-2 mt-3">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      disabled={isReadOnly}
-                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      disabled={isReadOnly}
-                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                    >
-                      <Timer className="h-4 w-4 mr-1" />
-                      Log Time
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -1267,6 +1363,285 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           )}
         </div>
       )}
+
+      {/* New Project Form Dialog */}
+      <Dialog open={showNewProjectForm} onOpenChange={setShowNewProjectForm}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Code2 className="h-5 w-5" />
+              Create New Project
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter project name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="projectType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select project type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="web">Web Application</SelectItem>
+                          <SelectItem value="mobile">Mobile App</SelectItem>
+                          <SelectItem value="desktop">Desktop App</SelectItem>
+                          <SelectItem value="api">API/Backend</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Describe your project..." 
+                        className="min-h-[100px]"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="planning">Planning</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="testing">Testing</SelectItem>
+                          <SelectItem value="deployed">Deployed</SelectItem>
+                          <SelectItem value="on_hold">On Hold</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select priority" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="urgent">Urgent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="estimatedHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estimated Hours</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="0"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="targetDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="repositoryUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Repository URL (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://github.com/..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="deploymentUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Deployment URL (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Tech Stack</label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add technologies (comma-separated)"
+                      value={techStackInput}
+                      onChange={(e) => setTechStackInput(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const commonTech = ['React', 'Node.js', 'TypeScript', 'Python', 'PostgreSQL', 'MongoDB', 'Express', 'Next.js'];
+                        const randomTech = commonTech[Math.floor(Math.random() * commonTech.length)];
+                        addTechStackItem(randomTech);
+                      }}
+                    >
+                      Suggest
+                    </Button>
+                  </div>
+                  {techStackInput && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {techStackInput.split(',').map((tech, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {tech.trim()}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Tags</label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add tags (comma-separated)"
+                      value={tagsInput}
+                      onChange={(e) => setTagsInput(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const commonTags = ['frontend', 'backend', 'fullstack', 'personal', 'client-work', 'learning'];
+                        const randomTag = commonTags[Math.floor(Math.random() * commonTags.length)];
+                        addTag(randomTag);
+                      }}
+                    >
+                      Suggest
+                    </Button>
+                  </div>
+                  {tagsInput && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {tagsInput.split(',').map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tag.trim()}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowNewProjectForm(false)}
+                  disabled={createProjectMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                  disabled={createProjectMutation.isPending}
+                >
+                  {createProjectMutation.isPending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Project
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
