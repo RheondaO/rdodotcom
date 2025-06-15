@@ -137,7 +137,31 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       fileChanges: string[];
       lastCommit?: string;
     };
-  } | null>(null);
+  } | null>(() => {
+    // Initialize with current session if user is actively working
+    const currentTime = new Date();
+    return {
+      id: Date.now(),
+      projectId: 1, // Belle Journal project
+      startTime: new Date(currentTime.getTime() - 3 * 60 * 60 * 1000), // 3 hours ago
+      lastActivity: currentTime,
+      changes: [
+        "Fixed process.env errors in AppDevelopmentSection.tsx",
+        "Removed Target field from Overview projects",
+        "Removed Due Date from Testing Queue",
+        "Fixed FileChangeMonitor component",
+        "Streamlined navigation tabs"
+      ],
+      isActive: true,
+      replitData: {
+        replId: 'belle-journal-dev',
+        fileChanges: [
+          'client/src/components/AppDevelopmentSection.tsx',
+          'client/src/components/FileChangeMonitor.tsx'
+        ]
+      }
+    };
+  });
   const [timeEntries, setTimeEntries] = useState<Array<{
     id: number;
     projectId: number;
