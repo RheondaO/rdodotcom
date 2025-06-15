@@ -114,10 +114,9 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('POST', '/api/app-projects', data);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('Project created successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
-      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
       setIsProjectDialogOpen(false);
       projectForm.reset();
       toast({ title: "Project created successfully" });
@@ -137,10 +136,9 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('PUT', `/api/app-projects/${id}`, data);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('Project updated successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
-      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
       setEditingProject(null);
       setIsProjectDialogOpen(false);
       toast({ title: "Project updated successfully" });
@@ -160,12 +158,12 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('DELETE', `/api/app-projects/${id}`);
       return response.json();
     },
-    onSuccess: (data, variables) => {
+    onSuccess: async (data, variables) => {
       console.log('Project deleted successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
-      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+      // Force immediate refetch of both projects and tasks
+      await queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+      
       if (selectedProject === variables) setSelectedProject(null);
       toast({ title: "Project deleted successfully" });
     },
