@@ -40,7 +40,9 @@ import {
   Bug,
   Lightbulb,
   Wrench,
-  Eye
+  Eye,
+  Webhook,
+  Command
 } from "lucide-react";
 import FileChangeMonitor from "./FileChangeMonitor";
 import { format } from "date-fns";
@@ -717,7 +719,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             { key: "testing", label: "Testing & QA", icon: AlertCircle },
             { key: "time", label: "Time Tracking", icon: Timer },
             { key: "integration", label: "Replit API", icon: Webhook },
-            { key: "cicd", label: "CI/CD", icon: Terminal },
+            { key: "cicd", label: "CI/CD", icon: Command },
             { key: "git", label: "Git", icon: GitBranch },
             { key: "monitoring", label: "File Monitor", icon: Eye }
           ].map((tab) => {
