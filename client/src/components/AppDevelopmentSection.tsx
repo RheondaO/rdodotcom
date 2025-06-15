@@ -136,6 +136,41 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const todayTotalTime = 215; // minutes
   const sessionsToday = 2;
 
+  // Timer functions
+  const formatTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  };
+
+  const startTimer = () => {
+    setIsTimerActive(true);
+    setSessionStartTime(new Date());
+    setSessionTime(0);
+  };
+
+  const stopTimer = () => {
+    setIsTimerActive(false);
+    setSessionStartTime(null);
+    // Here you would save the session to the database
+    toast({
+      title: "Session Completed",
+      description: `Logged ${formatTime(sessionTime)} of development time`,
+    });
+  };
+
+  // Update session time every minute when timer is active
+  useEffect(() => {
+    if (isTimerActive && sessionStartTime) {
+      const interval = setInterval(() => {
+        const now = new Date();
+        const elapsed = Math.floor((now.getTime() - sessionStartTime.getTime()) / 60000);
+        setSessionTime(elapsed);
+      }, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [isTimerActive, sessionStartTime]);
+
   // Queries - Enable for all users, not just admins
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['/api/app-projects']
