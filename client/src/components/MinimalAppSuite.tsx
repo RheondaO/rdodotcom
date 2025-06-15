@@ -114,11 +114,20 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('POST', '/api/app-projects', data);
       return response.json();
     },
-    onSuccess: async (data) => {
-      console.log('Project created successfully:', data);
-      await queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
+    onSuccess: async (newProject) => {
+      console.log('Project created successfully:', newProject);
+      
+      // Immediately add the new project to the cache
+      const currentProjects = queryClient.getQueryData<Project[]>(['/api/app-projects']) || [];
+      const updatedProjects = [newProject, ...currentProjects];
+      queryClient.setQueryData(['/api/app-projects'], updatedProjects);
+      
       setIsProjectDialogOpen(false);
       projectForm.reset();
+      
+      // Refetch as backup
+      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
+      
       toast({ title: "Project created successfully" });
     },
     onError: (error: any) => {
@@ -158,13 +167,26 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('DELETE', `/api/app-projects/${id}`);
       return response.json();
     },
-    onSuccess: async (data, variables) => {
+    onSuccess: async (data, deletedProjectId) => {
       console.log('Project deleted successfully:', data);
-      // Force immediate refetch of both projects and tasks
-      await queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
-      await queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
       
-      if (selectedProject === variables) setSelectedProject(null);
+      // Immediately update the cache to remove the deleted project
+      const currentProjects = queryClient.getQueryData<Project[]>(['/api/app-projects']) || [];
+      const updatedProjects = currentProjects.filter(p => p.id !== deletedProjectId);
+      queryClient.setQueryData(['/api/app-projects'], updatedProjects);
+      
+      // Also update tasks cache to remove tasks from deleted project
+      const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
+      const updatedTasks = currentTasks.filter(t => t.projectId !== deletedProjectId);
+      queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
+      
+      // Clear selected project if it was deleted
+      if (selectedProject === deletedProjectId) setSelectedProject(null);
+      
+      // Refetch as backup to ensure data consistency
+      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
+      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+      
       toast({ title: "Project deleted successfully" });
     },
     onError: (error: any) => {
