@@ -710,12 +710,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/app-tasks", async (req, res) => {
+  // App Development - Tasks
+  app.post('/api/app-tasks', async (req, res) => {
     try {
       const task = await storage.createAppTask(req.body);
       res.json(task);
     } catch (error) {
-      res.status(400).json({ error: "Invalid app task data" });
+      console.error('Error creating app task:', error);
+      res.status(500).json({ error: 'Failed to create app task' });
+    }
+  });
+
+  app.put('/api/app-tasks/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.updateAppTask(id, req.body);
+      res.json(task);
+    } catch (error) {
+      console.error('Error updating app task:', error);
+      res.status(500).json({ error: 'Failed to update app task' });
     }
   });
 
@@ -847,6 +860,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(habitData);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch habits analytics" });
+    </previous_generation>
     }
   });
 

@@ -162,6 +162,90 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
+  // Form schema for new task
+  const newTaskSchema = z.object({
+    projectId: z.number().min(1, "Project is required"),
+    title: z.string().min(1, "Task title is required"),
+    description: z.string().min(1, "Description is required"),
+    category: z.enum(["feature", "bug", "improvement", "documentation"]).default("feature"),
+    status: z.enum(["todo", "in_progress", "review", "testing", "done"]).default("todo"),
+    priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
+    estimatedHours: z.number().min(0).optional(),
+    dueDate: z.string().optional(),
+    assignee: z.string().optional()
+  });
+
+  type NewTaskForm = z.infer<typeof newTaskSchema>;
+
+  // Task form setup
+  const taskForm = useForm<NewTaskForm>({
+    resolver: zodResolver(newTaskSchema),
+    defaultValues: {
+      projectId: selectedProject || undefined,
+      title: "",
+      description: "",
+      category: "feature",
+      status: "todo",
+      priority: "medium"
+    }
+  });
+
+  // Create task mutation
+  const createTaskMutation = useMutation({
+    mutationFn: async (data: NewTaskForm) => {
+      const taskData = {
+        ...data,
+        dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : undefined
+      };
+      return await fetch('/api/app-tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(taskData)
+      }).then(res => res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      setShowNewTaskForm(false);
+      taskForm.reset();
+      toast({
+        title: "Success",
+        description: "Task created successfully!"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create task. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Update task mutation
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: number, updates: Partial<AppTask> }) => {
+      return await fetch(`/api/app-tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      }).then(res => res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      toast({
+        title: "Success",
+        description: "Task updated successfully!"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update task. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Derived data for calculations
   const activeProjects = projects.filter(p => p.isActive);
   const openTasks = tasks.filter(t => t.status !== 'done' && t.status !== 'completed');
@@ -411,6 +495,19 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       tags: tagsInput ? tagsInput.split(',').map((s: string) => s.trim()).filter((s: string) => s) : []
     };
     createProjectMutation.mutate(formData);
+  };
+
+  // Task form submission handler
+  const onTaskSubmit = (data: NewTaskForm) => {
+    createTaskMutation.mutate(data);
+  };
+
+  // Handle task status update
+  const handleTaskStatusUpdate = (taskId: number, newStatus: string) => {
+    updateTaskMutation.mutate({
+      id: taskId,
+      updates: { status: newStatus as AppTask['status'] }
+    });
   };
 
   // Helper function to add tech stack item
@@ -1925,6 +2022,375 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
+      {/* New Project Form Dialog */}
+      <Dialog open={showNewProjectForm} onOpenChange={setShowNewProjectForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="My Awesome App" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="projectType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="web">Web Application</SelectItem>
+                          <SelectItem value="mobile">Mobile App</SelectItem>
+                          <SelectItem value="desktop">Desktop App</SelectItem>
+                          <SelectItem value="api">API/Backend</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} placeholder="Describe your project..." rows={3} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="urgent">Urgent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="estimatedHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estimated Hours</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          placeholder="40"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="repositoryUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Repository URL (Optional)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://github.com/..." />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="targetDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target Date (Optional)</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div>
+                <FormLabel>Tech Stack (Optional)</FormLabel>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value={techStackInput}
+                    onChange={(e) => setTechStackInput(e.target.value)}
+                    placeholder="React, Node.js, PostgreSQL (comma separated)"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => addTechStackItem("React")}
+                    size="sm"
+                  >
+                    + React
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => addTechStackItem("Node.js")}
+                    size="sm"
+                  >
+                    + Node.js
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <FormLabel>Tags (Optional)</FormLabel>
+                <Input
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
+                  placeholder="frontend, backend, api (comma separated)"
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowNewProjectForm(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createProjectMutation.isPending}
+                  className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                >
+                  {createProjectMutation.isPending ? "Creating..." : "Create Project"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Task Form Dialog */}
+      <Dialog open={showNewTaskForm} onOpenChange={setShowNewTaskForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Task</DialogTitle>
+          </DialogHeader>
+          <Form {...taskForm}>
+            <form onSubmit={taskForm.handleSubmit(onTaskSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={taskForm.control}
+                  name="projectId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project</FormLabel>
+                      <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select project" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {projects.map(project => (
+                            <SelectItem key={project.id} value={project.id.toString()}>
+                              {project.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={taskForm.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="feature">Feature</SelectItem>
+                          <SelectItem value="bug">Bug Fix</SelectItem>
+                          <SelectItem value="improvement">Improvement</SelectItem>
+                          <SelectItem value="documentation">Documentation</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={taskForm.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Task Title</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Implement user authentication" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={taskForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} placeholder="Describe the task in detail..." rows={3} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={taskForm.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="urgent">Urgent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={taskForm.control}
+                  name="estimatedHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estimated Hours</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          placeholder="8"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={taskForm.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={taskForm.control}
+                name="assignee"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assignee (Optional)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Developer name" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowNewTaskForm(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createTaskMutation.isPending}
+                  className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+                >
+                  {createTaskMutation.isPending ? "Creating..." : "Create Task"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
