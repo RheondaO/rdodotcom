@@ -105,9 +105,13 @@ interface AppDevelopmentSectionProps {
 }
 
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
-  const [activeView, setActiveView] = useState<"overview" | "changes" | "gaps" | "testing">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "time">("overview");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-
+  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
+  const [showNewTaskForm, setShowNewTaskForm] = useState(false);
+  const [techStackInput, setTechStackInput] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  
   const { toast } = useToast();
 
   // Time tracking state
@@ -291,8 +295,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const onSubmit = (data: NewProjectForm) => {
     const formData = {
       ...data,
-      techStack: techStackInput ? techStackInput.split(',').map(s => s.trim()).filter(s => s) : [],
-      tags: tagsInput ? tagsInput.split(',').map(s => s.trim()).filter(s => s) : []
+      techStack: techStackInput ? techStackInput.split(',').map((s: string) => s.trim()).filter((s: string) => s) : [],
+      tags: tagsInput ? tagsInput.split(',').map((s: string) => s.trim()).filter((s: string) => s) : []
     };
     createProjectMutation.mutate(formData);
   };
@@ -300,7 +304,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   // Helper function to add tech stack item
   const addTechStackItem = (item: string) => {
     if (item.trim()) {
-      const currentStack = techStackInput ? techStackInput.split(',').map(s => s.trim()) : [];
+      const currentStack = techStackInput ? techStackInput.split(',').map((s: string) => s.trim()) : [];
       if (!currentStack.includes(item.trim())) {
         setTechStackInput(currentStack.concat(item.trim()).join(', '));
       }
@@ -310,7 +314,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   // Helper function to add tag
   const addTag = (tag: string) => {
     if (tag.trim()) {
-      const currentTags = tagsInput ? tagsInput.split(',').map(s => s.trim()) : [];
+      const currentTags = tagsInput ? tagsInput.split(',').map((s: string) => s.trim()) : [];
       if (!currentTags.includes(tag.trim())) {
         setTagsInput(currentTags.concat(tag.trim()).join(', '));
       }
@@ -379,9 +383,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         <div className="flex items-center space-x-2 bg-white/60 dark:bg-gray-800/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
           {[
             { key: "overview", label: "Overview", icon: BarChart3 },
-            { key: "changes", label: "Recent Changes", icon: GitBranch },
-            { key: "gaps", label: "Gaps & Issues", icon: AlertCircle },
-            { key: "testing", label: "Testing Queue", icon: CheckSquare }
+            { key: "projects", label: "Projects", icon: Code2 },
+            { key: "tasks", label: "Tasks", icon: CheckSquare },
+            { key: "testing", label: "Testing & QA", icon: AlertCircle },
+            { key: "time", label: "Time Tracking", icon: Timer }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -634,7 +639,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       )}
 
       {/* Recent Changes View */}
-      {activeView === "changes" && (
+      {activeView === "projects" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Changes & Updates</h2>
