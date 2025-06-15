@@ -1947,15 +1947,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       <Square className="h-4 w-4 mr-2" />
                       End Session
                     </Button>
-                    <Button 
-                      onClick={() => addChangeToSession("Manual update logged")}
-                      disabled={isReadOnly}
-                      variant="outline"
-                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Log Change
-                    </Button>
                   </div>
                   
                   <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
