@@ -63,6 +63,8 @@ export default function MinimalAppSuite() {
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{type: 'project' | 'task', id: number, name: string} | null>(null);
   
   const { toast } = useToast();
 
@@ -301,7 +303,7 @@ export default function MinimalAppSuite() {
       console.log('Creating new project...');
       createProjectMutation.mutate(data);
     }
-  };
+  }
 
   const onTaskSubmit = (data: any) => {
     if (editingTask) {
@@ -309,6 +311,21 @@ export default function MinimalAppSuite() {
     } else {
       createTaskMutation.mutate(data);
     }
+  }
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete?.type === 'project') {
+      deleteProjectMutation.mutate(itemToDelete.id);
+    } else if (itemToDelete?.type === 'task') {
+      deleteTaskMutation.mutate(itemToDelete.id);
+    }
+    setDeleteConfirmOpen(false);
+    setItemToDelete(null);
+  };
+
+  const openDeleteConfirm = (type: 'project' | 'task', id: number, name: string) => {
+    setItemToDelete({ type, id, name });
+    setDeleteConfirmOpen(true);
   };
 
   // Status badge styling
@@ -480,9 +497,7 @@ export default function MinimalAppSuite() {
                             variant="ghost"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm('Delete this project and all its tasks?')) {
-                                deleteProjectMutation.mutate(project.id);
-                              }
+                              openDeleteConfirm('project', project.id, project.name);
                             }}
                           >
                             <Trash2 className="h-3 w-3" />
