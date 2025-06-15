@@ -803,16 +803,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       )}
 
                       <div className="flex gap-2 mt-3">
-                        <Button
-                          size="sm"
-                          onClick={() => setSelectedProject(project.id)}
-                          disabled={isReadOnly}
-                          className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          View Details
-                        </Button>
                         {project.repositoryUrl && (
                           <Button 
                             size="sm" 
@@ -975,16 +965,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
                       {/* Action Buttons */}
                       <div className="flex gap-2 flex-wrap">
-                        <Button 
-                          size="sm"
-                          onClick={() => setSelectedProject(project.id)}
-                          disabled={isReadOnly}
-                          className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          View Details
-                        </Button>
                         {project.repositoryUrl && (
                           <Button 
                             size="sm" 
@@ -1151,15 +1131,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         size="sm" 
                         variant="outline"
                         disabled={isReadOnly}
-                        className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                      >
-                        <Users className="h-4 w-4 mr-1" />
-                        Assign
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={isReadOnly}
                         className={`text-green-600 border-green-300 hover:bg-green-50 ${
                           isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
@@ -1301,16 +1272,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     )}
 
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedProject(project.id)}
-                        disabled={isReadOnly}
-                        className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                          isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        Manage
-                      </Button>
                       <Button 
                         size="sm" 
                         variant="outline"
