@@ -730,3 +730,13 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Replit Sessions schema
+export const insertReplitSessionSchema = createInsertSchema(replitSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertReplitSession = z.infer<typeof insertReplitSessionSchema>;
+export type ReplitSession = typeof replitSessions.$inferSelect;
