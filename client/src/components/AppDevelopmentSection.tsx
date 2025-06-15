@@ -226,17 +226,33 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   // Mutations
   const createProjectMutation = useMutation({
-    mutationFn: (data: NewProjectForm) => 
-      fetch('/api/app-projects', {
+    mutationFn: async (data: NewProjectForm) => {
+      console.log('Frontend submitting project data:', data);
+      const payload = {
+        ...data,
+        technology_stack: techStackInput.split(',').map(t => t.trim()).filter(Boolean),
+        tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean)
+      };
+      console.log('Frontend payload:', payload);
+      
+      const response = await fetch('/api/app-projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          technology_stack: techStackInput.split(',').map(t => t.trim()).filter(Boolean),
-          tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean)
-        })
-      }).then(res => res.json()),
-    onSuccess: () => {
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Project creation failed:', response.status, errorText);
+        throw new Error(`Failed to create project: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      console.log('Project created successfully:', result);
+      return result;
+    },
+    onSuccess: (data) => {
+      console.log('Project creation mutation succeeded:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
       setShowNewProjectForm(false);
       projectForm.reset();
@@ -247,10 +263,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         description: "Your new project has been added to the development pipeline."
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Project creation mutation failed:', error);
       toast({
         title: "Error creating project",
-        description: "Please try again later.",
+        description: error.message || "Please try again later.",
         variant: "destructive"
       });
     }
