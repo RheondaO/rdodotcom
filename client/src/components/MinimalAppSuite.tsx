@@ -67,13 +67,20 @@ export default function MinimalAppSuite() {
   const { toast } = useToast();
 
   // Queries
-  const { data: projects = [], isLoading: projectsLoading } = useQuery<Project[]>({
-    queryKey: ['/api/app-projects']
+  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useQuery<Project[]>({
+    queryKey: ['/api/app-projects'],
+    staleTime: 0,
+    refetchOnMount: true
   });
 
-  const { data: allTasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ['/api/app-tasks']
+  const { data: allTasks = [], isLoading: tasksLoading, error: tasksError } = useQuery<Task[]>({
+    queryKey: ['/api/app-tasks'],
+    staleTime: 0,
+    refetchOnMount: true
   });
+
+  console.log('Projects data:', projects, 'Loading:', projectsLoading, 'Error:', projectsError);
+  console.log('Tasks data:', allTasks, 'Loading:', tasksLoading, 'Error:', tasksError);
 
   // Filter tasks based on selected project
   const tasks = selectedProject 
