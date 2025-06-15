@@ -69,12 +69,26 @@ export default function MinimalAppSuite() {
   // Queries
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useQuery<Project[]>({
     queryKey: ['/api/app-projects'],
+    queryFn: async () => {
+      const response = await fetch('/api/app-projects');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     staleTime: 0,
     refetchOnMount: true
   });
 
   const { data: allTasks = [], isLoading: tasksLoading, error: tasksError } = useQuery<Task[]>({
     queryKey: ['/api/app-tasks'],
+    queryFn: async () => {
+      const response = await fetch('/api/app-tasks');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     staleTime: 0,
     refetchOnMount: true
   });
