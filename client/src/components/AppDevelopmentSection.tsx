@@ -37,7 +37,7 @@ import {
   AlertCircle,
   Square
 } from "lucide-react";
-import FileChangeMonitor from "./FileChangeMonitor";
+
 import { format, formatDistanceToNow } from "date-fns";
 import { z } from "zod";
 
@@ -292,9 +292,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           </p>
         </div>
       </div>
-
-      {/* File Change Monitor */}
-      <FileChangeMonitor />
 
       {/* Tab Navigation */}
       <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
