@@ -1214,7 +1214,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             } ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             <Link className="h-4 w-4 mr-1" />
-                            {project.status === 'deployed' ? 'View Live' : 'Live Site'}
+                            Live Site
                           </Button>
                         )}
                       </div>
