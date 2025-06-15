@@ -357,6 +357,24 @@ export const appTimeEntries = pgTable("app_time_entries", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Replit Time Tracking Sessions
+export const replitSessions = pgTable("replit_sessions", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => appProjects.id),
+  replId: text("repl_id").notNull(),
+  sessionStart: timestamp("session_start").notNull(),
+  sessionEnd: timestamp("session_end"),
+  totalDuration: integer("total_duration").notNull().default(0), // seconds
+  lastActivity: timestamp("last_activity").notNull(),
+  changes: text("changes").array().notNull().default([]),
+  fileChanges: text("file_changes").array().notNull().default([]),
+  summary: text("summary"),
+  isActive: boolean("is_active").notNull().default(true),
+  autoEnded: boolean("auto_ended").notNull().default(false), // true if ended by inactivity timeout
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Testing & QA Tables
 export const testCases = pgTable("test_cases", {
   id: serial("id").primaryKey(),

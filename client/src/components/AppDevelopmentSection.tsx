@@ -126,12 +126,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     gitRepo?: string;
   }>({ isReplit: false });
 
-  // Automated session tracking state
+  // Automated session tracking state with persistent time tracking
   const [activeSession, setActiveSession] = useState<{
     id: number;
     projectId: number;
     startTime: Date;
     lastActivity: Date;
+    totalElapsedSeconds: number; // Accumulated time across all sessions
+    currentSessionStart: Date;
     changes: string[];
     isActive: boolean;
     replitData?: {
@@ -472,16 +474,28 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       
       // If no active session and user is working, start one
       if (!activeSession && selectedProject) {
+        // Check if there's a previous session for this project today to resume time tracking
+        const existingSession = timeEntries.find(entry => 
+          entry.projectId === selectedProject && 
+          entry.date === format(now, 'yyyy-MM-dd')
+        );
+        
+        const totalPreviousTime = timeEntries
+          .filter(entry => entry.projectId === selectedProject && entry.date === format(now, 'yyyy-MM-dd'))
+          .reduce((sum, entry) => sum + entry.duration, 0) * 60; // Convert minutes to seconds
+        
         const newSession = {
           id: Date.now(),
           projectId: selectedProject,
           startTime: now,
           lastActivity: now,
-          changes: [],
+          totalElapsedSeconds: totalPreviousTime,
+          currentSessionStart: now,
+          changes: [] as string[],
           isActive: true,
           replitData: replitEnvironment.isReplit ? {
             replId: replitEnvironment.replId || 'unknown',
-            fileChanges: [],
+            fileChanges: [] as string[],
             lastCommit: undefined
           } : undefined
         };
@@ -499,16 +513,18 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       
       // Update last activity if session is active
       if (activeSession) {
-        setActiveSession(prev => prev ? { ...prev, lastActivity: now } : null);
+        setActiveSession(prev => prev ? { 
+          ...prev, 
+          lastActivity: now,
+          totalElapsedSeconds: prev.totalElapsedSeconds + Math.floor((now.getTime() - prev.currentSessionStart.getTime()) / 1000)
+        } : null);
         
         // Clear previous inactivity timeout
         if (inactivityTimeout) clearTimeout(inactivityTimeout);
         
         // Set new inactivity timeout (1 hour)
         inactivityTimeout = setTimeout(() => {
-          if (activeSession) {
-            endAutomatedSession();
-          }
+          endAutomatedSession();
         }, 60 * 60 * 1000); // 1 hour
       }
     };
