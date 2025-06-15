@@ -39,8 +39,15 @@ import {
   Timer,
   Bug,
   Lightbulb,
-  Wrench
+  Wrench,
+  Webhook,
+  Terminal,
+  Eye
 } from "lucide-react";
+import ReplitIntegrationPanel from "./ReplitIntegrationPanel";
+import CICDPipelineMonitor from "./CICDPipelineMonitor";
+import GitIntegrationPanel from "./GitIntegrationPanel";
+import FileChangeMonitor from "./FileChangeMonitor";
 import { format } from "date-fns";
 
 // Form schema for new project
@@ -105,7 +112,7 @@ interface AppDevelopmentSectionProps {
 }
 
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "time">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "time" | "integration" | "cicd" | "git" | "monitoring">("overview");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -594,7 +601,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             { key: "projects", label: "Projects", icon: Code2 },
             { key: "tasks", label: "Tasks", icon: CheckSquare },
             { key: "testing", label: "Testing & QA", icon: AlertCircle },
-            { key: "time", label: "Time Tracking", icon: Timer }
+            { key: "time", label: "Time Tracking", icon: Timer },
+            { key: "integration", label: "Replit API", icon: Webhook },
+            { key: "cicd", label: "CI/CD", icon: Terminal },
+            { key: "git", label: "Git", icon: GitBranch },
+            { key: "monitoring", label: "File Monitor", icon: Eye }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -1841,6 +1852,26 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </Card>
           )}
         </div>
+      )}
+
+      {/* Replit Integration View */}
+      {activeView === "integration" && (
+        <ReplitIntegrationPanel isReadOnly={isReadOnly} />
+      )}
+
+      {/* CI/CD Pipeline View */}
+      {activeView === "cicd" && (
+        <CICDPipelineMonitor isReadOnly={isReadOnly} />
+      )}
+
+      {/* Git Integration View */}
+      {activeView === "git" && (
+        <GitIntegrationPanel isReadOnly={isReadOnly} />
+      )}
+
+      {/* File Monitoring View */}
+      {activeView === "monitoring" && (
+        <FileChangeMonitor isReadOnly={isReadOnly} />
       )}
 
       {/* New Project Form Dialog */}
