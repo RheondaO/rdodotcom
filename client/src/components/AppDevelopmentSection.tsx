@@ -149,8 +149,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   };
 
   // Queries - Enable for all users, not just admins
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
-    queryKey: ['/api/app-projects']
+  const { data: gitCommits = [], isLoading: commitsLoading } = useQuery({
+    queryKey: ['/api/git/commits']
   });
 
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
@@ -478,24 +478,26 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      {/* Projects Tab */}
+      {/* Projects Tab - Git Commits */}
       {activeTab === 'projects' && (
         <div className="space-y-6">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Belle Journal App</h2>
+            <p className="text-gray-600 dark:text-gray-400">Development Activity & Git Commits</p>
+          </div>
+          
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Projects</h3>
-            {!isReadOnly && (
-              <Button
-                onClick={() => setShowNewProjectForm(true)}
-                className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Project
-              </Button>
-            )}
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <GitCommit className="h-5 w-5" />
+              Recent Commits
+            </h3>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              {Array.isArray(gitCommits) ? gitCommits.length : 0} total commits
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projectsLoading ? (
+            {commitsLoading ? (
               [...Array(6)].map((_, i) => (
                 <Card key={i} className="animate-pulse">
                   <CardHeader>
