@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Code2, 
   Monitor, 
@@ -34,6 +42,23 @@ import {
   Wrench
 } from "lucide-react";
 import { format } from "date-fns";
+
+// Form schema for new project
+const newProjectSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  description: z.string().min(1, "Description is required"),
+  projectType: z.enum(["web", "mobile", "desktop", "api"]),
+  status: z.enum(["planning", "in_progress", "testing", "deployed", "on_hold"]).default("planning"),
+  priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
+  estimatedHours: z.number().min(0).optional(),
+  repositoryUrl: z.string().url().optional().or(z.literal("")),
+  deploymentUrl: z.string().url().optional().or(z.literal("")),
+  targetDate: z.string().optional(),
+  techStack: z.array(z.string()).default([]),
+  tags: z.array(z.string()).default([])
+});
+
+type NewProjectForm = z.infer<typeof newProjectSchema>;
 
 interface AppProject {
   id: number;
@@ -84,6 +109,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
+  const [techStackInput, setTechStackInput] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  
+  const { toast } = useToast();
   
   // Time tracking state
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -100,16 +129,66 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     date: string;
   }>>([]);
 
+  // Form setup
+  const form = useForm<NewProjectForm>({
+    resolver: zodResolver(newProjectSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      projectType: "web",
+      status: "planning",
+      priority: "medium",
+      techStack: [],
+      tags: []
+    }
+  });
+
   // Fetch real project data from API
-  const { data: projects = [] } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['/api/app-projects'],
     select: (data: any[]) => data || []
   });
 
   // Fetch real task data from API
-  const { data: tasks = [] } = useQuery({
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
     queryKey: ['/api/app-tasks'],
     select: (data: any[]) => data || []
+  });
+
+  // Create project mutation
+  const createProjectMutation = useMutation({
+    mutationFn: async (data: NewProjectForm) => {
+      const projectData = {
+        ...data,
+        repositoryUrl: data.repositoryUrl || undefined,
+        deploymentUrl: data.deploymentUrl || undefined,
+        targetDate: data.targetDate ? new Date(data.targetDate).toISOString() : undefined,
+        techStack: data.techStack.length > 0 ? data.techStack : [],
+        tags: data.tags.length > 0 ? data.tags : []
+      };
+      return apiRequest('/api/app-projects', {
+        method: 'POST',
+        body: JSON.stringify(projectData)
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      setShowNewProjectForm(false);
+      form.reset();
+      setTechStackInput("");
+      setTagsInput("");
+      toast({
+        title: "Success",
+        description: "Project created successfully!"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create project. Please try again.",
+        variant: "destructive"
+      });
+    }
   });
 
   // Fetch real testing data from API
@@ -209,6 +288,36 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Form submission handler
+  const onSubmit = (data: NewProjectForm) => {
+    const formData = {
+      ...data,
+      techStack: techStackInput ? techStackInput.split(',').map(s => s.trim()).filter(s => s) : [],
+      tags: tagsInput ? tagsInput.split(',').map(s => s.trim()).filter(s => s) : []
+    };
+    createProjectMutation.mutate(formData);
+  };
+
+  // Helper function to add tech stack item
+  const addTechStackItem = (item: string) => {
+    if (item.trim()) {
+      const currentStack = techStackInput ? techStackInput.split(',').map(s => s.trim()) : [];
+      if (!currentStack.includes(item.trim())) {
+        setTechStackInput(currentStack.concat(item.trim()).join(', '));
+      }
+    }
+  };
+
+  // Helper function to add tag
+  const addTag = (tag: string) => {
+    if (tag.trim()) {
+      const currentTags = tagsInput ? tagsInput.split(',').map(s => s.trim()) : [];
+      if (!currentTags.includes(tag.trim())) {
+        setTagsInput(currentTags.concat(tag.trim()).join(', '));
+      }
+    }
   };
 
   const activeProjects = projects.filter(p => p.isActive);
