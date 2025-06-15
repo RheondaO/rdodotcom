@@ -49,14 +49,14 @@ export default function FileChangeMonitor({ isReadOnly = false }: FileChangeMoni
   // Detect Replit environment
   useEffect(() => {
     const isReplit = !!(
-      process.env.REPL_ID || 
+      import.meta.env.VITE_REPL_ID || 
       window.location.hostname.includes('replit.app') ||
       window.location.hostname.includes('repl.co')
     );
 
     setReplitEnvironment({
       isReplit,
-      replId: process.env.REPL_ID || 'current-repl'
+      replId: import.meta.env.VITE_REPL_ID || 'current-repl'
     });
   }, []);
 
