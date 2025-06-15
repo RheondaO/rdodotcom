@@ -314,65 +314,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           console.log('Project sync will happen on first creation');
         }
 
-        // Create example projects if none exist (for demo purposes)
-        if (projects.length === 0) {
-          const exampleProjects = [
-            {
-              name: "Belle Journal - App Development Suite",
-              description: "Professional project management and development tracking suite",
-              projectType: "web" as const,
-              status: "deployed" as const,
-              priority: "high" as const,
-              repositoryUrl: replUrl,
-              deploymentUrl: replUrl,
-              progress: 85,
-              techStack: ["React", "TypeScript", "Node.js", "Express", "PostgreSQL"],
-              tags: ["project-management", "replit", "auto-detected"],
-              actualHours: 120
-            },
-            {
-              name: "CommunityPulse",
-              description: "Community engagement and social analytics platform",
-              projectType: "web" as const,
-              status: "deployed" as const,
-              priority: "high" as const,
-              repositoryUrl: "https://replit.com/@username/CommunityPulse",
-              deploymentUrl: "https://communitypulse.replit.app",
-              progress: 92,
-              techStack: ["React", "Node.js", "MongoDB", "Socket.io"],
-              tags: ["social-media", "analytics", "replit", "deployed"],
-              actualHours: 80
-            },
-            {
-              name: "PersonalPortfolio",
-              description: "Professional portfolio website showcasing projects and skills",
-              projectType: "web" as const,
-              status: "deployed" as const,
-              priority: "medium" as const,
-              repositoryUrl: "https://replit.com/@username/PersonalPortfolio",
-              deploymentUrl: "https://personalportfolio.replit.app",
-              progress: 100,
-              techStack: ["React", "TypeScript", "Tailwind CSS", "Framer Motion"],
-              tags: ["portfolio", "frontend", "replit", "deployed"],
-              actualHours: 40
-            }
-          ];
-
-          // Silently create projects without triggering toast notifications
-          try {
-            const response = await fetch('/api/app-projects/bulk-create', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ projects: exampleProjects })
-            });
-            
-            if (response.ok) {
-              queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
-            }
-          } catch (error) {
-            console.log('Example projects creation skipped - may already exist');
-          }
-        }
+        // Environment detected - ready for dynamic project creation
 
         if (isAdmin) {
           toast({
