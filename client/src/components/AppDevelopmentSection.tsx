@@ -425,20 +425,20 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </CardContent>
           </Card>
 
-          {/* Monitoring */}
+          {/* Hours Logged */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Monitoring
+                <Timer className="h-5 w-5" />
+                Hours Logged
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                Active
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                {formatTime(todayTotalTime)}
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                Real-time tracking
+                {sessionsToday} sessions today
               </p>
             </CardContent>
           </Card>
