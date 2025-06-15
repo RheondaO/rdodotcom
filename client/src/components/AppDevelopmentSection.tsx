@@ -123,18 +123,23 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [tagsInput, setTagsInput] = useState('');
   
   // Time tracking state
-  const [isTimerActive, setIsTimerActive] = useState(false);
-  const [sessionTime, setSessionTime] = useState(0);
-  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [showTimeTracker, setShowTimeTracker] = useState(false);
+  const [timeTrackingDescription, setTimeTrackingDescription] = useState('');
   
-  // Mock time tracking data (replace with actual API calls)
-  const timeEntries = [
-    { id: 1, startTime: new Date(), duration: 125, project: 'Belle Journal' },
-    { id: 2, startTime: new Date(Date.now() - 3600000), duration: 90, project: 'App Development Suite' }
-  ];
-  const todayTotalTime = 215; // minutes
-  const sessionsToday = 2;
+  // Time tracking queries
+  const { data: activeTimeEntry } = useQuery({
+    queryKey: ['/api/app-time-entries/active'],
+    refetchInterval: 5000 // Check every 5 seconds
+  });
+
+  const { data: timeEntries = [] } = useQuery({
+    queryKey: ['/api/app-time-entries', format(selectedDate, 'yyyy-MM-dd')],
+    queryFn: () => fetch(`/api/app-time-entries?date=${format(selectedDate, 'yyyy-MM-dd')}`).then(res => res.json())
+  });
+
+  // Calculate time stats from database entries
+  const todayTotalTime = Array.isArray(timeEntries) ? timeEntries.reduce((total: number, entry: any) => total + (entry.duration || 0), 0) : 0;
+  const sessionsToday = Array.isArray(timeEntries) ? timeEntries.length : 0;
 
   // Timer functions
   const formatTime = (minutes: number) => {
@@ -142,34 +147,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     const mins = minutes % 60;
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
   };
-
-  const startTimer = () => {
-    setIsTimerActive(true);
-    setSessionStartTime(new Date());
-    setSessionTime(0);
-  };
-
-  const stopTimer = () => {
-    setIsTimerActive(false);
-    setSessionStartTime(null);
-    // Here you would save the session to the database
-    toast({
-      title: "Session Completed",
-      description: `Logged ${formatTime(sessionTime)} of development time`,
-    });
-  };
-
-  // Update session time every minute when timer is active
-  useEffect(() => {
-    if (isTimerActive && sessionStartTime) {
-      const interval = setInterval(() => {
-        const now = new Date();
-        const elapsed = Math.floor((now.getTime() - sessionStartTime.getTime()) / 60000);
-        setSessionTime(elapsed);
-      }, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [isTimerActive, sessionStartTime]);
 
   // Queries - Enable for all users, not just admins
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
@@ -212,15 +189,40 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     }
   });
 
+  // Time tracking mutations
+  const startTimerMutation = useMutation({
+    mutationFn: (data: { projectId: number; description: string }) => 
+      apiRequest('/api/app-time-entries', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-time-entries/active'] });
+      setShowTimeTracker(false);
+      setTimeTrackingDescription('');
+      toast({
+        title: "Timer started",
+        description: "Time tracking session has begun"
+      });
+    }
+  });
+
+  const stopTimerMutation = useMutation({
+    mutationFn: (id: number) => 
+      apiRequest(`/api/app-time-entries/${id}/stop`, {}, 'PUT'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-time-entries/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/app-time-entries', format(selectedDate, 'yyyy-MM-dd')] });
+      toast({
+        title: "Timer stopped",
+        description: "Time tracking session completed"
+      });
+    }
+  });
+
   // Mutations
   const createProjectMutation = useMutation({
     mutationFn: (data: NewProjectForm) => apiRequest('/api/app-projects', {
-      method: 'POST',
-      body: JSON.stringify({
-        ...data,
-        technology_stack: techStackInput.split(',').map(t => t.trim()).filter(Boolean),
-        tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean)
-      })
+      ...data,
+      technology_stack: techStackInput.split(',').map(t => t.trim()).filter(Boolean),
+      tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean)
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
@@ -243,10 +245,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: (data: NewTaskForm) => apiRequest('/api/app-tasks', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    }),
+    mutationFn: (data: NewTaskForm) => apiRequest('/api/app-tasks', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setShowNewTaskForm(false);
