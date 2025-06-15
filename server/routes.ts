@@ -214,6 +214,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", adminLogin);
   app.post("/api/auth/logout", adminLogout);
 
+  // Combined dashboard data endpoint
+  app.get("/api/dashboard/data", async (req, res) => {
+    try {
+      const [goals, habits, todos, projects] = await Promise.all([
+        storage.getAllGoals(),
+        storage.getAllHabits(),
+        storage.getTodosByDate(new Date().toISOString().split('T')[0]),
+        storage.getAllAppProjects()
+      ]);
+      
+      res.json({
+        goals,
+        habits,
+        todaysTodos: todos,
+        projects: projects.slice(0, 5) // Recent projects only
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch dashboard data" });
+    }
+  });
+
   // Public read-only routes for dashboard data
   app.get("/api/goals", async (req, res) => {
     try {
