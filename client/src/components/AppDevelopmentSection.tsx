@@ -200,10 +200,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const taskForm = useForm<NewTaskForm>({
     resolver: zodResolver(newTaskSchema),
     defaultValues: {
-      projectId: selectedProject || undefined,
+      projectId: selectedProject || (projects.length > 0 ? projects[0].id : undefined),
       title: "",
       description: "",
-      category: "feature",
+      category: "feature", 
       status: "todo",
       priority: "medium"
     }
@@ -393,7 +393,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     return p.isActive && projectTasks.length > 0;
   });
   
-  const openTasks = tasks.filter((t: AppTask) => t.status !== 'done' && t.status !== 'completed');
+  const openTasks = tasks.filter((t: AppTask) => t.status !== 'done');
   const totalHoursLogged = tasks.reduce((sum: number, t: AppTask) => sum + (t.actualHours || 0), 0);
   
   // Calculate average progress based on task completion
