@@ -115,12 +115,26 @@ type NewTaskForm = z.infer<typeof newTaskSchema>;
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'tasks' | 'monitoring'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'tasks' | 'timetracking'>('overview');
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [techStackInput, setTechStackInput] = useState('');
   const [tagsInput, setTagsInput] = useState('');
+  
+  // Time tracking state
+  const [isTimerActive, setIsTimerActive] = useState(false);
+  const [sessionTime, setSessionTime] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+  const [showTimeTracker, setShowTimeTracker] = useState(false);
+  
+  // Mock time tracking data (replace with actual API calls)
+  const timeEntries = [
+    { id: 1, startTime: new Date(), duration: 125, project: 'Belle Journal' },
+    { id: 2, startTime: new Date(Date.now() - 3600000), duration: 90, project: 'App Development Suite' }
+  ];
+  const todayTotalTime = 215; // minutes
+  const sessionsToday = 2;
 
   // Queries - Enable for all users, not just admins
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
@@ -299,7 +313,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           { id: 'overview', label: 'Overview', icon: BarChart3 },
           { id: 'projects', label: 'Projects', icon: Code2 },
           { id: 'tasks', label: 'Tasks', icon: FileText },
-          { id: 'monitoring', label: 'Monitoring', icon: Eye }
+          { id: 'timetracking', label: 'Time Tracking', icon: Timer }
         ].map((tab) => {
           const Icon = tab.icon;
           return (
@@ -630,115 +644,137 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      {/* Monitoring Tab */}
-      {activeTab === 'monitoring' && (
+      {/* Time Tracking Tab */}
+      {activeTab === 'timetracking' && (
         <div className="space-y-6">
-          <h3 className="text-lg font-semibold">System Monitoring</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Time Tracking & Hours Log</h3>
+            {!isReadOnly && (
+              <Button
+                onClick={() => setShowTimeTracker(true)}
+                className="bg-gradient-to-r from-green-400 to-emerald-500 text-white"
+              >
+                <Timer className="h-4 w-4 mr-2" />
+                Start Timer
+              </Button>
+            )}
+          </div>
           
-          {/* Auto-detected Issues */}
-          <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
+          {/* Active Timer Display */}
+          <Card className="border-green-100 dark:border-green-800 shadow-lg">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
-                <AlertCircle className="h-5 w-5" />
-                Identified Issues ({autoDetectedIssues.length})
+              <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
+                <Timer className="h-5 w-5" />
+                Current Session
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {issuesLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl animate-pulse">
-                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
-                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-full"></div>
+              <div className="text-center py-8">
+                <div className="text-4xl font-mono font-bold text-gray-900 dark:text-white mb-2">
+                  {formatTime(sessionTime)}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  {isTimerActive ? 'Session in progress' : 'No active session'}
+                </p>
+                {!isReadOnly && (
+                  <div className="flex gap-2 justify-center">
+                    <Button
+                      variant={isTimerActive ? "destructive" : "default"}
+                      onClick={isTimerActive ? stopTimer : startTimer}
+                      className={!isTimerActive ? "bg-gradient-to-r from-green-400 to-emerald-500 text-white" : ""}
+                    >
+                      {isTimerActive ? (
+                        <>
+                          <Square className="h-4 w-4 mr-2" />
+                          Stop Session
+                        </>
+                      ) : (
+                        <>
+                          <Timer className="h-4 w-4 mr-2" />
+                          Start Session
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Today's Time Summary */}
+          <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+                <Clock className="h-5 w-5" />
+                Today's Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {Math.floor(todayTotalTime / 60)}h {todayTotalTime % 60}m
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Total Time</p>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {sessionsToday}
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Sessions</p>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {Math.round(todayTotalTime / Math.max(sessionsToday, 1))}m
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Avg Session</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Time Entries */}
+          <Card className="border-gray-200 dark:border-gray-700 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <History className="h-5 w-5" />
+                Recent Sessions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {timeEntries && timeEntries.length > 0 ? (
+                <div className="space-y-3">
+                  {timeEntries.slice(0, 5).map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-xl border">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            Development Session
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {format(new Date(entry.startTime), 'MMM dd, HH:mm')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono font-bold text-gray-900 dark:text-white">
+                          {formatTime(entry.duration)}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          {entry.project || 'General'}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
-              ) : autoDetectedIssues.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <CheckSquare className="h-8 w-8 text-green-400 dark:text-green-300" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">All Clear!</h3>
-                  <p className="text-gray-600 dark:text-gray-300">No issues detected in your development environment.</p>
-                </div>
               ) : (
-                <div className="space-y-4">
-                  {autoDetectedIssues.map((issue: AutoDetectedIssue) => {
-                    const IssueIcon = getIssueIcon(issue.severity);
-                    
-                    return (
-                      <div key={issue.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-lg ${
-                            issue.severity === 'high' ? 'bg-red-100 dark:bg-red-900/30' :
-                            issue.severity === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
-                            'bg-blue-100 dark:bg-blue-900/30'
-                          }`}>
-                            <IssueIcon className={`h-4 w-4 ${
-                              issue.severity === 'high' ? 'text-red-600 dark:text-red-400' :
-                              issue.severity === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
-                              'text-blue-600 dark:text-blue-400'
-                            }`} />
-                          </div>
-                          
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-medium text-gray-900 dark:text-white">
-                                {issue.title}
-                              </h4>
-                              <Badge className={`${
-                                issue.severity === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
-                                issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                              }`}>
-                                {issue.severity}
-                              </Badge>
-                              <Badge className={getStatusColor(issue.status)}>
-                                {issue.status.replace('_', ' ')}
-                              </Badge>
-                            </div>
-                            
-                            <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
-                              {issue.description}
-                            </p>
-                            
-                            {(issue.file_path || issue.line_number) && (
-                              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
-                                <FileText className="h-3 w-3" />
-                                {issue.file_path && <span>{issue.file_path}</span>}
-                                {issue.line_number && <span>Line {issue.line_number}</span>}
-                              </div>
-                            )}
-
-                            <div className="flex gap-2 mt-3">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                disabled={isReadOnly}
-                                className={`text-green-600 border-green-300 hover:bg-green-50 ${
-                                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
-                                onClick={() => {
-                                  // Update issue status to resolved
-                                  fetch(`/api/auto-detected-issues/${issue.id}`, {
-                                    method: 'PUT',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ status: 'resolved' })
-                                  }).then(() => {
-                                    queryClient.invalidateQueries({ queryKey: ['/api/auto-detected-issues'] });
-                                  });
-                                }}
-                              >
-                                <CheckSquare className="h-4 w-4 mr-1" />
-                                Mark Resolved
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Timer className="h-8 w-8 text-blue-400 dark:text-blue-300" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Time Entries Yet</h3>
+                  <p className="text-gray-600 dark:text-gray-300">Start your first development session to see time tracking data.</p>
                 </div>
               )}
             </CardContent>
