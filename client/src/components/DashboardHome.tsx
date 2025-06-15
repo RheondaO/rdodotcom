@@ -44,8 +44,6 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
     }
   });
   const { data: todos = [] } = useTodos(dateString);
-  const { data: timeBlocksData = [] } = useTimeBlocks(dateString);
-
   // Fetch combined dashboard data
   const { data: dashboardData, isLoading } = useDashboardData();
 
