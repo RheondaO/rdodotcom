@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Code2, 
   Monitor, 
@@ -115,6 +116,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [tagsInput, setTagsInput] = useState("");
   
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   // Replit environment detection
   const [replitEnvironment, setReplitEnvironment] = useState<{
