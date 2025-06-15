@@ -23,7 +23,7 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
+
   // Apply authentication middleware to all routes
   app.use(authenticateUser);
 
@@ -269,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/goals", async (req, res) => {
     try {
       console.log("Received goal data:", req.body);
-      
+
       // Check goal limit (5 goals maximum)
       const existingGoals = await storage.getAllGoals();
       if (existingGoals.length >= 5) {
@@ -278,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "You can only have a maximum of 5 goals at a time." 
         });
       }
-      
+
       const data = insertGoalSchema.parse(req.body);
       console.log("Parsed goal data:", data);
       const goal = await storage.createGoal(data);
@@ -547,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!year || !month) {
         return res.status(400).json({ error: "Year and month are required" });
       }
-      
+
       await storage.scheduleContentForMoonPhases(year, month);
       res.json({ success: true, message: `Content scheduled for ${month}/${year}` });
     } catch (error) {
@@ -656,7 +656,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // App Projects
+  // Deployment automation
+  app.post("/api/deploy", async (req, res) => {
+    try {
+      const { changeId, timestamp } = req.body;
+
+      // Log the deployment request
+      console.log(`Deployment triggered for change ${changeId} at ${timestamp}`);
+
+      // In a real implementation, you would:
+      // 1. Create a deployment record in the database
+      // 2. Call Replit's deployment API
+      // 3. Update the change status to "deployed"
+
+      res.json({ 
+        success: true, 
+        message: "Deployment initiated",
+        deploymentId: `deploy_${Date.now()}`
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to trigger deployment" });
+    }
+  });
+
+  // App development routes
   app.get("/api/app-projects", async (req, res) => {
     try {
       const projects = await storage.getAllAppProjects();
@@ -798,7 +821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const period = req.params.period;
       const { startDate, endDate } = req.query;
-      
+
       if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
@@ -813,7 +836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/reports/habits/:dateRange", async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
-      
+
       if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
@@ -829,7 +852,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const period = req.params.period;
       const { startDate, endDate } = req.query;
-      
+
       if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
@@ -843,9 +866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/reports/health/:dateRange", async (req, res) => {
     try {
-      const { startDate, endDate } = req.query;
-      
-      if (!startDate || !endDate) {
+      const { startDate, endDate } = req.query;      if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
 
@@ -859,7 +880,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/reports/productivity/:dateRange", async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
-      
+
       if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }

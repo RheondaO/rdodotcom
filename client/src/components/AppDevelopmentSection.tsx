@@ -107,9 +107,9 @@ interface AppDevelopmentSectionProps {
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
   const [activeView, setActiveView] = useState<"overview" | "changes" | "gaps" | "testing">("overview");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  
+
   const { toast } = useToast();
-  
+
   // Time tracking state
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -260,7 +260,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     if (startTime && isTimerRunning) {
       const endTime = new Date();
       const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 60000); // minutes
-      
+
       const newEntry = {
         id: timeEntries.length + 1,
         projectId: selectedProject || 1,
@@ -270,10 +270,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         duration,
         date: format(selectedDate, 'yyyy-MM-dd')
       };
-      
+
       setTimeEntries([...timeEntries, newEntry]);
     }
-    
+
     setIsTimerRunning(false);
     setStartTime(null);
     setElapsedTime(0);
@@ -327,12 +327,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     const passedTests = testCases.filter(tc => tc.status === 'passed').length;
     const failedTests = testCases.filter(tc => tc.status === 'failed').length;
     const pendingTests = testCases.filter(tc => tc.status === 'pending').length;
-    
+
     const totalIssues = qualityIssues.length;
     const openIssues = qualityIssues.filter(qi => qi.status === 'open').length;
     const criticalIssues = qualityIssues.filter(qi => qi.severity === 'critical').length;
     const highIssues = qualityIssues.filter(qi => qi.severity === 'high').length;
-    
+
     return {
       totalTests,
       passedTests,
@@ -347,6 +347,15 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   };
 
   const testingStats = getTestingStats();
+
+    const triggerDeployment = (changeId: number) => {
+        // Placeholder for deployment logic
+        // Replace with your actual deployment trigger mechanism
+        toast({
+            title: "Deployment Triggered",
+            description: `Deployment triggered for change ID: ${changeId}`,
+        });
+    };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -539,7 +548,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
                       </div>
                     </div>
-                    
+
                     <div className="space-y-3">
                       <div>
                         <div className="flex justify-between text-sm mb-1">
@@ -548,7 +557,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         </div>
                         <Progress value={project.progress} className="h-2" />
                       </div>
-                      
+
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
                           <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
@@ -718,7 +727,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div className="flex gap-2 mt-3">
                       <Button 
                         size="sm" 
@@ -843,7 +852,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div className="flex gap-2 mt-3">
                       <Button 
                         size="sm" 
@@ -969,7 +978,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground dark:text-gray-400">{project.description}</p>
-                    
+
                     <div>
                       <div className="flex justify-between text-sm mb-1">
                         <span>Progress</span>
@@ -1305,7 +1314,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
                           {item.description}
                         </p>
-                        
+
                         <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3 mb-3">
                           <div className="text-sm">
                             <div className="font-medium text-blue-900 dark:text-blue-100 mb-1">
@@ -1457,6 +1466,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     <Bug className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p>No quality issues found</p>
                     <p className="text-sm">Great job! No issues to report</p>
+                  ```tool_code
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -1549,7 +1559,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground dark:text-gray-400">Progress</span>
@@ -1698,7 +1708,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      
+
     </div>
   );
 }
