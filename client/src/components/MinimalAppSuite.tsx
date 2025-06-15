@@ -207,12 +207,20 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('POST', '/api/app-tasks', data);
       return response.json();
     },
-    onSuccess: (data) => {
-      console.log('Task created successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+    onSuccess: (newTask) => {
+      console.log('Task created successfully:', newTask);
+      
+      // Immediately add the new task to the cache
+      const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
+      const updatedTasks = [newTask, ...currentTasks];
+      queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
+      
       setIsTaskDialogOpen(false);
       taskForm.reset();
+      
+      // Refetch as backup
+      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+      
       toast({ title: "Task created successfully" });
     },
     onError: (error: any) => {
@@ -230,12 +238,22 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('PUT', `/api/app-tasks/${id}`, data);
       return response.json();
     },
-    onSuccess: (data) => {
-      console.log('Task updated successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+    onSuccess: (updatedTask) => {
+      console.log('Task updated successfully:', updatedTask);
+      
+      // Immediately update the task in the cache
+      const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
+      const updatedTasks = currentTasks.map(task => 
+        task.id === updatedTask.id ? updatedTask : task
+      );
+      queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
+      
       setEditingTask(null);
       setIsTaskDialogOpen(false);
+      
+      // Refetch as backup
+      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+      
       toast({ title: "Task updated successfully" });
     },
     onError: (error: any) => {
@@ -253,10 +271,17 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('DELETE', `/api/app-tasks/${id}`);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data, deletedTaskId) => {
       console.log('Task deleted successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      
+      // Immediately remove the task from the cache
+      const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
+      const updatedTasks = currentTasks.filter(task => task.id !== deletedTaskId);
+      queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
+      
+      // Refetch as backup
       queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+      
       toast({ title: "Task deleted successfully" });
     },
     onError: (error: any) => {
