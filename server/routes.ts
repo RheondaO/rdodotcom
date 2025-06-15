@@ -1209,6 +1209,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // App Time Tracking API
+  app.get("/api/app-time-entries", async (req, res) => {
+    try {
+      const { projectId, date } = req.query;
+      
+      if (date) {
+        const entries = await storage.getAppTimeEntriesByDate(date as string);
+        res.json(entries);
+      } else if (projectId) {
+        const entries = await storage.getAllAppTimeEntries(parseInt(projectId as string));
+        res.json(entries);
+      } else {
+        const entries = await storage.getAllAppTimeEntries();
+        res.json(entries);
+      }
+    } catch (error) {
+      console.error("Error fetching time entries:", error);
+      res.status(500).json({ error: "Failed to fetch time entries" });
+    }
+  });
+
+  app.get("/api/app-time-entries/active", async (req, res) => {
+    try {
+      const activeEntry = await storage.getActiveAppTimeEntry();
+      res.json(activeEntry);
+    } catch (error) {
+      console.error("Error fetching active time entry:", error);
+      res.status(500).json({ error: "Failed to fetch active time entry" });
+    }
+  });
+
+  app.post("/api/app-time-entries", async (req, res) => {
+    try {
+      const { projectId, taskId, description } = req.body;
+      
+      if (!projectId || !description) {
+        return res.status(400).json({ error: "Project ID and description are required" });
+      }
+
+      const newEntry = await storage.createAppTimeEntry({
+        projectId: parseInt(projectId),
+        taskId: taskId ? parseInt(taskId) : null,
+        description,
+        startTime: new Date(),
+        date: new Date(),
+        duration: 0,
+        billable: false
+      });
+
+      res.status(201).json(newEntry);
+    } catch (error) {
+      console.error("Error creating time entry:", error);
+      res.status(500).json({ error: "Failed to create time entry" });
+    }
+  });
+
+  app.put("/api/app-time-entries/:id/stop", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const endTime = new Date();
+      
+      const updatedEntry = await storage.stopAppTimeEntry(id, endTime);
+      res.json(updatedEntry);
+    } catch (error) {
+      console.error("Error stopping time entry:", error);
+      res.status(500).json({ error: "Failed to stop time entry" });
+    }
+  });
+
+  app.put("/api/app-time-entries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const updatedEntry = await storage.updateAppTimeEntry(id, updates);
+      res.json(updatedEntry);
+    } catch (error) {
+      console.error("Error updating time entry:", error);
+      res.status(500).json({ error: "Failed to update time entry" });
+    }
+  });
+
+  app.delete("/api/app-time-entries/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteAppTimeEntry(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting time entry:", error);
+      res.status(500).json({ error: "Failed to delete time entry" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

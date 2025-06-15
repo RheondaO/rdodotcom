@@ -1,6 +1,6 @@
 import { db } from "./db";
 import memoize from "memoizee";
-import { eq, desc, and, gte, lte, count, sum, avg } from "drizzle-orm";
+import { eq, desc, and, gte, lte, count, sum, avg, isNull } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import type {
   User, InsertUser, DailyEntry, InsertDailyEntry, Bill, InsertBill,
@@ -597,6 +597,76 @@ export class DatabaseStorage {
     return await query.orderBy(desc(schema.appTasks.createdAt));
   }
 
+  // App Time Entries
+  async getAllAppTimeEntries(projectId?: number): Promise<AppTimeEntry[]> {
+    const query = db.select().from(schema.appTimeEntries);
+    if (projectId) {
+      return await query.where(eq(schema.appTimeEntries.projectId, projectId))
+        .orderBy(desc(schema.appTimeEntries.startTime));
+    }
+    return await query.orderBy(desc(schema.appTimeEntries.startTime));
+  }
+
+  async getAppTimeEntriesByDate(date: string): Promise<AppTimeEntry[]> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await db.select().from(schema.appTimeEntries)
+      .where(and(
+        gte(schema.appTimeEntries.startTime, startOfDay),
+        lte(schema.appTimeEntries.startTime, endOfDay)
+      ))
+      .orderBy(desc(schema.appTimeEntries.startTime));
+  }
+
+  async createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry> {
+    const [newEntry] = await db.insert(schema.appTimeEntries).values(entry).returning();
+    return newEntry;
+  }
+
+  async updateAppTimeEntry(id: number, entry: Partial<InsertAppTimeEntry>): Promise<AppTimeEntry> {
+    const [updatedEntry] = await db.update(schema.appTimeEntries)
+      .set(entry)
+      .where(eq(schema.appTimeEntries.id, id))
+      .returning();
+    return updatedEntry;
+  }
+
+  async deleteAppTimeEntry(id: number): Promise<void> {
+    await db.delete(schema.appTimeEntries).where(eq(schema.appTimeEntries.id, id));
+  }
+
+  async getActiveAppTimeEntry(): Promise<AppTimeEntry | null> {
+    const [activeEntry] = await db.select().from(schema.appTimeEntries)
+      .where(isNull(schema.appTimeEntries.endTime))
+      .orderBy(desc(schema.appTimeEntries.startTime))
+      .limit(1);
+    return activeEntry || null;
+  }
+
+  async stopAppTimeEntry(id: number, endTime: Date): Promise<AppTimeEntry> {
+    const [entry] = await db.select().from(schema.appTimeEntries)
+      .where(eq(schema.appTimeEntries.id, id));
+    
+    if (!entry) {
+      throw new Error('Time entry not found');
+    }
+
+    const duration = Math.floor((endTime.getTime() - entry.startTime.getTime()) / 60000);
+    
+    const [updatedEntry] = await db.update(schema.appTimeEntries)
+      .set({ 
+        endTime,
+        duration
+      })
+      .where(eq(schema.appTimeEntries.id, id))
+      .returning();
+    
+    return updatedEntry;
+  }
+
   async createAppTask(task: InsertAppTask): Promise<AppTask> {
     const [newTask] = await db.insert(schema.appTasks).values(task).returning();
     return newTask;
@@ -610,22 +680,7 @@ export class DatabaseStorage {
     return updatedTask;
   }
 
-  async getAppTimeEntries(taskId?: number): Promise<AppTimeEntry[]> {
-    const query = db.select().from(schema.appTimeEntries);
-    if (taskId) {
-      return await query.where(eq(schema.appTimeEntries.taskId, taskId));
-    }
-    return await query.orderBy(desc(schema.appTimeEntries.createdAt));
-  }
 
-  async createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry> {
-    const [newEntry] = await db.insert(schema.appTimeEntries).values(entry).returning();
-    return newEntry;
-  }
-
-  async getAllAppTimeEntries(): Promise<AppTimeEntry[]> {
-    return await db.select().from(schema.appTimeEntries).orderBy(desc(schema.appTimeEntries.createdAt));
-  }
 
   async getAppTimeEntriesByProject(projectId: number, startDate?: string, endDate?: string): Promise<AppTimeEntry[]> {
     const conditions = [eq(schema.appTimeEntries.projectId, projectId)];
