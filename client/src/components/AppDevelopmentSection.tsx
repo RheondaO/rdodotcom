@@ -155,6 +155,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     select: (data: any[]) => data || []
   });
 
+  // Derived data for calculations
+  const activeProjects = projects.filter(p => p.isActive);
+  const openTasks = tasks.filter(t => t.status !== 'done' && t.status !== 'completed');
+  const totalHoursLogged = projects.reduce((sum, p) => sum + (p.actualHours || 0), 0);
+  const avgProgress = activeProjects.length > 0 
+    ? Math.round(activeProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / activeProjects.length)
+    : 0;
+
   // Create project mutation
   const createProjectMutation = useMutation({
     mutationFn: async (data: NewProjectForm) => {
@@ -321,7 +329,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     }
   };
 
-  const activeProjects = projects.filter(p => p.isActive);
   const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
   const testingTasks = tasks.filter(t => t.status === 'testing');
 
@@ -434,7 +441,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <div>
                     <p className="text-sm text-muted-foreground dark:text-gray-400">Open Tasks</p>
                     <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {tasks.filter(t => t.status !== 'done').length}
+                      {openTasks.length}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
@@ -466,7 +473,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <div>
                     <p className="text-sm text-muted-foreground dark:text-gray-400">Avg Progress</p>
                     <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                      {Math.round(activeProjects.reduce((sum, p) => sum + p.progress, 0) / activeProjects.length)}%
+                      {avgProgress}%
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-amber-500 rounded-xl flex items-center justify-center">
