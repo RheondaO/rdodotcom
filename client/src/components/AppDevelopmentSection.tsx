@@ -144,10 +144,17 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   });
 
   // Fetch real project data from API
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useQuery({
     queryKey: ['/api/app-projects'],
     select: (data: any[]) => data || []
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log('App Development - Projects data:', projects);
+    console.log('App Development - Projects loading:', projectsLoading);
+    console.log('App Development - Projects error:', projectsError);
+  }, [projects, projectsLoading, projectsError]);
 
   // Fetch real task data from API
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({

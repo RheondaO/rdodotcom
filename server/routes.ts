@@ -47,6 +47,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public app development data
+  app.get("/api/app-projects", async (req, res) => {
+    try {
+      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+      const projects = await storage.getAllAppProjects();
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch app projects" });
+    }
+  });
+
+  app.get("/api/app-tasks", async (req, res) => {
+    try {
+      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+      const tasks = await storage.getAllAppTasks();
+      res.json(tasks);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch app tasks" });
+    }
+  });
+
   app.get("/api/ai/suggestions", async (req, res) => {
     try {
       const suggestions = await storage.getAISuggestionData();
@@ -679,32 +700,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // App development routes
-  app.get("/api/app-projects", async (req, res) => {
-    try {
-      const projects = await storage.getAllAppProjects();
-      res.json(projects);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch app projects" });
-    }
-  });
-
+  // App development authenticated routes (for creating/updating)
   app.post("/api/app-projects", async (req, res) => {
     try {
       const project = await storage.createAppProject(req.body);
       res.json(project);
     } catch (error) {
       res.status(400).json({ error: "Invalid app project data" });
-    }
-  });
-
-  // App Tasks
-  app.get("/api/app-tasks", async (req, res) => {
-    try {
-      const tasks = await storage.getAllAppTasks();
-      res.json(tasks);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch app tasks" });
     }
   });
 
