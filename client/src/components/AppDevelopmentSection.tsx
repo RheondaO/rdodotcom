@@ -1033,17 +1033,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       )}
 
                       <div className="flex gap-2 mt-3">
-                        {project.repositoryUrl && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            disabled={isReadOnly}
-                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                          >
-                            <GitBranch className="h-4 w-4 mr-1" />
-                            Repository
-                          </Button>
-                        )}
                         {project.deploymentUrl && (
                           <Button 
                             size="sm" 
@@ -1212,18 +1201,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
                       {/* Action Buttons */}
                       <div className="flex gap-2 flex-wrap">
-                        {project.repositoryUrl && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => window.open(project.repositoryUrl, '_blank')}
-                            disabled={isReadOnly}
-                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                          >
-                            <GitBranch className="h-4 w-4 mr-1" />
-                            Repository
-                          </Button>
-                        )}
                         {project.deploymentUrl && (
                           <Button 
                             size="sm" 
