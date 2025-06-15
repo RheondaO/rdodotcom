@@ -67,11 +67,11 @@ export default function MinimalAppSuite() {
   const { toast } = useToast();
 
   // Queries
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ['/api/app-projects']
   });
 
-  const { data: allTasks = [], isLoading: tasksLoading } = useQuery({
+  const { data: allTasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ['/api/app-tasks']
   });
 
@@ -160,13 +160,18 @@ export default function MinimalAppSuite() {
     }
   });
 
-  const taskForm = useForm({
+  const taskForm = useForm<{
+    title: string;
+    description: string;
+    projectId: number;
+    status: "todo" | "in_progress" | "done";
+  }>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: "",
       description: "",
       projectId: selectedProject || 0,
-      status: "todo" as const,
+      status: "todo",
     }
   });
 
@@ -189,7 +194,7 @@ export default function MinimalAppSuite() {
 
   // Status badge styling
   const getStatusBadge = (status: string) => {
-    const variants = {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
       todo: "secondary",
       in_progress: "default",
       done: "default"
@@ -199,7 +204,7 @@ export default function MinimalAppSuite() {
       in_progress: "text-blue-600",
       done: "text-green-600"
     };
-    return { variant: variants[status as keyof typeof variants], className: colors[status as keyof typeof colors] };
+    return { variant: variants[status] || "secondary", className: colors[status as keyof typeof colors] || "text-gray-600" };
   };
 
   const getStatusIcon = (status: string) => {
@@ -587,7 +592,10 @@ export default function MinimalAppSuite() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge {...getStatusBadge(task.status)}>
+                          <Badge 
+                            variant={getStatusBadge(task.status).variant}
+                            className={getStatusBadge(task.status).className}
+                          >
                             {task.status === "todo" ? "Not Started" :
                              task.status === "in_progress" ? "In Progress" : "Completed"}
                           </Badge>
