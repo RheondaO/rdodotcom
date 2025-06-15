@@ -1544,7 +1544,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground dark:text-gray-400">Category:</span>
                         <span className="ml-1 font-medium capitalize">{task.category}</span>
@@ -1557,12 +1557,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         <span className="text-muted-foreground dark:text-gray-400">Project:</span>
                         <span className="ml-1 font-medium">
                           {projects.find(p => p.id === task.projectId)?.name}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground dark:text-gray-400">Due:</span>
-                        <span className="ml-1 font-medium">
-                          {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
                         </span>
                       </div>
                     </div>
