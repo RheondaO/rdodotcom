@@ -58,6 +58,11 @@ function App() {
               <Dashboard />
             </AuthGuard>
           </Route>
+          <Route path="/dev-suite">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+              <MinimalAppSuite />
+            </div>
+          </Route>
           <Route path="/auth-check">
             <AuthCheck />
           </Route>
