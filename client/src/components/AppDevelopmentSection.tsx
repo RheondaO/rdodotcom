@@ -122,20 +122,17 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [techStackInput, setTechStackInput] = useState('');
   const [tagsInput, setTagsInput] = useState('');
 
-  // Queries
+  // Queries - Enable for all users, not just admins
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
-    queryKey: ['/api/app-projects'],
-    enabled: !isReadOnly
+    queryKey: ['/api/app-projects']
   });
 
   const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['/api/app-tasks'],
-    enabled: !isReadOnly
+    queryKey: ['/api/app-tasks']
   });
 
   const { data: autoDetectedIssues = [], isLoading: issuesLoading } = useQuery({
-    queryKey: ['/api/auto-detected-issues'],
-    enabled: !isReadOnly
+    queryKey: ['/api/auto-detected-issues']
   });
 
   // Forms
@@ -280,32 +277,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     return Math.round((completedTasks.length / projectTasks.length) * 100);
   };
 
-  if (isReadOnly) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center">
-            <Code2 className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">App Development Suite</h2>
-            <p className="text-gray-600 dark:text-gray-300">Read-only view</p>
-          </div>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Development Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 dark:text-gray-300">
-              Development data is only available when logged in.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Remove the early return for read-only users - they should see the full suite
 
   return (
     <div className="space-y-6">
@@ -315,7 +287,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">App Development Suite</h2>
-          <p className="text-gray-600 dark:text-gray-300">Project management & development tracking</p>
+          <p className="text-gray-600 dark:text-gray-300">
+            Project management & development tracking
+            {isReadOnly && <span className="ml-2 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs rounded-full">Read Only</span>}
+          </p>
         </div>
       </div>
 
@@ -401,13 +376,15 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Projects</h3>
-            <Button
-              onClick={() => setShowNewProjectForm(true)}
-              className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Project
-            </Button>
+            {!isReadOnly && (
+              <Button
+                onClick={() => setShowNewProjectForm(true)}
+                className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Project
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -431,14 +408,18 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <Code2 className="h-8 w-8 text-blue-400 dark:text-blue-300" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No projects yet</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">Get started by creating your first project</p>
-                <Button
-                  onClick={() => setShowNewProjectForm(true)}
-                  className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Project
-                </Button>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  {isReadOnly ? "No projects to display" : "Get started by creating your first project"}
+                </p>
+                {!isReadOnly && (
+                  <Button
+                    onClick={() => setShowNewProjectForm(true)}
+                    className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Project
+                  </Button>
+                )}
               </div>
             ) : (
               projects.map((project: AppProject) => {
@@ -529,13 +510,15 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Tasks</h3>
-          <Button
-            onClick={() => setShowNewTaskForm(true)}
-            className="bg-gradient-to-r from-green-400 to-blue-500 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Task
-          </Button>
+          {!isReadOnly && (
+            <Button
+              onClick={() => setShowNewTaskForm(true)}
+              className="bg-gradient-to-r from-green-400 to-blue-500 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Task
+            </Button>
+          )}
         </div>
 
           <div className="space-y-4">
@@ -554,14 +537,18 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <FileText className="h-8 w-8 text-green-400 dark:text-green-300" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No tasks yet</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">Create your first task to get started</p>
-                <Button
-                  onClick={() => setShowNewTaskForm(true)}
-                  className="bg-gradient-to-r from-green-400 to-blue-500 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Task
-                </Button>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  {isReadOnly ? "No tasks to display" : "Create your first task to get started"}
+                </p>
+                {!isReadOnly && (
+                  <Button
+                    onClick={() => setShowNewTaskForm(true)}
+                    className="bg-gradient-to-r from-green-400 to-blue-500 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Task
+                  </Button>
+                )}
               </div>
             ) : (
               tasks.map((task: AppTask) => {
