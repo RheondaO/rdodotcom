@@ -26,14 +26,14 @@ export function useReplitIntegration() {
   useEffect(() => {
     const detectReplitEnvironment = () => {
       const isReplit = !!(
-        process.env.REPL_ID || 
+        import.meta.env.VITE_REPL_ID || 
         window.location.hostname.includes('replit.app') ||
         window.location.hostname.includes('repl.co') ||
         document.querySelector('script[src*="replit"]')
       );
 
       if (isReplit) {
-        const replId = process.env.REPL_ID || extractReplIdFromUrl();
+        const replId = import.meta.env.VITE_REPL_ID || extractReplIdFromUrl();
         const replUrl = window.location.origin;
         
         const env: ReplitEnvironment = {

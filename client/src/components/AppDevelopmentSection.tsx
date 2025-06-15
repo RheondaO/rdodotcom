@@ -267,14 +267,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   useEffect(() => {
     const detectReplitEnvironment = async () => {
       const isReplit = !!(
-        process.env.REPL_ID || 
+        import.meta.env.VITE_REPL_ID || 
         window.location.hostname.includes('replit.app') ||
         window.location.hostname.includes('repl.co') ||
         document.querySelector('script[src*="replit"]')
       );
 
       if (isReplit) {
-        const replId = process.env.REPL_ID || 'current-repl';
+        const replId = import.meta.env.VITE_REPL_ID || 'current-repl';
         const replUrl = window.location.origin;
         
         setReplitEnvironment({
