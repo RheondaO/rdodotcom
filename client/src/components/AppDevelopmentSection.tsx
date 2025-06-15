@@ -657,10 +657,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
       setTimeEntries([...timeEntries, newEntry]);
 
-      toast({
-        title: replitEnvironment.isReplit ? "Replit Session Completed" : "Work Session Completed",
-        description: `Logged ${duration} minutes: ${taskDescription}`,
-      });
+      if (isAdmin) {
+        toast({
+          title: replitEnvironment.isReplit ? "Replit Session Completed" : "Work Session Completed",
+          description: `Logged ${duration} minutes: ${taskDescription}`,
+        });
+      }
     }
 
     setActiveSession(null);
@@ -765,10 +767,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     const triggerDeployment = (changeId: number) => {
         // Placeholder for deployment logic
         // Replace with your actual deployment trigger mechanism
-        toast({
-            title: "Deployment Triggered",
-            description: `Deployment triggered for change ID: ${changeId}`,
-        });
+        if (isAdmin) {
+            toast({
+                title: "Deployment Triggered",
+                description: `Deployment triggered for change ID: ${changeId}`,
+            });
+        }
     };
 
   return (
