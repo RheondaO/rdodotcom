@@ -157,6 +157,7 @@ export interface IStorage {
 
   // Content Progress
   getAllContentProgress(): Promise<ContentProgress[]>;
+  getContentProgress(id: number): Promise<ContentProgress | undefined>;
   createContentProgress(progress: InsertContentProgress): Promise<ContentProgress>;
 
   // App Development
