@@ -226,17 +226,21 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setShowNewTaskForm(false);
       taskForm.reset();
-      toast({
-        title: "Success",
-        description: "Task created successfully!"
-      });
+      if (isAdmin) {
+        toast({
+          title: "Success",
+          description: "Task created successfully!"
+        });
+      }
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to create task. Please try again.",
-        variant: "destructive"
-      });
+      if (isAdmin) {
+        toast({
+          title: "Error",
+          description: "Failed to create task. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   });
 
@@ -251,17 +255,21 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-      toast({
-        title: "Success",
-        description: "Task updated successfully!"
-      });
+      if (isAdmin) {
+        toast({
+          title: "Success",
+          description: "Task updated successfully!"
+        });
+      }
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update task. Please try again.",
-        variant: "destructive"
-      });
+      if (isAdmin) {
+        toast({
+          title: "Error",
+          description: "Failed to update task. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   });
 
@@ -295,10 +303,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             // Refresh projects list to show newly synced projects
             queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
             
-            toast({
-              title: "Replit Projects Synced",
-              description: `Found and synced ${syncedProjects.length} Replit apps including CommunityPulse, PersonalPortfolio, and others`,
-            });
+            if (isAdmin) {
+              toast({
+                title: "Replit Projects Synced",
+                description: `Found and synced ${syncedProjects.length} Replit apps including CommunityPulse, PersonalPortfolio, and others`,
+              });
+            }
           }
         } catch (error) {
           console.log('Project sync will happen on first creation');
@@ -364,10 +374,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           }
         }
 
-        toast({
-          title: "Replit Environment Active",
-          description: `Connected to ${replId} - All apps will be auto-detected and displayed`,
-        });
+        if (isAdmin) {
+          toast({
+            title: "Replit Environment Active",
+            description: `Connected to ${replId} - All apps will be auto-detected and displayed`,
+          });
+        }
       }
     };
 
@@ -405,17 +417,21 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       form.reset();
       setTechStackInput("");
       setTagsInput("");
-      toast({
-        title: "Success",
-        description: "Project created successfully!"
-      });
+      if (isAdmin) {
+        toast({
+          title: "Success",
+          description: "Project created successfully!"
+        });
+      }
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to create project. Please try again.",
-        variant: "destructive"
-      });
+      if (isAdmin) {
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+          variant: "destructive"
+        });
+      }
     }
   });
 
@@ -494,12 +510,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         };
         setActiveSession(newSession);
         
-        toast({
-          title: replitEnvironment.isReplit ? "Replit Session Started" : "Work Session Started",
-          description: replitEnvironment.isReplit 
-            ? `Tracking development in Repl: ${replitEnvironment.replId}`
-            : "Automatically detected you're working on this project",
-        });
+        if (isAdmin) {
+          toast({
+            title: replitEnvironment.isReplit ? "Replit Session Started" : "Work Session Started",
+            description: replitEnvironment.isReplit 
+              ? `Tracking development in Repl: ${replitEnvironment.replId}`
+              : "Automatically detected you're working on this project",
+          });
+        }
       }
       
       // Update last activity if session is active
