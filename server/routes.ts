@@ -716,20 +716,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/replit/file-change", async (req, res) => {
     try {
       const { path, type, size, author } = req.body;
+      const changeId = `change_${Date.now()}`;
 
       // Log the file change event
       console.log(`Replit file change detected: ${type} - ${path}`);
 
-      // In a real implementation, you could:
-      // 1. Store file changes in database
-      // 2. Trigger automated testing
-      // 3. Update project statistics
+      // Auto-deploy trigger for important file changes
+      const deploymentTriggerFiles = [
+        'package.json',
+        'server/index.ts',
+        'server/routes.ts',
+        'shared/schema.ts',
+        'client/src/App.tsx',
+        'client/src/components/AppDevelopmentSection.tsx'
+      ];
 
-      res.json({
-        success: true,
-        message: "File change recorded",
-        changeId: `change_${Date.now()}`
-      });
+      const shouldAutoDeploy = deploymentTriggerFiles.some(file => 
+        path.includes(file) && (type === 'modified' || type === 'created')
+      );
+
+      if (shouldAutoDeploy) {
+        console.log(`Auto-deployment triggered by change to: ${path}`);
+        
+        // Trigger deployment
+        const deploymentResponse = await fetch(`${req.protocol}://${req.get('host')}/api/deploy`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            changeId,
+            timestamp: new Date().toISOString(),
+            triggerFile: path,
+            autoTriggered: true
+          })
+        });
+
+        const deploymentResult = await deploymentResponse.json();
+        
+        res.json({
+          success: true,
+          message: "File change recorded and deployment triggered",
+          changeId,
+          deployment: deploymentResult
+        });
+      } else {
+        res.json({
+          success: true,
+          message: "File change recorded",
+          changeId
+        });
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to record file change" });
     }
