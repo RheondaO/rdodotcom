@@ -1106,7 +1106,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
                 <Code2 className="h-5 w-5" />
-                All Projects ({projects.length})
+                Active Projects ({activeProjects.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1120,7 +1120,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     </div>
                   ))}
                 </div>
-              ) : projects.length === 0 ? (
+              ) : activeProjects.length === 0 ? (
                 <div className="text-center py-12">
                   <Code2 className="h-16 w-16 text-muted-foreground dark:text-gray-500 mx-auto mb-4 opacity-50" />
                   <h3 className="text-lg font-medium text-muted-foreground dark:text-gray-400 mb-2">No Projects Yet</h3>
@@ -1140,7 +1140,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {projects.map((project) => (
+                  {activeProjects.map((project) => (
                     <div key={project.id} className={`p-6 rounded-xl border hover:shadow-lg transition-shadow ${
                     project.status === 'deployed' 
                       ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800' 
