@@ -60,6 +60,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Git commits endpoint
+  app.get("/api/git/commits", async (req, res) => {
+    try {
+      // Get actual Git commits using shell command
+      const { execSync } = require('child_process');
+      
+      try {
+        // Get recent commits with detailed information
+        const gitOutput = execSync('git log --oneline --date=iso --pretty=format:"%H|%an|%ad|%s" -n 10', {
+          encoding: 'utf8',
+          cwd: process.cwd()
+        });
+
+        const commits = gitOutput.trim().split('\n').map(line => {
+          const [hash, author, dateStr, ...messageParts] = line.split('|');
+          return {
+            hash,
+            author,
+            date: new Date(dateStr).toISOString(),
+            message: messageParts.join('|'),
+            insertions: 0,
+            deletions: 0,
+            files: []
+          };
+        });
+
+        res.json(commits);
+      } catch (gitError) {
+        // If git command fails, return empty array
+        console.log('Git not available or no commits found:', gitError.message);
+        res.json([]);
+      }
+    } catch (error) {
+      console.error('Error fetching git commits:', error);
+      res.status(500).json({ error: "Failed to fetch git commits" });
+    }
+  });
+
   // Apply authentication middleware to all routes
   app.use(authenticateUser);
 
