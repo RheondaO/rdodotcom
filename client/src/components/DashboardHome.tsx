@@ -42,7 +42,9 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
       const response = await fetch('/api/habits');
       if (!response.ok) throw new Error('Failed to fetch habits');
       return response.json();
-    }
+    },
+    staleTime: 10000,
+    refetchOnWindowFocus: true,
   });
   const { data: todos = [] } = useTodos(dateString);
   // Fetch combined dashboard data
@@ -65,6 +67,8 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
       return response.json();
     },
     enabled: !!dashboardData, // Only load after main dashboard data loads
+    staleTime: 30000,
+    refetchOnWindowFocus: true,
   });
 
   const [activeTimer, setActiveTimer] = useState<{

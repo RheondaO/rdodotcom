@@ -20,7 +20,9 @@ export function useDashboardData() {
       }
       return response.json();
     },
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    refetchInterval: 60000, // Refetch every minute for live updates
+    staleTime: 10000, // Consider data fresh for 10 seconds (reduced from 30)
+    refetchInterval: 30000, // Refetch every 30 seconds for live updates
+    refetchOnWindowFocus: true,
+    retry: 1,
   });
 }

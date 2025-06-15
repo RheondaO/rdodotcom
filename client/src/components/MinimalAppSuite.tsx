@@ -66,7 +66,7 @@ export default function MinimalAppSuite() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{type: 'project' | 'task', id: number, name: string} | null>(null);
-  
+
   const { toast } = useToast();
 
   // Queries
@@ -119,18 +119,18 @@ export default function MinimalAppSuite() {
     },
     onSuccess: async (newProject) => {
       console.log('Project created successfully:', newProject);
-      
+
       // Immediately add the new project to the cache
       const currentProjects = queryClient.getQueryData<Project[]>(['/api/app-projects']) || [];
       const updatedProjects = [newProject, ...currentProjects];
       queryClient.setQueryData(['/api/app-projects'], updatedProjects);
-      
+
       setIsProjectDialogOpen(false);
       projectForm.reset();
-      
+
       // Refetch as backup
       queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
-      
+
       toast({ title: "Project created successfully" });
     },
     onError: (error: any) => {
@@ -172,24 +172,24 @@ export default function MinimalAppSuite() {
     },
     onSuccess: async (data, deletedProjectId) => {
       console.log('Project deleted successfully:', data);
-      
+
       // Immediately update the cache to remove the deleted project
       const currentProjects = queryClient.getQueryData<Project[]>(['/api/app-projects']) || [];
       const updatedProjects = currentProjects.filter(p => p.id !== deletedProjectId);
       queryClient.setQueryData(['/api/app-projects'], updatedProjects);
-      
+
       // Also update tasks cache to remove tasks from deleted project
       const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
       const updatedTasks = currentTasks.filter(t => t.projectId !== deletedProjectId);
       queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
-      
+
       // Clear selected project if it was deleted
       if (selectedProject === deletedProjectId) setSelectedProject(null);
-      
+
       // Refetch as backup to ensure data consistency
       queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
       queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
-      
+
       toast({ title: "Project deleted successfully" });
     },
     onError: (error: any) => {
@@ -297,7 +297,7 @@ export default function MinimalAppSuite() {
   const onProjectSubmit = (data: any) => {
     console.log('Form submitted with data:', data);
     console.log('Form errors:', projectForm.formState.errors);
-    
+
     if (editingProject) {
       updateProjectMutation.mutate({ id: editingProject.id, ...data });
     } else {
