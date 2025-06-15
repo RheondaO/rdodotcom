@@ -71,29 +71,11 @@ export default function MinimalAppSuite() {
 
   // Queries
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useQuery<Project[]>({
-    queryKey: ['/api/app-projects'],
-    queryFn: async () => {
-      const response = await fetch('/api/app-projects');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    },
-    staleTime: 0,
-    refetchOnMount: true
+    queryKey: ['/api/app-projects']
   });
 
   const { data: allTasks = [], isLoading: tasksLoading, error: tasksError } = useQuery<Task[]>({
-    queryKey: ['/api/app-tasks'],
-    queryFn: async () => {
-      const response = await fetch('/api/app-tasks');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    },
-    staleTime: 0,
-    refetchOnMount: true
+    queryKey: ['/api/app-tasks']
   });
 
 
@@ -170,35 +152,53 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('DELETE', `/api/app-projects/${id}`);
       return response.json();
     },
-    onSuccess: async (data, deletedProjectId) => {
-      console.log('Project deleted successfully:', data);
+    onMutate: async (deletedProjectId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/app-projects'] });
+      await queryClient.cancelQueries({ queryKey: ['/api/app-tasks'] });
 
-      // Immediately update the cache to remove the deleted project
-      const currentProjects = queryClient.getQueryData<Project[]>(['/api/app-projects']) || [];
-      const updatedProjects = currentProjects.filter(p => p.id !== deletedProjectId);
+      // Snapshot the previous values
+      const previousProjects = queryClient.getQueryData<Project[]>(['/api/app-projects']) || [];
+      const previousTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
+
+      // Optimistically update projects
+      const updatedProjects = previousProjects.filter(p => p.id !== deletedProjectId);
       queryClient.setQueryData(['/api/app-projects'], updatedProjects);
 
-      // Also update tasks cache to remove tasks from deleted project
-      const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
-      const updatedTasks = currentTasks.filter(t => t.projectId !== deletedProjectId);
+      // Optimistically update tasks
+      const updatedTasks = previousTasks.filter(t => t.projectId !== deletedProjectId);
       queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
 
       // Clear selected project if it was deleted
-      if (selectedProject === deletedProjectId) setSelectedProject(null);
+      if (selectedProject === deletedProjectId) {
+        setSelectedProject(null);
+      }
 
-      // Refetch as backup to ensure data consistency
-      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
-      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
-
-      toast({ title: "Project deleted successfully" });
+      return { previousProjects, previousTasks };
     },
-    onError: (error: any) => {
-      console.error('Project delete error:', error);
+    onError: (err, deletedProjectId, context) => {
+      // Rollback on error
+      if (context?.previousProjects) {
+        queryClient.setQueryData(['/api/app-projects'], context.previousProjects);
+      }
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['/api/app-tasks'], context.previousTasks);
+      }
+      
+      console.error('Project delete error:', err);
       toast({ 
         title: "Failed to delete project", 
-        description: error.message || "Please try again",
+        description: err.message || "Please try again",
         variant: "destructive" 
       });
+    },
+    onSuccess: () => {
+      toast({ title: "Project deleted successfully" });
+    },
+    onSettled: () => {
+      // Always refetch after success or error
+      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
     }
   });
 
@@ -207,29 +207,41 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('POST', '/api/app-tasks', data);
       return response.json();
     },
-    onSuccess: (newTask) => {
-      console.log('Task created successfully:', newTask);
+    onMutate: async (newTaskData) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/app-tasks'] });
       
-      // Immediately add the new task to the cache
-      const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
-      const updatedTasks = [newTask, ...currentTasks];
-      queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
+      const previousTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
       
-      setIsTaskDialogOpen(false);
-      taskForm.reset();
+      // Create optimistic task with temporary ID
+      const optimisticTask = {
+        ...newTaskData,
+        id: Date.now(), // temporary ID
+        createdAt: new Date().toISOString()
+      };
       
-      // Refetch as backup
-      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+      queryClient.setQueryData(['/api/app-tasks'], [optimisticTask, ...previousTasks]);
       
-      toast({ title: "Task created successfully" });
+      return { previousTasks };
     },
-    onError: (error: any) => {
-      console.error('Task creation error:', error);
+    onError: (err, newTaskData, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['/api/app-tasks'], context.previousTasks);
+      }
+      
+      console.error('Task creation error:', err);
       toast({ 
         title: "Failed to create task", 
-        description: error.message || "Please try again",
+        description: err.message || "Please try again",
         variant: "destructive" 
       });
+    },
+    onSuccess: (newTask) => {
+      setIsTaskDialogOpen(false);
+      taskForm.reset();
+      toast({ title: "Task created successfully" });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
     }
   });
 
@@ -238,31 +250,38 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('PUT', `/api/app-tasks/${id}`, data);
       return response.json();
     },
-    onSuccess: (updatedTask) => {
-      console.log('Task updated successfully:', updatedTask);
+    onMutate: async ({ id, ...updatedData }) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/app-tasks'] });
       
-      // Immediately update the task in the cache
-      const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
-      const updatedTasks = currentTasks.map(task => 
-        task.id === updatedTask.id ? updatedTask : task
+      const previousTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
+      
+      const updatedTasks = previousTasks.map(task => 
+        task.id === id ? { ...task, ...updatedData } : task
       );
+      
       queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
       
-      setEditingTask(null);
-      setIsTaskDialogOpen(false);
-      
-      // Refetch as backup
-      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
-      
-      toast({ title: "Task updated successfully" });
+      return { previousTasks };
     },
-    onError: (error: any) => {
-      console.error('Task update error:', error);
+    onError: (err, variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['/api/app-tasks'], context.previousTasks);
+      }
+      
+      console.error('Task update error:', err);
       toast({ 
         title: "Failed to update task", 
-        description: error.message || "Please try again",
+        description: err.message || "Please try again",
         variant: "destructive" 
       });
+    },
+    onSuccess: () => {
+      setEditingTask(null);
+      setIsTaskDialogOpen(false);
+      toast({ title: "Task updated successfully" });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
     }
   });
 
