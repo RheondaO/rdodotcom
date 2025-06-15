@@ -90,9 +90,14 @@ export default function MinimalAppSuite() {
 
   // Mutations
   const createProjectMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/app-projects', data),
-    onSuccess: () => {
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/app-projects', data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log('Project created successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
       setIsProjectDialogOpen(false);
       projectForm.reset();
       toast({ title: "Project created successfully" });
@@ -127,15 +132,25 @@ export default function MinimalAppSuite() {
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('POST', '/api/app-tasks', data),
-    onSuccess: () => {
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/app-tasks', data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log('Task created successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
       setIsTaskDialogOpen(false);
       taskForm.reset();
       toast({ title: "Task created successfully" });
     },
-    onError: () => {
-      toast({ title: "Failed to create task", variant: "destructive" });
+    onError: (error: any) => {
+      console.error('Task creation error:', error);
+      toast({ 
+        title: "Failed to create task", 
+        description: error.message || "Please try again",
+        variant: "destructive" 
+      });
     }
   });
 
