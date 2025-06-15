@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -10,8 +11,30 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Enable gzip compression
+app.use(compression({
+  level: 6,
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+
+// Add response headers for better caching
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/public/')) {
+    res.set('Cache-Control', 'public, max-age=300'); // Cache public data for 5 minutes
+  } else if (req.path.startsWith('/api/')) {
+    res.set('Cache-Control', 'no-cache');
+  }
+  next();
+});
 
 // CORS configuration for production
 if (process.env.NODE_ENV === 'production') {
@@ -40,36 +63,22 @@ app.use(session({
   }
 }));
 
-// Request logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+// Optimized request logging middleware - only in development
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    const start = Date.now();
+    const path = req.path;
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+    res.on("finish", () => {
+      if (path.startsWith("/api")) {
+        const duration = Date.now() - start;
+        log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
       }
+    });
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
-    }
+    next();
   });
-
-  next();
-});
+}
 
 (async () => {
   const server = await registerRoutes(app);

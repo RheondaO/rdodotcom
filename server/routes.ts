@@ -27,9 +27,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Apply authentication middleware to all routes
   app.use(authenticateUser);
 
-  // Public routes (no auth required)
+  // Public routes (no auth required) - with caching headers
   app.get("/api/public/stats", async (req, res) => {
     try {
+      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
       const stats = await storage.getPublicStats();
       res.json(stats);
     } catch (error) {

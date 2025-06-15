@@ -1,4 +1,5 @@
 import { db } from "./db";
+import memoize from "memoizee";
 import { eq, desc, and, gte, lte, count, sum, avg } from "drizzle-orm";
 import * as schema from "@shared/schema";
 import type {
@@ -16,6 +17,9 @@ import type {
   PerformanceInsights, InsertPerformanceInsights, MiniGameDesign, InsertMiniGameDesign,
   MiniGameBlock, InsertMiniGameBlock
 } from "@shared/schema";
+
+// Cache frequently accessed data for 5 minutes
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export class DatabaseStorage {
   // User management
@@ -186,17 +190,17 @@ export class DatabaseStorage {
   // Habit logs
   async getHabitLogs(habitId?: number, startDate?: string, endDate?: string): Promise<HabitLog[]> {
     const conditions = [];
-    
+
     if (habitId) conditions.push(eq(schema.habitLogs.habitId, habitId));
     if (startDate) conditions.push(gte(schema.habitLogs.date, startDate));
     if (endDate) conditions.push(lte(schema.habitLogs.date, endDate));
-    
+
     if (conditions.length > 0) {
       return await db.select().from(schema.habitLogs)
         .where(and(...conditions))
         .orderBy(desc(schema.habitLogs.date));
     }
-    
+
     return await db.select().from(schema.habitLogs).orderBy(desc(schema.habitLogs.date));
   }
 
@@ -537,7 +541,8 @@ export class DatabaseStorage {
   }
 
   // Public stats with error handling
-  async getPublicStats(): Promise<any> {
+  // Memoized version of getPublicStats for better performance
+  getPublicStats = memoize(async (): Promise<any> => {
     try {
       // Goal analytics - separate queries for accurate counts
       const [totalGoals] = await db.select({ count: count() }).from(schema.goals);
@@ -609,7 +614,7 @@ export class DatabaseStorage {
         recentActivityDays: 0,
       };
     }
-  }
+  }, { maxAge: CACHE_TTL });
 
   async getPublicRecentContent(): Promise<any> {
     try {
@@ -621,6 +626,185 @@ export class DatabaseStorage {
       console.error('Error fetching recent content:', error);
       return [];
     }
+  }
+
+  // Memoized version for better performance
+  getAllContentCategories = memoize(async (): Promise<ContentCategory[]> => {
+    return await db.select().from(schema.contentCategories).orderBy(desc(schema.contentCategories.createdAt));
+  }, { maxAge: CACHE_TTL });
+
+  async getAllContentTypes(): Promise<ContentType[]> {
+    return await db.select().from(schema.contentTypes).orderBy(desc(schema.contentTypes.createdAt));
+  }
+
+  async getAllContentPieces(): Promise<ContentPiece[]> {
+    return await db.select().from(schema.contentPieces).orderBy(desc(schema.contentPieces.createdAt));
+  }
+
+  async createContentPiece(piece: InsertContentPiece): Promise<ContentPiece> {
+    const [newPiece] = await db.insert(schema.contentPieces).values(piece).returning();
+    return newPiece;
+  }
+
+  async updateContentPiece(id: number, piece: Partial<InsertContentPiece>): Promise<ContentPiece> {
+    const [updatedPiece] = await db.update(schema.contentPieces)
+      .set({ ...piece, updatedAt: new Date() })
+      .where(eq(schema.contentPieces.id, id))
+      .returning();
+    return updatedPiece;
+  }
+
+  async getContentProgress(): Promise<ContentProgress[]> {
+    return await db.select().from(schema.contentProgress).orderBy(desc(schema.contentProgress.createdAt));
+  }
+
+  async createContentProgress(progress: InsertContentProgress): Promise<ContentProgress> {
+    const [newProgress] = await db.insert(schema.contentProgress).values(progress).returning();
+    return newProgress;
+  }
+
+  // Social media
+  async getAllSocialMediaPosts(): Promise<SocialMediaPost[]> {
+    return await db.select().from(schema.socialMediaPosts).orderBy(desc(schema.socialMediaPosts.createdAt));
+  }
+
+  async createSocialMediaPost(post: InsertSocialMediaPost): Promise<SocialMediaPost> {
+    const [newPost] = await db.insert(schema.socialMediaPosts).values(post).returning();
+    return newPost;
+  }
+
+  async updateSocialMediaPost(id: number, post: Partial<InsertSocialMediaPost>): Promise<SocialMediaPost> {
+    const [updatedPost] = await db.update(schema.socialMediaPosts)
+      .set({ ...post, updatedAt: new Date() })
+      .where(eq(schema.socialMediaPosts.id, id))
+      .returning();
+    return updatedPost;
+  }
+
+  async getSocialMediaAnalytics(): Promise<SocialMediaAnalytics[]> {
+    return await db.select().from(schema.socialMediaAnalytics).orderBy(desc(schema.socialMediaAnalytics.createdAt));
+  }
+
+  async createSocialMediaAnalytics(analytics: InsertSocialMediaAnalytics): Promise<SocialMediaAnalytics> {
+    const [newAnalytics] = await db.insert(schema.socialMediaAnalytics).values(analytics).returning();
+    return newAnalytics;
+  }
+
+  // App development
+  async getAllAppProjects(): Promise<AppProject[]> {
+    return await db.select().from(schema.appProjects).orderBy(desc(schema.appProjects.createdAt));
+  }
+
+  async getAppProject(id: number): Promise<AppProject | undefined> {
+    const [project] = await db.select().from(schema.appProjects).where(eq(schema.appProjects.id, id));
+    return project || undefined;
+  }
+
+  async createAppProject(project: InsertAppProject): Promise<AppProject> {
+    const [newProject] = await db.insert(schema.appProjects).values(project).returning();
+    return newProject;
+  }
+
+  async updateAppProject(id: number, project: Partial<InsertAppProject>): Promise<AppProject> {
+    const [updatedProject] = await db.update(schema.appProjects)
+      .set({ ...project, updatedAt: new Date() })
+      .where(eq(schema.appProjects.id, id))
+      .returning();
+    return updatedProject;
+  }
+
+  async getAppSprints(projectId?: number): Promise<AppSprint[]> {
+    const query = db.select().from(schema.appSprints);
+    if (projectId) {
+      return await query.where(eq(schema.appSprints.projectId, projectId));
+    }
+    return await query.orderBy(desc(schema.appSprints.createdAt));
+  }
+
+  async createAppSprint(sprint: InsertAppSprint): Promise<AppSprint> {
+    const [newSprint] = await db.insert(schema.appSprints).values(sprint).returning();
+    return newSprint;
+  }
+
+  async getAppTasks(sprintId?: number): Promise<AppTask[]> {
+    const query = db.select().from(schema.appTasks);
+    if (sprintId) {
+      return await query.orderBy(desc(schema.appTasks.createdAt));
+    }
+    return await query.orderBy(desc(schema.appTasks.createdAt));
+  }
+
+  async createAppTask(task: InsertAppTask): Promise<AppTask> {
+    const [newTask] = await db.insert(schema.appTasks).values(task).returning();
+    return newTask;
+  }
+
+  async updateAppTask(id: number, task: Partial<InsertAppTask>): Promise<AppTask> {
+    const [updatedTask] = await db.update(schema.appTasks)
+      .set({ ...task, updatedAt: new Date() })
+      .where(eq(schema.appTasks.id, id))
+      .returning();
+    return updatedTask;
+  }
+
+  async getAppTimeEntries(taskId?: number): Promise<AppTimeEntry[]> {
+    const query = db.select().from(schema.appTimeEntries);
+    if (taskId) {
+      return await query.where(eq(schema.appTimeEntries.taskId, taskId));
+    }
+    return await query.orderBy(desc(schema.appTimeEntries.createdAt));
+  }
+
+  async createAppTimeEntry(entry: InsertAppTimeEntry): Promise<AppTimeEntry> {
+    const [newEntry] = await db.insert(schema.appTimeEntries).values(entry).returning();
+    return newEntry;
+  }
+
+  // Testing & QA
+  async getAllTestCases(): Promise<TestCase[]> {
+    return await db.select().from(schema.testCases).orderBy(desc(schema.testCases.createdAt));
+  }
+
+  async createTestCase(testCase: InsertTestCase): Promise<TestCase> {
+    const [newTestCase] = await db.insert(schema.testCases).values(testCase).returning();
+    return newTestCase;
+  }
+
+  async getAllQualityIssues(): Promise<QualityIssue[]> {
+    return await db.select().from(schema.qualityIssues).orderBy(desc(schema.qualityIssues.createdAt));
+  }
+
+  async createQualityIssue(issue: InsertQualityIssue): Promise<QualityIssue> {
+    const [newIssue] = await db.insert(schema.qualityIssues).values(issue).returning();
+    return newIssue;
+  }
+
+  async getAllPerformanceInsights(): Promise<PerformanceInsights[]> {
+    return await db.select().from(schema.performanceInsights);
+  }
+
+  async createPerformanceInsight(insight: InsertPerformanceInsights): Promise<PerformanceInsights> {
+    const [newInsight] = await db.insert(schema.performanceInsights).values(insight).returning();
+    return newInsight;
+  }
+
+  // Mini games
+  async getAllMiniGameDesigns(): Promise<MiniGameDesign[]> {
+    return await db.select().from(schema.miniGameDesigns).orderBy(desc(schema.miniGameDesigns.createdAt));
+  }
+
+  async createMiniGameDesign(design: InsertMiniGameDesign): Promise<MiniGameDesign> {
+    const [newDesign] = await db.insert(schema.miniGameDesigns).values(design).returning();
+    return newDesign;
+  }
+
+  async getMiniGameBlocks(designId?: number): Promise<MiniGameBlock[]> {
+    return await db.select().from(schema.miniGameBlocks).orderBy(desc(schema.miniGameBlocks.createdAt));
+  }
+
+  async createMiniGameBlock(block: InsertMiniGameBlock): Promise<MiniGameBlock> {
+    const [newBlock] = await db.insert(schema.miniGameBlocks).values(block).returning();
+    return newBlock;
   }
 
   // Additional implementation methods for DatabaseStorage
@@ -761,7 +945,7 @@ export class DatabaseStorage {
 
   async getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any> {
     const goals = await this.getAllGoals();
-    
+
     return {
       goals: goals.map(goal => ({
         id: goal.id,
