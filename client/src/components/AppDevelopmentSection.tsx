@@ -2,121 +2,48 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
-import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   Code2, 
-  Monitor, 
-  Smartphone, 
-  Database, 
-  Globe,
   GitBranch,
   Clock,
-  CheckSquare,
-  AlertCircle,
-  Play,
-  Pause,
-  Square,
-  Plus,
-  Calendar,
-  Target,
-  Zap,
-  Users,
-  FileText,
-  Link,
-  Settings,
   BarChart3,
   Timer,
-  Bug,
-  Lightbulb,
-  Wrench,
-  Eye
+  Eye,
+  GitCommit,
+  History,
+  FileText,
+  Calendar,
+  User
 } from "lucide-react";
 import FileChangeMonitor from "./FileChangeMonitor";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
-// Form schema for new project
-const newProjectSchema = z.object({
-  name: z.string().min(1, "Project name is required"),
-  description: z.string().min(1, "Description is required"),
-  projectType: z.enum(["web", "mobile", "desktop", "api"]),
-  status: z.enum(["planning", "in_progress", "testing", "deployed", "on_hold"]).default("planning"),
-  priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
-  estimatedHours: z.number().min(0).optional(),
-  repositoryUrl: z.string().url().optional().or(z.literal("")),
-  deploymentUrl: z.string().url().optional().or(z.literal("")),
-  targetDate: z.string().optional(),
-  techStack: z.array(z.string()).default([]),
-  tags: z.array(z.string()).default([])
-});
+// Git-focused interfaces
+interface GitCommit {
+  hash: string;
+  author: string;
+  email: string;
+  date: string;
+  message: string;
+  files: string[];
+  insertions: number;
+  deletions: number;
+  project?: string;
+}
 
-type NewProjectForm = z.infer<typeof newProjectSchema>;
-
-interface AppProject {
-  id: number;
+interface GitProject {
   name: string;
-  description: string;
-  status: "planning" | "in_progress" | "testing" | "deployed" | "on_hold";
-  projectType: "web" | "mobile" | "desktop" | "api";
-  repositoryUrl?: string;
-  deploymentUrl?: string;
-  targetDate?: string;
-  startDate?: string;
-  completedDate?: string;
-  progress: number;
-  estimatedHours?: number;
-  actualHours: number;
-  techStack: string[];
+  repository: string;
+  branch: string;
+  lastCommit: string;
+  totalCommits: number;
+  contributors: string[];
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface AppTask {
-  id: number;
-  projectId: number;
-  title: string;
-  description: string;
-  status: "todo" | "in_progress" | "review" | "testing" | "done";
-  category: "feature" | "bug" | "improvement" | "documentation";
-  assignee?: string;
-  estimatedHours?: number;
-  actualHours: number;
-  dueDate?: string;
-  completedDate?: string;
-  dependencies: string[];
-  attachments: string[];
-  comments: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface AutoDetectedIssue {
-  id: number;
-  projectId?: number;
-  category: string;
-  title: string;
-  description: string;
-  severity: "low" | "medium" | "high" | "critical";
-  estimatedEffort?: string;
-  blockedFeatures: string[];
-  suggestedSolution: string;
-  status: "identified" | "in_progress" | "resolved" | "dismissed";
-  autoDetected: boolean;
-  detectionSource?: string;
-  createdAt: string;
-  updatedAt: string;
+  deploymentUrl?: string;
 }
 
 interface AppDevelopmentSectionProps {
@@ -125,12 +52,8 @@ interface AppDevelopmentSectionProps {
 }
 
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "time" | "monitoring">("overview");
-  const [selectedProject, setSelectedProject] = useState<number | null>(null);
-  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
-  const [showNewTaskForm, setShowNewTaskForm] = useState(false);
-  const [techStackInput, setTechStackInput] = useState("");
-  const [tagsInput, setTagsInput] = useState("");
+  const [activeView, setActiveView] = useState<"overview" | "projects" | "time" | "monitoring">("overview");
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   
   const { toast } = useToast();
   const { isAdmin } = useAuth();
@@ -186,25 +109,18 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     }
   });
 
-  // Fetch real project data from API
-  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useQuery({
-    queryKey: ['/api/app-projects'],
-    queryFn: () => fetch('/api/app-projects').then(res => res.json()),
-    staleTime: 5 * 60 * 1000 // 5 minutes
+  // Fetch Git commits data
+  const { data: commits = [], isLoading: commitsLoading } = useQuery({
+    queryKey: ['/api/git/commits'],
+    queryFn: () => fetch('/api/git/commits').then(res => res.json()),
+    staleTime: 1 * 60 * 1000 // 1 minute for more real-time updates
   });
 
-  // Fetch real task data from API
-  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-    queryKey: ['/api/app-tasks'],
-    queryFn: () => fetch('/api/app-tasks').then(res => res.json()),
-    staleTime: 5 * 60 * 1000 // 5 minutes
-  });
-
-  // Fetch auto-detected issues from API
-  const { data: autoDetectedIssues = [], isLoading: issuesLoading } = useQuery({
-    queryKey: ['/api/auto-detected-issues'],
-    queryFn: () => fetch('/api/auto-detected-issues').then(res => res.json()),
-    staleTime: 5 * 60 * 1000 // 5 minutes
+  // Fetch Git projects data
+  const { data: gitProjects = [], isLoading: projectsLoading } = useQuery({
+    queryKey: ['/api/git/projects'],
+    queryFn: () => fetch('/api/git/projects').then(res => res.json()),
+    staleTime: 2 * 60 * 1000 // 2 minutes
   });
 
   // Form schema for new task
@@ -888,9 +804,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         <div className="flex items-center space-x-2 bg-white/60 dark:bg-gray-800/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
           {[
             { key: "overview", label: "Overview", icon: BarChart3 },
-            { key: "projects", label: "Projects", icon: Code2 },
-            { key: "tasks", label: "Tasks", icon: CheckSquare },
-            { key: "testing", label: "Testing & QA", icon: AlertCircle },
+            { key: "projects", label: "Git Projects", icon: GitBranch },
             { key: "time", label: "Time Tracking", icon: Timer },
             { key: "monitoring", label: "File Monitor", icon: Eye }
           ].map((tab) => {
@@ -916,42 +830,40 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       {/* Overview */}
       {activeView === "overview" && (
         <div className="space-y-8">
-          {/* Replit Integration Status */}
-          {replitEnvironment.isReplit && (
-            <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center">
-                  <Code2 className="h-3 w-3 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                    Replit Integration Active
-                  </p>
-                  <p className="text-xs text-green-700 dark:text-green-300">
-                    Connected to <code className="bg-green-100 dark:bg-green-900/50 px-1 rounded text-xs">{replitEnvironment.replId}</code>
-                  </p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-green-600 dark:text-green-400">Live</span>
-                </div>
+          {/* Git Repository Status */}
+          <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center">
+                <GitBranch className="h-3 w-3 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  Git Integration Active
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Tracking commits and changes across all repositories
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-blue-600 dark:text-blue-400">Live</span>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Stats Cards */}
+          {/* Git Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Active Projects</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Active Repositories</p>
                     <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {activeProjects.length}
+                      {gitProjects.filter((p: GitProject) => p.isActive).length}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
-                    <Code2 className="h-6 w-6 text-white" />
+                    <GitBranch className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -961,13 +873,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Open Tasks</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Total Commits</p>
                     <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {openTasks.length}
+                      {commits.length}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
-                    <CheckSquare className="h-6 w-6 text-white" />
+                    <GitCommit className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -977,13 +889,15 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Hours Logged</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Today's Commits</p>
                     <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {projects.reduce((sum: number, p: AppProject) => sum + p.actualHours, 0)}h
+                      {commits.filter((c: GitCommit) => 
+                        format(new Date(c.date), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+                      ).length}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
-                    <Clock className="h-6 w-6 text-white" />
+                    <Calendar className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -993,13 +907,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Avg Progress</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Contributors</p>
                     <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                      {avgProgress}%
+                      {new Set(commits.map((c: GitCommit) => c.author)).size}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-amber-500 rounded-xl flex items-center justify-center">
-                    <Target className="h-6 w-6 text-white" />
+                    <User className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -1140,175 +1054,195 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      {/* Projects View */}
+      {/* Git Projects View */}
       {activeView === "projects" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h2>
-            <Button 
-              onClick={() => setShowNewProjectForm(true)}
-              disabled={isReadOnly}
-              className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Git Projects & Commits</h2>
+            <div className="flex gap-2">
+              <select
+                value={selectedProject || ""}
+                onChange={(e) => setSelectedProject(e.target.value || null)}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
+              >
+                <option value="">All Projects</option>
+                {gitProjects.map((project: GitProject) => (
+                  <option key={project.name} value={project.name}>{project.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Projects Grid */}
-          <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
-                <Code2 className="h-5 w-5" />
-                Active Projects ({activeProjects.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {projectsLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="p-6 bg-white/60 dark:bg-gray-800/60 rounded-xl animate-pulse">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : activeProjects.length === 0 ? (
-                <div className="text-center py-12">
-                  <Code2 className="h-16 w-16 text-muted-foreground dark:text-gray-500 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium text-muted-foreground dark:text-gray-400 mb-2">No Projects Yet</h3>
-                  <p className="text-sm text-muted-foreground dark:text-gray-500 mb-4">
-                    Create your first project to start tracking development progress
-                  </p>
-                  <Button 
-                    onClick={() => setShowNewProjectForm(true)}
-                    disabled={isReadOnly}
-                    className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                      isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Project
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {activeProjects.map((project) => (
-                    <div key={project.id} className={`p-6 rounded-xl border hover:shadow-lg transition-shadow ${
-                    project.status === 'deployed' 
-                      ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800' 
-                      : 'bg-white/60 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'
-                  }`}>
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h4 className="font-semibold text-gray-900 dark:text-white">
+          {/* Git Projects and Commits */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Git Projects */}
+            <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+                  <GitBranch className="h-5 w-5" />
+                  Active Repositories ({gitProjects.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {projectsLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl animate-pulse">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : gitProjects.length === 0 ? (
+                  <div className="text-center py-8">
+                    <GitBranch className="h-12 w-12 text-muted-foreground dark:text-gray-500 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm text-muted-foreground dark:text-gray-500">No Git repositories detected</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {gitProjects.map((project: GitProject) => (
+                      <div 
+                        key={project.name} 
+                        className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                          selectedProject === project.name 
+                            ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-700' 
+                            : 'bg-white/60 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800'
+                        }`}
+                        onClick={() => setSelectedProject(selectedProject === project.name ? null : project.name)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900 dark:text-white mb-1">
                               {project.name}
                             </h4>
-                            {project.status === 'deployed' && (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span className="text-xs font-medium text-green-700 dark:text-green-400">LIVE</span>
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400 mb-3">
-                            {project.description}
-                          </p>
-                          <div className="flex items-center gap-2 mb-3">
-                            <Badge className={
-                              project.status === 'deployed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                              project.status === 'in_progress' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
-                              project.status === 'planning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                              'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
-                            }>
-                              {project.status.replace('_', ' ')}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {project.projectType}
-                            </Badge>
-                            <Badge className={
-                              project.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                              project.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                              'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-                            }>
-                              {project.priority}
-                            </Badge>
-                            {project.tags?.includes('replit') && (
-                              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                                Replit
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="outline" className="text-xs">
+                                {project.branch}
                               </Badge>
-                            )}
+                              <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                {project.totalCommits} commits
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground dark:text-gray-500">
+                              Last commit: {formatDistanceToNow(new Date(project.lastCommit))} ago
+                            </p>
+                            <p className="text-xs text-muted-foreground dark:text-gray-500">
+                              Contributors: {project.contributors.join(', ')}
+                            </p>
                           </div>
-                          
-                          {/* Progress Bar */}
-                          <div className="mb-3">
-                            <div className="flex justify-between text-xs text-muted-foreground dark:text-gray-500 mb-1">
-                              <span>Progress</span>
-                              <span>{project.progress}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                              <div 
-                                className="bg-gradient-to-r from-purple-400 to-indigo-500 h-2 rounded-full transition-all"
-                                style={{ width: `${project.progress}%` }}
-                              ></div>
-                            </div>
-                          </div>
-
-                          {/* Time Tracking */}
-                          <div className="text-xs text-muted-foreground dark:text-gray-500 mb-3">
-                            <div className="flex justify-between">
-                              <span>Estimated: {project.estimatedHours}h</span>
-                              <span>Actual: {project.actualHours}h</span>
-                            </div>
-                          </div>
-
-                          {/* Tech Stack */}
-                          {project.techStack && project.techStack.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {project.techStack.slice(0, 3).map((tech, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {tech}
-                                </Badge>
-                              ))}
-                              {project.techStack.length > 3 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{project.techStack.length - 3}
-                                </Badge>
-                              )}
-                            </div>
+                          {project.deploymentUrl && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(project.deploymentUrl, '_blank');
+                              }}
+                              className="text-green-600 border-green-300 hover:bg-green-50"
+                            >
+                              <GitBranch className="h-3 w-3 mr-1" />
+                              Live
+                            </Button>
                           )}
                         </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 flex-wrap">
-                        {project.deploymentUrl && (
-                          <Button 
-                            size="sm" 
-                            variant={project.status === 'deployed' ? 'default' : 'outline'}
-                            onClick={() => window.open(project.deploymentUrl, '_blank')}
-                            disabled={isReadOnly}
-                            className={`${
-                              project.status === 'deployed' 
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700' 
-                                : ''
-                            } ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          >
-                            <Link className="h-4 w-4 mr-1" />
-                            Live Site
-                          </Button>
-                        )}
+            {/* Recent Commits */}
+            <Card className="border-green-100 dark:border-green-800 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
+                  <History className="h-5 w-5" />
+                  Recent Commits
+                  {selectedProject && (
+                    <Badge variant="outline" className="ml-2">
+                      {selectedProject}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {commitsLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg animate-pulse">
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {commits
+                      .filter((commit: GitCommit) => !selectedProject || commit.project === selectedProject)
+                      .slice(0, 20)
+                      .map((commit: GitCommit) => (
+                        <div key={commit.hash} className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
+                              <GitCommit className="h-4 w-4 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {commit.message}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-muted-foreground dark:text-gray-500">
+                                  {commit.author}
+                                </span>
+                                <span className="text-xs text-muted-foreground dark:text-gray-500">
+                                  {formatDistanceToNow(new Date(commit.date))} ago
+                                </span>
+                                <Badge variant="outline" className="text-xs">
+                                  {commit.hash}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-green-600 dark:text-green-400">
+                                  +{commit.insertions}
+                                </span>
+                                <span className="text-xs text-red-600 dark:text-red-400">
+                                  -{commit.deletions}
+                                </span>
+                                <span className="text-xs text-muted-foreground dark:text-gray-500">
+                                  {commit.files.length} file{commit.files.length !== 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              {commit.files.length > 0 && (
+                                <div className="mt-2">
+                                  <details className="text-xs">
+                                    <summary className="cursor-pointer text-blue-600 dark:text-blue-400 hover:underline">
+                                      Modified files ({commit.files.length})
+                                    </summary>
+                                    <div className="mt-1 pl-2 border-l-2 border-gray-200 dark:border-gray-700">
+                                      {commit.files.slice(0, 5).map((file, index) => (
+                                        <div key={index} className="text-muted-foreground dark:text-gray-500 truncate">
+                                          {file}
+                                        </div>
+                                      ))}
+                                      {commit.files.length > 5 && (
+                                        <div className="text-muted-foreground dark:text-gray-500">
+                                          ... and {commit.files.length - 5} more
+                                        </div>
+                                      )}
+                                    </div>
+                                  </details>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 

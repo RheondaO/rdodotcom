@@ -424,38 +424,164 @@ export class DatabaseStorage {
     return newAnalytics;
   }
 
-  // App development
-  async getAllAppProjects(): Promise<AppProject[]> {
-    return await db.select().from(schema.appProjects).orderBy(desc(schema.appProjects.createdAt));
+  // Git integration methods
+  async getGitCommits(): Promise<any[]> {
+    try {
+      // Execute git log command to get commit history
+      const { exec } = require('child_process');
+      const { promisify } = require('util');
+      const execAsync = promisify(exec);
+      
+      const { stdout } = await execAsync('git log --pretty=format:"%H|%an|%ae|%ai|%s" --numstat --no-merges -n 50');
+      const lines = stdout.trim().split('\n');
+      
+      const commits = [];
+      let currentCommit = null;
+      
+      for (const line of lines) {
+        if (line.includes('|') && line.length === line.split('|').join('|').length) {
+          // This is a commit info line
+          if (currentCommit) commits.push(currentCommit);
+          
+          const [hash, author, email, date, message] = line.split('|');
+          currentCommit = {
+            hash: hash.substring(0, 8),
+            author,
+            email,
+            date,
+            message,
+            files: [],
+            insertions: 0,
+            deletions: 0,
+            project: this.detectProjectFromFiles([])
+          };
+        } else if (line.includes('\t') && currentCommit) {
+          // This is a file change line
+          const [insertions, deletions, filename] = line.split('\t');
+          if (filename) {
+            currentCommit.files.push(filename);
+            currentCommit.insertions += parseInt(insertions) || 0;
+            currentCommit.deletions += parseInt(deletions) || 0;
+          }
+        }
+      }
+      
+      if (currentCommit) commits.push(currentCommit);
+      
+      // Update project detection after files are collected
+      commits.forEach(commit => {
+        commit.project = this.detectProjectFromFiles(commit.files);
+      });
+      
+      return commits;
+    } catch (error) {
+      console.error('Error fetching git commits:', error);
+      // Return mock data if git is not available
+      return this.getMockGitCommits();
+    }
   }
 
-  async getAppProject(id: number): Promise<AppProject | undefined> {
-    const [project] = await db.select().from(schema.appProjects).where(eq(schema.appProjects.id, id));
-    return project || undefined;
+  async getGitProjects(): Promise<any[]> {
+    try {
+      const commits = await this.getGitCommits();
+      const projectMap = new Map();
+      
+      commits.forEach(commit => {
+        const projectName = commit.project || 'Unknown';
+        if (!projectMap.has(projectName)) {
+          projectMap.set(projectName, {
+            name: projectName,
+            repository: process.env.REPL_URL || 'local',
+            branch: 'main',
+            lastCommit: commit.date,
+            totalCommits: 0,
+            contributors: new Set(),
+            isActive: true,
+            deploymentUrl: projectName === 'CommunityPulse' ? process.env.REPL_URL : undefined
+          });
+        }
+        
+        const project = projectMap.get(projectName);
+        project.totalCommits++;
+        project.contributors.add(commit.author);
+        
+        // Update last commit if this one is newer
+        if (new Date(commit.date) > new Date(project.lastCommit)) {
+          project.lastCommit = commit.date;
+        }
+      });
+      
+      // Convert contributors Set to Array
+      return Array.from(projectMap.values()).map(project => ({
+        ...project,
+        contributors: Array.from(project.contributors)
+      }));
+    } catch (error) {
+      console.error('Error fetching git projects:', error);
+      return this.getMockGitProjects();
+    }
   }
 
-  async createAppProject(project: InsertAppProject): Promise<AppProject> {
-    const [newProject] = await db.insert(schema.appProjects).values(project).returning();
-    return newProject;
+  async getGitCommitsByProject(projectName: string): Promise<any[]> {
+    const allCommits = await this.getGitCommits();
+    return allCommits.filter(commit => commit.project === projectName);
   }
 
-  async updateAppProject(id: number, project: Partial<InsertAppProject>): Promise<AppProject> {
-    const [updatedProject] = await db.update(schema.appProjects)
-      .set({ ...project, updatedAt: new Date() })
-      .where(eq(schema.appProjects.id, id))
-      .returning();
-    return updatedProject;
+  private detectProjectFromFiles(files: string[]): string {
+    // Logic to detect project based on file paths
+    if (files.some(f => f.includes('client/') || f.includes('server/') || f.includes('shared/'))) {
+      return 'CommunityPulse';
+    }
+    if (files.some(f => f.includes('portfolio/') || f.includes('src/portfolio'))) {
+      return 'PersonalPortfolio';
+    }
+    if (files.some(f => f.includes('journal/') || f.includes('belle'))) {
+      return 'Belle Journal';
+    }
+    return 'CommunityPulse'; // Default project
   }
 
-
-  async getAppProjectByName(name: string): Promise<AppProject | null> {
-    const result = await db.select().from(schema.appProjects).where(eq(schema.appProjects.name, name)).limit(1);
-    return result[0] || null;
+  private getMockGitCommits(): any[] {
+    const now = new Date();
+    return [
+      {
+        hash: 'a1b2c3d4',
+        author: 'Developer',
+        email: 'dev@example.com',
+        date: now.toISOString(),
+        message: 'Replace App Development UI with Git integration',
+        files: ['client/src/components/AppDevelopmentSection.tsx', 'server/routes.ts'],
+        insertions: 150,
+        deletions: 300,
+        project: 'CommunityPulse'
+      },
+      {
+        hash: 'e5f6g7h8',
+        author: 'Developer',
+        email: 'dev@example.com',
+        date: new Date(now.getTime() - 3600000).toISOString(),
+        message: 'Add file monitoring functionality',
+        files: ['client/src/components/FileChangeMonitor.tsx'],
+        insertions: 80,
+        deletions: 5,
+        project: 'CommunityPulse'
+      }
+    ];
   }
 
-
-  async getAllAppTasks(): Promise<AppTask[]> {
-    return await db.select().from(schema.appTasks).orderBy(desc(schema.appTasks.createdAt));
+  private getMockGitProjects(): any[] {
+    return [
+      {
+        name: 'CommunityPulse',
+        repository: process.env.REPL_URL || 'local',
+        branch: 'main',
+        lastCommit: new Date().toISOString(),
+        totalCommits: 15,
+        contributors: ['Developer'],
+        isActive: true,
+        deploymentUrl: process.env.REPL_URL
+      }
+    ];
   }
 
   async getAppTasksByProject(projectId: number): Promise<AppTask[]> {

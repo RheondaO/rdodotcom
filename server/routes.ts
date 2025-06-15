@@ -48,24 +48,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Public app development data
-  app.get("/api/app-projects", async (req, res) => {
+  // Git integration endpoints
+  app.get("/api/git/commits", async (req, res) => {
     try {
-      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
-      const projects = await storage.getAllAppProjects();
-      res.json(projects);
+      res.set('Cache-Control', 'public, max-age=60'); // Cache for 1 minute
+      const commits = await storage.getGitCommits();
+      res.json(commits);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch app projects" });
+      res.status(500).json({ error: "Failed to fetch git commits" });
     }
   });
 
-  app.get("/api/app-tasks", async (req, res) => {
+  app.get("/api/git/projects", async (req, res) => {
     try {
-      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
-      const tasks = await storage.getAllAppTasks();
-      res.json(tasks);
+      res.set('Cache-Control', 'public, max-age=120'); // Cache for 2 minutes
+      const projects = await storage.getGitProjects();
+      res.json(projects);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch app tasks" });
+      res.status(500).json({ error: "Failed to fetch git projects" });
+    }
+  });
+
+  app.get("/api/git/commits/:project", async (req, res) => {
+    try {
+      const projectName = req.params.project;
+      const commits = await storage.getGitCommitsByProject(projectName);
+      res.json(commits);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch project commits" });
     }
   });
 
