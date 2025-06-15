@@ -699,63 +699,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const replId = process.env.REPL_ID || 'current-user';
       
-      // Auto-detect common Replit app patterns
-      const detectedProjects = [
-        {
-          name: "CommunityPulse",
-          description: "Community engagement and social analytics platform",
-          projectType: "web",
-          status: "in_progress",
-          priority: "high",
-          repositoryUrl: `https://replit.com/@${replId}/CommunityPulse`,
-          deploymentUrl: "https://communitypulse.replit.app",
-          progress: 92,
-          techStack: ["React", "Node.js", "MongoDB", "Socket.io"],
-          tags: ["social-media", "analytics", "replit", "auto-detected"],
-          actualHours: 80,
-          isActive: true
-        },
-        {
-          name: "PersonalPortfolio",
-          description: "Professional portfolio website showcasing projects and skills",
-          projectType: "web",
-          status: "in_progress",
-          priority: "medium",
-          repositoryUrl: `https://replit.com/@${replId}/PersonalPortfolio`,
-          deploymentUrl: "https://personalportfolio.replit.app",
-          progress: 85,
-          techStack: ["React", "TypeScript", "Tailwind CSS", "Framer Motion"],
-          tags: ["portfolio", "frontend", "replit", "auto-detected"],
-          actualHours: 40,
-          isActive: true
-        }
-      ];
-
       // In a real implementation, this would query the Replit API
-      // For now, we'll sync these example projects to the database
-      const syncedProjects = [];
-      
-      for (const project of detectedProjects) {
-        try {
-          // Check if project already exists
-          const existing = await storage.getAppProjectByName(project.name);
-          if (!existing) {
-            const created = await storage.createAppProject(project);
-            syncedProjects.push(created);
-          }
-        } catch (error) {
-          console.log(`Project ${project.name} sync skipped`);
-        }
-      }
-
+      // For now, just return environment info without creating hardcoded data
       res.json({
         success: true,
-        syncedProjects,
-        message: `Synced ${syncedProjects.length} Replit projects`,
-        replId
+        message: "Replit environment detected - ready for project creation",
+        replId,
+        environment: "development"
       });
     } catch (error) {
-      res.status(500).json({ error: "Failed to sync Replit projects" });
+      res.status(500).json({ error: "Failed to detect Replit environment" });
     }
   });
 

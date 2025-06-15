@@ -387,11 +387,23 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   }, []);
 
   // Derived data for calculations
-  const activeProjects = projects.filter((p: AppProject) => p.isActive);
+  // Projects are only active if they have tasks
+  const activeProjects = projects.filter((p: AppProject) => {
+    const projectTasks = tasks.filter((t: AppTask) => t.projectId === p.id);
+    return p.isActive && projectTasks.length > 0;
+  });
+  
   const openTasks = tasks.filter((t: AppTask) => t.status !== 'done' && t.status !== 'completed');
-  const totalHoursLogged = projects.reduce((sum: number, p: AppProject) => sum + (p.actualHours || 0), 0);
+  const totalHoursLogged = tasks.reduce((sum: number, t: AppTask) => sum + (t.actualHours || 0), 0);
+  
+  // Calculate average progress based on task completion
   const avgProgress = activeProjects.length > 0 
-    ? Math.round(activeProjects.reduce((sum: number, p: AppProject) => sum + (p.progress || 0), 0) / activeProjects.length)
+    ? Math.round(activeProjects.reduce((sum: number, p: AppProject) => {
+        const projectTasks = tasks.filter((t: AppTask) => t.projectId === p.id);
+        const completedTasks = projectTasks.filter((t: AppTask) => t.status === 'done');
+        const projectProgress = projectTasks.length > 0 ? (completedTasks.length / projectTasks.length) * 100 : 0;
+        return sum + projectProgress;
+      }, 0) / activeProjects.length)
     : 0;
 
   // Create project mutation
@@ -405,14 +417,37 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         techStack: data.techStack.length > 0 ? data.techStack : [],
         tags: data.tags.length > 0 ? data.tags : []
       };
-      return await fetch('/api/app-projects', {
+      
+      // Create project
+      const response = await fetch('/api/app-projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectData)
-      }).then(res => res.json());
+      });
+      const project = await response.json();
+      
+      // Create initial task for the project to ensure it's active
+      const initialTask = {
+        projectId: project.id,
+        title: "Project Setup",
+        description: `Set up the initial structure and configuration for ${project.name}`,
+        status: "todo",
+        priority: "medium",
+        category: "feature",
+        estimatedHours: 2
+      };
+      
+      await fetch('/api/app-tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(initialTask)
+      });
+      
+      return project;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setShowNewProjectForm(false);
       form.reset();
       setTechStackInput("");
@@ -420,7 +455,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       if (isAdmin) {
         toast({
           title: "Success",
-          description: "Project created successfully!"
+          description: "Project created with initial task!"
         });
       }
     },
