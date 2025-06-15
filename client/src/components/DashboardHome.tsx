@@ -1,27 +1,29 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
-import { Button } from "./ui/button";
 import { 
-  Calendar, CheckCircle, Circle, Clock, Droplets, 
-  Target, Pill, User, TrendingUp, Activity,
-  Plus, Edit, Heart, Brain, Dumbbell, Moon, 
-  Sun, Coffee, BookOpen, Home, Car, ShoppingCart,
-  Briefcase, Phone, Mail, Music, Camera, 
-  Gamepad2, Gift, Star, Zap, AlertCircle, Timer,
-  Play, Pause, Award
-} from "lucide-react";
-import { format, isSameDay, isToday, addDays } from "date-fns";
-import { useAppConfig } from "../hooks/use-app-config";
-import { useDashboardData } from "../hooks/use-dashboard-data";
-import { PRIORITY_LEVELS } from "../lib/constants";
-
-import { useState } from "react";
-import { 
+  Calendar,
+  Target,
   CheckSquare,
+  Clock,
+  Activity,
+  Heart,
+  Pill,
   Flame,
+  Plus,
+  TrendingUp,
+  Award,
+  AlertCircle,
+  Play,
+  Pause,
+  CheckCircle,
+  Star
 } from "lucide-react";
-import { differenceInMinutes, isYesterday, isTomorrow } from "date-fns";
+import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorrow } from "date-fns";
+import { useDailyData } from "../hooks/use-daily-data";
+import { useHabits } from "../hooks/use-habits";
 import { useTodos } from "../hooks/use-todos";
 import { useTimeBlocks } from "../hooks/use-time-blocks";
 import { useQuery } from "@tanstack/react-query";
@@ -35,42 +37,21 @@ interface DashboardHomeProps {
 
 export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = false }: DashboardHomeProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
-  const { data: dailyEntry } = useTodos(dateString);
-  const { data: habits = [] } = useQuery({
-    queryKey: ['/api/habits'],
-    queryFn: async () => {
-      const response = await fetch('/api/habits');
-      if (!response.ok) throw new Error('Failed to fetch habits');
-      return response.json();
-    },
-    staleTime: 10000,
-    refetchOnWindowFocus: true,
-  });
+  const { data: dailyEntry } = useDailyData(dateString);
+  const { data: habits = [] } = useHabits();
   const { data: todos = [] } = useTodos(dateString);
-  // Fetch combined dashboard data
-  const { data: dashboardData, isLoading } = useDashboardData();
-
-  // Extract data from combined response
-  const goals = dashboardData?.goals || [];
-  const habitsData = dashboardData?.habits || [];
-  const todaysTodos = dashboardData?.todaysTodos || [];
-  const projects = dashboardData?.projects || [];
-  const dailyEntryData = dashboardData?.dailyEntry;
-  const timeBlocksData = dashboardData?.timeBlocks || [];
-
-  // Load medications separately as they're not needed immediately
-  const { data: medications = [] } = useQuery({
-    queryKey: ['/api/medications'],
-    queryFn: async () => {
-      const response = await fetch('/api/medications');
-      if (!response.ok) throw new Error('Failed to fetch medications');
-      return response.json();
-    },
-    enabled: !!dashboardData, // Only load after main dashboard data loads
-    staleTime: 30000,
-    refetchOnWindowFocus: true,
+  const { data: timeBlocksData = [] } = useTimeBlocks(dateString);
+  
+  // Fetch real goals data from API
+  const { data: goals = [] } = useQuery<Goal[]>({
+    queryKey: ['/api/goals'],
   });
-
+  
+  // Fetch real medications data from API
+  const { data: medications = [] } = useQuery<Medication[]>({
+    queryKey: ['/api/medications'],
+  });
+  
   const [activeTimer, setActiveTimer] = useState<{
     type: string;
     startTime: Date;
@@ -85,7 +66,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
     } else if (hour >= 12 && hour < 17) {
       return "Good Afternoon! ☀️";
     } else if (hour >= 17 && hour < 22) {
-      return "Good Evening! 💖";
+      return "Good Evening! 🌆";
     } else {
       return "Good Night! 🌙";
     }
@@ -93,14 +74,14 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
 
   // Selected date's summary data using real daily entry data
   const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
-
+  
   // Parse habit completions from daily entry
-  const completedHabitIds = dailyEntry?.habitCompletions && typeof dailyEntry.habitCompletions === 'string'
+  const completedHabitIds = dailyEntry?.habitCompletions 
     ? JSON.parse(dailyEntry.habitCompletions) 
     : [];
 
   // Use real habits data and check completion status for the selected date
-  const todaysHabits = habitsData.filter(habit => habit.isActive).map(habit => ({
+  const todaysHabits = habits.filter(habit => habit.isActive).map(habit => ({
     id: habit.id,
     name: habit.name,
     completed: completedHabitIds.includes(habit.id),
@@ -108,7 +89,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
   }));
 
   // Use real todos data for the selected date - only todos for this specific date
-  const todaysTodosData = todaysTodos.filter(todo => todo.dueDate === dateString).map(todo => ({
+  const todaysTodos = todos.filter(todo => todo.dueDate === dateString).map(todo => ({
     id: todo.id,
     title: todo.title,
     priority: todo.priority,
@@ -125,7 +106,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
       const currentVal = parseFloat(goal.currentValue || "0");
       const targetVal = parseFloat(goal.targetValue || "0");
       const progress = targetVal > 0 ? Math.round((currentVal / targetVal) * 100) : 0;
-
+      
       return {
         id: goal.id,
         title: goal.title,
@@ -158,62 +139,9 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
   const totalHabits = todaysHabits.length;
   const habitProgress = totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0;
 
-  const completedTodos = todaysTodosData.filter(t => t.completed).length;
-  const totalTodos = todaysTodosData.length;
+  const completedTodos = todaysTodos.filter(t => t.completed).length;
+  const totalTodos = todaysTodos.length;
   const todoProgress = totalTodos > 0 ? (completedTodos / totalTodos) * 100 : 0;
-
-  // Calculate Content Studio metrics from real data
-  const totalDesignsNeeded = (projects as any[]).reduce((sum: number, block: any) => sum + (block.frequencyValue || 0), 0);
-  const completedDesigns = (projects as any[]).filter((design: any) => design.status === 'approved').length;
-  const inProgressDesigns = (projects as any[]).filter((design: any) => 
-    design.status === 'designed' || design.status === 'reviewed'
-  ).length;
-  const remainingDesigns = Math.max(0, totalDesignsNeeded - completedDesigns - inProgressDesigns);
-
-  // Calculate health score from real daily entry data
-  const calculateHealthScore = () => {
-    if (!dailyEntryData) return 0;
-
-    let healthFactors = 0;
-    let totalFactors = 0;
-
-    // Water intake (target: 8 glasses)
-    if (dailyEntryData.waterIntake !== null && dailyEntryData.waterIntake !== undefined) {
-      healthFactors += Math.min(dailyEntryData.waterIntake / 8, 1);
-      totalFactors += 1;
-    }
-
-    // Sleep (target: 7-9 hours, optimal at 8)
-    if (dailyEntryData.sleepHours !== null && dailyEntryData.sleepHours !== undefined) {
-      const sleepHours = parseFloat(dailyEntryData.sleepHours.toString());
-      const sleepScore = sleepHours >= 7 && sleepHours <= 9 ? 1 : 
-                       Math.max(0, 1 - Math.abs(sleepHours - 8) * 0.2);
-      healthFactors += sleepScore;
-      totalFactors += 1;
-    }
-
-    // Exercise completion (boolean check)
-    if (dailyEntryData.exerciseCompleted !== null && dailyEntryData.exerciseCompleted !== undefined) {
-      healthFactors += dailyEntryData.exerciseCompleted ? 1 : 0;
-      totalFactors += 1;
-    }
-
-    // Energy level (1-5 scale, normalized)
-    if (dailyEntryData.energyLevel !== null && dailyEntryData.energyLevel !== undefined) {
-      healthFactors += (dailyEntryData.energyLevel - 1) / 4; // Convert 1-5 to 0-1
-      totalFactors += 1;
-    }
-
-    // Sleep quality (1-5 scale, normalized)
-    if (dailyEntryData.sleepQuality !== null && dailyEntryData.sleepQuality !== undefined) {
-      healthFactors += (dailyEntryData.sleepQuality - 1) / 4; // Convert 1-5 to 0-1
-      totalFactors += 1;
-    }
-
-    return totalFactors > 0 ? Math.round((healthFactors / totalFactors) * 100) : 0;
-  };
-
-  const healthScore = calculateHealthScore();
 
   const startFocusSession = (type: string, duration: number) => {
     setActiveTimer({
@@ -251,7 +179,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
   const getFullDateLabel = () => {
     const dayName = format(selectedDate, 'EEEE');
     const fullDate = format(selectedDate, 'MMMM d, yyyy');
-
+    
     if (isToday(selectedDate)) return `Today is ${dayName} ${fullDate}`;
     if (isYesterday(selectedDate)) return `Yesterday was ${dayName} ${fullDate}`;
     if (isTomorrow(selectedDate)) return `Tomorrow is ${dayName} ${fullDate}`;
@@ -332,7 +260,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-orange-100 text-sm">Health</p>
-                <p className="text-2xl font-bold">{healthScore}%</p>
+                <p className="text-2xl font-bold">85%</p>
               </div>
               <Heart className="h-8 w-8 text-orange-200" />
             </div>
@@ -358,25 +286,25 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                  {totalDesignsNeeded || 0}
+                  1,592
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Total Designs Needed</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {completedDesigns}
+                  1
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                  {inProgressDesigns}
+                  0
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">In Progress</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  {remainingDesigns}
+                  1,591
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Remaining</div>
               </div>
@@ -477,8 +405,8 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {todaysTodosData.length > 0 ? (
-                todaysTodosData.map(todo => (
+              {todaysTodos.length > 0 ? (
+                todaysTodos.map(todo => (
                   <div key={todo.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <div className={`w-2 h-2 rounded-full ${
@@ -560,7 +488,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                   <p className="text-sm text-gray-500 dark:text-gray-400">Stay focused!</p>
                 </div>
               )}
-
+              
               <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">{getDateLabel()}'s Schedule</h4>
                 {timeBlocks.length > 0 ? (
@@ -652,7 +580,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                   )}
                 </div>
               ))}
-
+              
               <div className="mt-4 p-3 bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <Heart className="h-4 w-4 text-red-500" />
@@ -693,7 +621,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <span className="text-xs">Progress Reports</span>
             </Button>
-
+            
             <Button
               onClick={() => !isReadOnly && onNavigate('finances')}
               disabled={isReadOnly}
@@ -703,7 +631,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
               <span className="text-xs">Finances</span>
             </Button>
-
+            
             <Button
               onClick={() => !isReadOnly && onNavigate('groceries')}
               disabled={isReadOnly}
@@ -713,7 +641,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               <CheckSquare className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               <span className="text-xs">Shopping</span>
             </Button>
-
+            
             <Button
               onClick={() => !isReadOnly && onNavigate('goals')}
               disabled={isReadOnly}

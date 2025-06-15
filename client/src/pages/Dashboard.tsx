@@ -25,7 +25,7 @@ import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "sitemap";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
 type TimeViewType = "day" | "week" | "month";
 
 function Dashboard() {
@@ -57,7 +57,7 @@ function Dashboard() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/status'] });
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = '/public-view';
       }, 1000);
     },
     onError: () => {
@@ -80,7 +80,7 @@ function Dashboard() {
   const today = new Date();
   const yesterday = subDays(today, 1);
   const tomorrow = addDays(today, 1);
-
+  
   const isYesterdaySelected = isSameDay(selectedDate, yesterday);
   const isTodaySelected = isSameDay(selectedDate, today);
   const isTomorrowSelected = isSameDay(selectedDate, tomorrow);
@@ -93,7 +93,7 @@ function Dashboard() {
   const getFullDateLabel = () => {
     const dayName = format(selectedDate, 'EEEE');
     const fullDate = format(selectedDate, 'MMMM d, yyyy');
-
+    
     if (isToday(selectedDate)) return `Today is ${dayName} ${fullDate}`;
     if (isYesterday(selectedDate)) return `Yesterday was ${dayName} ${fullDate}`;
     if (isTomorrow(selectedDate)) return `Tomorrow is ${dayName} ${fullDate}`;
@@ -183,14 +183,14 @@ function Dashboard() {
                 )}
               </Button>
             </div>
-
+            
             <div className="flex items-center space-x-3">
               <div className="text-sm text-muted-foreground dark:text-white">
                 <span className="font-medium text-pink-700 dark:text-white">
                   {format(selectedDate, 'MMM d, yyyy')}
                 </span>
               </div>
-
+              
               {isAuthenticated && isAdmin ? (
                 <Button
                   variant="ghost"
@@ -206,14 +206,14 @@ function Dashboard() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => window.location.href = '/public-view'}
                   className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-300 dark:hover:text-purple-400 dark:hover:bg-purple-950"
                 >
                   <Eye className="mr-2 h-4 w-4" />
                   Public View
                 </Button>
               )}
-
+              
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setSelectedDate(subDays(new Date(), 1))}
@@ -225,7 +225,7 @@ function Dashboard() {
                 >
                   Yesterday
                 </button>
-
+                
                 <button
                   onClick={() => setSelectedDate(new Date())}
                   className={`text-xs px-3 py-1 h-7 rounded-lg font-medium transition-colors ${
@@ -236,7 +236,7 @@ function Dashboard() {
                 >
                   Today
                 </button>
-
+                
                 <button
                   onClick={() => setSelectedDate(addDays(new Date(), 1))}
                   className={`text-xs px-3 py-1 h-7 rounded-lg font-medium transition-colors ${
@@ -270,7 +270,7 @@ function Dashboard() {
           {activeView === "groceries" && <GrocerySection isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-
+          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "sitemap" && (
             <SiteMapSection 
               onNavigate={(section: string) => setActiveView(section as ViewType)}

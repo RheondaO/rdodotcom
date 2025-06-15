@@ -27,10 +27,7 @@ export function useCreateTodo() {
       return response.json() as Promise<Todo>;
     },
     onSuccess: (_, variables) => {
-      // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['/api/todos', variables.dueDate] });
-      queryClient.invalidateQueries({ queryKey: ['/api/todos'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/data'] });
     }
   });
 }

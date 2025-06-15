@@ -1,6 +1,9 @@
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon, Pool } from "@neondatabase/serverless";
-import * as schema from "../shared/schema";
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from "ws";
+import * as schema from "@shared/schema";
+
+neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -8,22 +11,5 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Create connection pool for better performance
-const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
-  max: 20, // Maximum connections in pool
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
-});
-
-const sql = neon(process.env.DATABASE_URL!, {
-  fetchConnectionCache: true,
-  fullResults: true,
-});
-
-const db = drizzle(sql, { 
-  schema,
-  logger: process.env.NODE_ENV === 'development'
-});
-
-export { db, pool };
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const db = drizzle({ client: pool, schema });

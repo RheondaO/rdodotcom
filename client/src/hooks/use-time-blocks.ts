@@ -45,10 +45,7 @@ export function useCreateTimeBlock() {
       return response.json() as Promise<TimeBlock>;
     },
     onSuccess: (_, variables) => {
-      // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['/api/time-blocks', variables.date] });
-      queryClient.invalidateQueries({ queryKey: ['/api/time-blocks'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/data'] });
     }
   });
 }

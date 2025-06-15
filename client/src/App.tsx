@@ -34,7 +34,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!authStatus?.authenticated || !authStatus?.isAdmin) {
-    window.location.href = '/landing';
+    window.location.href = '/public-view';
     return null;
   }
 
@@ -46,7 +46,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Switch>
-          <Route path="/landing">
+          <Route path="/public-view">
             <PublicView />
           </Route>
           <Route path="/dashboard">
@@ -61,7 +61,7 @@ function App() {
             <AuthCheck />
           </Route>
           <Route path="/">
-            <PublicView />
+            <Dashboard />
           </Route>
           <Route>
             <NotFoundPage />

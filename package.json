@@ -12,8 +12,7 @@
     "test:coverage": "vitest run --coverage",
     "db:push": "drizzle-kit push",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio",
-    "db:clear-app-dev": "tsx server/clear-app-dev.ts"
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -51,7 +50,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "compression": "^1.8.0",
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^3.6.0",
     "drizzle-orm": "^0.39.1",

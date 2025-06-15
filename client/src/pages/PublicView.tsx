@@ -47,7 +47,7 @@ export default function PublicView() {
 
   const handleAdminLoginClick = () => {
     if (isAuthenticated && isAdmin) {
-      window.location.href = '/admin';
+      window.location.href = '/';
     } else {
       setShowLoginForm(true);
     }
@@ -59,7 +59,7 @@ export default function PublicView() {
 
   const handleLoginSuccess = () => {
     setShowLoginForm(false);
-    window.location.href = '/admin';
+    window.location.href = '/dashboard';
   };
 
   return (
@@ -68,10 +68,10 @@ export default function PublicView() {
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white text-lg">✨</span>
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">BJ</span>
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent leading-none pb-1">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Belle Journal
             </h1>
           </div>
@@ -96,7 +96,7 @@ export default function PublicView() {
       <main className="max-w-6xl mx-auto px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent leading-tight pb-2">
+          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
             Building My Productivity Journey
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
@@ -110,7 +110,7 @@ export default function PublicView() {
               onClick={handleFollowJourneyClick}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              View Dashboard
+              {isAuthenticated && isAdmin ? 'Go to Dashboard' : 'Follow My Journey'}
             </Button>
           </div>
         </div>

@@ -1,1 +1,0 @@
-// This component has been removed - App Development Suite functionality is no longer needed

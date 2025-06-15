@@ -1,18 +1,6 @@
-import { pgTable, text, serial, integer, boolean, decimal, timestamp, date, time, jsonb, index, unique, check } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, decimal, timestamp, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-
-// User management table
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  role: text("role").default("user"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => ({
-  usernameIdx: index("users_username_idx").on(table.username),
-}));
 
 export const dailyEntries = pgTable("daily_entries", {
   id: serial("id").primaryKey(),
@@ -26,16 +14,16 @@ export const dailyEntries = pgTable("daily_entries", {
   dinnerCompleted: boolean("dinner_completed").default(false),
   napTaken: boolean("nap_taken").default(false),
   napDuration: integer("nap_duration"), // minutes
-  wakeUpTime: time("wake_up_time"), // proper time type
+  wakeUpTime: text("wake_up_time"), // HH:MM format
   sleepHours: decimal("sleep_hours", { precision: 3, scale: 1 }), // hours with decimal
   sleepQuality: integer("sleep_quality"), // 1-5 rating
   mood: text("mood"), // happy, sad, neutral, anxious, excited, etc.
   energyLevel: integer("energy_level"), // 1-5 rating
   stressLevel: integer("stress_level"), // 1-5 rating
-  symptoms: jsonb("symptoms"), // JSONB for better performance
-  medicationsTaken: jsonb("medications_taken"), // JSONB for better performance
+  symptoms: text("symptoms"), // JSON array string
+  medicationsTaken: text("medications_taken"), // JSON array string
   periodFlow: text("period_flow"), // none, light, medium, heavy
-  periodSymptoms: jsonb("period_symptoms"), // JSONB for better performance
+  periodSymptoms: text("period_symptoms"), // JSON array string
   // Work & Screen Time
   workHours: decimal("work_hours", { precision: 3, scale: 1 }).default("0"),
   tvHours: decimal("tv_hours", { precision: 3, scale: 1 }).default("0"),
@@ -46,16 +34,12 @@ export const dailyEntries = pgTable("daily_entries", {
   grocerySpent: decimal("grocery_spent", { precision: 8, scale: 2 }).default("0"),
   dailyIncome: decimal("daily_income", { precision: 8, scale: 2 }).default("0"),
   // Habits (date-specific completion tracking)
-  habitCompletions: jsonb("habit_completions"), // JSONB for better performance
+  habitCompletions: text("habit_completions"), // JSON string of habit IDs that were completed
   // Tasks (date-specific todo items)
-  todoItems: jsonb("todo_items"), // JSONB for better performance
+  todoItems: text("todo_items"), // JSON string of todo items for this date
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => ({
-  // Add indexes for performance
-  dateIdx: index("daily_entries_date_idx").on(table.date),
-  createdAtIdx: index("daily_entries_created_at_idx").on(table.createdAt),
-}));
+});
 
 export const bills = pgTable("bills", {
   id: serial("id").primaryKey(),
@@ -103,12 +87,7 @@ export const goals = pgTable("goals", {
   targetDate: date("target_date"),
   isCompleted: boolean("is_completed").default(false),
   createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  categoryIdx: index("goals_category_idx").on(table.category),
-  completedIdx: index("goals_completed_idx").on(table.isCompleted),
-  targetDateIdx: index("goals_target_date_idx").on(table.targetDate),
-  createdAtIdx: index("goals_created_at_idx").on(table.createdAt),
-}));
+});
 
 export const habits = pgTable("habits", {
   id: serial("id").primaryKey(),
@@ -129,11 +108,7 @@ export const habitLogs = pgTable("habit_logs", {
   completed: boolean("completed").default(false),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  habitIdIdx: index("habit_logs_habit_id_idx").on(table.habitId),
-  dateIdx: index("habit_logs_date_idx").on(table.date),
-  habitDateIdx: index("habit_logs_habit_date_idx").on(table.habitId, table.date),
-}));
+});
 
 export const medications = pgTable("medications", {
   id: serial("id").primaryKey(),
@@ -242,17 +217,14 @@ export const contentPieces = pgTable("content_pieces", {
   contentTypeId: integer("content_type_id").notNull().references(() => contentTypes.id),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status").default("idea"), // idea, planning, draft, review, approved, scheduled, published, archived
+  status: text("status").default("draft"), // draft, review, approved, scheduled, published
   targetDate: date("target_date"),
   scheduledDate: date("scheduled_date"),
   publishedDate: date("published_date"),
-  platforms: text("platforms").array().default([]), // platforms where content will be published
-  tags: text("tags").array().default([]), // content tags
   notes: text("notes"),
   priority: text("priority").default("medium"), // low, medium, high, urgent
   estimatedDuration: integer("estimated_duration"), // minutes to complete
   actualDuration: integer("actual_duration"), // actual time spent
-  assignee: text("assignee"), // person assigned to the content
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -342,7 +314,19 @@ export const appTasks = pgTable("app_tasks", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-
+export const appSprints = pgTable("app_sprints", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => appProjects.id),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  status: text("status").notNull().default("planning"), // planning, active, completed
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  goal: text("goal").notNull().default(""),
+  velocity: integer("velocity").default(0), // story points completed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
 
 export const appTimeEntries = pgTable("app_time_entries", {
   id: serial("id").primaryKey(),
@@ -355,69 +339,6 @@ export const appTimeEntries = pgTable("app_time_entries", {
   date: timestamp("date").notNull(),
   billable: boolean("billable").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-// Replit Time Tracking Sessions
-export const replitSessions = pgTable("replit_sessions", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull().references(() => appProjects.id),
-  replId: text("repl_id").notNull(),
-  sessionStart: timestamp("session_start").notNull(),
-  sessionEnd: timestamp("session_end"),
-  totalDuration: integer("total_duration").notNull().default(0), // seconds
-  lastActivity: timestamp("last_activity").notNull(),
-  changes: text("changes").array().notNull().default([]),
-  fileChanges: text("file_changes").array().notNull().default([]),
-  summary: text("summary"),
-  isActive: boolean("is_active").notNull().default(true),
-  autoEnded: boolean("auto_ended").notNull().default(false), // true if ended by inactivity timeout
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-// Testing & QA Tables
-export const testCases = pgTable("test_cases", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull().references(() => appProjects.id),
-  taskId: integer("task_id").references(() => appTasks.id),
-  title: text("title").notNull(),
-  description: text("description").notNull().default(""),
-  category: text("category").notNull().default("functionality"), // functionality, design, performance, seo, accessibility, security
-  priority: text("priority").notNull().default("medium"), // low, medium, high, critical
-  status: text("status").notNull().default("pending"), // pending, passed, failed, blocked, skipped
-  steps: text("steps").array().notNull().default([]),
-  expectedResult: text("expected_result").notNull().default(""),
-  actualResult: text("actual_result").notNull().default(""),
-  testedBy: text("tested_by"),
-  testedAt: timestamp("tested_at"),
-  environment: text("environment").notNull().default("development"), // development, staging, production
-  browserOrDevice: text("browser_or_device"),
-  notes: text("notes").notNull().default(""),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const qualityIssues = pgTable("quality_issues", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").notNull().references(() => appProjects.id),
-  taskId: integer("task_id").references(() => appTasks.id),
-  testCaseId: integer("test_case_id").references(() => testCases.id),
-  title: text("title").notNull(),
-  description: text("description").notNull().default(""),
-  category: text("category").notNull().default("bug"), // bug, design_gap, performance, accessibility, security, usability
-  severity: text("severity").notNull().default("medium"), // low, medium, high, critical
-  status: text("status").notNull().default("open"), // open, in_progress, resolved, closed, wont_fix
-  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
-  foundIn: text("found_in").notNull().default("development"), // development, staging, production
-  assignedTo: text("assigned_to"),
-  stepsToReproduce: text("steps_to_reproduce").array().notNull().default([]),
-  expectedBehavior: text("expected_behavior").notNull().default(""),
-  actualBehavior: text("actual_behavior").notNull().default(""),
-  workaround: text("workaround").notNull().default(""),
-  resolution: text("resolution").notNull().default(""),
-  resolvedAt: timestamp("resolved_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Social Media Posts Table
@@ -596,7 +517,11 @@ export const insertAppTaskSchema = createInsertSchema(appTasks).omit({
   updatedAt: true,
 });
 
-
+export const insertAppSprintSchema = createInsertSchema(appSprints).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 export const insertAppTimeEntrySchema = createInsertSchema(appTimeEntries).omit({
   id: true,
@@ -617,18 +542,6 @@ export const insertSocialMediaAnalyticsSchema = createInsertSchema(socialMediaAn
 
 export const insertPerformanceInsightsSchema = createInsertSchema(performanceInsights).omit({
   id: true,
-});
-
-export const insertTestCaseSchema = createInsertSchema(testCases).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertQualityIssueSchema = createInsertSchema(qualityIssues).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 // Type exports
@@ -701,7 +614,8 @@ export type AppProject = typeof appProjects.$inferSelect;
 export type InsertAppTask = z.infer<typeof insertAppTaskSchema>;
 export type AppTask = typeof appTasks.$inferSelect;
 
-
+export type InsertAppSprint = z.infer<typeof insertAppSprintSchema>;
+export type AppSprint = typeof appSprints.$inferSelect;
 
 export type InsertAppTimeEntry = z.infer<typeof insertAppTimeEntrySchema>;
 export type AppTimeEntry = typeof appTimeEntries.$inferSelect;
@@ -714,58 +628,3 @@ export type SocialMediaAnalytics = typeof socialMediaAnalytics.$inferSelect;
 
 export type InsertPerformanceInsights = z.infer<typeof insertPerformanceInsightsSchema>;
 export type PerformanceInsights = typeof performanceInsights.$inferSelect;
-
-export type InsertTestCase = z.infer<typeof insertTestCaseSchema>;
-export type TestCase = typeof testCases.$inferSelect;
-
-export type InsertQualityIssue = z.infer<typeof insertQualityIssueSchema>;
-export type QualityIssue = typeof qualityIssues.$inferSelect;
-
-// User schemaAdding autoDetectedIssues table and types to the schema.```text
-// User schema
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
-
-// Replit Sessions schema
-export const insertReplitSessionSchema = createInsertSchema(replitSessions).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertReplitSession = z.infer<typeof insertReplitSessionSchema>;
-export type ReplitSession = typeof replitSessions.$inferSelect;
-
-// Auto-detected gaps and issues table for AI coding
-export const autoDetectedIssues = pgTable("auto_detected_issues", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id").references(() => appProjects.id),
-  category: text("category").notNull(), // "Missing Functionality", "Performance Issue", "Integration Gap", etc.
-  title: text("title").notNull(),
-  description: text("description").notNull().default(""),
-  severity: text("severity").notNull().default("medium"), // low, medium, high, critical
-  estimatedEffort: text("estimated_effort"), // "2-3 hours", "1-2 days", etc.
-  blockedFeatures: text("blocked_features").array().notNull().default([]),
-  suggestedSolution: text("suggested_solution").notNull().default(""),
-  status: text("status").notNull().default("identified"), // identified, in_progress, resolved, dismissed
-  autoDetected: boolean("auto_detected").default(true),
-  detectionSource: text("detection_source"), // "ai_analysis", "performance_monitoring", "user_report", etc.
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const insertAutoDetectedIssueSchema = createInsertSchema(autoDetectedIssues).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type AutoDetectedIssue = typeof autoDetectedIssues.$inferSelect;
-export type InsertAutoDetectedIssue = z.infer<typeof insertAutoDetectedIssueSchema>;
-

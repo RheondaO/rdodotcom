@@ -53,7 +53,8 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
         goals: "Personal goals and achievements",
         finances: "Financial tracking and budgets",
         groceries: "Shopping lists and items",
-        content: "Content management records"
+        content: "Content management records",
+        apps: "Development projects and tasks"
       }
     };
     
@@ -122,7 +123,14 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
         { key: "rotationonly", label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine", icon: Moon, description: "Astrological content and mini-game design studio" }
       ]
     },
-
+    {
+      category: "Development & Projects",
+      icon: Code2,
+      color: "from-purple-400 to-indigo-500",
+      items: [
+        { key: "apps", label: "App Development", icon: Code2, description: "Project management for software development" }
+      ]
+    }
   ];
 
   const quickActions = [

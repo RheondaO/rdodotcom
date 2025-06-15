@@ -30,9 +30,9 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
         <Heart className="text-pink-500 mr-3 h-6 w-6" />
         Health & Wellness 💕
       </h3>
-
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
+        
         {/* Water Intake Card */}
         <WaterIntakeCard selectedDate={selectedDate} isEditable={isEditable} />
 
@@ -47,7 +47,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
                 <h4 className="font-heading font-semibold text-gray-800">Exercise</h4>
               </div>
             </div>
-
+            
             <div className="text-center mb-4">
               <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg ${
                 dailyEntry?.exerciseCompleted 
@@ -68,7 +68,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
                 {dailyEntry?.exerciseCompleted ? '✨ Completed!' : 'Not done yet'}
               </div>
             </div>
-
+            
             {dailyEntry?.exerciseNotes && (
               <div className="text-xs text-gray-600 bg-pink-50 rounded-xl p-3 border border-pink-100">
                 {dailyEntry.exerciseNotes}
@@ -98,7 +98,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
                 </Button>
               )}
             </div>
-
+            
             <div className="text-center">
               <div className="text-3xl font-heading font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
                 {dailyEntry?.sleepHours ? `${dailyEntry.sleepHours}h` : '--'}
@@ -140,7 +140,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
                 </Button>
               )}
             </div>
-
+            
             <div className="space-y-3">
               <div className="flex items-center justify-between py-3 px-3 bg-gradient-to-r from-orange-50 to-pink-50 rounded-xl">
                 <span className="text-sm font-medium text-gray-700">Breakfast</span>

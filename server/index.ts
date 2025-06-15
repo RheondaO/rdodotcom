@@ -1,54 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
-import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
-
-// Trust proxy for production deployments
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1);
-}
-
-// Enable gzip compression
-app.use(compression({
-  level: 6,
-  threshold: 1024,
-  filter: (req, res) => {
-    if (req.headers['x-no-compression']) {
-      return false;
-    }
-    return compression.filter(req, res);
-  }
-}));
-
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: false, limit: '1mb' }));
-
-// Add response headers for better caching
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/public/')) {
-    res.set('Cache-Control', 'public, max-age=300'); // Cache public data for 5 minutes
-  } else if (req.path.startsWith('/api/')) {
-    res.set('Cache-Control', 'no-cache');
-  }
-  next();
-});
-
-// CORS configuration for production
-if (process.env.NODE_ENV === 'production') {
-  app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && origin.includes('replit.app')) {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    }
-    next();
-  });
-}
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // Session middleware
 app.use(session({
@@ -56,29 +13,41 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to false for Replit deployments
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax'
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
-// Optimized request logging middleware - only in development
-if (process.env.NODE_ENV === 'development') {
-  app.use((req, res, next) => {
-    const start = Date.now();
-    const path = req.path;
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path = req.path;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-    res.on("finish", () => {
-      if (path.startsWith("/api")) {
-        const duration = Date.now() - start;
-        log(`${req.method} ${path} ${res.statusCode} in ${duration}ms`);
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-    });
 
-    next();
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
+      log(logLine);
+    }
   });
-}
+
+  next();
+});
 
 (async () => {
   const server = await registerRoutes(app);

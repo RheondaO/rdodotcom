@@ -19,59 +19,17 @@ import {
   insertMiniGameDesignSchema,
   insertSocialMediaPostSchema,
   insertSocialMediaAnalyticsSchema,
-  insertPerformanceInsightsSchema,
-  insertReplitSessionSchema
+  insertPerformanceInsightsSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-
   
-
-  // Git commits endpoint
-  app.get("/api/git/commits", async (req, res) => {
-    try {
-      // Get actual Git commits using shell command
-      const { execSync } = require('child_process');
-      
-      try {
-        // Get recent commits with detailed information
-        const gitOutput = execSync('git log --oneline --date=iso --pretty=format:"%H|%an|%ad|%s" -n 10', {
-          encoding: 'utf8',
-          cwd: process.cwd()
-        });
-
-        const commits = gitOutput.trim().split('\n').map(line => {
-          const [hash, author, dateStr, ...messageParts] = line.split('|');
-          return {
-            hash,
-            author,
-            date: new Date(dateStr).toISOString(),
-            message: messageParts.join('|'),
-            insertions: 0,
-            deletions: 0,
-            files: []
-          };
-        });
-
-        res.json(commits);
-      } catch (gitError) {
-        // If git command fails, return empty array
-        console.log('Git not available or no commits found:', gitError.message);
-        res.json([]);
-      }
-    } catch (error) {
-      console.error('Error fetching git commits:', error);
-      res.status(500).json({ error: "Failed to fetch git commits" });
-    }
-  });
-
   // Apply authentication middleware to all routes
   app.use(authenticateUser);
 
-  // Public routes (no auth required) - with caching headers
+  // Public routes (no auth required)
   app.get("/api/public/stats", async (req, res) => {
     try {
-      res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
       const stats = await storage.getPublicStats();
       res.json(stats);
     } catch (error) {
@@ -88,65 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Git integration endpoints
-  app.get("/api/git/commits", async (req, res) => {
-    try {
-      res.set('Cache-Control', 'public, max-age=60'); // Cache for 1 minute
-      const commits = await storage.getGitCommits();
-      res.json(commits);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch git commits" });
-    }
-  });
-
-  app.get("/api/git/projects", async (req, res) => {
-    try {
-      res.set('Cache-Control', 'public, max-age=120'); // Cache for 2 minutes
-      const projects = await storage.getGitProjects();
-      res.json(projects);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch git projects" });
-    }
-  });
-
-  app.get("/api/git/commits/:project", async (req, res) => {
-    try {
-      const projectName = req.params.project;
-      const commits = await storage.getGitCommitsByProject(projectName);
-      res.json(commits);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch project commits" });
-    }
-  });
-
-  app.get("/api/ai/suggestions", async (req, res) => {
-    try {
-      const suggestions = await storage.getAISuggestionData();
-      res.json(suggestions);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch AI suggestions" });
-    }
-  });
-
-
-
   // Auth status endpoint
-
-
-  // Debug endpoint to check database entries
-  app.get("/api/debug/daily-entries", async (req, res) => {
-    try {
-      const { pool } = await import('./db.js');
-      const result = await pool.query("SELECT date, water_intake, exercise_completed, created_at FROM daily_entries ORDER BY date DESC LIMIT 10");
-      res.json({
-        count: result.rows.length,
-        entries: result.rows
-      });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch debug data" });
-    }
-  });
-
   app.get("/api/auth/status", (req: AuthenticatedRequest, res) => {
     res.json({ 
       authenticated: !!req.user,
@@ -158,32 +58,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/login", adminLogin);
   app.post("/api/auth/logout", adminLogout);
-
-  // Combined dashboard data endpoint
-  app.get("/api/dashboard/data", async (req, res) => {
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      
-      const [goals, habits, todos, dailyEntry, timeBlocks] = await Promise.all([
-        storage.getAllGoals(),
-        storage.getAllHabits(),
-        storage.getTodosByDate(today),
-        storage.getDailyEntry(today),
-        storage.getTimeBlocksByDate(today)
-      ]);
-      
-      res.json({
-        goals: goals.slice(0, 5), // Recent goals only for dashboard
-        habits,
-        todaysTodos: todos,
-        dailyEntry: dailyEntry || null,
-        timeBlocks: timeBlocks.slice(0, 3) // Next 3 time blocks
-      });
-    } catch (error) {
-      console.error('Dashboard data fetch error:', error);
-      res.status(500).json({ error: "Failed to fetch dashboard data" });
-    }
-  });
 
   // Public read-only routes for dashboard data
   app.get("/api/goals", async (req, res) => {
@@ -369,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/goals", async (req, res) => {
     try {
       console.log("Received goal data:", req.body);
-
+      
       // Check goal limit (5 goals maximum)
       const existingGoals = await storage.getAllGoals();
       if (existingGoals.length >= 5) {
@@ -378,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "You can only have a maximum of 5 goals at a time." 
         });
       }
-
+      
       const data = insertGoalSchema.parse(req.body);
       console.log("Parsed goal data:", data);
       const goal = await storage.createGoal(data);
@@ -647,7 +521,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!year || !month) {
         return res.status(400).json({ error: "Year and month are required" });
       }
-
+      
       await storage.scheduleContentForMoonPhases(year, month);
       res.json({ success: true, message: `Content scheduled for ${month}/${year}` });
     } catch (error) {
@@ -756,195 +630,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Replit integration endpoints
-  app.get("/api/replit/environment", async (req, res) => {
+  // App Projects
+  app.get("/api/app-projects", async (req, res) => {
     try {
-      const replId = process.env.REPL_ID || req.headers['x-repl-id'] || 'unknown';
-      const replUrl = process.env.REPL_URL || req.headers['x-repl-url'] || req.get('host');
-
-      res.json({
-        isReplit: !!process.env.REPL_ID,
-        replId,
-        replUrl,
-        environment: process.env.NODE_ENV || 'development',
-        timestamp: new Date().toISOString()
-      });
+      const projects = await storage.getAllAppProjects();
+      res.json(projects);
     } catch (error) {
-      res.status(500).json({ error: "Failed to get Replit environment data" });
+      res.status(500).json({ error: "Failed to fetch app projects" });
     }
   });
 
-  app.get("/api/replit/sync-projects", async (req, res) => {
+  app.post("/api/app-projects", async (req, res) => {
     try {
-      const replId = process.env.REPL_ID || 'current-user';
-      
-      // In a real implementation, this would query the Replit API
-      // For now, just return environment info without creating hardcoded data
-      res.json({
-        success: true,
-        message: "Replit environment detected - ready for project creation",
-        replId,
-        environment: "development"
-      });
+      const project = await storage.createAppProject(req.body);
+      res.json(project);
     } catch (error) {
-      res.status(500).json({ error: "Failed to detect Replit environment" });
+      res.status(400).json({ error: "Invalid app project data" });
     }
   });
 
-  app.post("/api/replit/file-change", async (req, res) => {
+  // App Tasks
+  app.get("/api/app-tasks", async (req, res) => {
     try {
-      const { path, type, size, author } = req.body;
-      const changeId = `change_${Date.now()}`;
-
-      // Log the file change event
-      console.log(`Replit file change detected: ${type} - ${path}`);
-
-      // Auto-deploy trigger for important file changes
-      const deploymentTriggerFiles = [
-        'package.json',
-        'server/index.ts',
-        'server/routes.ts',
-        'shared/schema.ts',
-        'client/src/App.tsx',
-        'client/src/components/AppDevelopmentSection.tsx'
-      ];
-
-      const shouldAutoDeploy = deploymentTriggerFiles.some(file => 
-        path.includes(file) && (type === 'modified' || type === 'created')
-      );
-
-      if (shouldAutoDeploy) {
-        console.log(`Auto-deployment triggered by change to: ${path}`);
-        
-        // Trigger deployment
-        const deploymentResponse = await fetch(`${req.protocol}://${req.get('host')}/api/deploy`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            changeId,
-            timestamp: new Date().toISOString(),
-            triggerFile: path,
-            autoTriggered: true
-          })
-        });
-
-        const deploymentResult = await deploymentResponse.json();
-        
-        res.json({
-          success: true,
-          message: "File change recorded and deployment triggered",
-          changeId,
-          deployment: deploymentResult
-        });
-      } else {
-        res.json({
-          success: true,
-          message: "File change recorded",
-          changeId
-        });
-      }
+      const tasks = await storage.getAllAppTasks();
+      res.json(tasks);
     } catch (error) {
-      res.status(500).json({ error: "Failed to record file change" });
+      res.status(500).json({ error: "Failed to fetch app tasks" });
     }
   });
 
-  app.get("/api/replit/project-stats", async (req, res) => {
+  app.post("/api/app-tasks", async (req, res) => {
     try {
-      const replId = process.env.REPL_ID || 'unknown';
-
-      // Generate real-time project statistics
-      const stats = {
-        replId,
-        activeFiles: Math.floor(Math.random() * 50) + 10,
-        totalLines: Math.floor(Math.random() * 5000) + 1000,
-        lastModified: new Date().toISOString(),
-        techStack: ['React', 'TypeScript', 'Node.js', 'Express'],
-        deploymentStatus: 'active'
-      };
-
-      res.json(stats);
+      const task = await storage.createAppTask(req.body);
+      res.json(task);
     } catch (error) {
-      res.status(500).json({ error: "Failed to get project stats" });
+      res.status(400).json({ error: "Invalid app task data" });
     }
   });
-
-  // Replit Session Management
-  app.post("/api/replit-sessions", async (req, res) => {
-    try {
-      const data = insertReplitSessionSchema.parse(req.body);
-      const session = await storage.createReplitSession(data);
-      res.json(session);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid session data" });
-    }
-  });
-
-  app.get("/api/replit-sessions/active/:projectId/:replId", async (req, res) => {
-    try {
-      const projectId = parseInt(req.params.projectId);
-      const replId = req.params.replId;
-      const session = await storage.getActiveReplitSession(projectId, replId);
-      res.json(session);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch active session" });
-    }
-  });
-
-  app.put("/api/replit-sessions/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      const session = await storage.updateReplitSession(id, updates);
-      res.json(session);
-    } catch (error) {
-      res.status(400).json({ error: "Failed to update session" });
-    }
-  });
-
-  app.post("/api/replit-sessions/:id/end", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { summary } = req.body;
-      const session = await storage.endReplitSession(id, summary);
-      res.json(session);
-    } catch (error) {
-      res.status(400).json({ error: "Failed to end session" });
-    }
-  });
-
-  app.get("/api/replit-sessions/project/:projectId", async (req, res) => {
-    try {
-      const projectId = parseInt(req.params.projectId);
-      const sessions = await storage.getReplitSessionsForProject(projectId);
-      res.json(sessions);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch project sessions" });
-    }
-  });
-
-  // Deployment automation
-  app.post("/api/deploy", async (req, res) => {
-    try {
-      const { changeId, timestamp } = req.body;
-      const replId = process.env.REPL_ID || 'unknown';
-
-      // Log the deployment request
-      console.log(`Deployment triggered for change ${changeId} at ${timestamp} in Repl: ${replId}`);
-
-      // Enhanced deployment with Replit integration
-      res.json({ 
-        success: true, 
-        message: "Deployment initiated",
-        deploymentId: `deploy_${Date.now()}`,
-        replId,
-        environment: process.env.NODE_ENV || 'production'
-      });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to trigger deployment" });
-    }
-  });
-
-  
 
   // Medications
   app.get("/api/medications", async (req, res) => {
@@ -970,7 +692,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const period = req.params.period;
       const { startDate, endDate } = req.query;
-
+      
       if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
@@ -985,7 +707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/reports/habits/:dateRange", async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
-
+      
       if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
@@ -1001,7 +723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const period = req.params.period;
       const { startDate, endDate } = req.query;
-
+      
       if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
@@ -1015,7 +737,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/reports/health/:dateRange", async (req, res) => {
     try {
-      const { startDate, endDate } = req.query;      if (!startDate || !endDate) {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
 
@@ -1029,7 +753,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/reports/productivity/:dateRange", async (req, res) => {
     try {
       const { startDate, endDate } = req.query;
-
+      
       if (!startDate || !endDate) {
         return res.status(400).json({ error: "Start date and end date are required" });
       }
@@ -1040,45 +764,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch productivity analytics" });
     }
   });
-
-  // Content Management Suite API routes
-  app.get("/api/content-categories", async (req, res) => {
-    try {
-      const categories = await storage.getContentCategories();
-      res.json(categories);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch content categories" });
-    }
-  });
-
-  app.get("/api/content-types", async (req, res) => {
-    try {
-      const contentTypes = await storage.getContentTypes();
-      res.json(contentTypes);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch content types" });
-    }
-  });
-
-  app.get("/api/content-pieces", async (req, res) => {
-    try {
-      const contentPieces = await storage.getContentPieces();
-      res.json(contentPieces);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch content pieces" });
-    }
-  });
-
-  app.get("/api/content-progress", async (req, res) => {
-    try {
-      const contentProgress = await storage.getContentProgress();
-      res.json(contentProgress);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch content progress" });
-    }
-  });
-
-  
 
   const httpServer = createServer(app);
   return httpServer;
