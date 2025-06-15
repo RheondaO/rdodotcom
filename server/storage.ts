@@ -584,11 +584,22 @@ export class DatabaseStorage {
     ];
   }
 
+  // App Projects
+  async getAllAppProjects(): Promise<AppProject[]> {
+    return await db.select().from(schema.appProjects).orderBy(desc(schema.appProjects.createdAt));
+  }
+
+  async createAppProject(project: InsertAppProject): Promise<AppProject> {
+    const [newProject] = await db.insert(schema.appProjects).values(project).returning();
+    return newProject;
+  }
+
   async getAppTasksByProject(projectId: number): Promise<AppTask[]> {
     return await db.select().from(schema.appTasks)
       .where(eq(schema.appTasks.projectId, projectId))
       .orderBy(desc(schema.appTasks.createdAt));
   }
+  
   async getAppTasks(sprintId?: number): Promise<AppTask[]> {
     const query = db.select().from(schema.appTasks);
     if (sprintId) {
