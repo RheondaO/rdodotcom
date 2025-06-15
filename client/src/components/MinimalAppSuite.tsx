@@ -93,8 +93,7 @@ export default function MinimalAppSuite() {
     refetchOnMount: true
   });
 
-  console.log('Projects data:', projects, 'Loading:', projectsLoading, 'Error:', projectsError);
-  console.log('Tasks data:', allTasks, 'Loading:', tasksLoading, 'Error:', tasksError);
+
 
   // Filter tasks based on selected project
   const tasks = selectedProject 
@@ -134,21 +133,49 @@ export default function MinimalAppSuite() {
   });
 
   const updateProjectMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest('PUT', `/api/app-projects/${id}`, data),
-    onSuccess: () => {
+    mutationFn: async ({ id, ...data }: any) => {
+      const response = await apiRequest('PUT', `/api/app-projects/${id}`, data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log('Project updated successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
       setEditingProject(null);
+      setIsProjectDialogOpen(false);
       toast({ title: "Project updated successfully" });
+    },
+    onError: (error: any) => {
+      console.error('Project update error:', error);
+      toast({ 
+        title: "Failed to update project", 
+        description: error.message || "Please try again",
+        variant: "destructive" 
+      });
     }
   });
 
   const deleteProjectMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('DELETE', `/api/app-projects/${id}`),
-    onSuccess: () => {
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/app-projects/${id}`);
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      console.log('Project deleted successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-      if (selectedProject === arguments[0]) setSelectedProject(null);
+      queryClient.refetchQueries({ queryKey: ['/api/app-projects'] });
+      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
+      if (selectedProject === variables) setSelectedProject(null);
       toast({ title: "Project deleted successfully" });
+    },
+    onError: (error: any) => {
+      console.error('Project delete error:', error);
+      toast({ 
+        title: "Failed to delete project", 
+        description: error.message || "Please try again",
+        variant: "destructive" 
+      });
     }
   });
 
@@ -176,19 +203,46 @@ export default function MinimalAppSuite() {
   });
 
   const updateTaskMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiRequest('PUT', `/api/app-tasks/${id}`, data),
-    onSuccess: () => {
+    mutationFn: async ({ id, ...data }: any) => {
+      const response = await apiRequest('PUT', `/api/app-tasks/${id}`, data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log('Task updated successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
       setEditingTask(null);
+      setIsTaskDialogOpen(false);
       toast({ title: "Task updated successfully" });
+    },
+    onError: (error: any) => {
+      console.error('Task update error:', error);
+      toast({ 
+        title: "Failed to update task", 
+        description: error.message || "Please try again",
+        variant: "destructive" 
+      });
     }
   });
 
   const deleteTaskMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('DELETE', `/api/app-tasks/${id}`),
-    onSuccess: () => {
+    mutationFn: async (id: number) => {
+      const response = await apiRequest('DELETE', `/api/app-tasks/${id}`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      console.log('Task deleted successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
       toast({ title: "Task deleted successfully" });
+    },
+    onError: (error: any) => {
+      console.error('Task delete error:', error);
+      toast({ 
+        title: "Failed to delete task", 
+        description: error.message || "Please try again",
+        variant: "destructive" 
+      });
     }
   });
 
