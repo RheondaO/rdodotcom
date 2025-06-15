@@ -29,7 +29,7 @@ import { format, addDays, subDays } from "date-fns";
 import { useDailyData, useUpdateDailyEntry } from "../hooks/use-daily-data";
 import { useTheme } from "../hooks/use-theme";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "sitemap";
 
 interface SidebarProps {
   activeView: ViewType;
