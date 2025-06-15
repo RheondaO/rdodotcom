@@ -446,7 +446,11 @@ export class DatabaseStorage {
     return updatedProject;
   }
 
-  
+
+  async getAppProjectByName(name: string): Promise<AppProject | null> {
+    const result = await db.select().from(schema.appProjects).where(eq(schema.appProjects.name, name)).limit(1);
+    return result[0] || null;
+  }
 
 
   async getAllAppTasks(): Promise<AppTask[]> {

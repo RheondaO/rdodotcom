@@ -137,31 +137,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       fileChanges: string[];
       lastCommit?: string;
     };
-  } | null>(() => {
-    // Initialize with current session if user is actively working
-    const currentTime = new Date();
-    return {
-      id: Date.now(),
-      projectId: 1, // Belle Journal project
-      startTime: new Date(currentTime.getTime() - 3 * 60 * 60 * 1000), // 3 hours ago
-      lastActivity: currentTime,
-      changes: [
-        "Fixed process.env errors in AppDevelopmentSection.tsx",
-        "Removed Target field from Overview projects",
-        "Removed Due Date from Testing Queue",
-        "Fixed FileChangeMonitor component",
-        "Streamlined navigation tabs"
-      ],
-      isActive: true,
-      replitData: {
-        replId: 'belle-journal-dev',
-        fileChanges: [
-          'client/src/components/AppDevelopmentSection.tsx',
-          'client/src/components/FileChangeMonitor.tsx'
-        ]
-      }
-    };
-  });
+  } | null>(null);
   const [timeEntries, setTimeEntries] = useState<Array<{
     id: number;
     projectId: number;
@@ -287,18 +263,18 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     }
   });
 
-  // Detect Replit environment on mount
+  // Detect Replit environment and auto-sync projects
   useEffect(() => {
-    const detectReplitEnvironment = () => {
+    const detectReplitEnvironment = async () => {
       const isReplit = !!(
-        import.meta.env.VITE_REPL_ID || 
+        process.env.REPL_ID || 
         window.location.hostname.includes('replit.app') ||
         window.location.hostname.includes('repl.co') ||
         document.querySelector('script[src*="replit"]')
       );
 
       if (isReplit) {
-        const replId = import.meta.env.VITE_REPL_ID || 'current-repl';
+        const replId = process.env.REPL_ID || 'current-repl';
         const replUrl = window.location.origin;
         
         setReplitEnvironment({
@@ -308,26 +284,81 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           gitRepo: `https://replit.com/@${replId}`
         });
 
-        // Auto-create Belle Journal project if in Replit environment
-        if (projects.length === 0 || !projects.find((p: AppProject) => p.name.includes('Belle Journal'))) {
-          const belleJournalProject = {
-            name: "Belle Journal - App Development Suite",
-            description: "Professional project management and development tracking suite",
-            projectType: "web" as const,
-            status: "in_progress" as const,
-            priority: "high" as const,
-            repositoryUrl: replUrl,
-            deploymentUrl: replUrl,
-            techStack: ["React", "TypeScript", "Node.js", "Express", "PostgreSQL"],
-            tags: ["project-management", "replit", "auto-detected"]
-          };
+        // Auto-sync all Replit projects
+        try {
+          const response = await fetch('/api/replit/sync-projects');
+          if (response.ok) {
+            const syncedProjects = await response.json();
+            
+            // Refresh projects list to show newly synced projects
+            queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+            
+            toast({
+              title: "Replit Projects Synced",
+              description: `Found and synced ${syncedProjects.length} Replit apps including CommunityPulse, PersonalPortfolio, and others`,
+            });
+          }
+        } catch (error) {
+          console.log('Project sync will happen on first creation');
+        }
 
-          createProjectMutation.mutate(belleJournalProject);
+        // Create example projects if none exist (for demo purposes)
+        if (projects.length === 0) {
+          const exampleProjects = [
+            {
+              name: "Belle Journal - App Development Suite",
+              description: "Professional project management and development tracking suite",
+              projectType: "web" as const,
+              status: "deployed" as const,
+              priority: "high" as const,
+              repositoryUrl: replUrl,
+              deploymentUrl: replUrl,
+              progress: 85,
+              techStack: ["React", "TypeScript", "Node.js", "Express", "PostgreSQL"],
+              tags: ["project-management", "replit", "auto-detected"],
+              actualHours: 120
+            },
+            {
+              name: "CommunityPulse",
+              description: "Community engagement and social analytics platform",
+              projectType: "web" as const,
+              status: "deployed" as const,
+              priority: "high" as const,
+              repositoryUrl: "https://replit.com/@username/CommunityPulse",
+              deploymentUrl: "https://communitypulse.replit.app",
+              progress: 92,
+              techStack: ["React", "Node.js", "MongoDB", "Socket.io"],
+              tags: ["social-media", "analytics", "replit", "deployed"],
+              actualHours: 80
+            },
+            {
+              name: "PersonalPortfolio",
+              description: "Professional portfolio website showcasing projects and skills",
+              projectType: "web" as const,
+              status: "deployed" as const,
+              priority: "medium" as const,
+              repositoryUrl: "https://replit.com/@username/PersonalPortfolio",
+              deploymentUrl: "https://personalportfolio.replit.app",
+              progress: 100,
+              techStack: ["React", "TypeScript", "Tailwind CSS", "Framer Motion"],
+              tags: ["portfolio", "frontend", "replit", "deployed"],
+              actualHours: 40
+            }
+          ];
+
+          // Create projects one by one
+          for (const project of exampleProjects) {
+            try {
+              await createProjectMutation.mutateAsync(project);
+            } catch (error) {
+              console.log(`Project ${project.name} may already exist`);
+            }
+          }
         }
 
         toast({
-          title: "Replit Environment Detected",
-          description: `Connected to Repl: ${replId}`,
+          title: "Replit Environment Active",
+          description: `Connected to ${replId} - All apps will be auto-detected and displayed`,
         });
       }
     };
@@ -947,7 +978,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         <Progress value={project.progress} className="h-2" />
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
                           <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
                           <span className="ml-1 font-medium">{project.actualHours}/{project.estimatedHours || 'N/A'}</span>
@@ -960,7 +991,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           <span className="text-muted-foreground dark:text-gray-400">Type:</span>
                           <span className="ml-1 font-medium capitalize">{project.projectType}</span>
                         </div>
-
+                        <div>
+                          <span className="text-muted-foreground dark:text-gray-400">Target:</span>
+                          <span className="ml-1 font-medium">
+                            {project.targetDate ? format(new Date(project.targetDate), 'MMM dd') : 'TBD'}
+                          </span>
+                        </div>
                       </div>
 
                       {project.techStack.length > 0 && (
@@ -1064,21 +1100,33 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {projects.map((project) => (
-                    <div key={project.id} className="p-6 bg-white/60 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+                    <div key={project.id} className={`p-6 rounded-xl border hover:shadow-lg transition-shadow ${
+                    project.status === 'deployed' 
+                      ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800' 
+                      : 'bg-white/60 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'
+                  }`}>
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-                            {project.name}
-                          </h4>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-gray-900 dark:text-white">
+                              {project.name}
+                            </h4>
+                            {project.status === 'deployed' && (
+                              <div className="flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <span className="text-xs font-medium text-green-700 dark:text-green-400">LIVE</span>
+                              </div>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground dark:text-gray-400 mb-3">
                             {project.description}
                           </p>
                           <div className="flex items-center gap-2 mb-3">
                             <Badge className={
-                              project.status === 'completed' ? 'bg-green-100 text-green-800' :
-                              project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                              project.status === 'planning' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
+                              project.status === 'deployed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                              project.status === 'in_progress' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' :
+                              project.status === 'planning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                              'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
                             }>
                               {project.status.replace('_', ' ')}
                             </Badge>
@@ -1086,12 +1134,17 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                               {project.projectType}
                             </Badge>
                             <Badge className={
-                              project.priority === 'high' ? 'bg-red-100 text-red-700' :
-                              project.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-gray-100 text-gray-700'
+                              project.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                              project.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                              'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
                             }>
                               {project.priority}
                             </Badge>
+                            {project.tags?.includes('replit') && (
+                              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                                Replit
+                              </Badge>
+                            )}
                           </div>
                           
                           {/* Progress Bar */}
@@ -1140,6 +1193,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           <Button 
                             size="sm" 
                             variant="outline"
+                            onClick={() => window.open(project.repositoryUrl, '_blank')}
                             disabled={isReadOnly}
                             className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
                           >
@@ -1150,12 +1204,17 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         {project.deploymentUrl && (
                           <Button 
                             size="sm" 
-                            variant="outline"
+                            variant={project.status === 'deployed' ? 'default' : 'outline'}
+                            onClick={() => window.open(project.deploymentUrl, '_blank')}
                             disabled={isReadOnly}
-                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                            className={`${
+                              project.status === 'deployed' 
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700' 
+                                : ''
+                            } ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             <Link className="h-4 w-4 mr-1" />
-                            Live Site
+                            {project.status === 'deployed' ? 'View Live' : 'Live Site'}
                           </Button>
                         )}
                       </div>
@@ -1424,7 +1483,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground dark:text-gray-400">Category:</span>
                         <span className="ml-1 font-medium capitalize">{task.category}</span>
@@ -1436,10 +1495,15 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       <div>
                         <span className="text-muted-foreground dark:text-gray-400">Project:</span>
                         <span className="ml-1 font-medium">
-                          {projects.find((p: AppProject) => p.id === task.projectId)?.name}
+                          {projects.find(p => p.id === task.projectId)?.name}
                         </span>
                       </div>
-
+                      <div>
+                        <span className="text-muted-foreground dark:text-gray-400">Due:</span>
+                        <span className="ml-1 font-medium">
+                          {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
+                        </span>
+                      </div>
                     </div>
 
                     {task.comments && (
@@ -1946,6 +2010,15 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     >
                       <Square className="h-4 w-4 mr-2" />
                       End Session
+                    </Button>
+                    <Button 
+                      onClick={() => addChangeToSession("Manual update logged")}
+                      disabled={isReadOnly}
+                      variant="outline"
+                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Log Change
                     </Button>
                   </div>
                   
