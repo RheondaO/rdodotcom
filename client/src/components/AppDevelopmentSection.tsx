@@ -827,32 +827,25 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         <div className="space-y-8">
           {/* Replit Integration Status */}
           {replitEnvironment.isReplit && (
-            <Card className="border-green-100 dark:border-green-800 shadow-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
-                    <Code2 className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">
-                      🎉 Replit Integration Active
-                    </h3>
-                    <p className="text-green-700 dark:text-green-300">
-                      Connected to Repl: <code className="bg-green-100 dark:bg-green-900/50 px-2 py-1 rounded text-sm">{replitEnvironment.replId}</code>
-                    </p>
-                    <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                      Automatic project detection, file monitoring, and development time tracking enabled
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium">Live</span>
-                    </div>
-                  </div>
+            <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-green-500 rounded-lg flex items-center justify-center">
+                  <Code2 className="h-3 w-3 text-white" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                    Replit Integration Active
+                  </p>
+                  <p className="text-xs text-green-700 dark:text-green-300">
+                    Connected to <code className="bg-green-100 dark:bg-green-900/50 px-1 rounded text-xs">{replitEnvironment.replId}</code>
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-green-600 dark:text-green-400">Live</span>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Stats Cards */}
