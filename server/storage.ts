@@ -726,6 +726,16 @@ export class DatabaseStorage {
     return newSprint;
   }
 
+
+  async getAllAppTasks(): Promise<AppTask[]> {
+    return await db.select().from(schema.appTasks).orderBy(desc(schema.appTasks.createdAt));
+  }
+
+  async getAppTasksByProject(projectId: number): Promise<AppTask[]> {
+    return await db.select().from(schema.appTasks)
+      .where(eq(schema.appTasks.projectId, projectId))
+      .orderBy(desc(schema.appTasks.createdAt));
+  }
   async getAppTasks(sprintId?: number): Promise<AppTask[]> {
     const query = db.select().from(schema.appTasks);
     if (sprintId) {
