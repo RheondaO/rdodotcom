@@ -69,6 +69,13 @@ export default function MinimalAppSuite() {
 
   const { toast } = useToast();
 
+  // Debug cache state
+  const debugCacheState = () => {
+    const projectsCache = queryClient.getQueryData(['/api/app-projects']);
+    const tasksCache = queryClient.getQueryData(['/api/app-tasks']);
+    console.log('Cache Debug:', { projectsCache, tasksCache });
+  };
+
   // Queries
   const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useQuery<Project[]>({
     queryKey: ['/api/app-projects']
@@ -290,26 +297,33 @@ export default function MinimalAppSuite() {
       const response = await apiRequest('DELETE', `/api/app-tasks/${id}`);
       return response.json();
     },
-    onSuccess: (data, deletedTaskId) => {
-      console.log('Task deleted successfully:', data);
+    onMutate: async (deletedTaskId) => {
+      await queryClient.cancelQueries({ queryKey: ['/api/app-tasks'] });
       
-      // Immediately remove the task from the cache
-      const currentTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
-      const updatedTasks = currentTasks.filter(task => task.id !== deletedTaskId);
+      const previousTasks = queryClient.getQueryData<Task[]>(['/api/app-tasks']) || [];
+      const updatedTasks = previousTasks.filter(task => task.id !== deletedTaskId);
+      
       queryClient.setQueryData(['/api/app-tasks'], updatedTasks);
       
-      // Refetch as backup
-      queryClient.refetchQueries({ queryKey: ['/api/app-tasks'] });
-      
-      toast({ title: "Task deleted successfully" });
+      return { previousTasks };
     },
-    onError: (error: any) => {
-      console.error('Task delete error:', error);
+    onError: (err, deletedTaskId, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['/api/app-tasks'], context.previousTasks);
+      }
+      
+      console.error('Task delete error:', err);
       toast({ 
         title: "Failed to delete task", 
-        description: error.message || "Please try again",
+        description: err.message || "Please try again",
         variant: "destructive" 
       });
+    },
+    onSuccess: () => {
+      toast({ title: "Task deleted successfully" });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
     }
   });
 
