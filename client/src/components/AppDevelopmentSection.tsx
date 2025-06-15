@@ -638,14 +638,21 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      {/* Recent Changes View */}
+      {/* Projects View */}
       {activeView === "projects" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Changes & Updates</h2>
-            <Badge variant="outline" className="bg-green-50 text-green-700">
-              Auto-detected from commits
-            </Badge>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h2>
+            <Button 
+              onClick={() => setShowNewProjectForm(true)}
+              disabled={isReadOnly}
+              className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Project
+            </Button>
           </div>
 
           {/* Auto-detected Changes */}
@@ -763,14 +770,40 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      {/* Gaps & Issues View */}
-      {activeView === "gaps" && (
+      {/* Tasks View */}
+      {activeView === "tasks" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Gaps & Missing Functionality</h2>
-            <Badge variant="outline" className="bg-orange-50 text-orange-700">
-              AI Analysis Powered
-            </Badge>
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tasks</h2>
+              {selectedProject && (
+                <Badge variant="outline" className="text-sm">
+                  {projects.find(p => p.id === selectedProject)?.name}
+                </Badge>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={selectedProject || ""}
+                onChange={(e) => setSelectedProject(e.target.value ? Number(e.target.value) : null)}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
+              >
+                <option value="">All Projects</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <Button 
+                onClick={() => setShowNewTaskForm(true)}
+                disabled={isReadOnly}
+                className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Task
+              </Button>
+            </div>
           </div>
 
           {/* Auto-detected Gaps */}
