@@ -25,62 +25,7 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
-  // App Projects - Public access for development suite (before auth middleware)
-  app.get("/api/app-projects", async (req, res) => {
-    try {
-      const projects = await storage.getAllAppProjects();
-      res.json(projects);
-    } catch (error) {
-      console.error('Error fetching app projects:', error);
-      res.status(500).json({ error: "Failed to fetch app projects" });
-    }
-  });
-
-  app.post("/api/app-projects", async (req, res) => {
-    try {
-      console.log('Creating app project with data:', req.body);
-      
-      // Map frontend fields to database schema
-      const projectData = {
-        ...req.body,
-        projectType: req.body.type, // Map 'type' to 'projectType'
-        techStack: req.body.technology_stack || [], // Map 'technology_stack' to 'techStack'
-      };
-      
-      // Remove the original fields that don't match the schema
-      delete projectData.type;
-      delete projectData.technology_stack;
-      
-      const project = await storage.createAppProject(projectData);
-      console.log('Created project:', project);
-      res.json(project);
-    } catch (error) {
-      console.error('Error creating app project:', error);
-      res.status(500).json({ error: "Failed to create app project" });
-    }
-  });
-
-  app.put("/api/app-projects/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const project = await storage.updateAppProject(id, req.body);
-      res.json(project);
-    } catch (error) {
-      console.error('Error updating app project:', error);
-      res.status(500).json({ error: "Failed to update app project" });
-    }
-  });
-
-  app.delete("/api/app-projects/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteAppProject(id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting app project:', error);
-      res.status(500).json({ error: "Failed to delete app project" });
-    }
-  });
+  
 
   // Git commits endpoint
   app.get("/api/git/commits", async (req, res) => {
@@ -219,11 +164,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const today = new Date().toISOString().split('T')[0];
       
-      const [goals, habits, todos, projects, dailyEntry, timeBlocks] = await Promise.all([
+      const [goals, habits, todos, dailyEntry, timeBlocks] = await Promise.all([
         storage.getAllGoals(),
         storage.getAllHabits(),
         storage.getTodosByDate(today),
-        storage.getAllAppProjects(),
         storage.getDailyEntry(today),
         storage.getTimeBlocksByDate(today)
       ]);
@@ -232,7 +176,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         goals: goals.slice(0, 5), // Recent goals only for dashboard
         habits,
         todaysTodos: todos,
-        projects: projects.slice(0, 5), // Recent projects only
         dailyEntry: dailyEntry || null,
         timeBlocks: timeBlocks.slice(0, 3) // Next 3 time blocks
       });
@@ -1001,222 +944,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // App development authenticated routes (for creating/updating)
-
-
-
-  // App Development - Tasks
-  app.get('/api/app-tasks', async (req, res) => {
-    try {
-      const projectId = req.query.projectId ? parseInt(req.query.projectId as string) : undefined;
-      const tasks = projectId ? 
-        await storage.getAppTasksByProject(projectId) : 
-        await storage.getAppTasks();
-      res.json(tasks);
-    } catch (error) {
-      console.error('Error fetching app tasks:', error);
-      res.status(500).json({ error: 'Failed to fetch app tasks' });
-    }
-  });
-
-  app.post('/api/app-tasks', async (req, res) => {
-    try {
-      const task = await storage.createAppTask(req.body);
-      res.json(task);
-    } catch (error) {
-      console.error('Error creating app task:', error);
-      res.status(500).json({ error: 'Failed to create app task' });
-    }
-  });
-
-  app.put('/api/app-tasks/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const task = await storage.updateAppTask(id, req.body);
-      res.json(task);
-    } catch (error) {
-      console.error('Error updating app task:', error);
-      res.status(500).json({ error: 'Failed to update app task' });
-    }
-  });
-
-  app.delete('/api/app-tasks/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteAppTask(id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error deleting app task:', error);
-      res.status(500).json({ error: 'Failed to delete app task' });
-    }
-  });
-
-  // Test Cases
-  app.get("/api/test-cases", async (req, res) => {
-    try {
-      const testCases = await storage.getAllTestCases();
-      res.json(testCases);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch test cases" });
-    }
-  });
-
-  app.get("/api/test-cases/project/:projectId", async (req, res) => {
-    try {
-      const projectId = parseInt(req.params.projectId);
-      const testCases = await storage.getTestCasesByProject(projectId);
-      res.json(testCases);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch test cases for project" });
-    }
-  });
-
-  app.post("/api/test-cases", async (req, res) => {
-    try {
-      const testCase = await storage.createTestCase(req.body);
-      res.json(testCase);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid test case data" });
-    }
-  });
-
-  app.put("/api/test-cases/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      const testCase = await storage.updateTestCase(id, updates);
-      res.json(testCase);
-    } catch (error) {
-      res.status(400).json({ error: "Failed to update test case" });
-    }
-  });
-
-  // Quality Issues
-  app.get("/api/quality-issues", async (req, res) => {
-    try {
-      const issues = await storage.getAllQualityIssues();
-      res.json(issues);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch quality issues" });
-    }
-  });
-
-  app.get("/api/quality-issues/project/:projectId", async (req, res) => {
-    try {
-      const projectId = parseInt(req.params.projectId);
-      const issues = await storage.getQualityIssuesByProject(projectId);
-      res.json(issues);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch quality issues for project" });
-    }
-  });
-
-  app.post("/api/quality-issues", async (req, res) => {
-    try {
-      const issue = await storage.createQualityIssue(req.body);
-      res.json(issue);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid quality issue data" });
-    }
-  });app.put("/api/quality-issues/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      const issue = await storage.updateQualityIssue(id, updates);
-      res.json(issue);
-    } catch (error) {
-      res.status(400).json({ error: "Failed to update quality issue" });
-    }
-  });
-
-  // Auto-detected Issues
-  app.get("/api/auto-detected-issues", async (req, res) => {
-    try {
-      const { projectId } = req.query;
-      if (projectId) {
-        const issues = await storage.getAutoDetectedIssuesByProject(parseInt(projectId as string));
-        res.json(issues);
-      } else {
-        const issues = await storage.getAllAutoDetectedIssues();
-        res.json(issues);
-      }
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch auto-detected issues" });
-    }
-  });
-
-  app.post("/api/auto-detected-issues", async (req, res) => {
-    try {
-      const issue = await storage.createAutoDetectedIssue(req.body);
-      res.json(issue);
-    } catch (error) {
-      res.status(400).json({ error: "Invalid auto-detected issue data" });
-    }
-  });
-
-  app.put("/api/auto-detected-issues/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      const issue = await storage.updateAutoDetectedIssue(id, updates);
-      res.json(issue);
-    } catch (error) {
-      res.status(400).json({ error: "Failed to update auto-detected issue" });
-    }
-  });
-
-  app.delete("/api/auto-detected-issues/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteAutoDetectedIssue(id);
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete auto-detected issue" });
-    }
-  });
-
-  // Create cross-app tracking tasks for existing projects
-  app.post("/api/create-cross-app-tracking-tasks", async (req, res) => {
-    try {
-      const projects = await storage.getAllAppProjects();
-      const tasksCreated = [];
-
-      for (const project of projects) {
-        // Check if project has Replit tag or is a known Replit app
-        const isReplitApp = project.tags?.includes('replit') || 
-                           ['CommunityPulse', 'PersonalPortfolio', 'Belle Journal'].includes(project.name);
-
-        if (isReplitApp) {
-          // Create task for enabling full cross-app tracking
-          const trackingTask = await storage.createAppTask({
-            projectId: project.id,
-            title: "Enable Full Cross-App Tracking",
-            description: `Implement comprehensive tracking for ${project.name} to monitor real-time file changes, development time, and live activity across all Replit apps`,
-            status: "todo",
-            priority: "medium",
-            category: "improvement",
-            estimatedHours: 3,
-            tags: ["replit-integration", "cross-app-tracking"]
-          });
-
-          tasksCreated.push({
-            project: project.name,
-            task: trackingTask.title,
-            id: trackingTask.id
-          });
-        }
-      }
-
-      res.json({ 
-        success: true, 
-        message: `Created ${tasksCreated.length} cross-app tracking tasks`,
-        tasks: tasksCreated
-      });
-    } catch (error) {
-      console.error("Error creating cross-app tracking tasks:", error);
-      res.status(500).json({ error: "Failed to create cross-app tracking tasks" });
-    }
-  });
+  
 
   // Medications
   app.get("/api/medications", async (req, res) => {
@@ -1350,98 +1078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // App Time Tracking API
-  app.get("/api/app-time-entries", async (req, res) => {
-    try {
-      const { projectId, date } = req.query;
-      
-      if (date) {
-        const entries = await storage.getAppTimeEntriesByDate(date as string);
-        res.json(entries);
-      } else if (projectId) {
-        const entries = await storage.getAllAppTimeEntries(parseInt(projectId as string));
-        res.json(entries);
-      } else {
-        const entries = await storage.getAllAppTimeEntries();
-        res.json(entries);
-      }
-    } catch (error) {
-      console.error("Error fetching time entries:", error);
-      res.status(500).json({ error: "Failed to fetch time entries" });
-    }
-  });
-
-  app.get("/api/app-time-entries/active", async (req, res) => {
-    try {
-      const activeEntry = await storage.getActiveAppTimeEntry();
-      res.json(activeEntry);
-    } catch (error) {
-      console.error("Error fetching active time entry:", error);
-      res.status(500).json({ error: "Failed to fetch active time entry" });
-    }
-  });
-
-  app.post("/api/app-time-entries", async (req, res) => {
-    try {
-      const { projectId, taskId, description } = req.body;
-      
-      if (!projectId || !description) {
-        return res.status(400).json({ error: "Project ID and description are required" });
-      }
-
-      const newEntry = await storage.createAppTimeEntry({
-        projectId: parseInt(projectId),
-        taskId: taskId ? parseInt(taskId) : null,
-        description,
-        startTime: new Date(),
-        date: new Date(),
-        duration: 0,
-        billable: false
-      });
-
-      res.status(201).json(newEntry);
-    } catch (error) {
-      console.error("Error creating time entry:", error);
-      res.status(500).json({ error: "Failed to create time entry" });
-    }
-  });
-
-  app.put("/api/app-time-entries/:id/stop", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const endTime = new Date();
-      
-      const updatedEntry = await storage.stopAppTimeEntry(id, endTime);
-      res.json(updatedEntry);
-    } catch (error) {
-      console.error("Error stopping time entry:", error);
-      res.status(500).json({ error: "Failed to stop time entry" });
-    }
-  });
-
-  app.put("/api/app-time-entries/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      
-      const updatedEntry = await storage.updateAppTimeEntry(id, updates);
-      res.json(updatedEntry);
-    } catch (error) {
-      console.error("Error updating time entry:", error);
-      res.status(500).json({ error: "Failed to update time entry" });
-    }
-  });
-
-  app.delete("/api/app-time-entries/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await storage.deleteAppTimeEntry(id);
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting time entry:", error);
-      res.status(500).json({ error: "Failed to delete time entry" });
-    }
-  });
+  
 
   const httpServer = createServer(app);
   return httpServer;

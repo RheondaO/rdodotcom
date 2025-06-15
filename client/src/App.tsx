@@ -3,7 +3,6 @@ import Dashboard from "./pages/Dashboard";
 import PublicView from "./pages/PublicView";
 import AuthCheck from "./pages/AuthCheck";
 import NotFoundPage from "./pages/not-found";
-import MinimalAppSuite from "./components/MinimalAppSuite";
 import { ThemeProvider } from "./hooks/use-theme";
 import { Toaster } from "./components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -57,11 +56,6 @@ function App() {
             <AuthGuard>
               <Dashboard />
             </AuthGuard>
-          </Route>
-          <Route path="/dev-suite">
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-              <MinimalAppSuite />
-            </div>
           </Route>
           <Route path="/auth-check">
             <AuthCheck />
