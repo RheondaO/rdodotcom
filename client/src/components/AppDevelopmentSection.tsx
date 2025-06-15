@@ -477,9 +477,56 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {activeProjects.map((project) => (
-                  <div key={project.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
+              {projectsLoading ? (
+                <div className="space-y-4">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl animate-pulse">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
+                          <div>
+                            <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-32 mb-2"></div>
+                            <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-24"></div>
+                          </div>
+                        </div>
+                        <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-20"></div>
+                      </div>
+                      <div className="h-2 bg-gray-300 dark:bg-gray-600 rounded w-full mb-3"></div>
+                      <div className="grid grid-cols-4 gap-4">
+                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : activeProjects.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Code2 className="h-8 w-8 text-purple-400 dark:text-purple-300" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No Active Projects
+                  </h3>
+                  <p className="text-muted-foreground dark:text-gray-400 mb-4 max-w-sm mx-auto">
+                    There are currently no active app projects in development. Create your first project to get started.
+                  </p>
+                  {!isReadOnly && (
+                    <Button 
+                      onClick={() => setShowNewProjectForm(true)}
+                      size="sm"
+                      className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Project
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {activeProjects.map((project) => (
+                    <div key={project.id} className="p-4 bg-white/60 dark:bg-gray-800/60 rounded-xl">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
@@ -574,8 +621,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
