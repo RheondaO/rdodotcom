@@ -115,7 +115,7 @@ type NewTaskForm = z.infer<typeof newTaskSchema>;
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  // Remove activeTab state since we're using integrated layout
+  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'tasks' | 'monitoring'>('overview');
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
@@ -296,82 +296,111 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       {/* File Change Monitor */}
       <FileChangeMonitor />
 
-      {/* Overview Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Project Stats */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Code2 className="h-5 w-5" />
-              Active Projects
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-              {activeProjects.length}
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              {completedProjects.length} completed
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Task Stats */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Open Tasks
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-              {tasks.filter((task: AppTask) => task.status !== 'completed').length}
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              {tasks.filter((task: AppTask) => task.status === 'completed').length} completed
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Issues Stats */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bug className="h-5 w-5" />
-              Issues
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-red-600 dark:text-red-400">
-              {autoDetectedIssues.filter((issue: AutoDetectedIssue) => issue.status !== 'resolved').length}
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              {autoDetectedIssues.filter((issue: AutoDetectedIssue) => issue.status === 'resolved').length} resolved
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Monitoring */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Monitoring
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-              Active
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              Real-time tracking
-            </p>
-          </CardContent>
-        </Card>
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+        {[
+          { id: 'overview', label: 'Overview', icon: BarChart3 },
+          { id: 'projects', label: 'Projects', icon: Code2 },
+          { id: 'tasks', label: 'Tasks', icon: FileText },
+          { id: 'monitoring', label: 'Monitoring', icon: Eye }
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                activeTab === tab.id
+                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Projects Section */}
+      {/* Overview Tab */}
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Project Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code2 className="h-5 w-5" />
+                Active Projects
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                {activeProjects.length}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {completedProjects.length} completed
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Task Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Open Tasks
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                {tasks.filter((task: AppTask) => task.status !== 'completed').length}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {tasks.filter((task: AppTask) => task.status === 'completed').length} completed
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Issues Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bug className="h-5 w-5" />
+                Issues
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                {autoDetectedIssues.filter((issue: AutoDetectedIssue) => issue.status !== 'resolved').length}
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {autoDetectedIssues.filter((issue: AutoDetectedIssue) => issue.status === 'resolved').length} resolved
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Monitoring */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Monitoring
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                Active
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                Real-time tracking
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Projects Tab */}
+      {activeTab === 'projects' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Projects</h3>
@@ -504,9 +533,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             )}
           </div>
         </div>
+      )}
 
-      {/* Tasks Section */}
-      <div className="space-y-6">
+      {/* Tasks Tab */}
+      {activeTab === 'tasks' && (
+        <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Tasks</h3>
           {!isReadOnly && (
@@ -600,12 +631,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             )}
           </div>
         </div>
+      )}
 
-      {/* Auto-detected Issues Section */}
-      <div className="space-y-6">
-        <h3 className="text-lg font-semibold">System Monitoring</h3>
-        
-        {/* Auto-detected Issues */}
+      {/* Monitoring Tab */}
+      {activeTab === 'monitoring' && (
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold">System Monitoring</h3>
+          
+          {/* Auto-detected Issues */}
           <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
@@ -713,7 +746,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               )}
             </CardContent>
           </Card>
-      </div>
+        </div>
+      )}
 
       {/* New Project Dialog */}
       <Dialog open={showNewProjectForm} onOpenChange={setShowNewProjectForm}>
