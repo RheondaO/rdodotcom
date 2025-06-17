@@ -719,20 +719,275 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
         </div>
       )}
 
-      {/* Analytics */}
+      {/* Analytics Dashboard */}
       {activeView === "analytics" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Content Analytics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-300">Detailed analytics would be displayed here</p>
-              <p className="text-sm text-gray-500 mt-2">Performance metrics and engagement insights</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          {/* Analytics Header */}
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Analytics Dashboard</h3>
+            <Dialog open={showAnalyticsForm} onOpenChange={setShowAnalyticsForm}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center space-x-2">
+                  <Plus className="h-4 w-4" />
+                  <span>Add Analytics Data</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add Performance Analytics</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="miniGameBlockId">Mini Game Block</Label>
+                    <Select value={newAnalytics.miniGameBlockId} onValueChange={(value) => setNewAnalytics({...newAnalytics, miniGameBlockId: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select block" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {displayBlocks.map((block) => (
+                          <SelectItem key={block.id} value={block.id.toString()}>{block.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="platform">Platform</Label>
+                    <Select value={newAnalytics.platform} onValueChange={(value) => setNewAnalytics({...newAnalytics, platform: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="twitter">Twitter</SelectItem>
+                        <SelectItem value="facebook">Facebook</SelectItem>
+                        <SelectItem value="tiktok">TikTok</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="dayOfWeek">Day of Week</Label>
+                      <Select value={newAnalytics.dayOfWeek} onValueChange={(value) => setNewAnalytics({...newAnalytics, dayOfWeek: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monday">Monday</SelectItem>
+                          <SelectItem value="tuesday">Tuesday</SelectItem>
+                          <SelectItem value="wednesday">Wednesday</SelectItem>
+                          <SelectItem value="thursday">Thursday</SelectItem>
+                          <SelectItem value="friday">Friday</SelectItem>
+                          <SelectItem value="saturday">Saturday</SelectItem>
+                          <SelectItem value="sunday">Sunday</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="timeSlot">Time Slot</Label>
+                      <Select value={newAnalytics.timeSlot} onValueChange={(value) => setNewAnalytics({...newAnalytics, timeSlot: value})}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="morning">Morning</SelectItem>
+                          <SelectItem value="afternoon">Afternoon</SelectItem>
+                          <SelectItem value="evening">Evening</SelectItem>
+                          <SelectItem value="night">Night</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="avgImpressions">Avg Impressions</Label>
+                      <Input
+                        type="number"
+                        value={newAnalytics.avgImpressions}
+                        onChange={(e) => setNewAnalytics({...newAnalytics, avgImpressions: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="avgReach">Avg Reach</Label>
+                      <Input
+                        type="number"
+                        value={newAnalytics.avgReach}
+                        onChange={(e) => setNewAnalytics({...newAnalytics, avgReach: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="avgLikes">Avg Likes</Label>
+                      <Input
+                        type="number"
+                        value={newAnalytics.avgLikes}
+                        onChange={(e) => setNewAnalytics({...newAnalytics, avgLikes: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="avgComments">Avg Comments</Label>
+                      <Input
+                        type="number"
+                        value={newAnalytics.avgComments}
+                        onChange={(e) => setNewAnalytics({...newAnalytics, avgComments: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="avgShares">Avg Shares</Label>
+                      <Input
+                        type="number"
+                        value={newAnalytics.avgShares}
+                        onChange={(e) => setNewAnalytics({...newAnalytics, avgShares: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="avgEngagementRate">Engagement Rate (%)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={newAnalytics.avgEngagementRate}
+                        onChange={(e) => setNewAnalytics({...newAnalytics, avgEngagementRate: parseFloat(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="totalPosts">Total Posts</Label>
+                      <Input
+                        type="number"
+                        value={newAnalytics.totalPosts}
+                        onChange={(e) => setNewAnalytics({...newAnalytics, totalPosts: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setShowAnalyticsForm(false)}>Cancel</Button>
+                    <Button 
+                      onClick={() => createAnalyticsMutation.mutate(newAnalytics)}
+                      disabled={createAnalyticsMutation.isPending}
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Analytics
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Analytics Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Impressions</CardTitle>
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {performanceInsights.reduce((sum, p) => sum + p.avgImpressions, 0).toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground">Across all blocks</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Engagement</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {performanceInsights.reduce((sum, p) => sum + p.avgLikes + p.avgComments + p.avgShares, 0).toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground">Likes + Comments + Shares</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Avg Engagement Rate</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {performanceInsights.length > 0 
+                    ? (performanceInsights.reduce((sum, p) => sum + p.avgEngagementRate, 0) / performanceInsights.length / 100).toFixed(1)
+                    : '0.0'
+                  }%
+                </div>
+                <p className="text-xs text-muted-foreground">Average across platforms</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {performanceInsights.reduce((sum, p) => sum + p.totalPosts, 0)}
+                </div>
+                <p className="text-xs text-muted-foreground">All content pieces</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Performance Insights Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Performance Insights</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {performanceInsights.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Block</th>
+                        <th className="text-left p-2">Platform</th>
+                        <th className="text-left p-2">Day/Time</th>
+                        <th className="text-right p-2">Impressions</th>
+                        <th className="text-right p-2">Reach</th>
+                        <th className="text-right p-2">Engagement</th>
+                        <th className="text-right p-2">Rate</th>
+                        <th className="text-right p-2">Posts</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {performanceInsights.map((insight) => {
+                        const block = displayBlocks.find(b => b.id === insight.miniGameBlockId);
+                        return (
+                          <tr key={insight.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td className="p-2">
+                              <div className="flex items-center space-x-2">
+                                <span>{block?.icon || '📝'}</span>
+                                <span className="font-medium">{block?.title || 'Unknown Block'}</span>
+                              </div>
+                            </td>
+                            <td className="p-2 capitalize">{insight.platform}</td>
+                            <td className="p-2 capitalize">{insight.dayOfWeek} {insight.timeSlot}</td>
+                            <td className="p-2 text-right">{insight.avgImpressions.toLocaleString()}</td>
+                            <td className="p-2 text-right">{insight.avgReach.toLocaleString()}</td>
+                            <td className="p-2 text-right">{(insight.avgLikes + insight.avgComments + insight.avgShares).toLocaleString()}</td>
+                            <td className="p-2 text-right">{(insight.avgEngagementRate / 100).toFixed(1)}%</td>
+                            <td className="p-2 text-right">{insight.totalPosts}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <BarChart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 dark:text-gray-300">No analytics data yet</p>
+                  <p className="text-sm text-gray-500 mt-2">Add performance insights to see analytics</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
