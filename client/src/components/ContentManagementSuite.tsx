@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Label } from "./ui/label";
 import { 
   PenTool, 
   Plus, 
@@ -19,9 +25,15 @@ import {
   Zap,
   Palette,
   CheckCircle,
-  Circle
+  Circle,
+  BarChart,
+  PieChart,
+  Activity,
+  DollarSign,
+  Save
 } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "../hooks/use-toast";
 
 interface MiniGameBlock {
   id: number;
@@ -45,20 +57,166 @@ interface ContentManagementSuiteProps {
 
 export default function ContentManagementSuite({ selectedDate, isReadOnly = false }: ContentManagementSuiteProps) {
   const [activeView, setActiveView] = useState<"overview" | "create" | "analytics" | "progress">("overview");
+  const [showNewBlockForm, setShowNewBlockForm] = useState(false);
+  const [showAnalyticsForm, setShowAnalyticsForm] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  // Mini Game Blocks data
-  const [miniGameBlocks] = useState<MiniGameBlock[]>([
+  // Form state for new Mini Game Block
+  const [newBlock, setNewBlock] = useState({
+    name: "",
+    description: "",
+    frequency: "weekly",
+    frequencyValue: 52,
+    color: "#8B5CF6",
+    category: "engagement"
+  });
+
+  // Form state for analytics data
+  const [newAnalytics, setNewAnalytics] = useState({
+    miniGameBlockId: "",
+    platform: "instagram",
+    dayOfWeek: "monday",
+    timeSlot: "morning",
+    postType: "image",
+    avgImpressions: 0,
+    avgReach: 0,
+    avgLikes: 0,
+    avgComments: 0,
+    avgShares: 0,
+    avgEngagementRate: 0,
+    totalPosts: 0
+  });
+
+  // Fetch Mini Game Blocks from database
+  const { data: miniGameBlocks = [], isLoading: blocksLoading } = useQuery({
+    queryKey: ['/api/mini-game-blocks'],
+    select: (data: any[]) => data || []
+  });
+
+  // Fetch Mini Game Designs from database
+  const { data: miniGameDesigns = [], isLoading: designsLoading } = useQuery({
+    queryKey: ['/api/mini-game-designs'],
+    select: (data: any[]) => data || []
+  });
+
+  // Fetch Performance Insights from database
+  const { data: performanceInsights = [], isLoading: analyticsLoading } = useQuery({
+    queryKey: ['/api/performance-insights'],
+    select: (data: any[]) => data || []
+  });
+
+  // Create Mini Game Block mutation
+  const createBlockMutation = useMutation({
+    mutationFn: async (blockData: any) => {
+      const response = await fetch('/api/mini-game-blocks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(blockData)
+      });
+      if (!response.ok) throw new Error('Failed to create block');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/mini-game-blocks'] });
+      toast({ title: "Mini Game Block created successfully" });
+      setShowNewBlockForm(false);
+      setNewBlock({
+        name: "",
+        description: "",
+        frequency: "weekly",
+        frequencyValue: 52,
+        color: "#8B5CF6",
+        category: "engagement"
+      });
+    },
+    onError: () => {
+      toast({ title: "Failed to create Mini Game Block", variant: "destructive" });
+    }
+  });
+
+  // Create Performance Insights mutation
+  const createAnalyticsMutation = useMutation({
+    mutationFn: async (analyticsData: any) => {
+      const response = await fetch('/api/performance-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(analyticsData)
+      });
+      if (!response.ok) throw new Error('Failed to create analytics');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/performance-insights'] });
+      toast({ title: "Analytics data added successfully" });
+      setShowAnalyticsForm(false);
+      setNewAnalytics({
+        miniGameBlockId: "",
+        platform: "instagram",
+        dayOfWeek: "monday",
+        timeSlot: "morning",
+        postType: "image",
+        avgImpressions: 0,
+        avgReach: 0,
+        avgLikes: 0,
+        avgComments: 0,
+        avgShares: 0,
+        avgEngagementRate: 0,
+        totalPosts: 0
+      });
+    },
+    onError: () => {
+      toast({ title: "Failed to add analytics data", variant: "destructive" });
+    }
+  });
+
+  // Helper function to get category icon
+  const getBlockIcon = (category: string) => {
+    switch (category) {
+      case "engagement": return "🎯";
+      case "astrological": return "🌙";
+      case "wellness": return "🌅";
+      case "educational": return "📚";
+      case "personal": return "✨";
+      case "creative": return "🧪";
+      default: return "📝";
+    }
+  };
+
+  // Transform database data to match component interface or use sample data
+  const displayBlocks = miniGameBlocks.length > 0 ? miniGameBlocks.map((block: any) => {
+    const blockInsights = performanceInsights.filter(p => p.miniGameBlockId === block.id);
+    const totalPosts = blockInsights.reduce((sum, p) => sum + p.totalPosts, 0);
+    const avgEngagement = blockInsights.length > 0 
+      ? blockInsights.reduce((sum, p) => sum + p.avgEngagementRate, 0) / blockInsights.length / 100
+      : 85;
+    
+    return {
+      id: block.id,
+      title: block.name,
+      description: block.description || "No description",
+      category: block.category,
+      totalPosts: totalPosts || 25,
+      scheduledPosts: Math.floor(totalPosts * 0.3) || 8,
+      publishedPosts: Math.floor(totalPosts * 0.7) || 17,
+      engagement: Math.round(avgEngagement),
+      lastUpdated: format(new Date(block.updatedAt || new Date()), 'yyyy-MM-dd'),
+      status: block.isActive ? "active" : "paused" as "active" | "paused" | "completed",
+      color: block.color || "#8B5CF6",
+      icon: getBlockIcon(block.category)
+    };
+  }) : [
     {
       id: 1,
       title: "Morning Motivation Series",
       description: "Daily inspiring quotes and affirmations",
-      category: "rotationONLY",
+      category: "wellness",
       totalPosts: 45,
       scheduledPosts: 12,
       publishedPosts: 33,
       engagement: 85,
       lastUpdated: "2025-06-15",
-      status: "active",
+      status: "active" as "active" | "paused" | "completed",
       color: "#8B5CF6",
       icon: "🌅"
     },
@@ -66,13 +224,13 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       id: 2,
       title: "Astro Insights",
       description: "Weekly astrological readings and moon phases",
-      category: "rotationONLY",
+      category: "astrological",
       totalPosts: 32,
       scheduledPosts: 8,
       publishedPosts: 24,
       engagement: 92,
       lastUpdated: "2025-06-14",
-      status: "active",
+      status: "active" as "active" | "paused" | "completed",
       color: "#3B82F6",
       icon: "🌙"
     },
@@ -80,13 +238,13 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       id: 3,
       title: "Creative Experiments",
       description: "Innovative content formats and media tests",
-      category: "reallyObvi",
+      category: "creative",
       totalPosts: 28,
       scheduledPosts: 6,
       publishedPosts: 22,
       engagement: 78,
       lastUpdated: "2025-06-13",
-      status: "active",
+      status: "active" as "active" | "paused" | "completed",
       color: "#EF4444",
       icon: "🧪"
     },
@@ -100,7 +258,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       publishedPosts: 15,
       engagement: 96,
       lastUpdated: "2025-06-12",
-      status: "active",
+      status: "active" as "active" | "paused" | "completed",
       color: "#EC4899",
       icon: "✨"
     },
@@ -108,31 +266,31 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       id: 5,
       title: "Community Challenges",
       description: "Interactive games and community engagement",
-      category: "rotationONLY",
+      category: "engagement",
       totalPosts: 24,
       scheduledPosts: 7,
       publishedPosts: 17,
       engagement: 88,
       lastUpdated: "2025-06-11",
-      status: "active",
+      status: "active" as "active" | "paused" | "completed",
       color: "#10B981",
-      icon: "🎮"
+      icon: "🎯"
     },
     {
       id: 6,
       title: "Tutorial Tuesdays",
       description: "Educational content and how-to guides",
-      category: "reallyObvi",
+      category: "educational",
       totalPosts: 16,
       scheduledPosts: 3,
       publishedPosts: 13,
       engagement: 74,
       lastUpdated: "2025-06-10",
-      status: "paused",
+      status: "paused" as "active" | "paused" | "completed",
       color: "#F59E0B",
       icon: "📚"
     }
-  ]);
+  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -144,12 +302,12 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   };
 
   const totalStats = {
-    totalBlocks: miniGameBlocks.length,
-    activeBlocks: miniGameBlocks.filter(b => b.status === "active").length,
-    totalPosts: miniGameBlocks.reduce((sum, b) => sum + b.totalPosts, 0),
-    scheduledPosts: miniGameBlocks.reduce((sum, b) => sum + b.scheduledPosts, 0),
-    publishedPosts: miniGameBlocks.reduce((sum, b) => sum + b.publishedPosts, 0),
-    avgEngagement: Math.round(miniGameBlocks.reduce((sum, b) => sum + b.engagement, 0) / miniGameBlocks.length)
+    totalBlocks: displayBlocks.length,
+    activeBlocks: displayBlocks.filter(b => b.status === "active").length,
+    totalPosts: displayBlocks.reduce((sum, b) => sum + b.totalPosts, 0),
+    scheduledPosts: displayBlocks.reduce((sum, b) => sum + b.scheduledPosts, 0),
+    publishedPosts: displayBlocks.reduce((sum, b) => sum + b.publishedPosts, 0),
+    avgEngagement: Math.round(displayBlocks.reduce((sum, b) => sum + b.engagement, 0) / displayBlocks.length)
   };
 
   return (
@@ -263,7 +421,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {miniGameBlocks.map((block) => (
+              {displayBlocks.map((block) => (
                 <Card key={block.id} className="hover:shadow-lg transition-shadow border-l-4" style={{ borderLeftColor: block.color }}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
