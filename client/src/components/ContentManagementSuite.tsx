@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { Badge } from "./ui/badge";
 import { 
   PenTool, 
@@ -15,20 +13,25 @@ import {
   Image,
   Layout,
   Target,
-  Edit,
-  Trash2
+  TrendingUp,
+  Users,
+  Zap
 } from "lucide-react";
 import { format } from "date-fns";
 
-interface ContentItem {
+interface MiniGameBlock {
   id: number;
   title: string;
-  type: "blog" | "social" | "video" | "email";
-  status: "draft" | "review" | "scheduled" | "published";
-  platform: string;
-  scheduledDate?: string;
-  content: string;
-  createdAt: string;
+  description: string;
+  category: string;
+  totalPosts: number;
+  scheduledPosts: number;
+  publishedPosts: number;
+  engagement: number;
+  lastUpdated: string;
+  status: "active" | "paused" | "completed";
+  color: string;
+  icon: string;
 }
 
 interface ContentManagementSuiteProps {
@@ -37,96 +40,113 @@ interface ContentManagementSuiteProps {
 }
 
 export default function ContentManagementSuite({ selectedDate, isReadOnly = false }: ContentManagementSuiteProps) {
-  const [activeView, setActiveView] = useState<"overview" | "create" | "calendar">("overview");
-  const [showNewContentForm, setShowNewContentForm] = useState(false);
-  const [newContent, setNewContent] = useState({
-    title: "",
-    type: "social" as const,
-    platform: "instagram",
-    content: "",
-    scheduledDate: format(selectedDate, 'yyyy-MM-dd')
-  });
+  const [activeView, setActiveView] = useState<"overview" | "create" | "analytics">("overview");
 
-  // Sample content data
-  const [contentItems, setContentItems] = useState<ContentItem[]>([
+  // Mini Game Blocks data
+  const [miniGameBlocks] = useState<MiniGameBlock[]>([
     {
       id: 1,
-      title: "Morning Motivation Post",
-      type: "social",
-      status: "published",
-      platform: "Instagram",
-      content: "Start your week with intention and purpose...",
-      createdAt: "2025-06-15",
-      scheduledDate: "2025-06-16"
+      title: "Morning Motivation Series",
+      description: "Daily inspiring quotes and affirmations",
+      category: "rotationONLY",
+      totalPosts: 45,
+      scheduledPosts: 12,
+      publishedPosts: 33,
+      engagement: 85,
+      lastUpdated: "2025-06-15",
+      status: "active",
+      color: "#8B5CF6",
+      icon: "🌅"
     },
     {
       id: 2,
-      title: "Weekly Newsletter",
-      type: "email",
-      status: "draft",
-      platform: "Email",
-      content: "This week's insights and updates...",
-      createdAt: "2025-06-15"
+      title: "Astro Insights",
+      description: "Weekly astrological readings and moon phases",
+      category: "rotationONLY",
+      totalPosts: 32,
+      scheduledPosts: 8,
+      publishedPosts: 24,
+      engagement: 92,
+      lastUpdated: "2025-06-14",
+      status: "active",
+      color: "#3B82F6",
+      icon: "🌙"
     },
     {
       id: 3,
-      title: "Tutorial Video",
-      type: "video",
-      status: "review",
-      platform: "YouTube",
-      content: "How to create engaging content...",
-      createdAt: "2025-06-14"
+      title: "Creative Experiments",
+      description: "Innovative content formats and media tests",
+      category: "reallyObvi",
+      totalPosts: 28,
+      scheduledPosts: 6,
+      publishedPosts: 22,
+      engagement: 78,
+      lastUpdated: "2025-06-13",
+      status: "active",
+      color: "#EF4444",
+      icon: "🧪"
+    },
+    {
+      id: 4,
+      title: "Personal Stories",
+      description: "Behind-the-scenes and personal insights",
+      category: "personal",
+      totalPosts: 19,
+      scheduledPosts: 4,
+      publishedPosts: 15,
+      engagement: 96,
+      lastUpdated: "2025-06-12",
+      status: "active",
+      color: "#EC4899",
+      icon: "✨"
+    },
+    {
+      id: 5,
+      title: "Community Challenges",
+      description: "Interactive games and community engagement",
+      category: "rotationONLY",
+      totalPosts: 24,
+      scheduledPosts: 7,
+      publishedPosts: 17,
+      engagement: 88,
+      lastUpdated: "2025-06-11",
+      status: "active",
+      color: "#10B981",
+      icon: "🎮"
+    },
+    {
+      id: 6,
+      title: "Tutorial Tuesdays",
+      description: "Educational content and how-to guides",
+      category: "reallyObvi",
+      totalPosts: 16,
+      scheduledPosts: 3,
+      publishedPosts: 13,
+      engagement: 74,
+      lastUpdated: "2025-06-10",
+      status: "paused",
+      color: "#F59E0B",
+      icon: "📚"
     }
   ]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "draft": return "bg-gray-100 text-gray-800";
-      case "review": return "bg-yellow-100 text-yellow-800";
-      case "scheduled": return "bg-blue-100 text-blue-800";
-      case "published": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "active": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      case "paused": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+      case "completed": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      default: return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "blog": return <FileText className="h-4 w-4" />;
-      case "social": return <Image className="h-4 w-4" />;
-      case "video": return <Video className="h-4 w-4" />;
-      case "email": return <Layout className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
-    }
+  const totalStats = {
+    totalBlocks: miniGameBlocks.length,
+    activeBlocks: miniGameBlocks.filter(b => b.status === "active").length,
+    totalPosts: miniGameBlocks.reduce((sum, b) => sum + b.totalPosts, 0),
+    scheduledPosts: miniGameBlocks.reduce((sum, b) => sum + b.scheduledPosts, 0),
+    publishedPosts: miniGameBlocks.reduce((sum, b) => sum + b.publishedPosts, 0),
+    avgEngagement: Math.round(miniGameBlocks.reduce((sum, b) => sum + b.engagement, 0) / miniGameBlocks.length)
   };
-
-  const handleCreateContent = () => {
-    if (!newContent.title || !newContent.content) return;
-    
-    const content: ContentItem = {
-      id: contentItems.length + 1,
-      title: newContent.title,
-      type: newContent.type,
-      status: "draft",
-      platform: newContent.platform,
-      content: newContent.content,
-      scheduledDate: newContent.scheduledDate,
-      createdAt: format(new Date(), 'yyyy-MM-dd')
-    };
-
-    setContentItems([...contentItems, content]);
-    setNewContent({
-      title: "",
-      type: "social",
-      platform: "instagram",
-      content: "",
-      scheduledDate: format(selectedDate, 'yyyy-MM-dd')
-    });
-    setShowNewContentForm(false);
-  };
-
-  const todaysContent = contentItems.filter(item => 
-    item.scheduledDate === format(selectedDate, 'yyyy-MM-dd')
-  );
 
   return (
     <div className="space-y-6">
@@ -134,7 +154,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Content Studio</h2>
-          <p className="text-gray-600 dark:text-gray-300">Plan, create, and manage your content</p>
+          <p className="text-gray-600 dark:text-gray-300">Mini Game Blocks & Content Management</p>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -154,216 +174,158 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <span>Create</span>
           </Button>
           <Button
-            variant={activeView === "calendar" ? "default" : "outline"}
-            onClick={() => setActiveView("calendar")}
+            variant={activeView === "analytics" ? "default" : "outline"}
+            onClick={() => setActiveView("analytics")}
             className="flex items-center space-x-2"
           >
-            <Calendar className="h-4 w-4" />
-            <span>Calendar</span>
+            <TrendingUp className="h-4 w-4" />
+            <span>Analytics</span>
           </Button>
         </div>
       </div>
 
       {/* Overview */}
       {activeView === "overview" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="space-y-6">
           {/* Quick Stats */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Content Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">Total Content</span>
-                  <span className="font-semibold">{contentItems.length}</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 border-purple-200 dark:border-purple-700">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-purple-600 dark:text-purple-300">Active Blocks</p>
+                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-200">{totalStats.activeBlocks}</p>
+                  </div>
+                  <Zap className="h-8 w-8 text-purple-500" />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">Published</span>
-                  <span className="font-semibold text-green-600">
-                    {contentItems.filter(c => c.status === "published").length}
-                  </span>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-blue-200 dark:border-blue-700">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-blue-600 dark:text-blue-300">Total Posts</p>
+                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-200">{totalStats.totalPosts}</p>
+                  </div>
+                  <FileText className="h-8 w-8 text-blue-500" />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">Scheduled</span>
-                  <span className="font-semibold text-blue-600">
-                    {contentItems.filter(c => c.status === "scheduled").length}
-                  </span>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 border-green-200 dark:border-green-700">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-green-600 dark:text-green-300">Published</p>
+                    <p className="text-2xl font-bold text-green-700 dark:text-green-200">{totalStats.publishedPosts}</p>
+                  </div>
+                  <Eye className="h-8 w-8 text-green-500" />
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">In Review</span>
-                  <span className="font-semibold text-yellow-600">
-                    {contentItems.filter(c => c.status === "review").length}
-                  </span>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-r from-pink-50 to-pink-100 dark:from-pink-900 dark:to-pink-800 border-pink-200 dark:border-pink-700">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-pink-600 dark:text-pink-300">Avg Engagement</p>
+                    <p className="text-2xl font-bold text-pink-700 dark:text-pink-200">{totalStats.avgEngagement}%</p>
+                  </div>
+                  <Users className="h-8 w-8 text-pink-500" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Recent Content */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg">Recent Content</CardTitle>
-                {!isReadOnly && (
-                  <Button 
-                    onClick={() => setActiveView("create")}
-                    className="flex items-center space-x-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span>New Content</span>
-                  </Button>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {contentItems.slice(0, 5).map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <div className="flex items-center space-x-3">
-                        {getTypeIcon(item.type)}
+          {/* Mini Game Blocks Grid */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mini Game Blocks</h3>
+              {!isReadOnly && (
+                <Button className="flex items-center space-x-2">
+                  <Plus className="h-4 w-4" />
+                  <span>New Block</span>
+                </Button>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {miniGameBlocks.map((block) => (
+                <Card key={block.id} className="hover:shadow-lg transition-shadow border-l-4" style={{ borderLeftColor: block.color }}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-2xl">{block.icon}</span>
                         <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{item.title}</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">{item.platform}</p>
+                          <CardTitle className="text-base">{block.title}</CardTitle>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{block.category}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={getStatusColor(item.status)}>{item.status}</Badge>
-                        {item.scheduledDate && (
-                          <span className="text-xs text-gray-500">{item.scheduledDate}</span>
-                        )}
+                      <Badge className={getStatusColor(block.status)}>{block.status}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{block.description}</p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-300">Total Posts</span>
+                        <span className="font-semibold">{block.totalPosts}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-300">Published</span>
+                        <span className="font-semibold text-green-600">{block.publishedPosts}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-300">Scheduled</span>
+                        <span className="font-semibold text-blue-600">{block.scheduledPosts}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600 dark:text-gray-300">Engagement</span>
+                        <span className="font-semibold" style={{ color: block.color }}>{block.engagement}%</span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+
+                    <div className="pt-2 border-t">
+                      <p className="text-xs text-gray-500">Last updated: {block.lastUpdated}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Create Content */}
+      {/* Create New Block */}
       {activeView === "create" && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Create New Content</CardTitle>
+            <CardTitle className="text-lg">Create New Mini Game Block</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Title</label>
-                <Input
-                  value={newContent.title}
-                  onChange={(e) => setNewContent({...newContent, title: e.target.value})}
-                  placeholder="Content title"
-                  disabled={isReadOnly}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Type</label>
-                <select
-                  value={newContent.type}
-                  onChange={(e) => setNewContent({...newContent, type: e.target.value as any})}
-                  className="w-full p-2 border rounded-lg"
-                  disabled={isReadOnly}
-                >
-                  <option value="social">Social Media</option>
-                  <option value="blog">Blog Post</option>
-                  <option value="video">Video</option>
-                  <option value="email">Email</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Platform</label>
-                <Input
-                  value={newContent.platform}
-                  onChange={(e) => setNewContent({...newContent, platform: e.target.value})}
-                  placeholder="Instagram, YouTube, etc."
-                  disabled={isReadOnly}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Scheduled Date</label>
-                <Input
-                  type="date"
-                  value={newContent.scheduledDate}
-                  onChange={(e) => setNewContent({...newContent, scheduledDate: e.target.value})}
-                  disabled={isReadOnly}
-                />
-              </div>
+          <CardContent>
+            <div className="text-center py-8">
+              <PenTool className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-300">Block creation form would be here</p>
+              <p className="text-sm text-gray-500 mt-2">Connect to database to enable content creation</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Content</label>
-              <Textarea
-                value={newContent.content}
-                onChange={(e) => setNewContent({...newContent, content: e.target.value})}
-                placeholder="Write your content here..."
-                rows={6}
-                disabled={isReadOnly}
-              />
-            </div>
-            {!isReadOnly && (
-              <div className="flex space-x-2">
-                <Button onClick={handleCreateContent} className="flex items-center space-x-2">
-                  <Plus className="h-4 w-4" />
-                  <span>Create Content</span>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setNewContent({
-                    title: "",
-                    type: "social",
-                    platform: "instagram",
-                    content: "",
-                    scheduledDate: format(selectedDate, 'yyyy-MM-dd')
-                  })}
-                >
-                  Clear
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
 
-      {/* Calendar View */}
-      {activeView === "calendar" && (
+      {/* Analytics */}
+      {activeView === "analytics" && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Content Calendar - {format(selectedDate, 'MMMM d, yyyy')}</CardTitle>
+            <CardTitle className="text-lg">Content Analytics</CardTitle>
           </CardHeader>
           <CardContent>
-            {todaysContent.length > 0 ? (
-              <div className="space-y-3">
-                {todaysContent.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      {getTypeIcon(item.type)}
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{item.title}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{item.platform}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={getStatusColor(item.status)}>{item.status}</Badge>
-                      <Clock className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-300">No content scheduled for {format(selectedDate, 'MMMM d, yyyy')}</p>
-                {!isReadOnly && (
-                  <Button 
-                    onClick={() => setActiveView("create")} 
-                    className="mt-4"
-                  >
-                    Create Content for Today
-                  </Button>
-                )}
-              </div>
-            )}
+            <div className="text-center py-8">
+              <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-300">Detailed analytics would be displayed here</p>
+              <p className="text-sm text-gray-500 mt-2">Performance metrics and engagement insights</p>
+            </div>
           </CardContent>
         </Card>
       )}
