@@ -1232,6 +1232,40 @@ export class MemStorage implements IStorage {
     this.miniGameDesigns.delete(id);
   }
 
+  // Performance Insights methods
+  async getAllPerformanceInsights(): Promise<PerformanceInsight[]> {
+    return Array.from(this.performanceInsights.values());
+  }
+
+  async getPerformanceInsightsByBlock(blockId: number): Promise<PerformanceInsight[]> {
+    return Array.from(this.performanceInsights.values()).filter(insight => insight.miniGameBlockId === blockId);
+  }
+
+  async createPerformanceInsight(insight: InsertPerformanceInsight): Promise<PerformanceInsight> {
+    const newInsight: PerformanceInsight = {
+      id: this.currentId++,
+      ...insight,
+      lastUpdated: new Date()
+    };
+    this.performanceInsights.set(newInsight.id, newInsight);
+    return newInsight;
+  }
+
+  async updatePerformanceInsight(id: number, updates: Partial<PerformanceInsight>): Promise<PerformanceInsight> {
+    const insight = this.performanceInsights.get(id);
+    if (!insight) {
+      throw new Error("Performance insight not found");
+    }
+
+    const updated = { ...insight, ...updates, lastUpdated: new Date() };
+    this.performanceInsights.set(id, updated);
+    return updated;
+  }
+
+  async deletePerformanceInsight(id: number): Promise<void> {
+    this.performanceInsights.delete(id);
+  }
+
   // Moon phase calculation helpers
   private calculateMoonPhase(date: Date): string {
     // This is a simplified moon phase calculation

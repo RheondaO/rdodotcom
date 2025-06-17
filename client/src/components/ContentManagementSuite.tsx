@@ -472,7 +472,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       {activeView === "progress" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {miniGameBlocks.map((block) => (
+            {displayBlocks.map((block) => (
               <Card key={block.id} className="hover:shadow-lg transition-shadow border-l-4" style={{ borderLeftColor: block.color }}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -566,18 +566,157 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
       {/* Create New Block */}
       {activeView === "create" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Create New Mini Game Block</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <PenTool className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-300">Block creation form would be here</p>
-              <p className="text-sm text-gray-500 mt-2">Connect to database to enable content creation</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Create New Mini Game Block</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Block Name</Label>
+                  <Input
+                    placeholder="e.g., Morning Motivation Series"
+                    value={newBlock.name}
+                    onChange={(e) => setNewBlock({...newBlock, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Select value={newBlock.category} onValueChange={(value) => setNewBlock({...newBlock, category: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="engagement">Engagement</SelectItem>
+                      <SelectItem value="astrological">Astrological</SelectItem>
+                      <SelectItem value="wellness">Wellness</SelectItem>
+                      <SelectItem value="educational">Educational</SelectItem>
+                      <SelectItem value="personal">Personal</SelectItem>
+                      <SelectItem value="creative">Creative</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  placeholder="Describe the content theme and purpose..."
+                  value={newBlock.description}
+                  onChange={(e) => setNewBlock({...newBlock, description: e.target.value})}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="frequency">Frequency</Label>
+                  <Select value={newBlock.frequency} onValueChange={(value) => setNewBlock({...newBlock, frequency: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="lunar_full">Lunar (Full Moon)</SelectItem>
+                      <SelectItem value="lunar_new">Lunar (New Moon)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="frequencyValue">Posts Per Year</Label>
+                  <Input
+                    type="number"
+                    value={newBlock.frequencyValue}
+                    onChange={(e) => setNewBlock({...newBlock, frequencyValue: parseInt(e.target.value) || 52})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="color">Theme Color</Label>
+                  <Input
+                    type="color"
+                    value={newBlock.color}
+                    onChange={(e) => setNewBlock({...newBlock, color: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setNewBlock({
+                  name: "",
+                  description: "",
+                  frequency: "weekly",
+                  frequencyValue: 52,
+                  color: "#8B5CF6",
+                  category: "engagement"
+                })}>
+                  Reset
+                </Button>
+                <Button 
+                  onClick={() => createBlockMutation.mutate(newBlock)}
+                  disabled={createBlockMutation.isPending || !newBlock.name}
+                  className="flex items-center space-x-2"
+                >
+                  <Save className="h-4 w-4" />
+                  <span>Create Block</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Sample Data Seeding */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Sample Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                Add sample Mini Game Blocks to populate your Content Studio with demonstration data.
+              </p>
+              <Button 
+                onClick={() => {
+                  const sampleBlocks = [
+                    {
+                      name: "Morning Motivation Series",
+                      description: "Daily inspiring quotes and affirmations",
+                      frequency: "daily",
+                      frequencyValue: 365,
+                      color: "#8B5CF6",
+                      category: "wellness"
+                    },
+                    {
+                      name: "Astro Insights",
+                      description: "Weekly astrological readings and moon phases",
+                      frequency: "weekly",
+                      frequencyValue: 52,
+                      color: "#3B82F6",
+                      category: "astrological"
+                    },
+                    {
+                      name: "Creative Experiments",
+                      description: "Innovative content formats and media tests",
+                      frequency: "weekly",
+                      frequencyValue: 26,
+                      color: "#EF4444",
+                      category: "creative"
+                    }
+                  ];
+                  
+                  sampleBlocks.forEach(block => {
+                    createBlockMutation.mutate(block);
+                  });
+                }}
+                disabled={createBlockMutation.isPending}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Sample Blocks</span>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Analytics */}

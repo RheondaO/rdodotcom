@@ -514,6 +514,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Performance Insights
+  app.get("/api/performance-insights", async (req, res) => {
+    try {
+      const insights = await storage.getAllPerformanceInsights();
+      res.json(insights);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch performance insights" });
+    }
+  });
+
+  app.post("/api/performance-insights", async (req, res) => {
+    try {
+      const data = insertPerformanceInsightSchema.parse(req.body);
+      const insight = await storage.createPerformanceInsight(data);
+      res.json(insight);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid performance insight data" });
+    }
+  });
+
   // Moon Phase Scheduling
   app.post("/api/schedule-moon-phases", async (req, res) => {
     try {

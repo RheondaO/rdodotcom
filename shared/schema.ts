@@ -505,6 +505,11 @@ export const insertMiniGameDesignSchema = createInsertSchema(miniGameDesigns).om
   updatedAt: true,
 });
 
+export const insertPerformanceInsightSchema = createInsertSchema(performanceInsights).omit({
+  id: true,
+  lastUpdated: true,
+});
+
 export const insertAppProjectSchema = createInsertSchema(appProjects).omit({
   id: true,
   createdAt: true,
