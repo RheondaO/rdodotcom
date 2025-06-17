@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Progress } from "./ui/progress";
 import { 
   PenTool, 
   Plus, 
@@ -15,7 +16,10 @@ import {
   Target,
   TrendingUp,
   Users,
-  Zap
+  Zap,
+  Palette,
+  CheckCircle,
+  Circle
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -40,7 +44,7 @@ interface ContentManagementSuiteProps {
 }
 
 export default function ContentManagementSuite({ selectedDate, isReadOnly = false }: ContentManagementSuiteProps) {
-  const [activeView, setActiveView] = useState<"overview" | "create" | "analytics">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "create" | "analytics" | "progress">("overview");
 
   // Mini Game Blocks data
   const [miniGameBlocks] = useState<MiniGameBlock[]>([
@@ -174,6 +178,14 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <span>Create</span>
           </Button>
           <Button
+            variant={activeView === "progress" ? "default" : "outline"}
+            onClick={() => setActiveView("progress")}
+            className="flex items-center space-x-2"
+          >
+            <Palette className="h-4 w-4" />
+            <span>Design Progress</span>
+          </Button>
+          <Button
             variant={activeView === "analytics" ? "default" : "outline"}
             onClick={() => setActiveView("analytics")}
             className="flex items-center space-x-2"
@@ -294,6 +306,102 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 </Card>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Design Progress */}
+      {activeView === "progress" && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {miniGameBlocks.map((block) => (
+              <Card key={block.id} className="hover:shadow-lg transition-shadow border-l-4" style={{ borderLeftColor: block.color }}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-2xl">{block.icon}</span>
+                      <div>
+                        <CardTitle className="text-base">{block.title}</CardTitle>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{block.category}</p>
+                      </div>
+                    </div>
+                    <Badge className={getStatusColor(block.status)}>{block.status}</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    {/* Design Progress Stages */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Concept</span>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '100%' }}></div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Design</span>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '100%' }}></div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Content Creation</span>
+                        <Circle className="h-4 w-4 text-blue-500" />
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${Math.min(85, (block.publishedPosts / block.totalPosts) * 100)}%` }}></div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Scheduling</span>
+                        <Circle className="h-4 w-4 text-yellow-500" />
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${(block.scheduledPosts / block.totalPosts) * 100}%` }}></div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Publishing</span>
+                        <Circle className="h-4 w-4 text-purple-500" />
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(block.publishedPosts / block.totalPosts) * 100}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-300">Overall Progress</span>
+                      <span className="font-semibold" style={{ color: block.color }}>
+                        {Math.round((block.publishedPosts / block.totalPosts) * 100)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+                      <div 
+                        className="h-3 rounded-full transition-all duration-500" 
+                        style={{ 
+                          width: `${(block.publishedPosts / block.totalPosts) * 100}%`,
+                          backgroundColor: block.color 
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       )}
