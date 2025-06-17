@@ -363,10 +363,10 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-purple-600 dark:text-purple-300">Active Blocks</p>
-                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-200">{totalStats.activeBlocks}</p>
+                    <p className="text-sm text-purple-600 dark:text-purple-300">Mini Game Blocks</p>
+                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-200">{totalStats.totalBlocks}</p>
                   </div>
-                  <Zap className="h-8 w-8 text-purple-500" />
+                  <Layout className="h-8 w-8 text-purple-500" />
                 </div>
               </CardContent>
             </Card>
@@ -375,7 +375,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-blue-600 dark:text-blue-300">Total Posts</p>
+                    <p className="text-sm text-blue-600 dark:text-blue-300">Content Pieces</p>
                     <p className="text-2xl font-bold text-blue-700 dark:text-blue-200">{totalStats.totalPosts}</p>
                   </div>
                   <FileText className="h-8 w-8 text-blue-500" />
@@ -387,7 +387,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-green-600 dark:text-green-300">Published</p>
+                    <p className="text-sm text-green-600 dark:text-green-300">Published Content</p>
                     <p className="text-2xl font-bold text-green-700 dark:text-green-200">{totalStats.publishedPosts}</p>
                   </div>
                   <Eye className="h-8 w-8 text-green-500" />
@@ -399,21 +399,73 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-pink-600 dark:text-pink-300">Avg Engagement</p>
-                    <p className="text-2xl font-bold text-pink-700 dark:text-pink-200">{totalStats.avgEngagement}%</p>
+                    <p className="text-sm text-pink-600 dark:text-pink-300">Scheduled Posts</p>
+                    <p className="text-2xl font-bold text-pink-700 dark:text-pink-200">{totalStats.scheduledPosts}</p>
                   </div>
-                  <Users className="h-8 w-8 text-pink-500" />
+                  <Calendar className="h-8 w-8 text-pink-500" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
+          {/* Content Pipeline Status */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Content Production Pipeline</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Concept & Design</span>
+                    <span className="text-sm text-gray-500">{displayBlocks.filter(b => b.status === "active").length} active</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-blue-500 h-3 rounded-full transition-all duration-500" 
+                      style={{ width: '85%' }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Content Creation</span>
+                    <span className="text-sm text-gray-500">{Math.round((totalStats.publishedPosts / totalStats.totalPosts) * 100)}% complete</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-green-500 h-3 rounded-full transition-all duration-500" 
+                      style={{ width: `${(totalStats.publishedPosts / totalStats.totalPosts) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Publishing & Analytics</span>
+                    <span className="text-sm text-gray-500">{performanceInsights.length} data points</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-purple-500 h-3 rounded-full transition-all duration-500" 
+                      style={{ width: performanceInsights.length > 0 ? '70%' : '5%' }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Mini Game Blocks Grid */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mini Game Blocks</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Content Blocks</h3>
               {!isReadOnly && (
-                <Button className="flex items-center space-x-2">
+                <Button 
+                  onClick={() => setActiveView("create")}
+                  className="flex items-center space-x-2"
+                >
                   <Plus className="h-4 w-4" />
                   <span>New Block</span>
                 </Button>
