@@ -217,17 +217,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         dateFound: "2025-06-03",
         resolution: "",
         testSteps: ["Navigate on mobile", "Check menu accessibility", "Verify responsive design"]
-      },
-      {
-        id: 2,
-        area: "Visual Design",
-        issue: "Color contrast insufficient for accessibility",
-        severity: "high",
-        project: "Really Obvious Media Lab",
-        status: "in_progress",
-        dateFound: "2025-06-01",
-        resolution: "Updating color palette to meet WCAG guidelines",
-        testSteps: ["Run accessibility audit", "Test with color blindness simulator", "Verify contrast ratios"]
       }
     ],
     oversights: [
@@ -240,25 +229,19 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         priority: "high",
         discoveredDuring: "Manual testing",
         solution: "Implement next/image or similar optimization"
-      },
-      {
-        id: 2,
-        category: "SEO",
-        description: "Meta descriptions missing on key pages",
-        impact: "Poor search engine visibility",
-        project: "Really Obvious Media Lab",
-        priority: "medium",
-        discoveredDuring: "SEO audit",
-        solution: "Add dynamic meta descriptions"
       }
     ],
     testChecklist: [
-      { category: "Functionality", items: ["All forms submit correctly", "Navigation works on all pages", "Search functionality accurate", "User authentication secure"] },
-      { category: "Design", items: ["Responsive on all devices", "Color contrast accessible", "Typography consistent", "Loading states present"] },
-      { category: "Performance", items: ["Page load under 3 seconds", "Images optimized", "Code minified", "CDN implemented"] },
-      { category: "SEO", items: ["Meta tags complete", "Alt text on images", "Structured data", "Sitemap generated"] },
-      { category: "Accessibility", items: ["Keyboard navigation", "Screen reader compatible", "Focus indicators", "ARIA labels"] },
-      { category: "Security", items: ["HTTPS enabled", "Input validation", "XSS protection", "Data encryption"] }
+      { 
+        category: "Test Results", 
+        items: [
+          { name: "Mobile navigation works correctly", status: "Failed" },
+          { name: "Project showcase loads properly", status: "Passed" },
+          { name: "Contact form submits successfully", status: "Pending" },
+          { name: "Page load time under 3 seconds", status: "Pending" },
+          { name: "SEO meta tags complete", status: "Pending" }
+        ]
+      }
     ]
   };
 
