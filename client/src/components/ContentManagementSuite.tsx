@@ -782,7 +782,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Analytics Dashboard</h3>
             <Dialog open={showAnalyticsForm} onOpenChange={setShowAnalyticsForm}>
               <DialogTrigger asChild>
-                <Button className="flex items-center space-x-2">
+                <Button className="flex items-center space-x-2" disabled={!user}>
                   <Plus className="h-4 w-4" />
                   <span>Add Analytics Data</span>
                 </Button>
