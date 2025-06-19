@@ -179,15 +179,15 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
                   key={action.key}
                   onClick={() => onNavigate(action.key)}
                   variant="outline"
-                  className="h-auto p-4 text-left border-pink-100 hover:bg-pink-50 dark:border-purple-800 dark:hover:bg-purple-900 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                  className="h-auto p-4 text-left border-pink-100 hover:bg-pink-50 dark:border-purple-800 dark:hover:bg-purple-900 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group"
                 >
                   <div className="flex items-start space-x-3 w-full">
-                    <div className="w-10 h-10 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-sm">
+                    <div className="w-10 h-10 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
                       <Icon className="h-5 w-5 text-white" />
                     </div>
-                    <div className="flex-1 text-left">
-                      <div className="font-medium text-gray-900 dark:text-white">{action.label}</div>
-                      <div className="text-sm text-muted-foreground dark:text-gray-400 mt-1">{action.description}</div>
+                    <div className="flex-1 text-left min-w-0">
+                      <div className="font-medium text-gray-900 dark:text-white break-words leading-tight mb-1">{action.label}</div>
+                      <div className="text-sm text-muted-foreground dark:text-gray-400 break-words leading-relaxed">{action.description}</div>
                     </div>
                   </div>
                 </Button>
@@ -207,16 +207,16 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
           {siteMapSections.map((section) => {
             const CategoryIcon = section.icon;
             return (
-              <Card key={section.category} className="border-pink-100 dark:border-purple-800 shadow-lg hover:shadow-xl transition-all duration-200">
-                <CardHeader>
+              <Card key={section.category} className="border-pink-100 dark:border-purple-800 shadow-lg hover:shadow-xl transition-all duration-200 min-h-[200px]">
+                <CardHeader className="pb-4">
                   <CardTitle className="text-lg font-heading text-pink-600 dark:text-pink-400 flex items-center gap-3">
-                    <div className={`w-8 h-8 bg-gradient-to-r ${section.color} rounded-lg flex items-center justify-center shadow-sm`}>
-                      <CategoryIcon className="h-4 w-4 text-white" />
+                    <div className={`w-10 h-10 bg-gradient-to-r ${section.color} rounded-lg flex items-center justify-center shadow-sm flex-shrink-0`}>
+                      <CategoryIcon className="h-5 w-5 text-white" />
                     </div>
-                    {section.category}
+                    <span className="break-words leading-tight">{section.category}</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 pt-0">
                   {section.items.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -224,15 +224,15 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
                         key={item.key}
                         onClick={() => onNavigate(item.key)}
                         variant="ghost"
-                        className="w-full h-auto p-4 text-left hover:bg-pink-50 dark:hover:bg-purple-900 rounded-xl transition-all duration-200 justify-start"
+                        className="w-full h-auto p-4 text-left hover:bg-pink-50 dark:hover:bg-purple-900 rounded-xl transition-all duration-200 justify-start group"
                       >
                         <div className="flex items-start space-x-3 w-full">
-                          <div className="w-8 h-8 bg-gradient-to-r from-pink-200 to-purple-200 dark:from-pink-800 dark:to-purple-800 rounded-lg flex items-center justify-center shadow-sm">
-                            <Icon className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                          <div className="w-10 h-10 bg-gradient-to-r from-pink-200 to-purple-200 dark:from-pink-800 dark:to-purple-800 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
+                            <Icon className="h-5 w-5 text-pink-600 dark:text-pink-400" />
                           </div>
-                          <div className="flex-1 text-left">
-                            <div className="font-medium text-gray-900 dark:text-white">{item.label}</div>
-                            <div className="text-sm text-muted-foreground dark:text-gray-400 mt-1">{item.description}</div>
+                          <div className="flex-1 text-left min-w-0">
+                            <div className="font-medium text-gray-900 dark:text-white break-words leading-tight mb-1">{item.label}</div>
+                            <div className="text-sm text-muted-foreground dark:text-gray-400 break-words leading-relaxed">{item.description}</div>
                           </div>
                         </div>
                       </Button>
