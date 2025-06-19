@@ -185,9 +185,9 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
                     <div className="w-10 h-10 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
                       <Icon className="h-5 w-5 text-white" />
                     </div>
-                    <div className="flex-1 text-left min-w-0">
-                      <div className="font-medium text-gray-900 dark:text-white break-words leading-tight mb-1">{action.label}</div>
-                      <div className="text-sm text-muted-foreground dark:text-gray-400 break-words leading-relaxed">{action.description}</div>
+                    <div className="flex-1 text-left min-w-0 pr-2">
+                      <div className="font-medium text-gray-900 dark:text-white break-words hyphens-auto leading-tight mb-1">{action.label}</div>
+                      <div className="text-sm text-muted-foreground dark:text-gray-400 break-words hyphens-auto leading-relaxed whitespace-normal">{action.description}</div>
                     </div>
                   </div>
                 </Button>
@@ -230,9 +230,9 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
                           <div className="w-10 h-10 bg-gradient-to-r from-pink-200 to-purple-200 dark:from-pink-800 dark:to-purple-800 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
                             <Icon className="h-5 w-5 text-pink-600 dark:text-pink-400" />
                           </div>
-                          <div className="flex-1 text-left min-w-0">
-                            <div className="font-medium text-gray-900 dark:text-white break-words leading-tight mb-1">{item.label}</div>
-                            <div className="text-sm text-muted-foreground dark:text-gray-400 break-words leading-relaxed">{item.description}</div>
+                          <div className="flex-1 text-left min-w-0 pr-2">
+                            <div className="font-medium text-gray-900 dark:text-white break-words hyphens-auto leading-tight mb-1">{item.label}</div>
+                            <div className="text-sm text-muted-foreground dark:text-gray-400 break-words hyphens-auto leading-relaxed whitespace-normal">{item.description}</div>
                           </div>
                         </div>
                       </Button>
