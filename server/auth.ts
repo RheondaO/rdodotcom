@@ -11,7 +11,7 @@ export interface AuthenticatedRequest extends Request {
 
 // Simple admin credentials - in production, use proper authentication
 const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'your-secure-password-here'; // Change this to a secure password
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
 export const authenticateUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
