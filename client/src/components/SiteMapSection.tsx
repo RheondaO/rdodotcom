@@ -80,12 +80,11 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       ]
     },
     {
-      category: "Health & Wellness",
-      icon: Heart,
-      color: "from-red-400 to-pink-500",
+      category: "Content Studio",
+      icon: Moon,
+      color: "from-purple-400 to-indigo-500",
       items: [
-        { key: "health", label: "Health Tracking", icon: Heart, description: "Basic health metrics and wellness" },
-        { key: "habits", label: "Habits & Mood", icon: Zap, description: "Daily habits, mood, and energy tracking" }
+        { key: "content", label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio", icon: Moon, description: "Astrological content management and mini-game design studio" }
       ]
     },
     {
@@ -93,9 +92,17 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       icon: Target,
       color: "from-blue-400 to-indigo-500",
       items: [
-        { key: "productivity", label: "Work & Time", icon: Briefcase, description: "Work hours, focus sessions, and time blocks" },
         { key: "goals", label: "Goals & Achievements", icon: Target, description: "Personal and professional goal tracking" },
+        { key: "productivity", label: "Work & Time", icon: Briefcase, description: "Work hours, focus sessions, and time blocks" },
         { key: "reports", label: "Reports & Analytics", icon: BarChart3, description: "Progress reports and data insights" }
+      ]
+    },
+    {
+      category: "Lifestyle & Planning",
+      icon: ShoppingCart,
+      color: "from-orange-400 to-amber-500",
+      items: [
+        { key: "groceries", label: "Grocery Management", icon: ShoppingCart, description: "Shopping lists and meal planning" }
       ]
     },
     {
@@ -107,20 +114,12 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       ]
     },
     {
-      category: "Lifestyle & Planning",
-      icon: ShoppingCart,
-      color: "from-orange-400 to-amber-500",
+      category: "Health & Wellness",
+      icon: Heart,
+      color: "from-red-400 to-pink-500",
       items: [
-        { key: "groceries", label: "Grocery Management", icon: ShoppingCart, description: "Shopping lists and meal planning" },
-        { key: "content", label: "Content Creation", icon: PenTool, description: "Content planning and scheduling" }
-      ]
-    },
-    {
-      category: "Brand Management",
-      icon: Moon,
-      color: "from-purple-400 to-indigo-500",
-      items: [
-        { key: "rotationonly", label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine", icon: Moon, description: "Astrological content and mini-game design studio" }
+        { key: "habits", label: "Habits & Mood", icon: Zap, description: "Daily habits, mood, and energy tracking" },
+        { key: "health", label: "Health Tracking", icon: Heart, description: "Basic health metrics and wellness" }
       ]
     },
     {
@@ -140,7 +139,7 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
     { key: "finances", label: "Add Expense", icon: Receipt, description: "Log a new expense or transaction" },
     { key: "groceries", label: "Create Shopping List", icon: List, description: "Plan your next grocery trip" },
     { key: "goals", label: "Update Goals", icon: TrendingUp, description: "Track progress on your goals" },
-    { key: "rotationonly", label: "Design Mini-Game", icon: Moon, description: "Create content for 𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine" }
+    { key: "content", label: "Design Mini-Game", icon: Moon, description: "Create content for 𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio" }
   ];
 
   return (
