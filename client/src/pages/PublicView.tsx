@@ -93,7 +93,7 @@ export default function PublicView() {
       </header>
 
       {/* Inspirational Quote - Hero */}
-      <section className="py-16">
+      <section className="py-8">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <div className="relative bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-pink-200/50 dark:border-pink-800/50">
             <div className="absolute top-4 left-6 text-pink-300 dark:text-pink-400">
@@ -107,14 +107,14 @@ export default function PublicView() {
               </svg>
             </div>
             <blockquote className="relative">
-              <div className="text-6xl text-pink-200/50 dark:text-pink-700/50 absolute -top-2 -left-2 font-serif italic">"</div>
-              <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-200 leading-relaxed px-8 relative z-10 italic">
+              <div className="text-5xl text-pink-200/50 dark:text-pink-700/50 absolute -top-1 -left-1 font-serif italic">"</div>
+              <p className="text-lg md:text-xl font-light text-gray-700 dark:text-gray-200 leading-relaxed px-8 relative z-10" style={{ fontFamily: 'cursive' }}>
                 What gets measured gets improved
               </p>
-              <div className="text-6xl text-pink-200/50 dark:text-pink-700/50 absolute -bottom-4 -right-2 font-serif italic">"</div>
+              <div className="text-5xl text-pink-200/50 dark:text-pink-700/50 absolute -bottom-2 -right-1 font-serif italic">"</div>
             </blockquote>
-            <footer className="mt-10">
-              <cite className="text-lg text-pink-600 dark:text-pink-400 font-medium tracking-wide">
+            <footer className="mt-4">
+              <cite className="text-sm text-pink-600 dark:text-pink-400 font-medium tracking-wide">
                 — Peter Drucker
               </cite>
             </footer>
@@ -128,7 +128,7 @@ export default function PublicView() {
       </section>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-6 py-6">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-8 leading-relaxed py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
