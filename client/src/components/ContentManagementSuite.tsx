@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "../hooks/use-toast";
+import { useAuth } from "../hooks/useAuth";
 
 interface MiniGameBlock {
   id: number;
@@ -61,6 +62,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   const [showAnalyticsForm, setShowAnalyticsForm] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Form state for new Mini Game Block
   const [newBlock, setNewBlock] = useState({
@@ -331,6 +333,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             variant={activeView === "create" ? "default" : "outline"}
             onClick={() => setActiveView("create")}
             className="flex items-center space-x-2"
+            disabled={!user}
           >
             <PenTool className="h-4 w-4" />
             <span>Create</span>
