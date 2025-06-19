@@ -66,7 +66,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     { key: "goals" as ViewType, label: "Goals", icon: Target },
     { key: "groceries" as ViewType, label: "Shopping", icon: ShoppingCart },
     { key: "finances" as ViewType, label: "Finances", icon: DollarSign },
-    { key: "content" as ViewType, label: "Social Media", icon: PenTool },
+    { key: "content" as ViewType, label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio", icon: PenTool },
     { key: "habits" as ViewType, label: "Habits", icon: Zap },
     { key: "health" as ViewType, label: "Health", icon: Heart },
     { key: "productivity" as ViewType, label: "Productivity", icon: Briefcase },
