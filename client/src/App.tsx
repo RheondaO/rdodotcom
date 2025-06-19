@@ -46,9 +46,6 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Switch>
-          <Route path="/www.rheondadotogletree.com">
-            <PublicView />
-          </Route>
           <Route path="/dashboard">
             <Dashboard />
           </Route>
