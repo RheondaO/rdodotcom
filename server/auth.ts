@@ -50,22 +50,39 @@ export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: Nex
 export const adminLogin = (req: AuthenticatedRequest, res: Response) => {
   const { username, password } = req.body;
 
+  // Log authentication attempt (without exposing password)
+  console.log(`Authentication attempt for user: ${username}`);
+  console.log(`ADMIN_PASSWORD configured: ${!!ADMIN_PASSWORD}`);
+  console.log(`Session available: ${!!(req as any).session}`);
+
+  if (!ADMIN_PASSWORD) {
+    console.error('ADMIN_PASSWORD environment variable not set');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    (req as any).session.isAuthenticated = true;
-    (req as any).session.isAdmin = true;
-    (req as any).session.username = username;
-    
-    res.json({ 
-      success: true, 
-      message: 'Admin login successful',
-      user: {
-        id: 'admin',
-        name: 'Admin User',
-        username: 'admin',
-        profileImage: ''
-      }
-    });
+    try {
+      (req as any).session.isAuthenticated = true;
+      (req as any).session.isAdmin = true;
+      (req as any).session.username = username;
+      
+      console.log('Admin login successful');
+      res.json({ 
+        success: true, 
+        message: 'Admin login successful',
+        user: {
+          id: 'admin',
+          name: 'Admin User',
+          username: 'admin',
+          profileImage: ''
+        }
+      });
+    } catch (error) {
+      console.error('Session error during login:', error);
+      res.status(500).json({ error: 'Session error' });
+    }
   } else {
+    console.log('Invalid credentials provided');
     res.status(401).json({ error: 'Invalid credentials' });
   }
 };
