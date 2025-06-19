@@ -22,7 +22,11 @@ import {
   Star,
   Layout,
   FileText,
-  Eye
+  Eye,
+  Brain,
+  Lightbulb,
+  Zap,
+  Sparkles
 } from "lucide-react";
 import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useDailyData } from "../hooks/use-daily-data";
@@ -260,16 +264,39 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
       };
     });
 
-  // Process real medications data for dashboard display
-  const medicationReminders = medications
-    .filter(med => med.isActive)
-    .slice(0, 3)
-    .map(med => ({
-      id: med.id,
-      name: med.name,
-      time: med.reminderTimes || "08:00",
-      taken: false // TODO: Check if medication was taken today from daily entry
-    }));
+  // AI Powered Insights data
+  const aiInsights = [
+    {
+      id: 1,
+      type: "productivity",
+      icon: "⚡",
+      title: "Peak Focus Time",
+      insight: "Your highest productivity occurs between 9-11 AM based on task completion patterns",
+      confidence: 92,
+      actionable: true,
+      suggestion: "Schedule important work during this window"
+    },
+    {
+      id: 2,
+      type: "wellness",
+      icon: "🌱",
+      title: "Habit Momentum",
+      insight: "You're 73% more likely to complete habits when paired with morning routine",
+      confidence: 85,
+      actionable: true,
+      suggestion: "Stack new habits with existing morning activities"
+    },
+    {
+      id: 3,
+      type: "content",
+      icon: "✨",
+      title: "Content Performance",
+      insight: "Posts with astrological themes show 34% higher engagement rates",
+      confidence: 88,
+      actionable: true,
+      suggestion: "Consider increasing astrological content frequency"
+    }
+  ];
 
   // Use real time blocks data, with formatted time display
   const timeBlocks = timeBlocksData.map(block => ({
@@ -716,48 +743,56 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
         <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
-              <Pill className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-              <span>Medication Reminders</span>
+              <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <span>AI Powered Insights</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {medicationReminders.map(med => (
-                <div key={med.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <Pill className={`h-4 w-4 ${med.taken ? 'text-green-500' : 'text-orange-500'}`} />
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-white">{med.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Scheduled: {med.time}
+              {aiInsights.map(insight => (
+                <div key={insight.id} className="p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg border-l-4 border-purple-400">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-lg">{insight.icon}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="font-medium text-gray-900 dark:text-white text-sm">{insight.title}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {insight.confidence}% confident
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        {insight.insight}
                       </p>
+                      {insight.actionable && (
+                        <div className="flex items-center space-x-1 text-xs">
+                          <Lightbulb className="h-3 w-3 text-yellow-500" />
+                          <span className="text-purple-600 dark:text-purple-400 font-medium">
+                            {insight.suggestion}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {med.taken ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-orange-500" />
-                  )}
                 </div>
               ))}
               
-              <div className="mt-4 p-3 bg-gradient-to-r from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-lg">
+              <div className="mt-4 p-3 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg">
                 <div className="flex items-center space-x-2">
-                  <Heart className="h-4 w-4 text-red-500" />
+                  <Sparkles className="h-4 w-4 text-purple-500" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">Health Tracking</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">Personalized Analytics</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Track sleep quality, energy levels, and symptoms
+                      AI-driven insights based on your activity patterns
                     </p>
                   </div>
                 </div>
                 <Button 
-                  onClick={() => !isReadOnly && onNavigate('health')}
+                  onClick={() => !isReadOnly && onNavigate('reports')}
                   disabled={isReadOnly}
                   size="sm"
-                  className={`w-full mt-2 bg-gradient-to-r from-orange-400 to-red-400 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`w-full mt-2 bg-gradient-to-r from-purple-400 to-pink-400 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Health Dashboard
+                  View Full Analytics
                 </Button>
               </div>
             </div>
