@@ -96,7 +96,7 @@ export default function PublicView() {
       <main className="max-w-6xl mx-auto px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-8 leading-relaxed py-2 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
             Building My Productivity Journey
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
@@ -112,6 +112,24 @@ export default function PublicView() {
               <ExternalLink className="mr-2 h-4 w-4" />
               {isAuthenticated && isAdmin ? 'Go to Dashboard' : 'Follow My Journey'}
             </Button>
+          </div>
+        </div>
+
+        {/* Inspirational Quote */}
+        <div className="text-center mb-16">
+          <div className="max-w-4xl mx-auto">
+            <blockquote className="relative">
+              <div className="text-6xl text-purple-200 dark:text-purple-700 absolute -top-4 -left-4">"</div>
+              <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-300 italic leading-relaxed px-8">
+                What gets measured gets improved
+              </p>
+              <div className="text-6xl text-purple-200 dark:text-purple-700 absolute -bottom-8 -right-4">"</div>
+            </blockquote>
+            <footer className="mt-8">
+              <cite className="text-lg text-purple-600 dark:text-purple-400 font-medium">
+                — Peter Drucker
+              </cite>
+            </footer>
           </div>
         </div>
 
