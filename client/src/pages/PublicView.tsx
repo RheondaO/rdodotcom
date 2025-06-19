@@ -92,6 +92,41 @@ export default function PublicView() {
         </div>
       </header>
 
+      {/* Inspirational Quote - Hero */}
+      <section className="py-16">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <div className="relative bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-pink-200/50 dark:border-pink-800/50">
+            <div className="absolute top-4 left-6 text-pink-300 dark:text-pink-400">
+              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
+              </svg>
+            </div>
+            <div className="absolute top-4 right-6 text-purple-300 dark:text-purple-400">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+              </svg>
+            </div>
+            <blockquote className="relative">
+              <div className="text-6xl text-pink-200/50 dark:text-pink-700/50 absolute -top-2 -left-2 font-serif italic">"</div>
+              <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-200 leading-relaxed px-8 relative z-10 italic">
+                What gets measured gets improved
+              </p>
+              <div className="text-6xl text-pink-200/50 dark:text-pink-700/50 absolute -bottom-4 -right-2 font-serif italic">"</div>
+            </blockquote>
+            <footer className="mt-10">
+              <cite className="text-lg text-pink-600 dark:text-pink-400 font-medium tracking-wide">
+                — Peter Drucker
+              </cite>
+            </footer>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              <div className="w-2 h-2 bg-pink-300 dark:bg-pink-600 rounded-full"></div>
+              <div className="w-2 h-2 bg-purple-300 dark:bg-purple-600 rounded-full"></div>
+              <div className="w-2 h-2 bg-rose-300 dark:bg-rose-600 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-12">
         {/* Hero Section */}
@@ -101,7 +136,7 @@ export default function PublicView() {
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
             Welcome to my personal productivity dashboard where I track goals, habits, content creation, 
-            and share my journey of building better systems for life and work.
+            and share my journey of building better systems for life, work, and play.
           </p>
           <div className="flex justify-center space-x-4">
             <Button 
@@ -112,24 +147,6 @@ export default function PublicView() {
               <ExternalLink className="mr-2 h-4 w-4" />
               {isAuthenticated && isAdmin ? 'Go to Dashboard' : 'Follow My Journey'}
             </Button>
-          </div>
-        </div>
-
-        {/* Inspirational Quote */}
-        <div className="text-center mb-16">
-          <div className="max-w-4xl mx-auto">
-            <blockquote className="relative">
-              <div className="text-6xl text-purple-200 dark:text-purple-700 absolute -top-4 -left-4">"</div>
-              <p className="text-2xl md:text-3xl font-light text-gray-700 dark:text-gray-300 italic leading-relaxed px-8">
-                What gets measured gets improved
-              </p>
-              <div className="text-6xl text-purple-200 dark:text-purple-700 absolute -bottom-8 -right-4">"</div>
-            </blockquote>
-            <footer className="mt-8">
-              <cite className="text-lg text-purple-600 dark:text-purple-400 font-medium">
-                — Peter Drucker
-              </cite>
-            </footer>
           </div>
         </div>
 
