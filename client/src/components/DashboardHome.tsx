@@ -367,7 +367,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
 
   const getContextualGreeting = () => {
     if (isToday(selectedDate)) return getGreeting();
-    if (isYesterday(selectedDate)) return "Yesterday's Journey 📝";
+    if (isYesterday(selectedDate)) return "Yesterday's Journey ✓";
     if (isTomorrow(selectedDate)) return "Tomorrow's Plan 🚀";
     return "Day Overview 📊";
   };
