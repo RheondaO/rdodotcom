@@ -57,7 +57,7 @@ function Dashboard() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/status'] });
       setTimeout(() => {
-        window.location.href = '/public-view';
+        window.location.href = '/';
       }, 1000);
     },
     onError: () => {
@@ -206,7 +206,7 @@ function Dashboard() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => window.location.href = '/public-view'}
+                  onClick={() => window.location.href = '/www.rheondadotogletree.com'}
                   className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 dark:text-gray-300 dark:hover:text-purple-400 dark:hover:bg-purple-950"
                 >
                   <Eye className="mr-2 h-4 w-4" />

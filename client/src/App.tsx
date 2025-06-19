@@ -34,7 +34,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!authStatus?.authenticated || !authStatus?.isAdmin) {
-    window.location.href = '/public-view';
+    window.location.href = '/';
     return null;
   }
 
@@ -46,7 +46,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Switch>
-          <Route path="/public-view">
+          <Route path="/www.rheondadotogletree.com">
             <PublicView />
           </Route>
           <Route path="/dashboard">
@@ -61,7 +61,7 @@ function App() {
             <AuthCheck />
           </Route>
           <Route path="/">
-            <Dashboard />
+            <PublicView />
           </Route>
           <Route>
             <NotFoundPage />
