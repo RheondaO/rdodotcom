@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Clock, Eye, Edit, Trash2, Plus, Lightbulb, BookOpen, FileText, CheckCircle, AlertCircle, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar, Clock, Eye, Edit, Trash2, Plus, Lightbulb, BookOpen, FileText, CheckCircle, AlertCircle, Calendar as CalendarIcon, PenTool, Zap } from "lucide-react";
 import { format } from "date-fns";
+import BlogEditor from "./BlogEditor";
 
 interface BlogPost {
   id: number;
@@ -112,6 +113,16 @@ export default function BlogContentStudio() {
   const [newPostDialog, setNewPostDialog] = useState(false);
   const [newIdeaDialog, setNewIdeaDialog] = useState(false);
   const [newCalendarDialog, setNewCalendarDialog] = useState(false);
+  const [editingPost, setEditingPost] = useState<number | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+  
+  // Filters and sorting
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [platformFilter, setPlatformFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("updatedAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch workflow status
   const { data: workflowStatus } = useQuery<WorkflowStatus>({
@@ -233,6 +244,66 @@ export default function BlogContentStudio() {
     return total > 0 ? (workflowStatus.workflow.published / total) * 100 : 0;
   };
 
+  // Filter and sort posts
+  const filteredAndSortedPosts = blogPosts?.filter(post => {
+    if (statusFilter !== "all" && post.status !== statusFilter) return false;
+    if (platformFilter !== "all" && post.platform !== platformFilter) return false;
+    if (priorityFilter !== "all" && post.priority !== priorityFilter) return false;
+    if (searchQuery && !post.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  }).sort((a, b) => {
+    let aValue = a[sortBy as keyof BlogPost];
+    let bValue = b[sortBy as keyof BlogPost];
+    
+    if (sortBy === "updatedAt" || sortBy === "createdAt") {
+      aValue = new Date(aValue as string).getTime();
+      bValue = new Date(bValue as string).getTime();
+    }
+    
+    if (sortOrder === "asc") {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+
+  // Filter and sort ideas
+  const filteredAndSortedIdeas = blogIdeas?.filter(idea => {
+    if (statusFilter !== "all" && idea.status !== statusFilter) return false;
+    if (platformFilter !== "all" && idea.platform !== platformFilter) return false;
+    if (priorityFilter !== "all" && idea.priority !== priorityFilter) return false;
+    if (searchQuery && !idea.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !idea.description?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  }).sort((a, b) => {
+    let aValue = a[sortBy as keyof BlogIdea];
+    let bValue = b[sortBy as keyof BlogIdea];
+    
+    if (sortBy === "updatedAt" || sortBy === "createdAt") {
+      aValue = new Date(aValue as string).getTime();
+      bValue = new Date(bValue as string).getTime();
+    }
+    
+    if (sortOrder === "asc") {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+
+  if (showEditor) {
+    return (
+      <BlogEditor 
+        postId={editingPost || undefined}
+        onClose={() => {
+          setShowEditor(false);
+          setEditingPost(null);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -253,29 +324,26 @@ export default function BlogContentStudio() {
             </DialogContent>
           </Dialog>
           
-          <Dialog open={newPostDialog} onOpenChange={setNewPostDialog}>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                New Post
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Blog Post</DialogTitle>
-              </DialogHeader>
-              <NewPostForm onSubmit={createPostMutation.mutate} />
-            </DialogContent>
-          </Dialog>
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditingPost(null);
+              setShowEditor(true);
+            }}
+          >
+            <PenTool className="h-4 w-4 mr-2" />
+            Write Post
+          </Button>
         </div>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="workflow">Workflow</TabsTrigger>
           <TabsTrigger value="posts">Posts</TabsTrigger>
           <TabsTrigger value="ideas">Ideas</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          <TabsTrigger value="list">List View</TabsTrigger>
         </TabsList>
 
         <TabsContent value="workflow" className="space-y-6">
@@ -451,6 +519,16 @@ export default function BlogContentStudio() {
                       {post.isAiGenerated && <span className="text-blue-600">AI Generated</span>}
                     </div>
                     <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingPost(post.id);
+                          setShowEditor(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
                       <Select
                         value={post.status}
                         onValueChange={(status) => updatePostStatusMutation.mutate({ id: post.id, status })}
@@ -546,6 +624,265 @@ export default function BlogContentStudio() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="list" className="space-y-4">
+          {/* Filters and Search */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Filters & Search</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                <div>
+                  <Input
+                    placeholder="Search posts..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="idea">Ideas</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="scheduled">Scheduled</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Select value={platformFilter} onValueChange={setPlatformFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Platform" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Platforms</SelectItem>
+                      <SelectItem value="personal_blog">Personal Blog</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="substack">Substack</SelectItem>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
+                      <SelectItem value="hashnode">Hashnode</SelectItem>
+                      <SelectItem value="dev_to">Dev.to</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Priorities</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="updatedAt">Updated</SelectItem>
+                      <SelectItem value="createdAt">Created</SelectItem>
+                      <SelectItem value="title">Title</SelectItem>
+                      <SelectItem value="status">Status</SelectItem>
+                      <SelectItem value="priority">Priority</SelectItem>
+                      <SelectItem value="platform">Platform</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as "asc" | "desc")}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Order" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desc">Newest First</SelectItem>
+                      <SelectItem value="asc">Oldest First</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Posts Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Blog Posts ({filteredAndSortedPosts?.length || 0})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3 font-medium">Title</th>
+                      <th className="text-left p-3 font-medium">Status</th>
+                      <th className="text-left p-3 font-medium">Platform</th>
+                      <th className="text-left p-3 font-medium">Priority</th>
+                      <th className="text-left p-3 font-medium">Words</th>
+                      <th className="text-left p-3 font-medium">Updated</th>
+                      <th className="text-left p-3 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAndSortedPosts?.map((post) => (
+                      <tr key={post.id} className="border-b hover:bg-gray-50">
+                        <td className="p-3">
+                          <div>
+                            <div className="font-medium">{post.title}</div>
+                            <div className="text-sm text-gray-600 truncate max-w-xs">
+                              {post.excerpt}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <Badge className={getStatusColor(post.status)}>
+                            {post.status}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">{post.platform}</span>
+                        </td>
+                        <td className="p-3">
+                          <Badge className={getPriorityColor(post.priority || "medium")}>
+                            {post.priority}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">{post.wordCount || 0}</span>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">
+                            {post.updatedAt ? format(new Date(post.updatedAt), "MMM d, yyyy") : "N/A"}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEditingPost(post.id);
+                                setShowEditor(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Select
+                              value={post.status}
+                              onValueChange={(status) => updatePostStatusMutation.mutate({ id: post.id, status })}
+                            >
+                              <SelectTrigger className="w-28">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="draft">Draft</SelectItem>
+                                <SelectItem value="scheduled">Scheduled</SelectItem>
+                                <SelectItem value="published">Published</SelectItem>
+                                <SelectItem value="archived">Archived</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {(!filteredAndSortedPosts || filteredAndSortedPosts.length === 0) && (
+                  <div className="text-center py-8 text-gray-500">
+                    No posts found matching your criteria.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Ideas Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Blog Ideas ({filteredAndSortedIdeas?.length || 0})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3 font-medium">Title</th>
+                      <th className="text-left p-3 font-medium">Status</th>
+                      <th className="text-left p-3 font-medium">Platform</th>
+                      <th className="text-left p-3 font-medium">Priority</th>
+                      <th className="text-left p-3 font-medium">Category</th>
+                      <th className="text-left p-3 font-medium">Updated</th>
+                      <th className="text-left p-3 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAndSortedIdeas?.map((idea) => (
+                      <tr key={idea.id} className="border-b hover:bg-gray-50">
+                        <td className="p-3">
+                          <div>
+                            <div className="font-medium">{idea.title}</div>
+                            <div className="text-sm text-gray-600 truncate max-w-xs">
+                              {idea.description}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <Badge className={getStatusColor(idea.status)}>
+                            {idea.status}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">{idea.platform}</span>
+                        </td>
+                        <td className="p-3">
+                          <Badge className={getPriorityColor(idea.priority || "medium")}>
+                            {idea.priority}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">{idea.category}</span>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">
+                            {idea.updatedAt ? format(new Date(idea.updatedAt), "MMM d, yyyy") : "N/A"}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => generateAIContentMutation.mutate(idea.id)}
+                              disabled={generateAIContentMutation.isPending}
+                            >
+                              <Zap className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {(!filteredAndSortedIdeas || filteredAndSortedIdeas.length === 0) && (
+                  <div className="text-center py-8 text-gray-500">
+                    No ideas found matching your criteria.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
