@@ -14,6 +14,7 @@ import SiteMapSection from "../components/SiteMapSection";
 import AppDevelopmentSection from "../components/AppDevelopmentSection";
 import ContentManagementSuite from "../components/ContentManagementSuite";
 import ContentCreationSection from "../components/ContentCreationSection";
+import BlogContentStudio from "../components/BlogContentStudio";
 import QuickAddModal from "../components/QuickAddModal";
 import WeekView from "../components/WeekView";
 import MonthView from "../components/MonthView";
@@ -25,7 +26,7 @@ import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap" | "blog-studio";
 type TimeViewType = "day" | "week" | "month";
 
 function Dashboard() {
@@ -271,6 +272,7 @@ function Dashboard() {
           {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "blog-studio" && <BlogContentStudio />}
           {activeView === "sitemap" && (
             <SiteMapSection 
               onNavigate={(section: string) => setActiveView(section as ViewType)}

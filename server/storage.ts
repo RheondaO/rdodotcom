@@ -54,7 +54,13 @@ import {
   type SocialMediaAnalytics,
   type InsertSocialMediaAnalytics,
   type PerformanceInsights,
-  type InsertPerformanceInsights
+  type InsertPerformanceInsights,
+  type BlogPost,
+  type InsertBlogPost,
+  type BlogIdea,
+  type InsertBlogIdea,
+  type BlogCalendar,
+  type InsertBlogCalendar
 } from "@shared/schema";
 
 export interface IStorage {
@@ -227,6 +233,30 @@ export interface IStorage {
   scheduleContentForMoonPhases(year: number, month: number): Promise<void>;
   aggregatePerformanceData(): Promise<void>;
 
+  // Blog Content Studio
+  getAllBlogPosts(): Promise<BlogPost[]>;
+  getBlogPostsByStatus(status: string): Promise<BlogPost[]>;
+  getBlogPostsByPlatform(platform: string): Promise<BlogPost[]>;
+  getBlogPost(id: number): Promise<BlogPost | undefined>;
+  createBlogPost(post: InsertBlogPost): Promise<BlogPost>;
+  updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost>;
+  deleteBlogPost(id: number): Promise<void>;
+
+  getAllBlogIdeas(): Promise<BlogIdea[]>;
+  getBlogIdeasByStatus(status: string): Promise<BlogIdea[]>;
+  getBlogIdeasByPlatform(platform: string): Promise<BlogIdea[]>;
+  createBlogIdea(idea: InsertBlogIdea): Promise<BlogIdea>;
+  updateBlogIdea(id: number, updates: Partial<BlogIdea>): Promise<BlogIdea>;
+  deleteBlogIdea(id: number): Promise<void>;
+  generateAIContent(ideaId: number): Promise<BlogIdea>;
+
+  getAllBlogCalendarEvents(): Promise<BlogCalendar[]>;
+  getBlogCalendarEventsByDate(date: string): Promise<BlogCalendar[]>;
+  getBlogCalendarEventsByDateRange(startDate: string, endDate: string): Promise<BlogCalendar[]>;
+  createBlogCalendarEvent(event: InsertBlogCalendar): Promise<BlogCalendar>;
+  updateBlogCalendarEvent(id: number, updates: Partial<BlogCalendar>): Promise<BlogCalendar>;
+  deleteBlogCalendarEvent(id: number): Promise<void>;
+
   // Analytics methods
   getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
   getHabitsAnalytics(startDate: string, endDate: string): Promise<any>;
@@ -266,6 +296,9 @@ export class MemStorage implements IStorage {
   private socialMediaPosts: Map<number, SocialMediaPost> = new Map();
   private socialMediaAnalytics: Map<number, SocialMediaAnalytics> = new Map();
   private performanceInsights: Map<number, PerformanceInsights> = new Map();
+  private blogPosts: Map<number, BlogPost> = new Map();
+  private blogIdeas: Map<number, BlogIdea> = new Map();
+  private blogCalendarEvents: Map<number, BlogCalendar> = new Map();
   private currentId = 1;
 
   constructor() {
@@ -390,6 +423,86 @@ export class MemStorage implements IStorage {
       name: "Blog Post",
       description: "Written articles and guides",
       estimatedDuration: 30
+    });
+
+    // Initialize with sample blog posts
+    this.createBlogPost({
+      title: "10 Productivity Tips for Remote Workers",
+      content: "Working from home can be challenging, but with the right strategies...",
+      excerpt: "Discover proven techniques to boost your productivity while working remotely.",
+      status: "published",
+      type: "blog",
+      platform: "personal_blog",
+      tags: JSON.stringify(["productivity", "remote work", "tips"]),
+      publishedDate: "2024-01-15",
+      priority: "high",
+      wordCount: 1200,
+      readingTime: 6,
+      seoTitle: "10 Productivity Tips for Remote Workers - Boost Your Efficiency",
+      seoDescription: "Learn how to maximize your productivity while working from home with these proven strategies and tips.",
+      isAiGenerated: false
+    });
+
+    this.createBlogPost({
+      title: "The Future of AI in Content Creation",
+      content: "Artificial Intelligence is revolutionizing how we create content...",
+      excerpt: "Explore how AI is transforming the content creation landscape.",
+      status: "draft",
+      type: "blog",
+      platform: "medium",
+      tags: JSON.stringify(["ai", "content creation", "technology"]),
+      scheduledDate: "2024-01-25",
+      priority: "medium",
+      wordCount: 800,
+      readingTime: 4,
+      isAiGenerated: true
+    });
+
+    // Initialize with sample blog ideas
+    this.createBlogIdea({
+      title: "Building Sustainable Habits",
+      description: "A deep dive into the psychology of habit formation and practical strategies for building lasting habits.",
+      category: "lifestyle",
+      platform: "substack",
+      tags: JSON.stringify(["habits", "psychology", "self-improvement"]),
+      priority: "high",
+      status: "idea",
+      estimatedReadTime: 8,
+      targetAudience: "professionals seeking personal development",
+      aiPrompt: "Write about the science of habit formation and include practical examples"
+    });
+
+    this.createBlogIdea({
+      title: "The Rise of No-Code Development",
+      description: "How no-code platforms are democratizing software development and what it means for the future.",
+      category: "technology",
+      platform: "linkedin",
+      tags: JSON.stringify(["no-code", "development", "technology"]),
+      priority: "medium",
+      status: "in_progress",
+      estimatedReadTime: 6,
+      targetAudience: "developers and business professionals"
+    });
+
+    // Initialize with sample calendar events
+    this.createBlogCalendarEvent({
+      title: "Review and Edit AI Content Post",
+      type: "review",
+      platform: "medium",
+      date: "2024-01-22",
+      time: "14:00",
+      status: "scheduled",
+      notes: "Final review before publishing AI content creation article"
+    });
+
+    this.createBlogCalendarEvent({
+      title: "Publish Remote Work Tips",
+      type: "post",
+      platform: "personal_blog",
+      date: "2024-01-20",
+      time: "09:00",
+      status: "scheduled",
+      notes: "Share on social media after publishing"
     });
   }
 
@@ -1358,6 +1471,154 @@ export class MemStorage implements IStorage {
       publishedDate: piece.createdAt,
       tags: piece.tags ? JSON.parse(piece.tags) : []
     }));
+  }
+
+  // Blog Content Studio methods
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    return Array.from(this.blogPosts.values()).sort((a, b) => 
+      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+  }
+
+  async getBlogPostsByStatus(status: string): Promise<BlogPost[]> {
+    return Array.from(this.blogPosts.values()).filter(post => post.status === status);
+  }
+
+  async getBlogPostsByPlatform(platform: string): Promise<BlogPost[]> {
+    return Array.from(this.blogPosts.values()).filter(post => post.platform === platform);
+  }
+
+  async getBlogPost(id: number): Promise<BlogPost | undefined> {
+    return this.blogPosts.get(id);
+  }
+
+  async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    const newPost: BlogPost = {
+      id: this.currentId++,
+      ...post,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.blogPosts.set(newPost.id, newPost);
+    return newPost;
+  }
+
+  async updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost> {
+    const post = this.blogPosts.get(id);
+    if (!post) throw new Error("Blog post not found");
+    
+    const updatedPost = { ...post, ...updates, updatedAt: new Date() };
+    this.blogPosts.set(id, updatedPost);
+    return updatedPost;
+  }
+
+  async deleteBlogPost(id: number): Promise<void> {
+    this.blogPosts.delete(id);
+  }
+
+  async getAllBlogIdeas(): Promise<BlogIdea[]> {
+    return Array.from(this.blogIdeas.values()).sort((a, b) => 
+      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+  }
+
+  async getBlogIdeasByStatus(status: string): Promise<BlogIdea[]> {
+    return Array.from(this.blogIdeas.values()).filter(idea => idea.status === status);
+  }
+
+  async getBlogIdeasByPlatform(platform: string): Promise<BlogIdea[]> {
+    return Array.from(this.blogIdeas.values()).filter(idea => idea.platform === platform);
+  }
+
+  async createBlogIdea(idea: InsertBlogIdea): Promise<BlogIdea> {
+    const newIdea: BlogIdea = {
+      id: this.currentId++,
+      ...idea,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.blogIdeas.set(newIdea.id, newIdea);
+    return newIdea;
+  }
+
+  async updateBlogIdea(id: number, updates: Partial<BlogIdea>): Promise<BlogIdea> {
+    const idea = this.blogIdeas.get(id);
+    if (!idea) throw new Error("Blog idea not found");
+    
+    const updatedIdea = { ...idea, ...updates, updatedAt: new Date() };
+    this.blogIdeas.set(id, updatedIdea);
+    return updatedIdea;
+  }
+
+  async deleteBlogIdea(id: number): Promise<void> {
+    this.blogIdeas.delete(id);
+  }
+
+  async generateAIContent(ideaId: number): Promise<BlogIdea> {
+    const idea = this.blogIdeas.get(ideaId);
+    if (!idea) throw new Error("Blog idea not found");
+    
+    // Mock AI content generation
+    const aiContent = `This is AI-generated content based on the prompt: "${idea.aiPrompt || idea.title}". 
+    
+    The content would explore ${idea.description} and provide valuable insights for ${idea.targetAudience}.
+    
+    Key topics to cover:
+    - Introduction to the concept
+    - Practical applications
+    - Real-world examples
+    - Conclusion and key takeaways
+    
+    This content is optimized for ${idea.platform} and targets an estimated reading time of ${idea.estimatedReadTime} minutes.`;
+    
+    const updatedIdea = { 
+      ...idea, 
+      aiGeneratedContent: aiContent, 
+      status: "in_progress",
+      updatedAt: new Date() 
+    };
+    
+    this.blogIdeas.set(ideaId, updatedIdea);
+    return updatedIdea;
+  }
+
+  async getAllBlogCalendarEvents(): Promise<BlogCalendar[]> {
+    return Array.from(this.blogCalendarEvents.values()).sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+  }
+
+  async getBlogCalendarEventsByDate(date: string): Promise<BlogCalendar[]> {
+    return Array.from(this.blogCalendarEvents.values()).filter(event => event.date === date);
+  }
+
+  async getBlogCalendarEventsByDateRange(startDate: string, endDate: string): Promise<BlogCalendar[]> {
+    return Array.from(this.blogCalendarEvents.values()).filter(event => 
+      event.date >= startDate && event.date <= endDate
+    );
+  }
+
+  async createBlogCalendarEvent(event: InsertBlogCalendar): Promise<BlogCalendar> {
+    const newEvent: BlogCalendar = {
+      id: this.currentId++,
+      ...event,
+      createdAt: new Date()
+    };
+    this.blogCalendarEvents.set(newEvent.id, newEvent);
+    return newEvent;
+  }
+
+  async updateBlogCalendarEvent(id: number, updates: Partial<BlogCalendar>): Promise<BlogCalendar> {
+    const event = this.blogCalendarEvents.get(id);
+    if (!event) throw new Error("Blog calendar event not found");
+    
+    const updatedEvent = { ...event, ...updates };
+    this.blogCalendarEvents.set(id, updatedEvent);
+    return updatedEvent;
+  }
+
+  async deleteBlogCalendarEvent(id: number): Promise<void> {
+    this.blogCalendarEvents.delete(id);
   }
 }
 

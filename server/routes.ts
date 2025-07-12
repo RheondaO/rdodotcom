@@ -19,7 +19,10 @@ import {
   insertMiniGameDesignSchema,
   insertSocialMediaPostSchema,
   insertSocialMediaAnalyticsSchema,
-  insertPerformanceInsightsSchema
+  insertPerformanceInsightsSchema,
+  insertBlogPostSchema,
+  insertBlogIdeaSchema,
+  insertBlogCalendarSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -526,7 +529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/performance-insights", async (req, res) => {
     try {
-      const data = insertPerformanceInsightSchema.parse(req.body);
+      const data = insertPerformanceInsightsSchema.parse(req.body);
       const insight = await storage.createPerformanceInsight(data);
       res.json(insight);
     } catch (error) {
@@ -547,6 +550,235 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Moon phase scheduling error:", error);
       res.status(500).json({ error: "Failed to schedule moon phase content" });
+    }
+  });
+
+  // Blog Content Studio Routes
+  // Blog Posts
+  app.get("/api/blog/posts", async (req, res) => {
+    try {
+      const { status, platform } = req.query;
+      let posts;
+      
+      if (status) {
+        posts = await storage.getBlogPostsByStatus(status as string);
+      } else if (platform) {
+        posts = await storage.getBlogPostsByPlatform(platform as string);
+      } else {
+        posts = await storage.getAllBlogPosts();
+      }
+      
+      res.json(posts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch blog posts" });
+    }
+  });
+
+  app.get("/api/blog/posts/:id", async (req, res) => {
+    try {
+      const post = await storage.getBlogPost(parseInt(req.params.id));
+      if (!post) {
+        return res.status(404).json({ error: "Blog post not found" });
+      }
+      res.json(post);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch blog post" });
+    }
+  });
+
+  app.post("/api/blog/posts", async (req, res) => {
+    try {
+      const data = insertBlogPostSchema.parse(req.body);
+      const post = await storage.createBlogPost(data);
+      res.json(post);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid blog post data" });
+    }
+  });
+
+  app.patch("/api/blog/posts/:id", async (req, res) => {
+    try {
+      const post = await storage.updateBlogPost(parseInt(req.params.id), req.body);
+      res.json(post);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update blog post" });
+    }
+  });
+
+  app.delete("/api/blog/posts/:id", async (req, res) => {
+    try {
+      await storage.deleteBlogPost(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete blog post" });
+    }
+  });
+
+  // Blog Ideas
+  app.get("/api/blog/ideas", async (req, res) => {
+    try {
+      const { status, platform } = req.query;
+      let ideas;
+      
+      if (status) {
+        ideas = await storage.getBlogIdeasByStatus(status as string);
+      } else if (platform) {
+        ideas = await storage.getBlogIdeasByPlatform(platform as string);
+      } else {
+        ideas = await storage.getAllBlogIdeas();
+      }
+      
+      res.json(ideas);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch blog ideas" });
+    }
+  });
+
+  app.post("/api/blog/ideas", async (req, res) => {
+    try {
+      const data = insertBlogIdeaSchema.parse(req.body);
+      const idea = await storage.createBlogIdea(data);
+      res.json(idea);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid blog idea data" });
+    }
+  });
+
+  app.patch("/api/blog/ideas/:id", async (req, res) => {
+    try {
+      const idea = await storage.updateBlogIdea(parseInt(req.params.id), req.body);
+      res.json(idea);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update blog idea" });
+    }
+  });
+
+  app.delete("/api/blog/ideas/:id", async (req, res) => {
+    try {
+      await storage.deleteBlogIdea(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete blog idea" });
+    }
+  });
+
+  app.post("/api/blog/ideas/:id/generate-ai-content", async (req, res) => {
+    try {
+      const idea = await storage.generateAIContent(parseInt(req.params.id));
+      res.json(idea);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate AI content" });
+    }
+  });
+
+  // Blog Calendar
+  app.get("/api/blog/calendar", async (req, res) => {
+    try {
+      const { date, startDate, endDate } = req.query;
+      let events;
+      
+      if (date) {
+        events = await storage.getBlogCalendarEventsByDate(date as string);
+      } else if (startDate && endDate) {
+        events = await storage.getBlogCalendarEventsByDateRange(startDate as string, endDate as string);
+      } else {
+        events = await storage.getAllBlogCalendarEvents();
+      }
+      
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch blog calendar events" });
+    }
+  });
+
+  app.post("/api/blog/calendar", async (req, res) => {
+    try {
+      const data = insertBlogCalendarSchema.parse(req.body);
+      const event = await storage.createBlogCalendarEvent(data);
+      res.json(event);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid blog calendar data" });
+    }
+  });
+
+  app.patch("/api/blog/calendar/:id", async (req, res) => {
+    try {
+      const event = await storage.updateBlogCalendarEvent(parseInt(req.params.id), req.body);
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update blog calendar event" });
+    }
+  });
+
+  app.delete("/api/blog/calendar/:id", async (req, res) => {
+    try {
+      await storage.deleteBlogCalendarEvent(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete blog calendar event" });
+    }
+  });
+
+  // Blog Workflow Status - shows where posts are in development
+  app.get("/api/blog/workflow-status", async (req, res) => {
+    try {
+      const posts = await storage.getAllBlogPosts();
+      const ideas = await storage.getAllBlogIdeas();
+      const calendar = await storage.getAllBlogCalendarEvents();
+      
+      const workflowStatus = {
+        ideas: {
+          total: ideas.length,
+          byStatus: ideas.reduce((acc, idea) => {
+            acc[idea.status] = (acc[idea.status] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>),
+          items: ideas.map(idea => ({
+            id: idea.id,
+            title: idea.title,
+            status: idea.status,
+            platform: idea.platform,
+            priority: idea.priority,
+            createdAt: idea.createdAt
+          }))
+        },
+        posts: {
+          total: posts.length,
+          byStatus: posts.reduce((acc, post) => {
+            acc[post.status] = (acc[post.status] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>),
+          items: posts.map(post => ({
+            id: post.id,
+            title: post.title,
+            status: post.status,
+            platform: post.platform,
+            priority: post.priority,
+            scheduledDate: post.scheduledDate,
+            publishedDate: post.publishedDate,
+            createdAt: post.createdAt
+          }))
+        },
+        calendar: {
+          upcoming: calendar.filter(event => 
+            new Date(event.date) >= new Date() && event.status === 'scheduled'
+          ).slice(0, 10),
+          overdue: calendar.filter(event => 
+            new Date(event.date) < new Date() && event.status === 'scheduled'
+          )
+        },
+        workflow: {
+          ideaStage: ideas.filter(i => i.status === 'idea').length,
+          research: ideas.filter(i => i.status === 'in_progress').length,
+          drafting: posts.filter(p => p.status === 'draft').length,
+          review: posts.filter(p => p.status === 'scheduled').length,
+          published: posts.filter(p => p.status === 'published').length
+        }
+      };
+      
+      res.json(workflowStatus);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch workflow status" });
     }
   });
 

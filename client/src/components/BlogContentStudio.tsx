@@ -1,0 +1,677 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Calendar, Clock, Eye, Edit, Trash2, Plus, Lightbulb, BookOpen, FileText, CheckCircle, AlertCircle, Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+
+interface BlogPost {
+  id: number;
+  title: string;
+  content?: string;
+  excerpt?: string;
+  status: string;
+  type: string;
+  platform: string;
+  tags?: string;
+  scheduledDate?: string;
+  publishedDate?: string;
+  reviewDate?: string;
+  priority?: string;
+  wordCount?: number;
+  readingTime?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  featuredImage?: string;
+  isAiGenerated?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface BlogIdea {
+  id: number;
+  title: string;
+  description?: string;
+  category: string;
+  platform: string;
+  tags?: string;
+  priority?: string;
+  aiPrompt?: string;
+  aiGeneratedContent?: string;
+  status: string;
+  estimatedReadTime?: number;
+  targetAudience?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface BlogCalendar {
+  id: number;
+  postId?: number;
+  ideaId?: number;
+  title: string;
+  type: string;
+  platform: string;
+  date: string;
+  time?: string;
+  status: string;
+  notes?: string;
+  createdAt?: Date;
+}
+
+interface WorkflowStatus {
+  ideas: {
+    total: number;
+    byStatus: Record<string, number>;
+    items: Array<{
+      id: number;
+      title: string;
+      status: string;
+      platform: string;
+      priority: string;
+      createdAt?: Date;
+    }>;
+  };
+  posts: {
+    total: number;
+    byStatus: Record<string, number>;
+    items: Array<{
+      id: number;
+      title: string;
+      status: string;
+      platform: string;
+      priority: string;
+      scheduledDate?: string;
+      publishedDate?: string;
+      createdAt?: Date;
+    }>;
+  };
+  calendar: {
+    upcoming: BlogCalendar[];
+    overdue: BlogCalendar[];
+  };
+  workflow: {
+    ideaStage: number;
+    research: number;
+    drafting: number;
+    review: number;
+    published: number;
+  };
+}
+
+export default function BlogContentStudio() {
+  const queryClient = useQueryClient();
+  const [selectedTab, setSelectedTab] = useState("workflow");
+  const [newPostDialog, setNewPostDialog] = useState(false);
+  const [newIdeaDialog, setNewIdeaDialog] = useState(false);
+  const [newCalendarDialog, setNewCalendarDialog] = useState(false);
+
+  // Fetch workflow status
+  const { data: workflowStatus } = useQuery<WorkflowStatus>({
+    queryKey: ["/api/blog/workflow-status"],
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  // Fetch blog posts
+  const { data: blogPosts } = useQuery<BlogPost[]>({
+    queryKey: ["/api/blog/posts"],
+  });
+
+  // Fetch blog ideas
+  const { data: blogIdeas } = useQuery<BlogIdea[]>({
+    queryKey: ["/api/blog/ideas"],
+  });
+
+  // Fetch calendar events
+  const { data: calendarEvents } = useQuery<BlogCalendar[]>({
+    queryKey: ["/api/blog/calendar"],
+  });
+
+  // Mutations
+  const createPostMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/blog/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/blog/posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/blog/workflow-status"] });
+      setNewPostDialog(false);
+    },
+  });
+
+  const createIdeaMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/blog/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/blog/ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/blog/workflow-status"] });
+      setNewIdeaDialog(false);
+    },
+  });
+
+  const updatePostStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const response = await fetch(`/api/blog/posts/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/blog/posts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/blog/workflow-status"] });
+    },
+  });
+
+  const generateAIContentMutation = useMutation({
+    mutationFn: async (ideaId: number) => {
+      const response = await fetch(`/api/blog/ideas/${ideaId}/generate-ai-content`, {
+        method: "POST",
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/blog/ideas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/blog/workflow-status"] });
+    },
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "idea":
+        return "bg-blue-100 text-blue-800";
+      case "in_progress":
+        return "bg-yellow-100 text-yellow-800";
+      case "draft":
+        return "bg-orange-100 text-orange-800";
+      case "scheduled":
+        return "bg-purple-100 text-purple-800";
+      case "published":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getWorkflowProgress = () => {
+    if (!workflowStatus) return 0;
+    const total = workflowStatus.workflow.ideaStage + workflowStatus.workflow.research + 
+                  workflowStatus.workflow.drafting + workflowStatus.workflow.review + 
+                  workflowStatus.workflow.published;
+    return total > 0 ? (workflowStatus.workflow.published / total) * 100 : 0;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Blog Content Studio</h1>
+        <div className="flex gap-2">
+          <Dialog open={newIdeaDialog} onOpenChange={setNewIdeaDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Lightbulb className="h-4 w-4 mr-2" />
+                New Idea
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Blog Idea</DialogTitle>
+              </DialogHeader>
+              <NewIdeaForm onSubmit={createIdeaMutation.mutate} />
+            </DialogContent>
+          </Dialog>
+          
+          <Dialog open={newPostDialog} onOpenChange={setNewPostDialog}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                New Post
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Blog Post</DialogTitle>
+              </DialogHeader>
+              <NewPostForm onSubmit={createPostMutation.mutate} />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="workflow">Workflow</TabsTrigger>
+          <TabsTrigger value="posts">Posts</TabsTrigger>
+          <TabsTrigger value="ideas">Ideas</TabsTrigger>
+          <TabsTrigger value="calendar">Calendar</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="workflow" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <Lightbulb className="h-4 w-4 mr-2 text-blue-500" />
+                  Ideas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{workflowStatus?.workflow.ideaStage || 0}</div>
+                <p className="text-xs text-muted-foreground">Brainstorming stage</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <BookOpen className="h-4 w-4 mr-2 text-yellow-500" />
+                  Research
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{workflowStatus?.workflow.research || 0}</div>
+                <p className="text-xs text-muted-foreground">In development</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <Edit className="h-4 w-4 mr-2 text-orange-500" />
+                  Drafting
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{workflowStatus?.workflow.drafting || 0}</div>
+                <p className="text-xs text-muted-foreground">Writing stage</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <Eye className="h-4 w-4 mr-2 text-purple-500" />
+                  Review
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{workflowStatus?.workflow.review || 0}</div>
+                <p className="text-xs text-muted-foreground">Ready for review</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                  Published
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{workflowStatus?.workflow.published || 0}</div>
+                <p className="text-xs text-muted-foreground">Live content</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="h-5 w-5 mr-2" />
+                Content Pipeline Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Overall Progress</span>
+                  <span>{Math.round(getWorkflowProgress())}%</span>
+                </div>
+                <Progress value={getWorkflowProgress()} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  {workflowStatus?.workflow.published || 0} of {(workflowStatus?.workflow.ideaStage || 0) + (workflowStatus?.workflow.research || 0) + (workflowStatus?.workflow.drafting || 0) + (workflowStatus?.workflow.review || 0) + (workflowStatus?.workflow.published || 0)} pieces published
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CalendarIcon className="h-5 w-5 mr-2" />
+                  Upcoming Deadlines
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {workflowStatus?.calendar.upcoming.map((event) => (
+                    <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-sm">{event.title}</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {event.platform} • {format(new Date(event.date), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {event.type}
+                      </Badge>
+                    </div>
+                  )) || <p className="text-sm text-muted-foreground">No upcoming deadlines</p>}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <AlertCircle className="h-5 w-5 mr-2 text-red-500" />
+                  Overdue Tasks
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {workflowStatus?.calendar.overdue.map((event) => (
+                    <div key={event.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-sm">{event.title}</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {event.platform} • {format(new Date(event.date), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                      <Badge variant="destructive" className="text-xs">
+                        Overdue
+                      </Badge>
+                    </div>
+                  )) || <p className="text-sm text-muted-foreground">No overdue tasks</p>}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="posts" className="space-y-4">
+          <div className="grid gap-4">
+            {blogPosts?.map((post) => (
+              <Card key={post.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{post.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">{post.excerpt}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge className={getStatusColor(post.status)}>
+                        {post.status}
+                      </Badge>
+                      <Badge className={getPriorityColor(post.priority || "medium")}>
+                        {post.priority}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-4 text-sm text-muted-foreground">
+                      <span>{post.platform}</span>
+                      <span>{post.wordCount} words</span>
+                      <span>{post.readingTime} min read</span>
+                      {post.isAiGenerated && <span className="text-blue-600">AI Generated</span>}
+                    </div>
+                    <div className="flex gap-2">
+                      <Select
+                        value={post.status}
+                        onValueChange={(status) => updatePostStatusMutation.mutate({ id: post.id, status })}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="scheduled">Scheduled</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ideas" className="space-y-4">
+          <div className="grid gap-4">
+            {blogIdeas?.map((idea) => (
+              <Card key={idea.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{idea.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">{idea.description}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge className={getStatusColor(idea.status)}>
+                        {idea.status}
+                      </Badge>
+                      <Badge className={getPriorityColor(idea.priority || "medium")}>
+                        {idea.priority}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-4 text-sm text-muted-foreground">
+                      <span>{idea.platform}</span>
+                      <span>{idea.category}</span>
+                      <span>{idea.estimatedReadTime} min read</span>
+                      <span>{idea.targetAudience}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => generateAIContentMutation.mutate(idea.id)}
+                        disabled={generateAIContentMutation.isPending}
+                      >
+                        Generate AI Content
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="calendar" className="space-y-4">
+          <div className="grid gap-4">
+            {calendarEvents?.map((event) => (
+              <Card key={event.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{event.title}</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">{event.notes}</p>
+                    </div>
+                    <Badge className={getStatusColor(event.status)}>
+                      {event.status}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-4 text-sm text-muted-foreground">
+                      <span>{event.platform}</span>
+                      <span>{event.type}</span>
+                      <span>{format(new Date(event.date), "MMM d, yyyy")}</span>
+                      {event.time && <span>{event.time}</span>}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function NewPostForm({ onSubmit }: { onSubmit: (data: any) => void }) {
+  const [formData, setFormData] = useState({
+    title: "",
+    excerpt: "",
+    platform: "",
+    priority: "medium",
+    type: "blog",
+    status: "draft",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Input
+          placeholder="Post title"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          required
+        />
+      </div>
+      <div>
+        <Textarea
+          placeholder="Brief excerpt"
+          value={formData.excerpt}
+          onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <Select value={formData.platform} onValueChange={(value) => setFormData({ ...formData, platform: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Platform" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="personal_blog">Personal Blog</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="substack">Substack</SelectItem>
+            <SelectItem value="linkedin">LinkedIn</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={formData.priority} onValueChange={(value) => setFormData({ ...formData, priority: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <Button type="submit" className="w-full">Create Post</Button>
+    </form>
+  );
+}
+
+function NewIdeaForm({ onSubmit }: { onSubmit: (data: any) => void }) {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "",
+    platform: "",
+    priority: "medium",
+    targetAudience: "",
+    estimatedReadTime: 5,
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Input
+          placeholder="Idea title"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          required
+        />
+      </div>
+      <div>
+        <Textarea
+          placeholder="Idea description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          placeholder="Category"
+          value={formData.category}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          required
+        />
+        <Select value={formData.platform} onValueChange={(value) => setFormData({ ...formData, platform: value })}>
+          <SelectTrigger>
+            <SelectValue placeholder="Platform" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="personal_blog">Personal Blog</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="substack">Substack</SelectItem>
+            <SelectItem value="linkedin">LinkedIn</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Input
+          placeholder="Target audience"
+          value={formData.targetAudience}
+          onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
+        />
+      </div>
+      <Button type="submit" className="w-full">Create Idea</Button>
+    </form>
+  );
+}

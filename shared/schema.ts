@@ -327,6 +327,61 @@ export interface PerformanceInsights {
   createdAt?: Date;
 }
 
+// Blog Content Studio Models
+export interface BlogPost {
+  id: number;
+  title: string;
+  content?: string;
+  excerpt?: string;
+  status: string; // draft, scheduled, published, archived
+  type: string; // blog, newsletter, article
+  platform: string; // substack, medium, linkedin, personal_blog, etc.
+  tags?: string; // JSON array string
+  scheduledDate?: string;
+  publishedDate?: string;
+  reviewDate?: string;
+  priority?: string; // low, medium, high
+  wordCount?: number;
+  readingTime?: number; // minutes
+  seoTitle?: string;
+  seoDescription?: string;
+  featuredImage?: string;
+  isAiGenerated?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface BlogIdea {
+  id: number;
+  title: string;
+  description?: string;
+  category: string;
+  platform: string;
+  tags?: string; // JSON array string
+  priority?: string; // low, medium, high
+  aiPrompt?: string;
+  aiGeneratedContent?: string;
+  status: string; // idea, in_progress, completed, discarded
+  estimatedReadTime?: number;
+  targetAudience?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface BlogCalendar {
+  id: number;
+  postId?: number;
+  ideaId?: number;
+  title: string;
+  type: string; // post, review, brainstorm, research
+  platform: string;
+  date: string;
+  time?: string;
+  status: string; // scheduled, completed, cancelled
+  notes?: string;
+  createdAt?: Date;
+}
+
 // Insert schemas using Zod
 export const insertDailyEntrySchema = z.object({
   date: z.string(),
@@ -494,6 +549,52 @@ export const insertPerformanceInsightsSchema = z.object({
   insights: z.string().optional(),
 });
 
+export const insertBlogPostSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  content: z.string().optional(),
+  excerpt: z.string().optional(),
+  status: z.string().default("draft"),
+  type: z.string().default("blog"),
+  platform: z.string().min(1, "Platform is required"),
+  tags: z.string().optional(),
+  scheduledDate: z.string().optional(),
+  publishedDate: z.string().optional(),
+  reviewDate: z.string().optional(),
+  priority: z.string().default("medium"),
+  wordCount: z.number().optional(),
+  readingTime: z.number().optional(),
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  featuredImage: z.string().optional(),
+  isAiGenerated: z.boolean().default(false)
+});
+
+export const insertBlogIdeaSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
+  platform: z.string().min(1, "Platform is required"),
+  tags: z.string().optional(),
+  priority: z.string().default("medium"),
+  aiPrompt: z.string().optional(),
+  aiGeneratedContent: z.string().optional(),
+  status: z.string().default("idea"),
+  estimatedReadTime: z.number().optional(),
+  targetAudience: z.string().optional()
+});
+
+export const insertBlogCalendarSchema = z.object({
+  postId: z.number().optional(),
+  ideaId: z.number().optional(),
+  title: z.string().min(1, "Title is required"),
+  type: z.string().min(1, "Type is required"),
+  platform: z.string().min(1, "Platform is required"),
+  date: z.string().min(1, "Date is required"),
+  time: z.string().optional(),
+  status: z.string().default("scheduled"),
+  notes: z.string().optional()
+});
+
 // Insert types
 export type InsertDailyEntry = z.infer<typeof insertDailyEntrySchema>;
 export type InsertBill = z.infer<typeof insertBillSchema>;
@@ -512,3 +613,6 @@ export type InsertMiniGameDesign = z.infer<typeof insertMiniGameDesignSchema>;
 export type InsertSocialMediaPost = z.infer<typeof insertSocialMediaPostSchema>;
 export type InsertSocialMediaAnalytics = z.infer<typeof insertSocialMediaAnalyticsSchema>;
 export type InsertPerformanceInsights = z.infer<typeof insertPerformanceInsightsSchema>;
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type InsertBlogIdea = z.infer<typeof insertBlogIdeaSchema>;
+export type InsertBlogCalendar = z.infer<typeof insertBlogCalendarSchema>;
