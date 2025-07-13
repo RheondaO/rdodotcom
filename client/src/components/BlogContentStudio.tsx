@@ -27,7 +27,9 @@ import {
   ChevronRight,
   Clock,
   MapPin,
-  Target
+  Target,
+  Grid3X3,
+  List
 } from "lucide-react";
 import BlogEditor from "./BlogEditor";
 import { useAuth } from "../hooks/useAuth";
@@ -139,6 +141,7 @@ export default function BlogContentStudio() {
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const queryClient = useQueryClient();
   const { user, isAdmin, isAuthenticated } = useAuth();
@@ -359,8 +362,28 @@ export default function BlogContentStudio() {
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View:</span>
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-md p-1">
-            <button className="px-2 py-1 text-xs bg-white dark:bg-gray-700 rounded shadow-sm">Grid</button>
-            <button className="px-2 py-1 text-xs hover:bg-gray-200 dark:hover:bg-gray-600 rounded">List</button>
+            <button 
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
+                viewMode === 'grid' 
+                  ? 'bg-white dark:bg-gray-700 shadow-sm' 
+                  : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              <Grid3X3 className="h-3 w-3" />
+              Grid
+            </button>
+            <button 
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
+                viewMode === 'list' 
+                  ? 'bg-white dark:bg-gray-700 shadow-sm' 
+                  : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              <List className="h-3 w-3" />
+              List
+            </button>
           </div>
         </div>
       </div>
@@ -505,95 +528,199 @@ export default function BlogContentStudio() {
             <CardContent>
               <div className="space-y-4">
                 {blogPosts && blogPosts.length > 0 ? (
-                  <div className="space-y-3">
-                    {blogPosts.map((post) => (
-                      <div key={post.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="font-semibold text-lg">{post.title}</h3>
-                              <Badge className={getStatusColor(post.status)}>
-                                {post.status}
-                              </Badge>
-                              {post.priority && (
-                                <Badge className={getPriorityColor(post.priority)}>
-                                  {post.priority}
-                                </Badge>
-                              )}
-                              {post.isAiGenerated && (
-                                <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200">
-                                  <Zap className="h-3 w-3 mr-1" />
-                                  AI Generated
-                                </Badge>
-                              )}
+                  viewMode === 'grid' ? (
+                    // Grid View
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {blogPosts.map((post) => (
+                        <div key={post.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          <div className="flex flex-col h-full">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-lg line-clamp-2 mb-2">{post.title}</h3>
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                  <Badge className={getStatusColor(post.status)}>
+                                    {post.status}
+                                  </Badge>
+                                  {post.priority && (
+                                    <Badge className={getPriorityColor(post.priority)}>
+                                      {post.priority}
+                                    </Badge>
+                                  )}
+                                  {post.isAiGenerated && (
+                                    <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200">
+                                      <Zap className="h-3 w-3 mr-1" />
+                                      AI
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                             
                             {post.excerpt && (
-                              <p className="text-gray-600 dark:text-gray-400 mb-3">{post.excerpt}</p>
+                              <p className="text-gray-600 dark:text-gray-400 mb-3 line-clamp-3 flex-1">{post.excerpt}</p>
                             )}
                             
-                            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                            <div className="flex flex-col gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
-                                {post.publishedDate ? format(new Date(post.publishedDate), 'MMM dd, yyyy') : 
-                                 post.scheduledDate ? `Scheduled ${format(new Date(post.scheduledDate), 'MMM dd, yyyy')}` : 
-                                 post.createdAt ? format(new Date(post.createdAt), 'MMM dd, yyyy') : 'No date'}
+                                <span className="truncate">
+                                  {post.publishedDate ? format(new Date(post.publishedDate), 'MMM dd, yyyy') : 
+                                   post.scheduledDate ? `Scheduled ${format(new Date(post.scheduledDate), 'MMM dd')}` : 
+                                   post.createdAt ? format(new Date(post.createdAt), 'MMM dd, yyyy') : 'No date'}
+                                </span>
                               </div>
                               {post.platform && (
                                 <div className="flex items-center gap-1">
                                   <BookOpen className="h-4 w-4" />
-                                  {post.platform}
+                                  <span className="truncate">{post.platform}</span>
                                 </div>
                               )}
                               {post.wordCount && (
                                 <div className="flex items-center gap-1">
                                   <FileText className="h-4 w-4" />
-                                  {post.wordCount} words
-                                </div>
-                              )}
-                              {post.readingTime && (
-                                <div className="flex items-center gap-1">
-                                  <AlertCircle className="h-4 w-4" />
-                                  {post.readingTime} min read
+                                  <span>{post.wordCount} words</span>
                                 </div>
                               )}
                             </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => {
-                                setEditingPost(post.id);
-                                setShowEditor(true);
-                              }}
-                              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                // Preview functionality
-                              }}
-                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </button>
-                            <select
-                              value={post.status}
-                              onChange={(e) => !isReadOnly && updatePostStatusMutation.mutate({ id: post.id, status: e.target.value })}
-                              disabled={isReadOnly}
-                              className={`px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}
-                            >
-                              <option value="draft">Draft</option>
-                              <option value="scheduled">Scheduled</option>
-                              <option value="published">Published</option>
-                              <option value="archived">Archived</option>
-                            </select>
+                            
+                            <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                              <div className="flex items-center gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  disabled={isReadOnly}
+                                  onClick={() => {
+                                    if (!isReadOnly) {
+                                      setEditingPost(post.id);
+                                      setShowEditor(true);
+                                    }
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    // Preview functionality
+                                  }}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <select
+                                value={post.status}
+                                onChange={(e) => !isReadOnly && updatePostStatusMutation.mutate({ id: post.id, status: e.target.value })}
+                                disabled={isReadOnly}
+                                className={`px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}
+                              >
+                                <option value="draft">Draft</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="published">Published</option>
+                                <option value="archived">Archived</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                  ) : (
+                    // List View
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="col-span-4">Title</div>
+                        <div className="col-span-2">Status</div>
+                        <div className="col-span-2">Platform</div>
+                        <div className="col-span-2">Date</div>
+                        <div className="col-span-1">Words</div>
+                        <div className="col-span-1">Actions</div>
                       </div>
-                    ))}
-                  </div>
+                      {blogPosts.map((post) => (
+                        <div key={post.id} className="grid grid-cols-12 gap-4 px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          <div className="col-span-4">
+                            <div className="flex flex-col">
+                              <h3 className="font-semibold text-base line-clamp-1">{post.title}</h3>
+                              {post.excerpt && (
+                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">{post.excerpt}</p>
+                              )}
+                              <div className="flex gap-1 mt-2">
+                                {post.priority && (
+                                  <Badge className={getPriorityColor(post.priority)}>
+                                    {post.priority}
+                                  </Badge>
+                                )}
+                                {post.isAiGenerated && (
+                                  <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200">
+                                    <Zap className="h-3 w-3 mr-1" />
+                                    AI
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-span-2">
+                            <Badge className={getStatusColor(post.status)}>
+                              {post.status}
+                            </Badge>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {post.platform || 'Not specified'}
+                            </span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {post.publishedDate ? format(new Date(post.publishedDate), 'MMM dd, yyyy') : 
+                               post.scheduledDate ? format(new Date(post.scheduledDate), 'MMM dd, yyyy') : 
+                               post.createdAt ? format(new Date(post.createdAt), 'MMM dd, yyyy') : 'No date'}
+                            </span>
+                          </div>
+                          <div className="col-span-1">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {post.wordCount || 0}
+                            </span>
+                          </div>
+                          <div className="col-span-1">
+                            <div className="flex items-center gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                disabled={isReadOnly}
+                                onClick={() => {
+                                  if (!isReadOnly) {
+                                    setEditingPost(post.id);
+                                    setShowEditor(true);
+                                  }
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => {
+                                  // Preview functionality
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <select
+                                value={post.status}
+                                onChange={(e) => !isReadOnly && updatePostStatusMutation.mutate({ id: post.id, status: e.target.value })}
+                                disabled={isReadOnly}
+                                className={`px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}
+                              >
+                                <option value="draft">Draft</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="published">Published</option>
+                                <option value="archived">Archived</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
                 ) : (
                   <div className="text-center py-12">
                     <FileText className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
