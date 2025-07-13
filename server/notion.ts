@@ -11,6 +11,15 @@ if (!process.env.NOTION_PAGE_URL) {
     console.error("Please add your Notion database URL to environment variables");
 }
 
+// Log environment variable status (without exposing actual values)
+console.log("🔑 NOTION_INTEGRATION_SECRET configured:", !!process.env.NOTION_INTEGRATION_SECRET);
+console.log("🔗 NOTION_PAGE_URL configured:", !!process.env.NOTION_PAGE_URL);
+
+if (process.env.NOTION_INTEGRATION_SECRET) {
+    console.log("🔑 Secret length:", process.env.NOTION_INTEGRATION_SECRET.length);
+    console.log("🔑 Secret starts with:", process.env.NOTION_INTEGRATION_SECRET.substring(0, 10) + "...");
+}
+
 export const notion = new Client({
     auth: process.env.NOTION_INTEGRATION_SECRET!,
 });
@@ -37,15 +46,30 @@ export async function getNotionDatabase() {
             throw new Error("NOTION_DATABASE_ID is not configured");
         }
         
+        console.log("🔍 Attempting to retrieve database with ID:", NOTION_DATABASE_ID);
+        
         const database = await notion.databases.retrieve({
             database_id: NOTION_DATABASE_ID,
         });
+        
+        console.log("✅ Successfully retrieved database:", database.title?.[0]?.plain_text || "Unknown");
         return database;
-    } catch (error) {
-        console.error("Error retrieving database:", error);
+    } catch (error: any) {
+        console.error("❌ Error retrieving database:", error.message);
         console.error("Database ID:", NOTION_DATABASE_ID);
-        console.error("Error details:", error);
-        throw error;
+        console.error("Error code:", error.code);
+        console.error("Error status:", error.status);
+        
+        // Provide more specific error messages
+        if (error.code === 'unauthorized') {
+            throw new Error("Notion integration secret is invalid or expired. Please update your NOTION_INTEGRATION_SECRET.");
+        } else if (error.code === 'object_not_found') {
+            throw new Error("Database not found. Please check your NOTION_PAGE_URL points to the correct database.");
+        } else if (error.code === 'forbidden') {
+            throw new Error("Notion integration doesn't have permission to access this database. Please share the database with your integration.");
+        } else {
+            throw new Error(`Notion API error: ${error.message}`);
+        }
     }
 }
 

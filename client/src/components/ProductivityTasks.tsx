@@ -65,6 +65,9 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
     queryFn: () => apiRequest(`/api/notion/tasks?date=${selectedDate.toISOString().split('T')[0]}&view=day`),
     retry: 3,
     retryDelay: 1000,
+    onError: (error) => {
+      console.error('Notion tasks query failed:', error);
+    },
   });
 
   // Create task mutation

@@ -1328,7 +1328,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/notion/tasks", async (req, res) => {
     try {
       const { date, view } = req.query;
+      
+      console.log("📋 Fetching Notion tasks for date:", date, "view:", view);
+      console.log("🔍 Environment check - Secret exists:", !!process.env.NOTION_INTEGRATION_SECRET);
+      console.log("🔍 Environment check - URL exists:", !!process.env.NOTION_PAGE_URL);
+      
       const tasks = await getNotionTasks();
+      
+      console.log("📋 Retrieved", tasks.length, "tasks from Notion");
       
       // Filter by date if provided
       if (date && view) {
@@ -1343,13 +1350,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return taskDateStr === targetDateStr;
         });
         
+        console.log("📋 Filtered to", filteredTasks.length, "tasks for selected date");
         res.json(filteredTasks);
       } else {
         res.json(tasks);
       }
-    } catch (error) {
-      console.error("Error fetching Notion entries:", error);
-      res.status(500).json({ error: "Failed to fetch Notion entries" });
+    } catch (error: any) {
+      console.error("❌ Error fetching Notion entries:", error.message);
+      console.error("❌ Error code:", error.code);
+      console.error("❌ Error status:", error.status);
+      console.error("❌ Full error:", error);
+      
+      // Return specific error message for debugging
+      res.status(500).json({ 
+        error: `Failed to fetch Notion entries: ${error.message}`,
+        code: error.code,
+        status: error.status 
+      });
     }
   });
 
