@@ -237,20 +237,20 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "draft": return "bg-gray-100 text-gray-800";
-      case "scheduled": return "bg-blue-100 text-blue-800";
-      case "published": return "bg-green-100 text-green-800";
-      case "archived": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "draft": return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      case "scheduled": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      case "published": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      case "archived": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      default: return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high": return "bg-red-100 text-red-800";
-      case "medium": return "bg-yellow-100 text-yellow-800";
-      case "low": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "high": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      case "medium": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+      case "low": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      default: return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
     }
   };
 
@@ -259,21 +259,21 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-sm text-gray-600">Loading post...</p>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Loading post...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="max-w-6xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-50 border-b px-6 py-4">
+      <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <h1 className="text-xl font-semibold text-gray-800">
+              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                 {postId ? "Edit Post" : "New Blog Post"}
               </h1>
             </div>
@@ -290,7 +290,7 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
           
           <div className="flex items-center space-x-2">
             {lastSaved && (
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 Last saved: {format(lastSaved, "HH:mm:ss")}
               </span>
             )}
@@ -361,7 +361,7 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
                   placeholder="Post title..."
                   value={post.title || ""}
                   onChange={(e) => setPost(prev => ({ ...prev, title: e.target.value }))}
-                  className="text-2xl font-bold border-none px-0 focus:ring-0 placeholder:text-gray-400"
+                  className="text-2xl font-bold border-none px-0 focus:ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-transparent dark:text-gray-100"
                 />
               </div>
 
@@ -371,7 +371,7 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
                   placeholder="Write a brief excerpt..."
                   value={post.excerpt || ""}
                   onChange={(e) => setPost(prev => ({ ...prev, excerpt: e.target.value }))}
-                  className="resize-none border-none px-0 focus:ring-0 placeholder:text-gray-400"
+                  className="resize-none border-none px-0 focus:ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-transparent dark:text-gray-100"
                   rows={2}
                 />
               </div>
@@ -488,13 +488,13 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
                   placeholder="Start writing your post..."
                   value={post.content || ""}
                   onChange={(e) => setPost(prev => ({ ...prev, content: e.target.value }))}
-                  className="min-h-96 border-none px-0 focus:ring-0 placeholder:text-gray-400 resize-none"
+                  className="min-h-96 border-none px-0 focus:ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none bg-transparent dark:text-gray-100"
                   style={{ fontSize: '16px', lineHeight: '1.6' }}
                 />
               </div>
 
               {/* Status Bar */}
-              <div className="flex items-center justify-between pt-4 border-t text-sm text-gray-500">
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex items-center space-x-4">
                   <span className="flex items-center">
                     <FileText className="h-4 w-4 mr-1" />
@@ -523,10 +523,10 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
             </div>
           ) : (
             /* Preview Mode */
-            <div className="p-6 prose prose-lg max-w-none">
-              <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
+            <div className="p-6 prose prose-lg max-w-none dark:prose-invert">
+              <h1 className="text-3xl font-bold mb-4 dark:text-gray-100">{post.title}</h1>
               {post.excerpt && (
-                <p className="text-lg text-gray-600 mb-6 italic">{post.excerpt}</p>
+                <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 italic">{post.excerpt}</p>
               )}
               <div className="whitespace-pre-wrap">
                 {post.content?.split('\n').map((paragraph, index) => {
@@ -571,9 +571,9 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
 
         {/* Settings Sidebar */}
         {showSettings && (
-          <div className="w-80 bg-gray-50 p-6 space-y-6">
+          <div className="w-80 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 p-6 space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Post Settings</h3>
+              <h3 className="text-lg font-semibold mb-4 dark:text-gray-200">Post Settings</h3>
               
               <div className="space-y-4">
                 <div>
@@ -657,7 +657,7 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">SEO Settings</h3>
+              <h3 className="text-lg font-semibold mb-4 dark:text-gray-200">SEO Settings</h3>
               
               <div className="space-y-4">
                 <div>
