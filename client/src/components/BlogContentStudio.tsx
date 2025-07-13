@@ -141,10 +141,10 @@ export default function BlogContentStudio() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, isAdmin, isAuthenticated } = useAuth();
   
   // Check if user has admin access for CRUD operations
-  const isReadOnly = !user?.isAdmin;
+  const isReadOnly = !isAuthenticated || !isAdmin;
 
   const { data: blogPosts, isLoading: postsLoading } = useQuery<BlogPost[]>({
     queryKey: ['/api/blog/posts'],
