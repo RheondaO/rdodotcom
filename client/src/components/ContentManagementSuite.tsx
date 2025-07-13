@@ -104,7 +104,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       lastUpdated: "2025-06-15",
       status: "active" as "active" | "paused" | "completed",
       color: "#6B7280",
-      icon: "🌅"
+      icon: "W"
     },
     {
       id: 2,
@@ -118,7 +118,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       lastUpdated: "2025-06-14",
       status: "active" as "active" | "paused" | "completed",
       color: "#6B7280",
-      icon: "🌙"
+      icon: "A"
     },
     {
       id: 3,
@@ -132,7 +132,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       lastUpdated: "2025-06-13",
       status: "active" as "active" | "paused" | "completed",
       color: "#6B7280",
-      icon: "🧪"
+      icon: "C"
     },
     {
       id: 4,
@@ -146,7 +146,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       lastUpdated: "2025-06-12",
       status: "active" as "active" | "paused" | "completed",
       color: "#6B7280",
-      icon: "✨"
+      icon: "P"
     },
     {
       id: 5,
@@ -160,7 +160,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       lastUpdated: "2025-06-11",
       status: "active" as "active" | "paused" | "completed",
       color: "#6B7280",
-      icon: "🎯"
+      icon: "E"
     },
     {
       id: 6,
@@ -174,7 +174,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       lastUpdated: "2025-06-10",
       status: "paused" as "active" | "paused" | "completed",
       color: "#6B7280",
-      icon: "📚"
+      icon: "T"
     }
   ];
 
@@ -453,12 +453,12 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="engagement">🎯 Engagement</SelectItem>
-                          <SelectItem value="astrological">🌙 Astrological</SelectItem>
-                          <SelectItem value="wellness">🌅 Wellness</SelectItem>
-                          <SelectItem value="educational">📚 Educational</SelectItem>
-                          <SelectItem value="personal">✨ Personal</SelectItem>
-                          <SelectItem value="creative">🧪 Creative</SelectItem>
+                          <SelectItem value="engagement">Engagement</SelectItem>
+                          <SelectItem value="astrological">Astrological</SelectItem>
+                          <SelectItem value="wellness">Wellness</SelectItem>
+                          <SelectItem value="educational">Educational</SelectItem>
+                          <SelectItem value="personal">Personal</SelectItem>
+                          <SelectItem value="creative">Creative</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
