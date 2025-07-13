@@ -250,88 +250,106 @@ export default function BlogContentStudio() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-purple-600 dark:text-purple-400 flex items-center gap-2">
-              <FileText className="h-8 w-8" />
-              Content Management Suite
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">Manage content across all your brands</p>
-          </div>
-          <div className="flex gap-2">
-            <Dialog open={newIdeaDialog} onOpenChange={setNewIdeaDialog}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Lightbulb className="h-4 w-4 mr-2" />
-                  New Idea
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Blog Idea</DialogTitle>
-                </DialogHeader>
-                <NewIdeaForm onSubmit={createIdeaMutation.mutate} />
-              </DialogContent>
-            </Dialog>
-            
-            <Button
-              size="sm"
-              onClick={() => {
-                setEditingPost(null);
-                setShowEditor(true);
-              }}
-            >
-              <PenTool className="h-4 w-4 mr-2" />
-              Write Post
-            </Button>
-          </div>
-        </div>
-
-        {/* Brand Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 flex items-center gap-1 px-3 py-1">
-            <span className="text-lg">🌙</span>
-            relationONLY Magazine
-          </Badge>
-          <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 flex items-center gap-1 px-3 py-1">
-            <span className="text-lg">🖊️</span>
-            Really Obvi Media Lab
-          </Badge>
-          <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 flex items-center gap-1 px-3 py-1">
-            <span className="text-lg">✨</span>
-            Personal Brand
-          </Badge>
-          <Badge variant="outline" className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800 flex items-center gap-1 px-3 py-1">
-            <span className="text-lg">🏈</span>
-            Misc
-          </Badge>
-        </div>
-      </div>
-
-      {/* Mini-Game Block Studio Section */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-purple-600 rounded flex items-center justify-center">
-              <Zap className="h-4 w-4 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 p-6">
+      {/* Enhanced Header Section */}
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-8">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <FileText className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-4 w-4 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    Content Management Suite
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg">Professional content creation and workflow management</p>
+                </div>
+              </div>
             </div>
-            <h2 className="text-xl font-semibold text-purple-600 dark:text-purple-400">Mini-Game Block Studio</h2>
-            <Plus className="h-5 w-5 text-gray-400" />
+            <div className="flex gap-3">
+              <Dialog open={newIdeaDialog} onOpenChange={setNewIdeaDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="hover:bg-yellow-50 dark:hover:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                    <Lightbulb className="h-4 w-4 mr-2 text-yellow-600" />
+                    New Idea
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Blog Idea</DialogTitle>
+                  </DialogHeader>
+                  <NewIdeaForm onSubmit={createIdeaMutation.mutate} />
+                </DialogContent>
+              </Dialog>
+              
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg"
+                onClick={() => {
+                  setEditingPost(null);
+                  setShowEditor(true);
+                }}
+              >
+                <PenTool className="h-4 w-4 mr-2" />
+                Write Post
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-gray-800 dark:bg-gray-200 rounded-full"></div>
-              New Block
-            </Button>
-            <Button variant="outline" size="sm" className="bg-purple-600 text-white hover:bg-purple-700 flex items-center gap-2">
+
+          {/* Enhanced Brand Tabs */}
+          <div className="flex gap-3 overflow-x-auto pb-2 mt-8">
+            <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-lg">🌙</span>
+              <span className="font-semibold">relationONLY Magazine</span>
+            </div>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-emerald-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-lg">🖊️</span>
+              <span className="font-semibold">Really Obvi Media Lab</span>
+            </div>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-400 to-cyan-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
               <span className="text-lg">✨</span>
-              New Mini-Game
-            </Button>
+              <span className="font-semibold">Personal Brand</span>
+            </div>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-red-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-lg">🏈</span>
+              <span className="font-semibold">Misc</span>
+            </div>
           </div>
         </div>
+
+        {/* Enhanced Mini-Game Block Studio Section */}
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-8">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  Mini-Game Block Studio
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">Create and manage content blocks with workflow tracking</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="hover:bg-gray-50 dark:hover:bg-gray-700/50 border-gray-200 dark:border-gray-700">
+                <Plus className="h-4 w-4 mr-2" />
+                New Block
+              </Button>
+              <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg">
+                <span className="text-lg mr-2">✨</span>
+                New Mini-Game
+              </Button>
+            </div>
+          </div>
 
         <Tabs value={selectedStudioTab} onValueChange={setSelectedStudioTab}>
           <TabsList className="grid w-full grid-cols-4">
@@ -342,157 +360,256 @@ export default function BlogContentStudio() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Administration Block */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Administration Block - Enhanced */}
+              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-gray-800 dark:to-gray-700">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-600 dark:bg-gray-500 rounded-full flex items-center justify-center">
-                        <Users className="h-4 w-4 text-white" />
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-gray-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <Users className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">Administration</CardTitle>
+                      <div>
+                        <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Administration</CardTitle>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">52 designs/year</p>
+                      </div>
                     </div>
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors" />
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">52 designs/year</p>
                 </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <Calendar className="h-4 w-4" />
-                      <span>May 31, 2025</span>
+                <CardContent className="pt-6">
+                  <div className="space-y-5">
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium">May 31, 2025</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <span className="text-purple-600 dark:text-purple-400">♈</span>
-                      <span>Administration during Aries</span>
-                      <span className="text-purple-600 dark:text-purple-400">♉</span>
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3">
+                      <span className="text-purple-600 dark:text-purple-400 text-lg">♈</span>
+                      <span className="font-medium">Administration during Aries</span>
+                      <span className="text-purple-600 dark:text-purple-400 text-lg">♉</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <Calendar className="h-4 w-4" />
-                      <span>Every Friday (52/year)</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Annual Progress</span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-gray-100">1/52</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">2%</span>
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
+                      <Calendar className="h-4 w-4 text-green-600" />
+                      <span className="font-medium">Every Friday (52/year)</span>
                     </div>
                     
-                    {/* Vertical Progress Bar */}
-                    <div className="relative h-32 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Annual Progress</span>
+                        <span className="text-lg font-bold text-gray-900 dark:text-gray-100">1/52</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
+                        <span className="text-xs font-bold text-purple-600 dark:text-purple-400">2%</span>
+                      </div>
+                    </div>
+                    
+                    {/* Enhanced Vertical Progress Bar */}
+                    <div className="relative h-40 bg-gradient-to-t from-gray-200 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-2xl overflow-hidden shadow-inner">
                       <div 
-                        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-gray-500 to-gray-400 rounded-full transition-all duration-500"
+                        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-slate-600 via-slate-500 to-slate-400 rounded-2xl transition-all duration-1000 shadow-lg"
                         style={{ height: '4%' }}
                       ></div>
                       
-                      {/* Progress markers */}
-                      <div className="absolute inset-0 flex flex-col justify-between items-center py-2">
-                        <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                        <div className="w-2 h-2 bg-gray-200 rounded-full"></div>
-                        <div className="w-2 h-2 bg-gray-100 rounded-full"></div>
+                      {/* Enhanced Progress markers */}
+                      <div className="absolute inset-0 flex flex-col justify-between items-center py-3">
+                        <div className="w-3 h-3 bg-slate-700 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-slate-500 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-slate-300 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-slate-200 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-slate-100 rounded-full shadow-md"></div>
                       </div>
                     </div>
                     
-                    {/* Status indicators */}
-                    <div className="flex justify-between items-center text-xs">
+                    {/* Enhanced Status indicators */}
+                    <div className="flex justify-between items-center text-xs bg-white/50 dark:bg-gray-800/50 rounded-xl p-3 backdrop-blur-sm">
                       <div className="flex flex-col items-center">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full mb-1"></div>
-                        <span className="text-blue-600 dark:text-blue-400 font-medium">0</span>
-                        <span className="text-gray-500 dark:text-gray-400">Designed</span>
+                        <div className="w-3 h-3 bg-blue-600 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">0</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Designed</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full mb-1"></div>
-                        <span className="text-yellow-600 dark:text-yellow-400 font-medium">0</span>
-                        <span className="text-gray-500 dark:text-gray-400">Reviewed</span>
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-yellow-600 dark:text-yellow-400 font-bold text-sm">0</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Reviewed</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mb-1"></div>
-                        <span className="text-green-600 dark:text-green-400 font-medium">1</span>
-                        <span className="text-gray-500 dark:text-gray-400">Approved</span>
+                        <div className="w-3 h-3 bg-green-500 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-green-600 dark:text-green-400 font-bold text-sm">1</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Approved</span>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              {/* Other content blocks follow the same pattern */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="pb-4 border-b border-gray-200 dark:border-gray-700">
+              {/* Word of the Week Block - Enhanced */}
+              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-green-800 dark:to-emerald-700">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-green-600 dark:bg-green-500 rounded-full flex items-center justify-center">
-                        <BookOpen className="h-4 w-4 text-white" />
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <BookOpen className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">Word of the Week</CardTitle>
+                      <div>
+                        <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Word of the Week</CardTitle>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">52 designs/year</p>
+                      </div>
                     </div>
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors" />
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">52 designs/year</p>
                 </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <Calendar className="h-4 w-4" />
-                      <span>June 1, 2025</span>
+                <CardContent className="pt-6">
+                  <div className="space-y-5">
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium">June 1, 2025</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <span className="text-purple-600 dark:text-purple-400">♉</span>
-                      <span>Word of the Week during Taurus</span>
-                      <span className="text-purple-600 dark:text-purple-400">♊</span>
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3">
+                      <span className="text-purple-600 dark:text-purple-400 text-lg">♉</span>
+                      <span className="font-medium">Word learning during Taurus</span>
+                      <span className="text-purple-600 dark:text-purple-400 text-lg">♊</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <Calendar className="h-4 w-4" />
-                      <span>Every Friday (52/year)</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Annual Progress</span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-gray-100">0/52</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">0%</span>
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
+                      <Calendar className="h-4 w-4 text-green-600" />
+                      <span className="font-medium">Every Sunday (52/year)</span>
                     </div>
                     
-                    {/* Vertical Progress Bar */}
-                    <div className="relative h-32 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-green-800 dark:to-emerald-700 rounded-xl p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Annual Progress</span>
+                        <span className="text-lg font-bold text-gray-900 dark:text-gray-100">22/52</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
+                        <span className="text-xs font-bold text-green-600 dark:text-green-400">42%</span>
+                      </div>
+                    </div>
+                    
+                    {/* Enhanced Vertical Progress Bar */}
+                    <div className="relative h-40 bg-gradient-to-t from-emerald-200 to-green-100 dark:from-green-700 dark:to-emerald-600 rounded-2xl overflow-hidden shadow-inner">
                       <div 
-                        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-green-500 to-green-400 rounded-full transition-all duration-500"
-                        style={{ height: '0%' }}
+                        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-green-600 via-emerald-500 to-green-400 rounded-2xl transition-all duration-1000 shadow-lg"
+                        style={{ height: '42%' }}
                       ></div>
                       
-                      {/* Progress markers */}
-                      <div className="absolute inset-0 flex flex-col justify-between items-center py-2">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <div className="w-2 h-2 bg-green-300 rounded-full"></div>
-                        <div className="w-2 h-2 bg-green-200 rounded-full"></div>
-                        <div className="w-2 h-2 bg-green-100 rounded-full"></div>
+                      {/* Enhanced Progress markers */}
+                      <div className="absolute inset-0 flex flex-col justify-between items-center py-3">
+                        <div className="w-3 h-3 bg-green-700 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-green-300 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-green-200 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-green-100 rounded-full shadow-md"></div>
                       </div>
                     </div>
                     
-                    {/* Status indicators */}
-                    <div className="flex justify-between items-center text-xs">
+                    {/* Enhanced Status indicators */}
+                    <div className="flex justify-between items-center text-xs bg-white/50 dark:bg-gray-800/50 rounded-xl p-3 backdrop-blur-sm">
                       <div className="flex flex-col items-center">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full mb-1"></div>
-                        <span className="text-blue-600 dark:text-blue-400 font-medium">0</span>
-                        <span className="text-gray-500 dark:text-gray-400">Designed</span>
+                        <div className="w-3 h-3 bg-blue-600 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">15</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Designed</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full mb-1"></div>
-                        <span className="text-yellow-600 dark:text-yellow-400 font-medium">0</span>
-                        <span className="text-gray-500 dark:text-gray-400">Reviewed</span>
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-yellow-600 dark:text-yellow-400 font-bold text-sm">5</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Reviewed</span>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mb-1"></div>
-                        <span className="text-green-600 dark:text-green-400 font-medium">0</span>
-                        <span className="text-gray-500 dark:text-gray-400">Approved</span>
+                        <div className="w-3 h-3 bg-green-500 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-green-600 dark:text-green-400 font-bold text-sm">22</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Approved</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Social Media Posts Block - Enhanced */}
+              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
+                <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-800 dark:to-cyan-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <AlertCircle className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Social Media Posts</CardTitle>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">365 posts/year</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="space-y-5">
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium">Daily Posts</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3">
+                      <span className="text-purple-600 dark:text-purple-400 text-lg">📱</span>
+                      <span className="font-medium">Multi-platform content</span>
+                      <span className="text-purple-600 dark:text-purple-400 text-lg">🌐</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
+                      <Calendar className="h-4 w-4 text-green-600" />
+                      <span className="font-medium">Automated scheduling</span>
+                    </div>
+                    
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-800 dark:to-cyan-700 rounded-xl p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Annual Progress</span>
+                        <span className="text-lg font-bold text-gray-900 dark:text-gray-100">193/365</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
+                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400">53%</span>
+                      </div>
+                    </div>
+                    
+                    {/* Enhanced Vertical Progress Bar */}
+                    <div className="relative h-40 bg-gradient-to-t from-blue-200 to-cyan-100 dark:from-blue-700 dark:to-cyan-600 rounded-2xl overflow-hidden shadow-inner">
+                      <div 
+                        className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-600 via-cyan-500 to-blue-400 rounded-2xl transition-all duration-1000 shadow-lg"
+                        style={{ height: '53%' }}
+                      ></div>
+                      
+                      {/* Enhanced Progress markers */}
+                      <div className="absolute inset-0 flex flex-col justify-between items-center py-3">
+                        <div className="w-3 h-3 bg-blue-700 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-blue-500 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-blue-300 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-blue-200 rounded-full shadow-md"></div>
+                        <div className="w-3 h-3 bg-blue-100 rounded-full shadow-md"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Enhanced Status indicators */}
+                    <div className="flex justify-between items-center text-xs bg-white/50 dark:bg-gray-800/50 rounded-xl p-3 backdrop-blur-sm">
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 bg-blue-600 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">125</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Designed</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-yellow-600 dark:text-yellow-400 font-bold text-sm">68</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Reviewed</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 bg-green-500 rounded-full mb-2 shadow-lg"></div>
+                        <span className="text-green-600 dark:text-green-400 font-bold text-sm">193</span>
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Approved</span>
                       </div>
                     </div>
                   </div>
@@ -519,6 +636,7 @@ export default function BlogContentStudio() {
             </div>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   );
