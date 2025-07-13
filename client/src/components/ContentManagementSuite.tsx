@@ -378,10 +378,6 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                             <CardTitle className="text-lg font-bold text-gray-800 dark:text-gray-200">{block.title}</CardTitle>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                          <Badge className={getStatusColor(block.status)}>{block.status}</Badge>
-                        </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-6">
@@ -417,6 +413,12 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                             <span>Published: {block.publishedPosts}</span>
                             <span>Scheduled: {block.scheduledPosts}</span>
                           </div>
+                        </div>
+                        
+                        {/* Status indicator at bottom left */}
+                        <div className="flex items-center gap-2 mt-4">
+                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                          <Badge className={getStatusColor(block.status)}>{block.status}</Badge>
                         </div>
                       </div>
                     </CardContent>
