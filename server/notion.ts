@@ -18,6 +18,20 @@ console.log("🔗 NOTION_PAGE_URL configured:", !!process.env.NOTION_PAGE_URL);
 if (process.env.NOTION_INTEGRATION_SECRET) {
     console.log("🔑 Secret length:", process.env.NOTION_INTEGRATION_SECRET.length);
     console.log("🔑 Secret starts with:", process.env.NOTION_INTEGRATION_SECRET.substring(0, 10) + "...");
+    
+    // Additional validation
+    if (process.env.NOTION_INTEGRATION_SECRET.length < 40) {
+        console.error("❌ NOTION_INTEGRATION_SECRET seems too short - should be ~50 characters");
+    }
+    
+    if (!process.env.NOTION_INTEGRATION_SECRET.startsWith('ntn_')) {
+        console.error("❌ NOTION_INTEGRATION_SECRET should start with 'ntn_'");
+    }
+}
+
+if (process.env.NOTION_PAGE_URL) {
+    console.log("🔗 Page URL length:", process.env.NOTION_PAGE_URL.length);
+    console.log("🔗 Page URL domain:", process.env.NOTION_PAGE_URL.includes('notion.so') ? 'notion.so' : 'other');
 }
 
 export const notion = new Client({

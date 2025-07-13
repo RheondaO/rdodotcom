@@ -1325,6 +1325,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Production debugging endpoint
+  app.get("/api/notion/production-test", async (req, res) => {
+    try {
+      const results = {
+        environment: process.env.NODE_ENV,
+        hasSecret: !!process.env.NOTION_INTEGRATION_SECRET,
+        hasUrl: !!process.env.NOTION_PAGE_URL,
+        timestamp: new Date().toISOString(),
+        tests: []
+      };
+      
+      if (!process.env.NOTION_INTEGRATION_SECRET) {
+        results.tests.push({
+          name: 'Environment Variables',
+          status: 'FAILED',
+          error: 'NOTION_INTEGRATION_SECRET not configured'
+        });
+        return res.json(results);
+      }
+      
+      if (!process.env.NOTION_PAGE_URL) {
+        results.tests.push({
+          name: 'Environment Variables',
+          status: 'FAILED',
+          error: 'NOTION_PAGE_URL not configured'
+        });
+        return res.json(results);
+      }
+      
+      results.tests.push({
+        name: 'Environment Variables',
+        status: 'PASSED',
+        details: {
+          secretLength: process.env.NOTION_INTEGRATION_SECRET.length,
+          secretFormat: process.env.NOTION_INTEGRATION_SECRET.startsWith('ntn_'),
+          urlFormat: process.env.NOTION_PAGE_URL.includes('notion.so')
+        }
+      });
+      
+      // Test database connection
+      try {
+        const databases = await getNotionDatabases();
+        results.tests.push({
+          name: 'Database Connection',
+          status: 'PASSED',
+          details: { 
+            databaseCount: databases.length,
+            databases: databases.map(db => ({
+              id: db.id,
+              title: db.title?.[0]?.plain_text || 'Unknown'
+            }))
+          }
+        });
+        
+        // Test task retrieval
+        const tasks = await getNotionTasks();
+        results.tests.push({
+          name: 'Task Retrieval',
+          status: 'PASSED',
+          details: { taskCount: tasks.length }
+        });
+        
+      } catch (error) {
+        results.tests.push({
+          name: 'Database Connection',
+          status: 'FAILED',
+          error: error.message,
+          code: error.code,
+          status: error.status
+        });
+      }
+      
+      res.json(results);
+      
+    } catch (error) {
+      res.status(500).json({
+        error: 'Production test failed',
+        message: error.message
+      });
+    }
+  });
+
   app.get("/api/notion/tasks", async (req, res) => {
     try {
       const { date, view } = req.query;
