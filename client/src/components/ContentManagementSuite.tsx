@@ -376,7 +376,6 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                         <div className="flex items-center gap-3">
                           <div>
                             <CardTitle className="text-lg font-bold text-gray-800 dark:text-gray-200">{block.title}</CardTitle>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">{block.description}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
