@@ -64,6 +64,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   const [activeView, setActiveView] = useState<"overview" | "create" | "analytics" | "progress">("overview");
   const [showNewBlockForm, setShowNewBlockForm] = useState(false);
   const [showAnalyticsForm, setShowAnalyticsForm] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -94,8 +95,19 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     totalPosts: 0
   });
 
+  // Mapping between @rotationonly tags and mini block titles
+  const tagToBlockMapping = {
+    "rotationonly.ext": ["Astro Insights"],
+    "rotationonly.ceo": ["Personal Stories"],
+    "rotationonly.mag": ["Morning Motivation Series"],
+    "rotationonly.econ": ["Community Challenges"],
+    "rotationonly.xxx": ["Creative Experiments"],
+    "rotationonly.stem": ["Tutorial Tuesdays"],
+    "rotationonly.music": ["Morning Motivation Series", "Creative Experiments"] // Multiple blocks can be mapped to music
+  };
+
   // Sample data for mini game blocks
-  const displayBlocks = [
+  const allBlocks = [
     {
       id: 1,
       title: "Morning Motivation Series",
@@ -200,6 +212,11 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     }
   ];
 
+  // Filter blocks based on selected @rotationonly tag
+  const displayBlocks = selectedFilter 
+    ? allBlocks.filter(block => tagToBlockMapping[selectedFilter]?.includes(block.title))
+    : allBlocks;
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active": return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
@@ -215,7 +232,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     totalPosts: displayBlocks.reduce((sum, b) => sum + b.totalPosts, 0),
     scheduledPosts: displayBlocks.reduce((sum, b) => sum + b.scheduledPosts, 0),
     publishedPosts: displayBlocks.reduce((sum, b) => sum + b.publishedPosts, 0),
-    avgEngagement: Math.round(displayBlocks.reduce((sum, b) => sum + b.engagement, 0) / displayBlocks.length)
+    avgEngagement: displayBlocks.length > 0 ? Math.round(displayBlocks.reduce((sum, b) => sum + b.engagement, 0) / displayBlocks.length) : 0
   };
 
   return (
@@ -269,27 +286,29 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
           {/* Brand Tabs */}
           <div className="flex flex-wrap justify-center gap-2 pb-2 mt-4">
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
-              <span>@rotationonly.mag</span>
+            <div 
+              className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-colors ${
+                selectedFilter === null 
+                  ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+              onClick={() => setSelectedFilter(null)}
+            >
+              <span>All</span>
             </div>
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
-              <span>@rotationonly.econ</span>
-            </div>
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
-              <span>@rotationonly.xxx</span>
-            </div>
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
-              <span>@rotationonly.ext</span>
-            </div>
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
-              <span>@rotationonly.stem</span>
-            </div>
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
-              <span>@rotationonly.music</span>
-            </div>
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
-              <span>@rotationonly.ceo</span>
-            </div>
+            {Object.keys(tagToBlockMapping).map((tag) => (
+              <div 
+                key={tag}
+                className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-colors ${
+                  selectedFilter === tag 
+                    ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100' 
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+                onClick={() => setSelectedFilter(tag)}
+              >
+                <span>@{tag}</span>
+              </div>
+            ))}
           </div>
         </div>
 
