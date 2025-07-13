@@ -90,124 +90,8 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     totalPosts: 0
   });
 
-  // Fetch Mini Game Blocks from database
-  const { data: miniGameBlocks = [], isLoading: blocksLoading } = useQuery({
-    queryKey: ['/api/mini-game-blocks'],
-    select: (data: any[]) => data || []
-  });
-
-  // Fetch Mini Game Designs from database
-  const { data: miniGameDesigns = [], isLoading: designsLoading } = useQuery({
-    queryKey: ['/api/mini-game-designs'],
-    select: (data: any[]) => data || []
-  });
-
-  // Fetch Performance Insights from database
-  const { data: performanceInsights = [], isLoading: analyticsLoading } = useQuery({
-    queryKey: ['/api/performance-insights'],
-    select: (data: any[]) => data || []
-  });
-
-  // Create Mini Game Block mutation
-  const createBlockMutation = useMutation({
-    mutationFn: async (blockData: any) => {
-      const response = await fetch('/api/mini-game-blocks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(blockData)
-      });
-      if (!response.ok) throw new Error('Failed to create block');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/mini-game-blocks'] });
-      toast({ title: "Mini Game Block created successfully" });
-      setShowNewBlockForm(false);
-      setNewBlock({
-        name: "",
-        description: "",
-        frequency: "weekly",
-        frequencyValue: 52,
-        color: "#8B5CF6",
-        category: "engagement"
-      });
-    },
-    onError: () => {
-      toast({ title: "Failed to create Mini Game Block", variant: "destructive" });
-    }
-  });
-
-  // Create Performance Insights mutation
-  const createAnalyticsMutation = useMutation({
-    mutationFn: async (analyticsData: any) => {
-      const response = await fetch('/api/performance-insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(analyticsData)
-      });
-      if (!response.ok) throw new Error('Failed to create analytics');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/performance-insights'] });
-      toast({ title: "Analytics data added successfully" });
-      setShowAnalyticsForm(false);
-      setNewAnalytics({
-        miniGameBlockId: "",
-        platform: "instagram",
-        dayOfWeek: "monday",
-        timeSlot: "morning",
-        postType: "image",
-        avgImpressions: 0,
-        avgReach: 0,
-        avgLikes: 0,
-        avgComments: 0,
-        avgShares: 0,
-        avgEngagementRate: 0,
-        totalPosts: 0
-      });
-    },
-    onError: () => {
-      toast({ title: "Failed to add analytics data", variant: "destructive" });
-    }
-  });
-
-  // Helper function to get category icon
-  const getBlockIcon = (category: string) => {
-    switch (category) {
-      case "engagement": return "🎯";
-      case "astrological": return "🌙";
-      case "wellness": return "🌅";
-      case "educational": return "📚";
-      case "personal": return "✨";
-      case "creative": return "🧪";
-      default: return "📝";
-    }
-  };
-
-  // Transform database data to match component interface or use sample data
-  const displayBlocks = miniGameBlocks.length > 0 ? miniGameBlocks.map((block: any) => {
-    const blockInsights = performanceInsights.filter(p => p.miniGameBlockId === block.id);
-    const totalPosts = blockInsights.reduce((sum, p) => sum + p.totalPosts, 0);
-    const avgEngagement = blockInsights.length > 0 
-      ? blockInsights.reduce((sum, p) => sum + p.avgEngagementRate, 0) / blockInsights.length / 100
-      : 85;
-    
-    return {
-      id: block.id,
-      title: block.name,
-      description: block.description || "No description",
-      category: block.category,
-      totalPosts: totalPosts || 25,
-      scheduledPosts: Math.floor(totalPosts * 0.3) || 8,
-      publishedPosts: Math.floor(totalPosts * 0.7) || 17,
-      engagement: Math.round(avgEngagement),
-      lastUpdated: format(new Date(block.updatedAt || new Date()), 'yyyy-MM-dd'),
-      status: block.isActive ? "active" : "paused" as "active" | "paused" | "completed",
-      color: block.color || "#8B5CF6",
-      icon: getBlockIcon(block.category)
-    };
-  }) : [
+  // Sample data for mini game blocks
+  const displayBlocks = [
     {
       id: 1,
       title: "Morning Motivation Series",
@@ -313,737 +197,365 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Content Studio</h2>
-          <p className="text-gray-600 dark:text-gray-300">Mini Game Blocks & Content Management</p>
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            variant={activeView === "overview" ? "default" : "outline"}
-            onClick={() => setActiveView("overview")}
-            className="flex items-center space-x-2"
-          >
-            <Layout className="h-4 w-4" />
-            <span>Overview</span>
-          </Button>
-          <Button
-            variant={activeView === "create" ? "default" : "outline"}
-            onClick={() => setActiveView("create")}
-            className="flex items-center space-x-2"
-            disabled={!user}
-          >
-            <PenTool className="h-4 w-4" />
-            <span>Create</span>
-          </Button>
-          <Button
-            variant={activeView === "progress" ? "default" : "outline"}
-            onClick={() => setActiveView("progress")}
-            className="flex items-center space-x-2"
-          >
-            <Palette className="h-4 w-4" />
-            <span>Design Progress</span>
-          </Button>
-          <Button
-            variant={activeView === "analytics" ? "default" : "outline"}
-            onClick={() => setActiveView("analytics")}
-            className="flex items-center space-x-2"
-          >
-            <TrendingUp className="h-4 w-4" />
-            <span>Analytics</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Overview */}
-      {activeView === "overview" && (
-        <div className="space-y-6">
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 border-purple-200 dark:border-purple-700">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-purple-600 dark:text-purple-300">Mini Game Blocks</p>
-                    <p className="text-2xl font-bold text-purple-700 dark:text-purple-200">{totalStats.totalBlocks}</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 p-6">
+      {/* Enhanced Header Section */}
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-8">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <FileText className="h-8 w-8 text-white" />
                   </div>
-                  <Layout className="h-8 w-8 text-purple-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-blue-200 dark:border-blue-700">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-blue-600 dark:text-blue-300">Content Pieces</p>
-                    <p className="text-2xl font-bold text-blue-700 dark:text-blue-200">{totalStats.totalPosts}</p>
-                  </div>
-                  <FileText className="h-8 w-8 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 border-green-200 dark:border-green-700">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-green-600 dark:text-green-300">Published Content</p>
-                    <p className="text-2xl font-bold text-green-700 dark:text-green-200">{totalStats.publishedPosts}</p>
-                  </div>
-                  <Eye className="h-8 w-8 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-pink-50 to-pink-100 dark:from-pink-900 dark:to-pink-800 border-pink-200 dark:border-pink-700">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-pink-600 dark:text-pink-300">Scheduled Posts</p>
-                    <p className="text-2xl font-bold text-pink-700 dark:text-pink-200">{totalStats.scheduledPosts}</p>
-                  </div>
-                  <Calendar className="h-8 w-8 text-pink-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Content Pipeline Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Content Production Pipeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Concept & Design</span>
-                    <span className="text-sm text-gray-500">{displayBlocks.filter(b => b.status === "active").length} active</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div 
-                      className="bg-blue-500 h-3 rounded-full transition-all duration-500" 
-                      style={{ width: '85%' }}
-                    ></div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-4 w-4 text-white" />
                   </div>
                 </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Content Creation</span>
-                    <span className="text-sm text-gray-500">{Math.round((totalStats.publishedPosts / totalStats.totalPosts) * 100)}% complete</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div 
-                      className="bg-green-500 h-3 rounded-full transition-all duration-500" 
-                      style={{ width: `${(totalStats.publishedPosts / totalStats.totalPosts) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Publishing & Analytics</span>
-                    <span className="text-sm text-gray-500">{performanceInsights.length} data points</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div 
-                      className="bg-purple-500 h-3 rounded-full transition-all duration-500" 
-                      style={{ width: performanceInsights.length > 0 ? '70%' : '5%' }}
-                    ></div>
-                  </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    rotationONLY Content Studio
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg">Mini Game Blocks & Professional Content Management</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Mini Game Blocks Grid */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Content Blocks</h3>
-              {!isReadOnly && (
-                <Button 
-                  onClick={() => setActiveView("create")}
-                  className="flex items-center space-x-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>New Block</span>
-                </Button>
-              )}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayBlocks.map((block) => (
-                <Card key={block.id} className="hover:shadow-lg transition-shadow border-l-4" style={{ borderLeftColor: block.color }}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-2xl">{block.icon}</span>
-                        <div>
-                          <CardTitle className="text-base">{block.title}</CardTitle>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">{block.category}</p>
-                        </div>
-                      </div>
-                      <Badge className={getStatusColor(block.status)}>{block.status}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{block.description}</p>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300">Total Posts</span>
-                        <span className="font-semibold">{block.totalPosts}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300">Published</span>
-                        <span className="font-semibold text-green-600">{block.publishedPosts}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300">Scheduled</span>
-                        <span className="font-semibold text-blue-600">{block.scheduledPosts}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300">Engagement</span>
-                        <span className="font-semibold" style={{ color: block.color }}>{block.engagement}%</span>
-                      </div>
-                    </div>
+            <div className="flex gap-3">
+              <Button
+                variant={activeView === "overview" ? "default" : "outline"}
+                onClick={() => setActiveView("overview")}
+                className="hover:bg-purple-50 dark:hover:bg-purple-900/20"
+              >
+                Overview
+              </Button>
+              <Button
+                variant={activeView === "create" ? "default" : "outline"}
+                onClick={() => setActiveView("create")}
+                className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              >
+                Create
+              </Button>
+              <Button
+                variant={activeView === "analytics" ? "default" : "outline"}
+                onClick={() => setActiveView("analytics")}
+                className="hover:bg-green-50 dark:hover:bg-green-900/20"
+              >
+                Analytics
+              </Button>
+              <Button
+                variant={activeView === "progress" ? "default" : "outline"}
+                onClick={() => setActiveView("progress")}
+                className="hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+              >
+                Progress
+              </Button>
+            </div>
+          </div>
 
-                    <div className="pt-2 border-t">
-                      <p className="text-xs text-gray-500">Last updated: {block.lastUpdated}</p>
+          {/* Enhanced Brand Tabs */}
+          <div className="flex gap-3 overflow-x-auto pb-2 mt-8">
+            <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-lg">🌙</span>
+              <span className="font-semibold">relationONLY Magazine</span>
+            </div>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-emerald-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-lg">🖊️</span>
+              <span className="font-semibold">Really Obvi Media Lab</span>
+            </div>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-400 to-cyan-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-lg">✨</span>
+              <span className="font-semibold">Personal Brand</span>
+            </div>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-red-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-lg">🏈</span>
+              <span className="font-semibold">Misc</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced Mini-Game Block Studio Section */}
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-8">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  Mini-Game Block Studio
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">Create and manage content blocks with workflow tracking</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowNewBlockForm(true)}
+                disabled={isReadOnly}
+                className="hover:bg-gray-50 dark:hover:bg-gray-700/50 border-gray-200 dark:border-gray-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Block
+              </Button>
+              <Button
+                onClick={() => setShowAnalyticsForm(true)}
+                disabled={isReadOnly}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg"
+              >
+                <span className="text-lg mr-2">✨</span>
+                Add Analytics
+              </Button>
+            </div>
+          </div>
+
+          {activeView === "overview" && (
+            <div className="space-y-6">
+              {/* Stats Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Blocks</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalStats.totalBlocks}</p>
+                      </div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                        <Layout className="h-5 w-5 text-white" />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Design Progress */}
-      {activeView === "progress" && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayBlocks.map((block) => (
-              <Card key={block.id} className="hover:shadow-lg transition-shadow border-l-4" style={{ borderLeftColor: block.color }}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-2xl">{block.icon}</span>
+                
+                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="text-base">{block.title}</CardTitle>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{block.category}</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Blocks</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalStats.activeBlocks}</p>
+                      </div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                        <Activity className="h-5 w-5 text-white" />
                       </div>
                     </div>
-                    <Badge className={getStatusColor(block.status)}>{block.status}</Badge>
-                  </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Published Posts</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalStats.publishedPosts}</p>
+                      </div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Engagement</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalStats.avgEngagement}%</p>
+                      </div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Enhanced Content Blocks Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {displayBlocks.map((block) => (
+                  <Card key={block.id} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
+                    <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50" style={{ background: `linear-gradient(135deg, ${block.color}15 0%, ${block.color}08 100%)` }}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg text-2xl" style={{ background: `linear-gradient(135deg, ${block.color} 0%, ${block.color}CC 100%)` }}>
+                            {block.icon}
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg font-bold text-gray-800 dark:text-gray-200">{block.title}</CardTitle>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">{block.description}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                          <Badge className={getStatusColor(block.status)}>{block.status}</Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-5">
+                        <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
+                          <Calendar className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium">Last updated: {block.lastUpdated}</span>
+                        </div>
+                        
+                        <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Content Progress</span>
+                            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">{block.publishedPosts}/{block.totalPosts}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-600 dark:text-gray-400">Engagement Rate</span>
+                            <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{block.engagement}%</span>
+                          </div>
+                        </div>
+                        
+                        {/* Enhanced Progress Bar */}
+                        <div className="relative">
+                          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full rounded-full transition-all duration-1000 shadow-sm"
+                              style={{ 
+                                width: `${(block.publishedPosts / block.totalPosts) * 100}%`,
+                                background: `linear-gradient(90deg, ${block.color} 0%, ${block.color}CC 100%)`
+                              }}
+                            ></div>
+                          </div>
+                          <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <span>Published: {block.publishedPosts}</span>
+                            <span>Scheduled: {block.scheduledPosts}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeView === "create" && (
+            <div className="space-y-6">
+              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Create New Content Block</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-4">
-                    {/* Design Progress Stages */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Concept</span>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '100%' }}></div>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="blockName">Block Name</Label>
+                      <Input 
+                        id="blockName"
+                        placeholder="Enter block name"
+                        value={newBlock.name}
+                        onChange={(e) => setNewBlock({...newBlock, name: e.target.value})}
+                      />
                     </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Design</span>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '100%' }}></div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Content Creation</span>
-                        <Circle className="h-4 w-4 text-blue-500" />
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${Math.min(85, (block.publishedPosts / block.totalPosts) * 100)}%` }}></div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Scheduling</span>
-                        <Circle className="h-4 w-4 text-yellow-500" />
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${(block.scheduledPosts / block.totalPosts) * 100}%` }}></div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Publishing</span>
-                        <Circle className="h-4 w-4 text-purple-500" />
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(block.publishedPosts / block.totalPosts) * 100}%` }}></div>
-                      </div>
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select value={newBlock.category} onValueChange={(value) => setNewBlock({...newBlock, category: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="engagement">🎯 Engagement</SelectItem>
+                          <SelectItem value="astrological">🌙 Astrological</SelectItem>
+                          <SelectItem value="wellness">🌅 Wellness</SelectItem>
+                          <SelectItem value="educational">📚 Educational</SelectItem>
+                          <SelectItem value="personal">✨ Personal</SelectItem>
+                          <SelectItem value="creative">🧪 Creative</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea 
+                      id="description"
+                      placeholder="Describe the content block"
+                      value={newBlock.description}
+                      onChange={(e) => setNewBlock({...newBlock, description: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="frequency">Frequency</Label>
+                      <Select value={newBlock.frequency} onValueChange={(value) => setNewBlock({...newBlock, frequency: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="color">Color</Label>
+                      <Input 
+                        id="color"
+                        type="color"
+                        value={newBlock.color}
+                        onChange={(e) => setNewBlock({...newBlock, color: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => {
+                      toast({ title: "Block created successfully!" });
+                      setNewBlock({
+                        name: "",
+                        description: "",
+                        frequency: "weekly",
+                        frequencyValue: 52,
+                        color: "#8B5CF6",
+                        category: "engagement"
+                      });
+                    }}
+                    disabled={!newBlock.name}
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+                  >
+                    Create Block
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
-                  <div className="pt-3 border-t">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-300">Overall Progress</span>
-                      <span className="font-semibold" style={{ color: block.color }}>
-                        {Math.round((block.publishedPosts / block.totalPosts) * 100)}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
-                      <div 
-                        className="h-3 rounded-full transition-all duration-500" 
-                        style={{ 
-                          width: `${(block.publishedPosts / block.totalPosts) * 100}%`,
-                          backgroundColor: block.color 
-                        }}
-                      ></div>
-                    </div>
+          {activeView === "analytics" && (
+            <div className="space-y-6">
+              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Analytics Dashboard</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <BarChart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">Analytics dashboard coming soon...</p>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {activeView === "progress" && (
+            <div className="space-y-6">
+              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Progress Tracking</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <PieChart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400">Progress tracking coming soon...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Create New Block */}
-      {activeView === "create" && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Create New Mini Game Block</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Block Name</Label>
-                  <Input
-                    placeholder="e.g., Morning Motivation Series"
-                    value={newBlock.name}
-                    onChange={(e) => setNewBlock({...newBlock, name: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select value={newBlock.category} onValueChange={(value) => setNewBlock({...newBlock, category: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="engagement">Engagement</SelectItem>
-                      <SelectItem value="astrological">Astrological</SelectItem>
-                      <SelectItem value="wellness">Wellness</SelectItem>
-                      <SelectItem value="educational">Educational</SelectItem>
-                      <SelectItem value="personal">Personal</SelectItem>
-                      <SelectItem value="creative">Creative</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  placeholder="Describe the content theme and purpose..."
-                  value={newBlock.description}
-                  onChange={(e) => setNewBlock({...newBlock, description: e.target.value})}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="frequency">Frequency</Label>
-                  <Select value={newBlock.frequency} onValueChange={(value) => setNewBlock({...newBlock, frequency: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="lunar_full">Lunar (Full Moon)</SelectItem>
-                      <SelectItem value="lunar_new">Lunar (New Moon)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="frequencyValue">Posts Per Year</Label>
-                  <Input
-                    type="number"
-                    value={newBlock.frequencyValue}
-                    onChange={(e) => setNewBlock({...newBlock, frequencyValue: parseInt(e.target.value) || 52})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="color">Theme Color</Label>
-                  <Input
-                    type="color"
-                    value={newBlock.color}
-                    onChange={(e) => setNewBlock({...newBlock, color: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setNewBlock({
-                  name: "",
-                  description: "",
-                  frequency: "weekly",
-                  frequencyValue: 52,
-                  color: "#8B5CF6",
-                  category: "engagement"
-                })}>
-                  Reset
-                </Button>
-                <Button 
-                  onClick={() => createBlockMutation.mutate(newBlock)}
-                  disabled={createBlockMutation.isPending || !newBlock.name}
-                  className="flex items-center space-x-2"
-                >
-                  <Save className="h-4 w-4" />
-                  <span>Create Block</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Sample Data Seeding */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Sample Data</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                Add sample Mini Game Blocks to populate your Content Studio with demonstration data.
-              </p>
-              <Button 
-                onClick={() => {
-                  const sampleBlocks = [
-                    {
-                      name: "Morning Motivation Series",
-                      description: "Daily inspiring quotes and affirmations",
-                      frequency: "daily",
-                      frequencyValue: 365,
-                      color: "#8B5CF6",
-                      category: "wellness"
-                    },
-                    {
-                      name: "Astro Insights",
-                      description: "Weekly astrological readings and moon phases",
-                      frequency: "weekly",
-                      frequencyValue: 52,
-                      color: "#3B82F6",
-                      category: "astrological"
-                    },
-                    {
-                      name: "Creative Experiments",
-                      description: "Innovative content formats and media tests",
-                      frequency: "weekly",
-                      frequencyValue: 26,
-                      color: "#EF4444",
-                      category: "creative"
-                    }
-                  ];
-                  
-                  sampleBlocks.forEach(block => {
-                    createBlockMutation.mutate(block);
-                  });
-                }}
-                disabled={createBlockMutation.isPending}
-                variant="outline"
-                className="flex items-center space-x-2"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Add Sample Blocks</span>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Analytics Dashboard */}
-      {activeView === "analytics" && (
-        <div className="space-y-6">
-          {/* Analytics Header */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Analytics Dashboard</h3>
-            <Dialog open={showAnalyticsForm} onOpenChange={setShowAnalyticsForm}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center space-x-2" disabled={!user}>
-                  <Plus className="h-4 w-4" />
-                  <span>Add Analytics Data</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Add Performance Analytics</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="miniGameBlockId">Mini Game Block</Label>
-                    <Select value={newAnalytics.miniGameBlockId} onValueChange={(value) => setNewAnalytics({...newAnalytics, miniGameBlockId: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select block" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {displayBlocks.map((block) => (
-                          <SelectItem key={block.id} value={block.id.toString()}>{block.title}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="platform">Platform</Label>
-                    <Select value={newAnalytics.platform} onValueChange={(value) => setNewAnalytics({...newAnalytics, platform: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="instagram">Instagram</SelectItem>
-                        <SelectItem value="twitter">Twitter</SelectItem>
-                        <SelectItem value="facebook">Facebook</SelectItem>
-                        <SelectItem value="tiktok">TikTok</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="dayOfWeek">Day of Week</Label>
-                      <Select value={newAnalytics.dayOfWeek} onValueChange={(value) => setNewAnalytics({...newAnalytics, dayOfWeek: value})}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="monday">Monday</SelectItem>
-                          <SelectItem value="tuesday">Tuesday</SelectItem>
-                          <SelectItem value="wednesday">Wednesday</SelectItem>
-                          <SelectItem value="thursday">Thursday</SelectItem>
-                          <SelectItem value="friday">Friday</SelectItem>
-                          <SelectItem value="saturday">Saturday</SelectItem>
-                          <SelectItem value="sunday">Sunday</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="timeSlot">Time Slot</Label>
-                      <Select value={newAnalytics.timeSlot} onValueChange={(value) => setNewAnalytics({...newAnalytics, timeSlot: value})}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="morning">Morning</SelectItem>
-                          <SelectItem value="afternoon">Afternoon</SelectItem>
-                          <SelectItem value="evening">Evening</SelectItem>
-                          <SelectItem value="night">Night</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="avgImpressions">Avg Impressions</Label>
-                      <Input
-                        type="number"
-                        value={newAnalytics.avgImpressions}
-                        onChange={(e) => setNewAnalytics({...newAnalytics, avgImpressions: parseInt(e.target.value) || 0})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="avgReach">Avg Reach</Label>
-                      <Input
-                        type="number"
-                        value={newAnalytics.avgReach}
-                        onChange={(e) => setNewAnalytics({...newAnalytics, avgReach: parseInt(e.target.value) || 0})}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="avgLikes">Avg Likes</Label>
-                      <Input
-                        type="number"
-                        value={newAnalytics.avgLikes}
-                        onChange={(e) => setNewAnalytics({...newAnalytics, avgLikes: parseInt(e.target.value) || 0})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="avgComments">Avg Comments</Label>
-                      <Input
-                        type="number"
-                        value={newAnalytics.avgComments}
-                        onChange={(e) => setNewAnalytics({...newAnalytics, avgComments: parseInt(e.target.value) || 0})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="avgShares">Avg Shares</Label>
-                      <Input
-                        type="number"
-                        value={newAnalytics.avgShares}
-                        onChange={(e) => setNewAnalytics({...newAnalytics, avgShares: parseInt(e.target.value) || 0})}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="avgEngagementRate">Engagement Rate (%)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={newAnalytics.avgEngagementRate}
-                        onChange={(e) => setNewAnalytics({...newAnalytics, avgEngagementRate: parseFloat(e.target.value) || 0})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="totalPosts">Total Posts</Label>
-                      <Input
-                        type="number"
-                        value={newAnalytics.totalPosts}
-                        onChange={(e) => setNewAnalytics({...newAnalytics, totalPosts: parseInt(e.target.value) || 0})}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setShowAnalyticsForm(false)}>Cancel</Button>
-                    <Button 
-                      onClick={() => createAnalyticsMutation.mutate(newAnalytics)}
-                      disabled={createAnalyticsMutation.isPending}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save Analytics
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {/* Analytics Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Impressions</CardTitle>
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {performanceInsights.reduce((sum, p) => sum + p.avgImpressions, 0).toLocaleString()}
-                </div>
-                <p className="text-xs text-muted-foreground">Across all blocks</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Engagement</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {performanceInsights.reduce((sum, p) => sum + p.avgLikes + p.avgComments + p.avgShares, 0).toLocaleString()}
-                </div>
-                <p className="text-xs text-muted-foreground">Likes + Comments + Shares</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Engagement Rate</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {performanceInsights.length > 0 
-                    ? (performanceInsights.reduce((sum, p) => sum + p.avgEngagementRate, 0) / performanceInsights.length / 100).toFixed(1)
-                    : '0.0'
-                  }%
-                </div>
-                <p className="text-xs text-muted-foreground">Average across platforms</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {performanceInsights.reduce((sum, p) => sum + p.totalPosts, 0)}
-                </div>
-                <p className="text-xs text-muted-foreground">All content pieces</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Performance Insights Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Performance Insights</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {performanceInsights.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-2">Block</th>
-                        <th className="text-left p-2">Platform</th>
-                        <th className="text-left p-2">Day/Time</th>
-                        <th className="text-right p-2">Impressions</th>
-                        <th className="text-right p-2">Reach</th>
-                        <th className="text-right p-2">Engagement</th>
-                        <th className="text-right p-2">Rate</th>
-                        <th className="text-right p-2">Posts</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {performanceInsights.map((insight) => {
-                        const block = displayBlocks.find(b => b.id === insight.miniGameBlockId);
-                        return (
-                          <tr key={insight.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <td className="p-2">
-                              <div className="flex items-center space-x-2">
-                                <span>{block?.icon || '📝'}</span>
-                                <span className="font-medium">{block?.title || 'Unknown Block'}</span>
-                              </div>
-                            </td>
-                            <td className="p-2 capitalize">{insight.platform}</td>
-                            <td className="p-2 capitalize">{insight.dayOfWeek} {insight.timeSlot}</td>
-                            <td className="p-2 text-right">{insight.avgImpressions.toLocaleString()}</td>
-                            <td className="p-2 text-right">{insight.avgReach.toLocaleString()}</td>
-                            <td className="p-2 text-right">{(insight.avgLikes + insight.avgComments + insight.avgShares).toLocaleString()}</td>
-                            <td className="p-2 text-right">{(insight.avgEngagementRate / 100).toFixed(1)}%</td>
-                            <td className="p-2 text-right">{insight.totalPosts}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <BarChart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 dark:text-gray-300">No analytics data yet</p>
-                  <p className="text-sm text-gray-500 mt-2">Add performance insights to see analytics</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

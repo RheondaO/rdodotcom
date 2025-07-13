@@ -269,7 +269,7 @@ function Dashboard() {
           {activeView === "reports" && <ReportsSection isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "finances" && <FinanceSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "groceries" && <GrocerySection isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "content" && <BlogContentStudio />}
+          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "blog-studio" && <BlogContentStudio />}
