@@ -407,7 +407,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                         <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Annual Progress</span>
-                            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">{block.publishedPosts}/{block.totalPosts}</span>
+                            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">{Math.round((block.publishedPosts / block.totalPosts) * 100)}%</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-600 dark:text-gray-400">Engagement Rate</span>
