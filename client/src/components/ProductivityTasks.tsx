@@ -62,7 +62,7 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
   // Fetch tasks filtered by the selected date
   const { data: tasks = [], isLoading, error } = useQuery({
     queryKey: ['/api/notion/tasks', selectedDate.toISOString().split('T')[0]],
-    queryFn: () => apiRequest(`/api/notion/tasks?date=${selectedDate.toISOString().split('T')[0]}&view=day`),
+    queryFn: () => apiRequest('GET', `/api/notion/tasks?date=${selectedDate.toISOString().split('T')[0]}&view=day`),
     retry: 3,
     retryDelay: 1000,
     onError: (error) => {
@@ -73,12 +73,9 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
   // Create task mutation
   const createTask = useMutation({
     mutationFn: (task: typeof newTask) => 
-      apiRequest('/api/notion/tasks', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...task,
-          dueDate: new Date(task.dueDate)
-        })
+      apiRequest('POST', '/api/notion/tasks', {
+        ...task,
+        dueDate: new Date(task.dueDate)
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notion/tasks'] });
@@ -101,10 +98,7 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
   // Update task mutation
   const updateTask = useMutation({
     mutationFn: ({ taskId, updates }: { taskId: string; updates: Partial<ProductivityTask> }) =>
-      apiRequest(`/api/notion/tasks/${taskId}`, {
-        method: 'PATCH',
-        body: JSON.stringify(updates)
-      }),
+      apiRequest('PATCH', `/api/notion/tasks/${taskId}`, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notion/tasks'] });
       setEditingTask(null);
@@ -118,7 +112,7 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
   // Delete task mutation
   const deleteTask = useMutation({
     mutationFn: (taskId: string) =>
-      apiRequest(`/api/notion/tasks/${taskId}`, { method: 'DELETE' }),
+      apiRequest('DELETE', `/api/notion/tasks/${taskId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notion/tasks'] });
       toast({ title: "Task deleted successfully" });
