@@ -45,6 +45,9 @@ interface MiniGameBlock {
   totalPosts: number;
   scheduledPosts: number;
   publishedPosts: number;
+  designedPosts: number;
+  reviewedPosts: number;
+  approvedPosts: number;
   engagement: number;
   lastUpdated: string;
   status: "active" | "paused" | "completed";
@@ -101,6 +104,9 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       totalPosts: 45,
       scheduledPosts: 12,
       publishedPosts: 33,
+      designedPosts: 40,
+      reviewedPosts: 37,
+      approvedPosts: 35,
       engagement: 85,
       lastUpdated: "2025-06-15",
       status: "active" as "active" | "paused" | "completed",
@@ -115,6 +121,9 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       totalPosts: 32,
       scheduledPosts: 8,
       publishedPosts: 24,
+      designedPosts: 30,
+      reviewedPosts: 28,
+      approvedPosts: 26,
       engagement: 92,
       lastUpdated: "2025-06-14",
       status: "active" as "active" | "paused" | "completed",
@@ -129,6 +138,9 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       totalPosts: 28,
       scheduledPosts: 6,
       publishedPosts: 22,
+      designedPosts: 26,
+      reviewedPosts: 24,
+      approvedPosts: 23,
       engagement: 78,
       lastUpdated: "2025-06-13",
       status: "active" as "active" | "paused" | "completed",
@@ -143,6 +155,9 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       totalPosts: 19,
       scheduledPosts: 4,
       publishedPosts: 15,
+      designedPosts: 18,
+      reviewedPosts: 17,
+      approvedPosts: 16,
       engagement: 96,
       lastUpdated: "2025-06-12",
       status: "active" as "active" | "paused" | "completed",
@@ -157,6 +172,9 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       totalPosts: 24,
       scheduledPosts: 7,
       publishedPosts: 17,
+      designedPosts: 22,
+      reviewedPosts: 20,
+      approvedPosts: 19,
       engagement: 88,
       lastUpdated: "2025-06-11",
       status: "active" as "active" | "paused" | "completed",
@@ -171,6 +189,9 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       totalPosts: 16,
       scheduledPosts: 3,
       publishedPosts: 13,
+      designedPosts: 15,
+      reviewedPosts: 14,
+      approvedPosts: 14,
       engagement: 74,
       lastUpdated: "2025-06-10",
       status: "paused" as "active" | "paused" | "completed",
@@ -391,6 +412,24 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-600 dark:text-gray-400">Engagement Rate</span>
                             <span className="text-xs font-bold text-purple-600 dark:text-purple-400">{block.engagement}%</span>
+                          </div>
+                        </div>
+                        
+                        {/* Designed/Reviewed/Approved Counts */}
+                        <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4">
+                          <div className="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{block.designedPosts}</div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400">Designed</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{block.reviewedPosts}</div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400">Reviewed</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{block.approvedPosts}</div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400">Approved</div>
+                            </div>
                           </div>
                         </div>
                         
