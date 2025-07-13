@@ -307,7 +307,7 @@ export default function BlogContentStudio() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Blog Content Studio</h1>
+        <h1 className="text-3xl font-bold">Blogging Content Studio</h1>
         <div className="flex gap-2">
           <Dialog open={newIdeaDialog} onOpenChange={setNewIdeaDialog}>
             <DialogTrigger asChild>

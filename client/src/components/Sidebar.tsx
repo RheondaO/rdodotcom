@@ -64,14 +64,14 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   const navItems = [
     { key: "dashboard" as ViewType, label: "Dashboard", icon: Home },
     { key: "content" as ViewType, label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio", icon: Moon },
+    { key: "blog-studio" as ViewType, label: "Blogging Content Studio", icon: FileText },
+    { key: "apps" as ViewType, label: "App Development", icon: Code2 },
     { key: "goals" as ViewType, label: "Goals", icon: Target },
     { key: "groceries" as ViewType, label: "Shopping", icon: ShoppingCart },
     { key: "finances" as ViewType, label: "Finances", icon: DollarSign },
     { key: "habits" as ViewType, label: "Habits", icon: Zap },
     { key: "health" as ViewType, label: "Health", icon: Heart },
     { key: "productivity" as ViewType, label: "Productivity", icon: Briefcase },
-    { key: "apps" as ViewType, label: "App Development", icon: Code2 },
-    { key: "blog-studio" as ViewType, label: "Blog Studio", icon: FileText },
     { key: "reports" as ViewType, label: "Reports", icon: BarChart3 },
     { key: "sitemap" as ViewType, label: "Site Map", icon: Map },
   ];
