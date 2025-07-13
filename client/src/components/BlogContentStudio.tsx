@@ -347,106 +347,316 @@ export default function BlogContentStudio() {
         </TabsList>
 
         <TabsContent value="workflow" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Ideas Stage */}
-            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 border border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full -mr-10 -mt-10"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">Ideas</CardTitle>
                   </div>
-                  <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                    Stage 1
+                  <Eye className="h-4 w-4 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">52 designs/year</p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Annual Progress</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{workflowStatus?.workflow.ideaStage || 0}/52</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{Math.round(((workflowStatus?.workflow.ideaStage || 0) / 52) * 100)}%</span>
+                  </div>
+                  
+                  {/* Vertical Progress Bar */}
+                  <div className="relative h-32 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-full transition-all duration-500"
+                      style={{ height: `${Math.min(((workflowStatus?.workflow.ideaStage || 0) / 52) * 100, 100)}%` }}
+                    ></div>
+                    
+                    {/* Progress markers */}
+                    <div className="absolute inset-0 flex flex-col justify-between items-center py-2">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-300 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-200 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-100 rounded-full"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Status indicators */}
+                  <div className="flex justify-between items-center text-xs">
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mb-1"></div>
+                      <span className="text-blue-600 dark:text-blue-400 font-medium">{Math.floor((workflowStatus?.workflow.ideaStage || 0) * 0.2)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Designed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mb-1"></div>
+                      <span className="text-yellow-600 dark:text-yellow-400 font-medium">{Math.floor((workflowStatus?.workflow.ideaStage || 0) * 0.3)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Reviewed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mb-1"></div>
+                      <span className="text-green-600 dark:text-green-400 font-medium">{Math.floor((workflowStatus?.workflow.ideaStage || 0) * 0.5)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Approved</span>
+                    </div>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Ideas</h3>
-                <p className="text-sm text-blue-600 dark:text-blue-400 mb-3">Brainstorming & Ideation</p>
-                <div className="text-3xl font-bold text-blue-700 dark:text-blue-300">
-                  {workflowStatus?.workflow.ideaStage || 0}
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
             {/* Research Stage */}
-            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-6 border border-yellow-200 dark:border-yellow-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-500/10 rounded-full -mr-10 -mt-10"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-yellow-500/20 rounded-lg">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                    <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">Research</CardTitle>
                   </div>
-                  <div className="text-xs font-semibold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">
-                    Stage 2
+                  <Eye className="h-4 w-4 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">52 designs/year</p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Annual Progress</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{workflowStatus?.workflow.research || 0}/52</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{Math.round(((workflowStatus?.workflow.research || 0) / 52) * 100)}%</span>
+                  </div>
+                  
+                  {/* Vertical Progress Bar */}
+                  <div className="relative h-32 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-yellow-500 to-yellow-400 rounded-full transition-all duration-500"
+                      style={{ height: `${Math.min(((workflowStatus?.workflow.research || 0) / 52) * 100, 100)}%` }}
+                    ></div>
+                    
+                    {/* Progress markers */}
+                    <div className="absolute inset-0 flex flex-col justify-between items-center py-2">
+                      <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
+                      <div className="w-2 h-2 bg-yellow-200 rounded-full"></div>
+                      <div className="w-2 h-2 bg-yellow-100 rounded-full"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Status indicators */}
+                  <div className="flex justify-between items-center text-xs">
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mb-1"></div>
+                      <span className="text-blue-600 dark:text-blue-400 font-medium">{Math.floor((workflowStatus?.workflow.research || 0) * 0.2)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Designed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mb-1"></div>
+                      <span className="text-yellow-600 dark:text-yellow-400 font-medium">{Math.floor((workflowStatus?.workflow.research || 0) * 0.3)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Reviewed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mb-1"></div>
+                      <span className="text-green-600 dark:text-green-400 font-medium">{Math.floor((workflowStatus?.workflow.research || 0) * 0.5)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Approved</span>
+                    </div>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Research</h3>
-                <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-3">Information Gathering</p>
-                <div className="text-3xl font-bold text-yellow-700 dark:text-yellow-300">
-                  {workflowStatus?.workflow.research || 0}
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
             {/* Drafting Stage */}
-            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-6 border border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full -mr-10 -mt-10"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-orange-500/20 rounded-lg">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <Edit className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                    <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">Drafting</CardTitle>
                   </div>
-                  <div className="text-xs font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
-                    Stage 3
+                  <Eye className="h-4 w-4 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">52 designs/year</p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Annual Progress</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{workflowStatus?.workflow.drafting || 0}/52</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{Math.round(((workflowStatus?.workflow.drafting || 0) / 52) * 100)}%</span>
+                  </div>
+                  
+                  {/* Vertical Progress Bar */}
+                  <div className="relative h-32 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-orange-500 to-orange-400 rounded-full transition-all duration-500"
+                      style={{ height: `${Math.min(((workflowStatus?.workflow.drafting || 0) / 52) * 100, 100)}%` }}
+                    ></div>
+                    
+                    {/* Progress markers */}
+                    <div className="absolute inset-0 flex flex-col justify-between items-center py-2">
+                      <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-orange-300 rounded-full"></div>
+                      <div className="w-2 h-2 bg-orange-200 rounded-full"></div>
+                      <div className="w-2 h-2 bg-orange-100 rounded-full"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Status indicators */}
+                  <div className="flex justify-between items-center text-xs">
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mb-1"></div>
+                      <span className="text-blue-600 dark:text-blue-400 font-medium">{Math.floor((workflowStatus?.workflow.drafting || 0) * 0.2)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Designed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mb-1"></div>
+                      <span className="text-yellow-600 dark:text-yellow-400 font-medium">{Math.floor((workflowStatus?.workflow.drafting || 0) * 0.3)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Reviewed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mb-1"></div>
+                      <span className="text-green-600 dark:text-green-400 font-medium">{Math.floor((workflowStatus?.workflow.drafting || 0) * 0.5)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Approved</span>
+                    </div>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Drafting</h3>
-                <p className="text-sm text-orange-600 dark:text-orange-400 mb-3">Content Creation</p>
-                <div className="text-3xl font-bold text-orange-700 dark:text-orange-300">
-                  {workflowStatus?.workflow.drafting || 0}
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
             {/* Review Stage */}
-            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-6 border border-purple-200 dark:border-purple-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full -mr-10 -mt-10"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-purple-500/20 rounded-lg">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <Eye className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">Review</CardTitle>
                   </div>
-                  <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
-                    Stage 4
+                  <Eye className="h-4 w-4 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">52 designs/year</p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Annual Progress</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{workflowStatus?.workflow.review || 0}/52</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{Math.round(((workflowStatus?.workflow.review || 0) / 52) * 100)}%</span>
+                  </div>
+                  
+                  {/* Vertical Progress Bar */}
+                  <div className="relative h-32 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-purple-500 to-purple-400 rounded-full transition-all duration-500"
+                      style={{ height: `${Math.min(((workflowStatus?.workflow.review || 0) / 52) * 100, 100)}%` }}
+                    ></div>
+                    
+                    {/* Progress markers */}
+                    <div className="absolute inset-0 flex flex-col justify-between items-center py-2">
+                      <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-purple-300 rounded-full"></div>
+                      <div className="w-2 h-2 bg-purple-200 rounded-full"></div>
+                      <div className="w-2 h-2 bg-purple-100 rounded-full"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Status indicators */}
+                  <div className="flex justify-between items-center text-xs">
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mb-1"></div>
+                      <span className="text-blue-600 dark:text-blue-400 font-medium">{Math.floor((workflowStatus?.workflow.review || 0) * 0.2)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Designed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mb-1"></div>
+                      <span className="text-yellow-600 dark:text-yellow-400 font-medium">{Math.floor((workflowStatus?.workflow.review || 0) * 0.3)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Reviewed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mb-1"></div>
+                      <span className="text-green-600 dark:text-green-400 font-medium">{Math.floor((workflowStatus?.workflow.review || 0) * 0.5)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Approved</span>
+                    </div>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Review</h3>
-                <p className="text-sm text-purple-600 dark:text-purple-400 mb-3">Quality Assurance</p>
-                <div className="text-3xl font-bold text-purple-700 dark:text-purple-300">
-                  {workflowStatus?.workflow.review || 0}
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
             {/* Published Stage */}
-            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-6 border border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full -mr-10 -mt-10"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-green-500/20 rounded-lg">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <CardTitle className="text-lg font-semibold text-gray-800 dark:text-gray-200">Published</CardTitle>
                   </div>
-                  <div className="text-xs font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider">
-                    Stage 5
+                  <Eye className="h-4 w-4 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">52 designs/year</p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Annual Progress</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{workflowStatus?.workflow.published || 0}/52</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">Completion Rate</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{Math.round(((workflowStatus?.workflow.published || 0) / 52) * 100)}%</span>
+                  </div>
+                  
+                  {/* Vertical Progress Bar */}
+                  <div className="relative h-32 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-green-500 to-green-400 rounded-full transition-all duration-500"
+                      style={{ height: `${Math.min(((workflowStatus?.workflow.published || 0) / 52) * 100, 100)}%` }}
+                    ></div>
+                    
+                    {/* Progress markers */}
+                    <div className="absolute inset-0 flex flex-col justify-between items-center py-2">
+                      <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-300 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-200 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-100 rounded-full"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Status indicators */}
+                  <div className="flex justify-between items-center text-xs">
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mb-1"></div>
+                      <span className="text-blue-600 dark:text-blue-400 font-medium">{Math.floor((workflowStatus?.workflow.published || 0) * 0.2)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Designed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mb-1"></div>
+                      <span className="text-yellow-600 dark:text-yellow-400 font-medium">{Math.floor((workflowStatus?.workflow.published || 0) * 0.3)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Reviewed</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mb-1"></div>
+                      <span className="text-green-600 dark:text-green-400 font-medium">{Math.floor((workflowStatus?.workflow.published || 0) * 0.5)}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Approved</span>
+                    </div>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Published</h3>
-                <p className="text-sm text-green-600 dark:text-green-400 mb-3">Live Content</p>
-                <div className="text-3xl font-bold text-green-700 dark:text-green-300">
-                  {workflowStatus?.workflow.published || 0}
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           <Card>
