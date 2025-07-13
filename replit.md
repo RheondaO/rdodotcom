@@ -143,7 +143,7 @@ Preferred communication style: Simple, everyday language.
   - React frontend component with modern UI
   - Error handling and connection status monitoring
 - **User Experience**: 
-  - Integrated into main navigation with database icon
+  - Integrated as primary task widget in ProductivitySection
   - Real-time task list showing existing Notion entries
   - Create/edit forms with proper validation
   - Connection status indicators and setup verification
@@ -160,7 +160,8 @@ Preferred communication style: Simple, everyday language.
   - Task duration estimation and time tracking
   - Priority-based task organization and filtering
   - Full CRUD operations with proper authentication
-- **UI Integration**: Seamlessly integrated into ProductivitySection with native Belle Journal styling
+- **UI Integration**: Replaced main "Today's Tasks" widget in ProductivitySection with Notion integration
+- **Navigation**: Hidden Notion integration from sidebar navigation for cleaner interface
 
 ### Production Deployment Resolution (July 13, 2025)
 - **Issue**: Notion tasks widget showing "Connection Failed" in production despite environment variables being configured

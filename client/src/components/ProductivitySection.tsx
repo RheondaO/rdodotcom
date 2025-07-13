@@ -208,13 +208,26 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
         </CardContent>
       </Card>
 
-      {/* Tasks Section */}
+      {/* Notion Tasks Integration */}
       <Card className="border-0 shadow-lg">
         <CardHeader className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded-t-lg">
+          <CardTitle className="flex items-center space-x-2">
+            <CheckSquare className="h-5 w-5 text-pink-600" />
+            <span>{getDateLabel()}'s Tasks</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <ProductivityTasks selectedDate={selectedDate} isReadOnly={isReadOnly} />
+        </CardContent>
+      </Card>
+
+      {/* Local Tasks Section (for backup/additional tasks) */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-900/20 dark:to-gray-900/20 rounded-t-lg">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2">
-              <CheckSquare className="h-5 w-5 text-pink-600" />
-              <span>{getDateLabel()}'s Tasks</span>
+              <CheckSquare className="h-5 w-5 text-slate-600" />
+              <span>Local {getDateLabel()}'s Tasks</span>
             </CardTitle>
             <Dialog open={showTodoDialog} onOpenChange={!isReadOnly ? setShowTodoDialog : undefined}>
               <DialogTrigger asChild>
@@ -383,18 +396,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
         </CardContent>
       </Card>
 
-      {/* Notion Tasks Integration */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-t-lg">
-          <CardTitle className="flex items-center space-x-2">
-            <CheckSquare className="h-5 w-5 text-purple-600" />
-            <span>Notion Tasks - {getDateLabel()}</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <ProductivityTasks selectedDate={selectedDate} isReadOnly={isReadOnly} />
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
