@@ -120,7 +120,8 @@ interface WorkflowStatus {
 }
 
 export default function BlogContentStudio() {
-  const [selectedTab, setSelectedTab] = useState("workflow");
+  const [selectedBrand, setSelectedBrand] = useState("relationONLY");
+  const [selectedStudioTab, setSelectedStudioTab] = useState("overview");
   const [showEditor, setShowEditor] = useState(false);
   const [editingPost, setEditingPost] = useState<number | null>(null);
   const [newIdeaDialog, setNewIdeaDialog] = useState(false);
@@ -332,15 +333,15 @@ export default function BlogContentStudio() {
           </div>
         </div>
 
-        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <Tabs value={selectedStudioTab} onValueChange={setSelectedStudioTab}>
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="workflow">Overview</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="progress">Progress Tracker</TabsTrigger>
             <TabsTrigger value="queues">Design Queues</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="workflow" className="space-y-6">
+          <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Administration Block */}
               <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
