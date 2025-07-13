@@ -22,7 +22,23 @@ import {
   insertPerformanceInsightsSchema,
   insertBlogPostSchema,
   insertBlogIdeaSchema,
-  insertBlogCalendarSchema
+  insertBlogCalendarSchema,
+  insertBudgetCategorySchema,
+  insertExpenseSchema,
+  insertDebtSchema,
+  insertDebtPaymentSchema,
+  insertInvestmentSchema,
+  insertInvestmentPlatformSchema,
+  insertAccountSchema,
+  insertNetWorthSnapshotSchema,
+  insertFinancialGoalSchema,
+  insertBudgetPeriodSchema,
+  insertBudgetAlertSchema,
+  insertSpendingTrendSchema,
+  insertPortfolioSchema,
+  insertPortfolioHoldingSchema,
+  insertPriceHistorySchema,
+  insertInvestmentTransactionSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1014,6 +1030,279 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(productivityData);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch productivity analytics" });
+    }
+  });
+
+  // Budget Management Routes
+  app.get("/api/budget-categories", async (req, res) => {
+    try {
+      const categories = await storage.getAllBudgetCategories();
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch budget categories" });
+    }
+  });
+
+  app.post("/api/budget-categories", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertBudgetCategorySchema.parse(req.body);
+      const category = await storage.createBudgetCategory(validatedData);
+      res.status(201).json(category);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid budget category data" });
+    }
+  });
+
+  app.get("/api/budget-periods", async (req, res) => {
+    try {
+      const periods = await storage.getAllBudgetPeriods();
+      res.json(periods);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch budget periods" });
+    }
+  });
+
+  app.post("/api/budget-periods", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertBudgetPeriodSchema.parse(req.body);
+      const period = await storage.createBudgetPeriod(validatedData);
+      res.status(201).json(period);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid budget period data" });
+    }
+  });
+
+  app.get("/api/budget-alerts", async (req, res) => {
+    try {
+      const alerts = await storage.getAllBudgetAlerts();
+      res.json(alerts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch budget alerts" });
+    }
+  });
+
+  app.get("/api/expenses", async (req, res) => {
+    try {
+      const expenses = await storage.getAllExpenses();
+      res.json(expenses);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch expenses" });
+    }
+  });
+
+  app.post("/api/expenses", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertExpenseSchema.parse(req.body);
+      const expense = await storage.createExpense(validatedData);
+      res.status(201).json(expense);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid expense data" });
+    }
+  });
+
+  app.get("/api/debts", async (req, res) => {
+    try {
+      const debts = await storage.getAllDebts();
+      res.json(debts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch debts" });
+    }
+  });
+
+  app.post("/api/debts", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertDebtSchema.parse(req.body);
+      const debt = await storage.createDebt(validatedData);
+      res.status(201).json(debt);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid debt data" });
+    }
+  });
+
+  app.get("/api/spending-trends", async (req, res) => {
+    try {
+      const trends = await storage.getAllSpendingTrends();
+      res.json(trends);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch spending trends" });
+    }
+  });
+
+  // Investment Management Routes
+  app.get("/api/investments", async (req, res) => {
+    try {
+      const investments = await storage.getAllInvestments();
+      res.json(investments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch investments" });
+    }
+  });
+
+  app.post("/api/investments", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertInvestmentSchema.parse(req.body);
+      const investment = await storage.createInvestment(validatedData);
+      res.status(201).json(investment);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid investment data" });
+    }
+  });
+
+  app.get("/api/portfolios", async (req, res) => {
+    try {
+      const portfolios = await storage.getAllPortfolios();
+      res.json(portfolios);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch portfolios" });
+    }
+  });
+
+  app.post("/api/portfolios", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertPortfolioSchema.parse(req.body);
+      const portfolio = await storage.createPortfolio(validatedData);
+      res.status(201).json(portfolio);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid portfolio data" });
+    }
+  });
+
+  app.get("/api/portfolio-holdings", async (req, res) => {
+    try {
+      const holdings = await storage.getAllPortfolioHoldings();
+      res.json(holdings);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch portfolio holdings" });
+    }
+  });
+
+  app.get("/api/investment-platforms", async (req, res) => {
+    try {
+      const platforms = await storage.getAllInvestmentPlatforms();
+      res.json(platforms);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch investment platforms" });
+    }
+  });
+
+  app.post("/api/investment-platforms", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertInvestmentPlatformSchema.parse(req.body);
+      const platform = await storage.createInvestmentPlatform(validatedData);
+      res.status(201).json(platform);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid investment platform data" });
+    }
+  });
+
+  app.get("/api/accounts", async (req, res) => {
+    try {
+      const accounts = await storage.getAllAccounts();
+      res.json(accounts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch accounts" });
+    }
+  });
+
+  app.post("/api/accounts", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertAccountSchema.parse(req.body);
+      const account = await storage.createAccount(validatedData);
+      res.status(201).json(account);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid account data" });
+    }
+  });
+
+  app.get("/api/net-worth-snapshots", async (req, res) => {
+    try {
+      const snapshots = await storage.getAllNetWorthSnapshots();
+      res.json(snapshots);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch net worth snapshots" });
+    }
+  });
+
+  app.post("/api/net-worth-snapshots", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertNetWorthSnapshotSchema.parse(req.body);
+      const snapshot = await storage.createNetWorthSnapshot(validatedData);
+      res.status(201).json(snapshot);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid net worth snapshot data" });
+    }
+  });
+
+  app.get("/api/investment-transactions", async (req, res) => {
+    try {
+      const transactions = await storage.getAllInvestmentTransactions();
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch investment transactions" });
+    }
+  });
+
+  app.post("/api/investment-transactions", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertInvestmentTransactionSchema.parse(req.body);
+      const transaction = await storage.createInvestmentTransaction(validatedData);
+      res.status(201).json(transaction);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid investment transaction data" });
+    }
+  });
+
+  // Financial Analytics Routes
+  app.get("/api/budget-analytics/:month", async (req, res) => {
+    try {
+      const month = req.params.month;
+      const analytics = await storage.getBudgetAnalytics(month);
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch budget analytics" });
+    }
+  });
+
+  app.get("/api/debt-payoff-projections", async (req, res) => {
+    try {
+      const projections = await storage.calculateDebtPayoffTimelines();
+      res.json(projections);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch debt payoff projections" });
+    }
+  });
+
+  app.get("/api/investment-performance/:period", async (req, res) => {
+    try {
+      // Mock investment performance data for the period
+      const period = req.params.period;
+      const performance = await storage.getInvestmentPerformance();
+      res.json(performance || []);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch investment performance" });
+    }
+  });
+
+  app.get("/api/portfolio-performance/:portfolioId", async (req, res) => {
+    try {
+      const portfolioId = parseInt(req.params.portfolioId);
+      const performance = await storage.calculatePortfolioPerformance(portfolioId);
+      res.json(performance);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch portfolio performance" });
+    }
+  });
+
+  app.get("/api/net-worth-history", async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      const history = await storage.calculateNetWorthOverTime(
+        startDate as string || "2024-01-01", 
+        endDate as string || new Date().toISOString().split('T')[0]
+      );
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch net worth history" });
     }
   });
 

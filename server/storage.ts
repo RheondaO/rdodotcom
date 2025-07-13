@@ -78,7 +78,21 @@ import {
   type NetWorthSnapshot,
   type InsertNetWorthSnapshot,
   type FinancialGoal,
-  type InsertFinancialGoal
+  type InsertFinancialGoal,
+  type BudgetPeriod,
+  type InsertBudgetPeriod,
+  type BudgetAlert,
+  type InsertBudgetAlert,
+  type SpendingTrend,
+  type InsertSpendingTrend,
+  type Portfolio,
+  type InsertPortfolio,
+  type PortfolioHolding,
+  type InsertPortfolioHolding,
+  type PriceHistory,
+  type InsertPriceHistory,
+  type InvestmentTransaction,
+  type InsertInvestmentTransaction
 } from "@shared/schema";
 
 export interface IStorage {
@@ -338,12 +352,61 @@ export interface IStorage {
   updateFinancialGoal(id: number, updates: Partial<FinancialGoal>): Promise<FinancialGoal>;
   deleteFinancialGoal(id: number): Promise<void>;
 
+  // Budget Management
+  getAllBudgetPeriods(): Promise<BudgetPeriod[]>;
+  getActiveBudgetPeriod(): Promise<BudgetPeriod | undefined>;
+  createBudgetPeriod(period: InsertBudgetPeriod): Promise<BudgetPeriod>;
+  updateBudgetPeriod(id: number, updates: Partial<BudgetPeriod>): Promise<BudgetPeriod>;
+  deleteBudgetPeriod(id: number): Promise<void>;
+
+  getAllBudgetAlerts(): Promise<BudgetAlert[]>;
+  getActiveBudgetAlerts(): Promise<BudgetAlert[]>;
+  createBudgetAlert(alert: InsertBudgetAlert): Promise<BudgetAlert>;
+  updateBudgetAlert(id: number, updates: Partial<BudgetAlert>): Promise<BudgetAlert>;
+  deleteBudgetAlert(id: number): Promise<void>;
+
+  getAllSpendingTrends(): Promise<SpendingTrend[]>;
+  getSpendingTrendsByCategory(categoryId: number): Promise<SpendingTrend[]>;
+  createSpendingTrend(trend: InsertSpendingTrend): Promise<SpendingTrend>;
+  updateSpendingTrend(id: number, updates: Partial<SpendingTrend>): Promise<SpendingTrend>;
+  deleteSpendingTrend(id: number): Promise<void>;
+
+  // Portfolio Management
+  getAllPortfolios(): Promise<Portfolio[]>;
+  getPortfolio(id: number): Promise<Portfolio | undefined>;
+  createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio>;
+  updatePortfolio(id: number, updates: Partial<Portfolio>): Promise<Portfolio>;
+  deletePortfolio(id: number): Promise<void>;
+
+  getAllPortfolioHoldings(): Promise<PortfolioHolding[]>;
+  getPortfolioHoldingsByPortfolio(portfolioId: number): Promise<PortfolioHolding[]>;
+  createPortfolioHolding(holding: InsertPortfolioHolding): Promise<PortfolioHolding>;
+  updatePortfolioHolding(id: number, updates: Partial<PortfolioHolding>): Promise<PortfolioHolding>;
+  deletePortfolioHolding(id: number): Promise<void>;
+
+  getAllPriceHistory(): Promise<PriceHistory[]>;
+  getPriceHistoryBySymbol(symbol: string): Promise<PriceHistory[]>;
+  createPriceHistory(history: InsertPriceHistory): Promise<PriceHistory>;
+  updatePriceHistory(id: number, updates: Partial<PriceHistory>): Promise<PriceHistory>;
+  deletePriceHistory(id: number): Promise<void>;
+
+  getAllInvestmentTransactions(): Promise<InvestmentTransaction[]>;
+  getInvestmentTransactionsByInvestment(investmentId: number): Promise<InvestmentTransaction[]>;
+  createInvestmentTransaction(transaction: InsertInvestmentTransaction): Promise<InvestmentTransaction>;
+  updateInvestmentTransaction(id: number, updates: Partial<InvestmentTransaction>): Promise<InvestmentTransaction>;
+  deleteInvestmentTransaction(id: number): Promise<void>;
+
   // Finance Analytics
   getBudgetAnalytics(month: string): Promise<any>;
   getSpendingTrends(startDate: string, endDate: string): Promise<any>;
   getDebtPayoffProjections(): Promise<any>;
   getInvestmentPerformance(): Promise<any>;
   getFinancialHealthScore(): Promise<any>;
+  calculateBudgetVsActual(budgetPeriodId: number): Promise<any>;
+  generateSpendingAlerts(): Promise<BudgetAlert[]>;
+  calculateDebtPayoffTimelines(): Promise<any>;
+  calculatePortfolioPerformance(portfolioId: number): Promise<any>;
+  calculateNetWorthOverTime(startDate: string, endDate: string): Promise<any>;
 
   // Analytics methods
   getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
@@ -396,6 +459,13 @@ export class MemStorage implements IStorage {
   private accounts: Map<number, Account> = new Map();
   private netWorthSnapshots: Map<number, NetWorthSnapshot> = new Map();
   private financialGoals: Map<number, FinancialGoal> = new Map();
+  private budgetPeriods: Map<number, BudgetPeriod> = new Map();
+  private budgetAlerts: Map<number, BudgetAlert> = new Map();
+  private spendingTrends: Map<number, SpendingTrend> = new Map();
+  private portfolios: Map<number, Portfolio> = new Map();
+  private portfolioHoldings: Map<number, PortfolioHolding> = new Map();
+  private priceHistory: Map<number, PriceHistory> = new Map();
+  private investmentTransactions: Map<number, InvestmentTransaction> = new Map();
   private currentId = 1;
 
   constructor() {
@@ -1716,6 +1786,389 @@ export class MemStorage implements IStorage {
 
   async deleteBlogCalendarEvent(id: number): Promise<void> {
     this.blogCalendarEvents.delete(id);
+  }
+
+  // Budget Management Implementation
+  async getAllBudgetPeriods(): Promise<BudgetPeriod[]> {
+    return Array.from(this.budgetPeriods.values()).sort((a, b) => 
+      new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+    );
+  }
+
+  async getActiveBudgetPeriod(): Promise<BudgetPeriod | undefined> {
+    return Array.from(this.budgetPeriods.values()).find(period => period.isActive);
+  }
+
+  async createBudgetPeriod(period: InsertBudgetPeriod): Promise<BudgetPeriod> {
+    const newPeriod: BudgetPeriod = {
+      id: this.currentId++,
+      ...period,
+      createdAt: new Date()
+    };
+    this.budgetPeriods.set(newPeriod.id, newPeriod);
+    return newPeriod;
+  }
+
+  async updateBudgetPeriod(id: number, updates: Partial<BudgetPeriod>): Promise<BudgetPeriod> {
+    const period = this.budgetPeriods.get(id);
+    if (!period) throw new Error("Budget period not found");
+    
+    const updatedPeriod = { ...period, ...updates };
+    this.budgetPeriods.set(id, updatedPeriod);
+    return updatedPeriod;
+  }
+
+  async deleteBudgetPeriod(id: number): Promise<void> {
+    this.budgetPeriods.delete(id);
+  }
+
+  async getAllBudgetAlerts(): Promise<BudgetAlert[]> {
+    return Array.from(this.budgetAlerts.values());
+  }
+
+  async getActiveBudgetAlerts(): Promise<BudgetAlert[]> {
+    return Array.from(this.budgetAlerts.values()).filter(alert => alert.isActive);
+  }
+
+  async createBudgetAlert(alert: InsertBudgetAlert): Promise<BudgetAlert> {
+    const newAlert: BudgetAlert = {
+      id: this.currentId++,
+      ...alert,
+      createdAt: new Date()
+    };
+    this.budgetAlerts.set(newAlert.id, newAlert);
+    return newAlert;
+  }
+
+  async updateBudgetAlert(id: number, updates: Partial<BudgetAlert>): Promise<BudgetAlert> {
+    const alert = this.budgetAlerts.get(id);
+    if (!alert) throw new Error("Budget alert not found");
+    
+    const updatedAlert = { ...alert, ...updates };
+    this.budgetAlerts.set(id, updatedAlert);
+    return updatedAlert;
+  }
+
+  async deleteBudgetAlert(id: number): Promise<void> {
+    this.budgetAlerts.delete(id);
+  }
+
+  async getAllSpendingTrends(): Promise<SpendingTrend[]> {
+    return Array.from(this.spendingTrends.values()).sort((a, b) => 
+      new Date(b.calculatedAt).getTime() - new Date(a.calculatedAt).getTime()
+    );
+  }
+
+  async getSpendingTrendsByCategory(categoryId: number): Promise<SpendingTrend[]> {
+    return Array.from(this.spendingTrends.values()).filter(trend => trend.categoryId === categoryId);
+  }
+
+  async createSpendingTrend(trend: InsertSpendingTrend): Promise<SpendingTrend> {
+    const newTrend: SpendingTrend = {
+      id: this.currentId++,
+      ...trend,
+      createdAt: new Date()
+    };
+    this.spendingTrends.set(newTrend.id, newTrend);
+    return newTrend;
+  }
+
+  async updateSpendingTrend(id: number, updates: Partial<SpendingTrend>): Promise<SpendingTrend> {
+    const trend = this.spendingTrends.get(id);
+    if (!trend) throw new Error("Spending trend not found");
+    
+    const updatedTrend = { ...trend, ...updates };
+    this.spendingTrends.set(id, updatedTrend);
+    return updatedTrend;
+  }
+
+  async deleteSpendingTrend(id: number): Promise<void> {
+    this.spendingTrends.delete(id);
+  }
+
+  // Portfolio Management Implementation
+  async getAllPortfolios(): Promise<Portfolio[]> {
+    return Array.from(this.portfolios.values()).sort((a, b) => 
+      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+  }
+
+  async getPortfolio(id: number): Promise<Portfolio | undefined> {
+    return this.portfolios.get(id);
+  }
+
+  async createPortfolio(portfolio: InsertPortfolio): Promise<Portfolio> {
+    const newPortfolio: Portfolio = {
+      id: this.currentId++,
+      ...portfolio,
+      createdAt: new Date(),
+      lastUpdated: new Date()
+    };
+    this.portfolios.set(newPortfolio.id, newPortfolio);
+    return newPortfolio;
+  }
+
+  async updatePortfolio(id: number, updates: Partial<Portfolio>): Promise<Portfolio> {
+    const portfolio = this.portfolios.get(id);
+    if (!portfolio) throw new Error("Portfolio not found");
+    
+    const updatedPortfolio = { ...portfolio, ...updates, lastUpdated: new Date() };
+    this.portfolios.set(id, updatedPortfolio);
+    return updatedPortfolio;
+  }
+
+  async deletePortfolio(id: number): Promise<void> {
+    this.portfolios.delete(id);
+  }
+
+  async getAllPortfolioHoldings(): Promise<PortfolioHolding[]> {
+    return Array.from(this.portfolioHoldings.values());
+  }
+
+  async getPortfolioHoldingsByPortfolio(portfolioId: number): Promise<PortfolioHolding[]> {
+    return Array.from(this.portfolioHoldings.values()).filter(holding => holding.portfolioId === portfolioId);
+  }
+
+  async createPortfolioHolding(holding: InsertPortfolioHolding): Promise<PortfolioHolding> {
+    const newHolding: PortfolioHolding = {
+      id: this.currentId++,
+      ...holding,
+      createdAt: new Date()
+    };
+    this.portfolioHoldings.set(newHolding.id, newHolding);
+    return newHolding;
+  }
+
+  async updatePortfolioHolding(id: number, updates: Partial<PortfolioHolding>): Promise<PortfolioHolding> {
+    const holding = this.portfolioHoldings.get(id);
+    if (!holding) throw new Error("Portfolio holding not found");
+    
+    const updatedHolding = { ...holding, ...updates };
+    this.portfolioHoldings.set(id, updatedHolding);
+    return updatedHolding;
+  }
+
+  async deletePortfolioHolding(id: number): Promise<void> {
+    this.portfolioHoldings.delete(id);
+  }
+
+  async getAllPriceHistory(): Promise<PriceHistory[]> {
+    return Array.from(this.priceHistory.values()).sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }
+
+  async getPriceHistoryBySymbol(symbol: string): Promise<PriceHistory[]> {
+    return Array.from(this.priceHistory.values()).filter(history => history.symbol === symbol);
+  }
+
+  async createPriceHistory(history: InsertPriceHistory): Promise<PriceHistory> {
+    const newHistory: PriceHistory = {
+      id: this.currentId++,
+      ...history,
+      createdAt: new Date()
+    };
+    this.priceHistory.set(newHistory.id, newHistory);
+    return newHistory;
+  }
+
+  async updatePriceHistory(id: number, updates: Partial<PriceHistory>): Promise<PriceHistory> {
+    const history = this.priceHistory.get(id);
+    if (!history) throw new Error("Price history not found");
+    
+    const updatedHistory = { ...history, ...updates };
+    this.priceHistory.set(id, updatedHistory);
+    return updatedHistory;
+  }
+
+  async deletePriceHistory(id: number): Promise<void> {
+    this.priceHistory.delete(id);
+  }
+
+  async getAllInvestmentTransactions(): Promise<InvestmentTransaction[]> {
+    return Array.from(this.investmentTransactions.values()).sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }
+
+  async getInvestmentTransactionsByInvestment(investmentId: number): Promise<InvestmentTransaction[]> {
+    return Array.from(this.investmentTransactions.values()).filter(tx => tx.investmentId === investmentId);
+  }
+
+  async createInvestmentTransaction(transaction: InsertInvestmentTransaction): Promise<InvestmentTransaction> {
+    const newTransaction: InvestmentTransaction = {
+      id: this.currentId++,
+      ...transaction,
+      createdAt: new Date()
+    };
+    this.investmentTransactions.set(newTransaction.id, newTransaction);
+    return newTransaction;
+  }
+
+  async updateInvestmentTransaction(id: number, updates: Partial<InvestmentTransaction>): Promise<InvestmentTransaction> {
+    const transaction = this.investmentTransactions.get(id);
+    if (!transaction) throw new Error("Investment transaction not found");
+    
+    const updatedTransaction = { ...transaction, ...updates };
+    this.investmentTransactions.set(id, updatedTransaction);
+    return updatedTransaction;
+  }
+
+  async deleteInvestmentTransaction(id: number): Promise<void> {
+    this.investmentTransactions.delete(id);
+  }
+
+  // Advanced Analytics Implementation
+  async calculateBudgetVsActual(budgetPeriodId: number): Promise<any> {
+    const period = this.budgetPeriods.get(budgetPeriodId);
+    if (!period) return null;
+    
+    const expenses = Array.from(this.expenses.values()).filter(expense => 
+      expense.date >= period.startDate && expense.date <= period.endDate
+    );
+    
+    const budgets = Array.from(this.budgets.values()).filter(budget => 
+      budget.month >= period.startDate.substring(0, 7) && budget.month <= period.endDate.substring(0, 7)
+    );
+    
+    return {
+      period: period.name,
+      totalBudget: parseFloat(period.totalBudget),
+      totalSpent: expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0),
+      categoryBreakdown: budgets.map(budget => {
+        const categoryExpenses = expenses.filter(expense => expense.categoryId.toString() === budget.category);
+        const spent = categoryExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+        return {
+          category: budget.category,
+          budget: parseFloat(budget.monthlyLimit),
+          spent,
+          variance: spent - parseFloat(budget.monthlyLimit),
+          percentageUsed: (spent / parseFloat(budget.monthlyLimit)) * 100
+        };
+      })
+    };
+  }
+
+  async generateSpendingAlerts(): Promise<BudgetAlert[]> {
+    const alerts: BudgetAlert[] = [];
+    const budgets = Array.from(this.budgets.values());
+    const currentMonth = new Date().toISOString().substring(0, 7);
+    
+    for (const budget of budgets) {
+      if (budget.month === currentMonth) {
+        const expenses = Array.from(this.expenses.values()).filter(expense => 
+          expense.date.startsWith(currentMonth) && expense.categoryId.toString() === budget.category
+        );
+        
+        const totalSpent = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+        const budgetLimit = parseFloat(budget.monthlyLimit);
+        const percentageUsed = (totalSpent / budgetLimit) * 100;
+        
+        if (percentageUsed > 80) {
+          const alert: BudgetAlert = {
+            id: this.currentId++,
+            budgetId: budget.id,
+            type: percentageUsed > 100 ? "overspend" : "approaching_limit",
+            threshold: percentageUsed.toFixed(1),
+            isActive: true,
+            lastTriggered: new Date(),
+            createdAt: new Date()
+          };
+          alerts.push(alert);
+          this.budgetAlerts.set(alert.id, alert);
+        }
+      }
+    }
+    
+    return alerts;
+  }
+
+  async calculateDebtPayoffTimelines(): Promise<any> {
+    const debts = Array.from(this.debts.values()).filter(debt => debt.isActive);
+    
+    return debts.map(debt => {
+      const balance = parseFloat(debt.currentBalance);
+      const rate = parseFloat(debt.interestRate) / 100 / 12;
+      const payment = parseFloat(debt.minimumPayment);
+      
+      let months = 0;
+      if (payment > balance * rate) {
+        months = Math.ceil(-Math.log(1 - (balance * rate) / payment) / Math.log(1 + rate));
+      }
+      
+      const totalInterest = (payment * months) - balance;
+      
+      return {
+        debtId: debt.id,
+        debtName: debt.name,
+        currentBalance: balance,
+        monthsToPayoff: months,
+        totalInterest,
+        totalPayments: payment * months,
+        payoffDate: months > 0 ? new Date(Date.now() + months * 30 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10) : null
+      };
+    });
+  }
+
+  async calculatePortfolioPerformance(portfolioId: number): Promise<any> {
+    const portfolio = this.portfolios.get(portfolioId);
+    if (!portfolio) return null;
+    
+    const holdings = Array.from(this.portfolioHoldings.values()).filter(h => h.portfolioId === portfolioId);
+    const investments = Array.from(this.investments.values());
+    
+    const portfolioData = holdings.map(holding => {
+      const investment = investments.find(i => i.id === holding.investmentId);
+      if (!investment) return null;
+      
+      const quantity = parseFloat(investment.quantity);
+      const purchasePrice = parseFloat(investment.purchasePrice);
+      const currentPrice = parseFloat(investment.currentPrice);
+      const marketValue = parseFloat(investment.marketValue);
+      const costBasis = quantity * purchasePrice;
+      const gainLoss = marketValue - costBasis;
+      
+      return {
+        symbol: investment.symbol,
+        quantity,
+        purchasePrice,
+        currentPrice,
+        marketValue,
+        costBasis,
+        gainLoss,
+        gainLossPercentage: costBasis > 0 ? (gainLoss / costBasis) * 100 : 0,
+        allocationPercentage: parseFloat(holding.allocationPercentage)
+      };
+    }).filter(item => item !== null);
+    
+    const totalValue = portfolioData.reduce((sum, item) => sum + item.marketValue, 0);
+    const totalCost = portfolioData.reduce((sum, item) => sum + item.costBasis, 0);
+    const totalGainLoss = totalValue - totalCost;
+    
+    return {
+      portfolioId,
+      portfolioName: portfolio.name,
+      totalValue,
+      totalCost,
+      totalGainLoss,
+      totalGainLossPercentage: totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0,
+      holdings: portfolioData
+    };
+  }
+
+  async calculateNetWorthOverTime(startDate: string, endDate: string): Promise<any> {
+    const snapshots = Array.from(this.netWorthSnapshots.values()).filter(snapshot => 
+      snapshot.date >= startDate && snapshot.date <= endDate
+    ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    return snapshots.map(snapshot => ({
+      date: snapshot.date,
+      netWorth: parseFloat(snapshot.netWorth),
+      totalAssets: parseFloat(snapshot.totalAssets),
+      totalLiabilities: parseFloat(snapshot.totalLiabilities),
+      change: snapshots.length > 1 ? 
+        parseFloat(snapshot.netWorth) - parseFloat(snapshots[snapshots.indexOf(snapshot) - 1]?.netWorth || "0") : 0
+    }));
   }
 }
 

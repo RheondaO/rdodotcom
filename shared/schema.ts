@@ -166,6 +166,38 @@ export interface Budget {
   createdAt?: Date;
 }
 
+export interface BudgetPeriod {
+  id: number;
+  name: string;
+  startDate: string;
+  endDate: string;
+  totalBudget: string;
+  totalSpent?: string;
+  isActive?: boolean;
+  createdAt?: Date;
+}
+
+export interface BudgetAlert {
+  id: number;
+  budgetId: number;
+  type: string; // overspend, approaching_limit, trend_change
+  threshold: string; // percentage or amount
+  isActive?: boolean;
+  lastTriggered?: Date;
+  createdAt?: Date;
+}
+
+export interface SpendingTrend {
+  id: number;
+  categoryId: number;
+  period: string; // weekly, monthly, yearly
+  averageSpend: string;
+  trendDirection: string; // increasing, decreasing, stable
+  changePercentage: string;
+  calculatedAt: Date;
+  createdAt?: Date;
+}
+
 export interface BudgetCategory {
   id: number;
   name: string;
@@ -227,6 +259,49 @@ export interface Investment {
   platformId?: number;
   purchaseDate: string;
   lastPriceUpdate?: Date;
+  createdAt?: Date;
+}
+
+export interface Portfolio {
+  id: number;
+  name: string;
+  description?: string;
+  totalValue: string;
+  totalCost: string;
+  totalGainLoss: string;
+  lastUpdated?: Date;
+  createdAt?: Date;
+}
+
+export interface PortfolioHolding {
+  id: number;
+  portfolioId: number;
+  investmentId: number;
+  allocationPercentage: string;
+  targetAllocation?: string;
+  createdAt?: Date;
+}
+
+export interface PriceHistory {
+  id: number;
+  symbol: string;
+  price: string;
+  date: string;
+  volume?: string;
+  source?: string;
+  createdAt?: Date;
+}
+
+export interface InvestmentTransaction {
+  id: number;
+  investmentId: number;
+  type: string; // buy, sell, dividend, split
+  quantity: string;
+  price: string;
+  totalAmount: string;
+  fees?: string;
+  date: string;
+  notes?: string;
   createdAt?: Date;
 }
 
@@ -794,6 +869,65 @@ export const insertFinancialGoalSchema = z.object({
   monthlyContribution: z.string().optional()
 });
 
+export const insertBudgetPeriodSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().min(1, "End date is required"),
+  totalBudget: z.string().min(1, "Total budget is required"),
+  totalSpent: z.string().default("0"),
+  isActive: z.boolean().default(true)
+});
+
+export const insertBudgetAlertSchema = z.object({
+  budgetId: z.number().min(1, "Budget ID is required"),
+  type: z.string().min(1, "Type is required"),
+  threshold: z.string().min(1, "Threshold is required"),
+  isActive: z.boolean().default(true)
+});
+
+export const insertSpendingTrendSchema = z.object({
+  categoryId: z.number().min(1, "Category ID is required"),
+  period: z.string().min(1, "Period is required"),
+  averageSpend: z.string().min(1, "Average spend is required"),
+  trendDirection: z.string().min(1, "Trend direction is required"),
+  changePercentage: z.string().min(1, "Change percentage is required"),
+  calculatedAt: z.date()
+});
+
+export const insertPortfolioSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  totalValue: z.string().default("0"),
+  totalCost: z.string().default("0"),
+  totalGainLoss: z.string().default("0")
+});
+
+export const insertPortfolioHoldingSchema = z.object({
+  portfolioId: z.number().min(1, "Portfolio ID is required"),
+  investmentId: z.number().min(1, "Investment ID is required"),
+  allocationPercentage: z.string().min(1, "Allocation percentage is required"),
+  targetAllocation: z.string().optional()
+});
+
+export const insertPriceHistorySchema = z.object({
+  symbol: z.string().min(1, "Symbol is required"),
+  price: z.string().min(1, "Price is required"),
+  date: z.string().min(1, "Date is required"),
+  volume: z.string().optional(),
+  source: z.string().optional()
+});
+
+export const insertInvestmentTransactionSchema = z.object({
+  investmentId: z.number().min(1, "Investment ID is required"),
+  type: z.string().min(1, "Type is required"),
+  quantity: z.string().min(1, "Quantity is required"),
+  price: z.string().min(1, "Price is required"),
+  totalAmount: z.string().min(1, "Total amount is required"),
+  fees: z.string().optional(),
+  date: z.string().min(1, "Date is required"),
+  notes: z.string().optional()
+});
+
 // Insert types
 export type InsertDailyEntry = z.infer<typeof insertDailyEntrySchema>;
 export type InsertBill = z.infer<typeof insertBillSchema>;
@@ -824,3 +958,10 @@ export type InsertInvestmentPlatform = z.infer<typeof insertInvestmentPlatformSc
 export type InsertAccount = z.infer<typeof insertAccountSchema>;
 export type InsertNetWorthSnapshot = z.infer<typeof insertNetWorthSnapshotSchema>;
 export type InsertFinancialGoal = z.infer<typeof insertFinancialGoalSchema>;
+export type InsertBudgetPeriod = z.infer<typeof insertBudgetPeriodSchema>;
+export type InsertBudgetAlert = z.infer<typeof insertBudgetAlertSchema>;
+export type InsertSpendingTrend = z.infer<typeof insertSpendingTrendSchema>;
+export type InsertPortfolio = z.infer<typeof insertPortfolioSchema>;
+export type InsertPortfolioHolding = z.infer<typeof insertPortfolioHoldingSchema>;
+export type InsertPriceHistory = z.infer<typeof insertPriceHistorySchema>;
+export type InsertInvestmentTransaction = z.infer<typeof insertInvestmentTransactionSchema>;
