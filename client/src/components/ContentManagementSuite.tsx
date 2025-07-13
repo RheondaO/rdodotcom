@@ -373,9 +373,6 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                     <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50" style={{ background: `linear-gradient(135deg, ${block.color}15 0%, ${block.color}08 100%)` }}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg text-2xl" style={{ background: `linear-gradient(135deg, ${block.color} 0%, ${block.color}CC 100%)` }}>
-                            {block.icon}
-                          </div>
                           <div>
                             <CardTitle className="text-lg font-bold text-gray-800 dark:text-gray-200">{block.title}</CardTitle>
                             <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">{block.description}</p>
