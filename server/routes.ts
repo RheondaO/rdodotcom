@@ -1327,8 +1327,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/notion/tasks", async (req, res) => {
     try {
+      const { date, view } = req.query;
       const tasks = await getNotionTasks();
-      res.json(tasks);
+      
+      // Filter by date if provided
+      if (date && view) {
+        const targetDate = new Date(date as string);
+        const filteredTasks = tasks.filter(task => {
+          if (!task.dueDate) return false;
+          
+          const taskDate = new Date(task.dueDate);
+          const taskDateStr = taskDate.toISOString().split('T')[0];
+          const targetDateStr = targetDate.toISOString().split('T')[0];
+          
+          return taskDateStr === targetDateStr;
+        });
+        
+        res.json(filteredTasks);
+      } else {
+        res.json(tasks);
+      }
     } catch (error) {
       console.error("Error fetching Notion entries:", error);
       res.status(500).json({ error: "Failed to fetch Notion entries" });

@@ -35,12 +35,15 @@ interface NotionTask {
   notionId: string;
   title: string;
   description: string;
+  category: string;
   section: string;
   isCompleted: boolean;
   dueDate: Date | null;
+  createdDate: Date | null;
   completedAt: Date | null;
   priority: string | null;
   status: string | null;
+  estimatedDuration: number | null;
 }
 
 interface NotionDatabase {

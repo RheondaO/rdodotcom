@@ -28,6 +28,7 @@ import {
 import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
+import ProductivityTasks from "./ProductivityTasks";
 
 interface ProductivitySectionProps {
   selectedDate: Date;
@@ -379,6 +380,19 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
               </div>
             ))
           )}
+        </CardContent>
+      </Card>
+
+      {/* Notion Tasks Integration */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-t-lg">
+          <CardTitle className="flex items-center space-x-2">
+            <CheckSquare className="h-5 w-5 text-purple-600" />
+            <span>Notion Tasks - {getDateLabel()}</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <ProductivityTasks selectedDate={selectedDate} isReadOnly={isReadOnly} />
         </CardContent>
       </Card>
     </div>

@@ -98,12 +98,15 @@ export async function getNotionTasks(tasksDatabaseId: string = NOTION_DATABASE_I
                 notionId: page.id,
                 title: properties.Name?.title?.[0]?.plain_text || "Untitled Entry",
                 description: properties.Description?.rich_text?.[0]?.plain_text || "",
-                section: properties.Section?.select?.name || "General",
+                category: properties.Category?.select?.name || "Personal",
+                section: properties.Section?.select?.name || properties.Category?.select?.name || "General",
                 isCompleted: properties.Completed?.checkbox || false,
-                dueDate: properties.DueDate?.date?.start ? new Date(properties.DueDate.date.start) : null,
-                completedAt: properties.CompletedAt?.date?.start ? new Date(properties.CompletedAt.date.start) : null,
+                dueDate: properties["Due DateTime"]?.date?.start ? new Date(properties["Due DateTime"].date.start) : null,
+                createdDate: properties["Created DateTime"]?.created_time ? new Date(properties["Created DateTime"].created_time) : null,
+                completedAt: properties["Completed At"]?.date?.start ? new Date(properties["Completed At"].date.start) : null,
                 priority: properties.Priority?.select?.name || null,
-                status: properties.Status?.select?.name || "Active",
+                status: properties.Status?.select?.name || "To Do",
+                estimatedDuration: properties["Estimated Duration"]?.number || null,
             };
         });
     } catch (error) {
@@ -116,9 +119,12 @@ export async function getNotionTasks(tasksDatabaseId: string = NOTION_DATABASE_I
 export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE_ID, task: {
     title: string;
     description?: string;
+    category?: string;
     section?: string;
     priority?: string;
     dueDate?: Date;
+    estimatedDuration?: number;
+    status?: string;
 }) {
     try {
         const properties: any = {
@@ -131,6 +137,60 @@ export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE
                     }
                 ]
             }
+        };
+
+        if (task.description) {
+            properties.Description = {
+                rich_text: [
+                    {
+                        text: {
+                            content: task.description
+                        }
+                    }
+                ]
+            };
+        }
+
+        if (task.category) {
+            properties.Category = {
+                select: {
+                    name: task.category
+                }
+            };
+        }
+
+        if (task.priority) {
+            properties.Priority = {
+                select: {
+                    name: task.priority
+                }
+            };
+        }
+
+        if (task.status) {
+            properties.Status = {
+                select: {
+                    name: task.status
+                }
+            };
+        }
+
+        if (task.estimatedDuration) {
+            properties["Estimated Duration"] = {
+                number: task.estimatedDuration
+            };
+        }
+
+        if (task.dueDate) {
+            properties["Due DateTime"] = {
+                date: {
+                    start: task.dueDate.toISOString().split('T')[0]
+                }
+            };
+        }
+
+        properties.Completed = {
+            checkbox: task.status === "Done"
         };
 
         const response = await notion.pages.create({
@@ -151,11 +211,13 @@ export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE
 export async function updateNotionTask(pageId: string, updates: {
     title?: string;
     description?: string;
+    category?: string;
     section?: string;
     priority?: string;
     isCompleted?: boolean;
     status?: string;
     dueDate?: Date;
+    estimatedDuration?: number;
 }) {
     try {
         const properties: any = {};
@@ -170,6 +232,70 @@ export async function updateNotionTask(pageId: string, updates: {
                     }
                 ]
             };
+        }
+
+        if (updates.description !== undefined) {
+            properties.Description = {
+                rich_text: updates.description ? [
+                    {
+                        text: {
+                            content: updates.description
+                        }
+                    }
+                ] : []
+            };
+        }
+
+        if (updates.category) {
+            properties.Category = {
+                select: {
+                    name: updates.category
+                }
+            };
+        }
+
+        if (updates.priority) {
+            properties.Priority = {
+                select: {
+                    name: updates.priority
+                }
+            };
+        }
+
+        if (updates.status) {
+            properties.Status = {
+                select: {
+                    name: updates.status
+                }
+            };
+        }
+
+        if (updates.estimatedDuration !== undefined) {
+            properties["Estimated Duration"] = {
+                number: updates.estimatedDuration
+            };
+        }
+
+        if (updates.dueDate) {
+            properties["Due DateTime"] = {
+                date: {
+                    start: updates.dueDate.toISOString().split('T')[0]
+                }
+            };
+        }
+
+        if (updates.isCompleted !== undefined) {
+            properties.Completed = {
+                checkbox: updates.isCompleted
+            };
+            
+            if (updates.isCompleted) {
+                properties["Completed At"] = {
+                    date: {
+                        start: new Date().toISOString().split('T')[0]
+                    }
+                };
+            }
         }
 
         const response = await notion.pages.update({
