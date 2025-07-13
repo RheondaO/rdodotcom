@@ -30,7 +30,8 @@ import {
   PieChart,
   Activity,
   DollarSign,
-  Save
+  Save,
+  Moon
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "../hooks/use-toast";
@@ -204,7 +205,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
-                <FileText className="h-5 w-5 text-white" />
+                <Moon className="h-5 w-5 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
