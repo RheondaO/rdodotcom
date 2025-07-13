@@ -1,256 +1,161 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
+import React, { useState, useEffect } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
+  ArrowLeft, 
   Save, 
   Eye, 
-  Send, 
   Calendar, 
-  Tag, 
-  Image, 
-  Link, 
-  Bold, 
-  Italic, 
-  List, 
-  ListOrdered, 
-  Quote, 
-  Code, 
-  Heading1, 
-  Heading2, 
-  Heading3,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Undo,
-  Redo,
-  Plus,
-  FileText,
-  Settings,
-  Clock,
   Target,
+  FileText,
   Zap,
+  Globe,
+  Tag,
   BookOpen,
-  PenTool,
-  Users,
-  BarChart3,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Archive
-} from "lucide-react";
-import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
+  Clock,
+  Share2,
+  ChevronDown
+} from 'lucide-react';
 
 interface BlogPost {
   id: number;
   title: string;
-  content?: string;
+  content: string;
   excerpt?: string;
-  status: string;
+  status: 'draft' | 'published' | 'scheduled' | 'archived';
   type: string;
   platform: string;
   tags?: string;
-  scheduledDate?: string;
   publishedDate?: string;
-  reviewDate?: string;
-  priority?: string;
+  scheduledDate?: string;
+  priority: 'low' | 'medium' | 'high';
   wordCount?: number;
   readingTime?: number;
   seoTitle?: string;
   seoDescription?: string;
-  featuredImage?: string;
   isAiGenerated?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface BlogEditorProps {
   postId?: number;
-  onClose?: () => void;
+  onClose: () => void;
 }
 
-export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  
-  const [post, setPost] = useState<Partial<BlogPost>>({
-    title: "",
-    content: "",
-    excerpt: "",
-    status: "draft",
-    type: "blog",
-    platform: "personal_blog",
-    priority: "medium",
-    tags: "[]",
-    seoTitle: "",
-    seoDescription: "",
-    featuredImage: "",
+const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
+  const [activeTab, setActiveTab] = useState("content");
+  const [showPreview, setShowPreview] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    excerpt: '',
+    status: 'draft',
+    type: 'blog',
+    platform: 'personal_blog',
+    tags: '',
+    publishedDate: '',
+    scheduledDate: '',
+    priority: 'medium',
+    seoTitle: '',
+    seoDescription: '',
     isAiGenerated: false
   });
-  
-  const [showPreview, setShowPreview] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [autoSave, setAutoSave] = useState(true);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [wordCount, setWordCount] = useState(0);
-  const [readingTime, setReadingTime] = useState(0);
+
+  const queryClient = useQueryClient();
 
   // Fetch existing post if editing
-  const { data: existingPost, isLoading } = useQuery<BlogPost>({
-    queryKey: ["/api/blog/posts", postId],
+  const { data: post, isLoading } = useQuery<BlogPost>({
+    queryKey: ['/api/blog/posts', postId],
     enabled: !!postId,
   });
 
-  // Load existing post data
+  // Update form when post data is loaded
   useEffect(() => {
-    if (existingPost) {
-      setPost(existingPost);
-    }
-  }, [existingPost]);
-
-  // Calculate word count and reading time
-  useEffect(() => {
-    const content = post.content || "";
-    const words = content.trim() ? content.trim().split(/\s+/).length : 0;
-    const readTime = Math.ceil(words / 200); // Average reading speed
-    
-    setWordCount(words);
-    setReadingTime(readTime);
-    
-    // Update post state
-    setPost(prev => ({
-      ...prev,
-      wordCount: words,
-      readingTime: readTime
-    }));
-  }, [post.content]);
-
-  // Auto-save mutation
-  const autoSaveMutation = useMutation({
-    mutationFn: async (data: Partial<BlogPost>) => {
-      const url = postId ? `/api/blog/posts/${postId}` : "/api/blog/posts";
-      const method = postId ? "PATCH" : "POST";
-      
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+    if (post) {
+      setFormData({
+        title: post.title || '',
+        content: post.content || '',
+        excerpt: post.excerpt || '',
+        status: post.status,
+        type: post.type,
+        platform: post.platform,
+        tags: post.tags || '',
+        publishedDate: post.publishedDate || '',
+        scheduledDate: post.scheduledDate || '',
+        priority: post.priority,
+        seoTitle: post.seoTitle || '',
+        seoDescription: post.seoDescription || '',
+        isAiGenerated: post.isAiGenerated || false
       });
-      return response.json();
-    },
-    onSuccess: () => {
-      setLastSaved(new Date());
-      queryClient.invalidateQueries({ queryKey: ["/api/blog/posts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/blog/workflow-status"] });
-    },
-  });
+    }
+  }, [post]);
 
-  // Manual save mutation
   const saveMutation = useMutation({
-    mutationFn: async (data: Partial<BlogPost>) => {
-      const url = postId ? `/api/blog/posts/${postId}` : "/api/blog/posts";
-      const method = postId ? "PATCH" : "POST";
-      
+    mutationFn: async (data: any) => {
+      const url = postId ? `/api/blog/posts/${postId}` : '/api/blog/posts';
+      const method = postId ? 'PUT' : 'POST';
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Post saved successfully",
-        description: "Your blog post has been saved.",
-      });
-      setLastSaved(new Date());
-      queryClient.invalidateQueries({ queryKey: ["/api/blog/posts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/blog/workflow-status"] });
-    },
-    onError: () => {
-      toast({
-        title: "Error saving post",
-        description: "There was an error saving your post. Please try again.",
-        variant: "destructive",
-      });
+      queryClient.invalidateQueries({ queryKey: ['/api/blog/posts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/blog/workflow-status'] });
+      onClose();
     },
   });
 
-  // Auto-save functionality
-  useEffect(() => {
-    if (autoSave && post.title && post.content) {
-      const timer = setTimeout(() => {
-        autoSaveMutation.mutate(post);
-      }, 3000); // Auto-save after 3 seconds of inactivity
-      
-      return () => clearTimeout(timer);
-    }
-  }, [post, autoSave]);
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleSave = () => {
-    saveMutation.mutate(post);
-  };
+    // Calculate word count and reading time
+    const wordCount = formData.content.split(' ').filter(word => word.trim().length > 0).length;
+    const readingTime = Math.ceil(wordCount / 200); // Assuming 200 words per minute
 
-  const handlePublish = () => {
-    saveMutation.mutate({
-      ...post,
-      status: "published",
-      publishedDate: format(new Date(), "yyyy-MM-dd")
-    });
-  };
+    const dataToSave = {
+      ...formData,
+      wordCount,
+      readingTime,
+      tags: formData.tags ? JSON.stringify(formData.tags.split(',').map(tag => tag.trim())) : JSON.stringify([])
+    };
 
-  const handleSchedule = () => {
-    saveMutation.mutate({
-      ...post,
-      status: "scheduled"
-    });
-  };
-
-  const insertFormatting = (before: string, after: string = "") => {
-    const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement;
-    if (!textarea) return;
-    
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = textarea.value.substring(start, end);
-    
-    const newText = before + selectedText + after;
-    const newContent = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
-    
-    setPost(prev => ({ ...prev, content: newContent }));
-    
-    // Set cursor position after formatting
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length);
-    }, 0);
+    saveMutation.mutate(dataToSave);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "draft": return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
-      case "scheduled": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
-      case "published": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-      case "archived": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-      default: return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      case 'scheduled': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200';
+      case 'published': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
+      case 'archived': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-      case "medium": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
-      case "low": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-      default: return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      case 'low': return 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200';
+      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
   };
 
@@ -258,368 +163,249 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Loading post...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Loading post...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="max-w-6xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+  if (showPreview) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        {/* Preview Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                {postId ? "Edit Post" : "New Blog Post"}
-              </h1>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Badge className={getStatusColor(post.status || "draft")}>
-                {post.status || "draft"}
-              </Badge>
-              <Badge className={getPriorityColor(post.priority || "medium")}>
-                {post.priority || "medium"}
-              </Badge>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            {lastSaved && (
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                Last saved: {format(lastSaved, "HH:mm:ss")}
-              </span>
-            )}
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowPreview(!showPreview)}
-            >
-              <Eye className="h-4 w-4" />
-              {showPreview ? "Edit" : "Preview"}
-            </Button>
-            
+          <div className="flex items-center gap-4">
             <Button
               variant="outline"
               size="sm"
-              onClick={handleSave}
-              disabled={saveMutation.isPending}
+              onClick={() => setShowPreview(false)}
+              className="flex items-center gap-2"
             >
-              <Save className="h-4 w-4 mr-2" />
-              Save
+              <ArrowLeft className="h-4 w-4" />
+              Back to Editor
             </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSchedule}
-              disabled={saveMutation.isPending}
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule
-            </Button>
-            
-            <Button
-              size="sm"
-              onClick={handlePublish}
-              disabled={saveMutation.isPending}
-            >
-              <Send className="h-4 w-4 mr-2" />
-              Publish
-            </Button>
-            
-            {onClose && (
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <XCircle className="h-4 w-4" />
-              </Button>
-            )}
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Preview</h1>
           </div>
+          <div className="flex items-center gap-2">
+            <Badge className={getStatusColor(formData.status)}>
+              {formData.status}
+            </Badge>
+            <Badge className={getPriorityColor(formData.priority)}>
+              {formData.priority}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Preview Content */}
+        <Card>
+          <CardContent className="p-8">
+            <div className="prose prose-lg max-w-none dark:prose-invert">
+              <h1 className="text-3xl font-bold mb-4">{formData.title || 'Untitled Post'}</h1>
+              
+              {formData.excerpt && (
+                <p className="text-xl text-gray-600 dark:text-gray-400 mb-6 italic border-l-4 border-purple-500 pl-4">
+                  {formData.excerpt}
+                </p>
+              )}
+
+              <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-8">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {formData.publishedDate || 'Not published'}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {Math.ceil(formData.content.split(' ').filter(word => word.trim().length > 0).length / 200)} min read
+                </div>
+                <div className="flex items-center gap-1">
+                  <Globe className="h-4 w-4" />
+                  {formData.platform}
+                </div>
+              </div>
+
+              <div className="whitespace-pre-wrap">
+                {formData.content || 'No content yet...'}
+              </div>
+
+              {formData.tags && (
+                <div className="mt-8 pt-6 border-t">
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.split(',').map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200">
+                        #{tag.trim()}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      {/* Editor Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Studio
+          </Button>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {postId ? 'Edit Post' : 'New Post'}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPreview(true)}
+            className="flex items-center gap-2"
+          >
+            <Eye className="h-4 w-4" />
+            Preview
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={saveMutation.isPending}
+            className="flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            {saveMutation.isPending ? 'Saving...' : 'Save'}
+          </Button>
         </div>
       </div>
 
-      <div className="flex">
-        {/* Main Editor */}
-        <div className={`flex-1 ${showSettings ? 'border-r' : ''}`}>
-          {!showPreview ? (
-            <div className="p-6 space-y-6">
-              {/* Title */}
-              <div>
+      {/* Editor Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="content" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Content
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Settings
+          </TabsTrigger>
+          <TabsTrigger value="seo" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            SEO
+          </TabsTrigger>
+          <TabsTrigger value="publish" className="flex items-center gap-2">
+            <Share2 className="h-4 w-4" />
+            Publish
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Content Tab */}
+        <TabsContent value="content" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Content Editor
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title</Label>
                 <Input
-                  placeholder="Post title..."
-                  value={post.title || ""}
-                  onChange={(e) => setPost(prev => ({ ...prev, title: e.target.value }))}
-                  className="text-2xl font-bold border-none px-0 focus:ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-transparent dark:text-gray-100"
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  placeholder="Enter post title..."
+                  className="text-lg"
                 />
               </div>
 
-              {/* Excerpt */}
-              <div>
+              <div className="space-y-2">
+                <Label htmlFor="excerpt">Excerpt</Label>
                 <Textarea
-                  placeholder="Write a brief excerpt..."
-                  value={post.excerpt || ""}
-                  onChange={(e) => setPost(prev => ({ ...prev, excerpt: e.target.value }))}
-                  className="resize-none border-none px-0 focus:ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-transparent dark:text-gray-100"
-                  rows={2}
+                  id="excerpt"
+                  value={formData.excerpt}
+                  onChange={(e) => handleInputChange('excerpt', e.target.value)}
+                  placeholder="Brief summary of the post..."
+                  rows={3}
                 />
               </div>
 
-              <Separator />
-
-              {/* Formatting Toolbar */}
-              <div className="border-b pb-4">
-                <div className="flex items-center space-x-2 flex-wrap">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("# ", "")}
-                    title="Heading 1"
-                  >
-                    <Heading1 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("## ", "")}
-                    title="Heading 2"
-                  >
-                    <Heading2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("### ", "")}
-                    title="Heading 3"
-                  >
-                    <Heading3 className="h-4 w-4" />
-                  </Button>
-                  
-                  <Separator orientation="vertical" className="h-6" />
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("**", "**")}
-                    title="Bold"
-                  >
-                    <Bold className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("*", "*")}
-                    title="Italic"
-                  >
-                    <Italic className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("`", "`")}
-                    title="Code"
-                  >
-                    <Code className="h-4 w-4" />
-                  </Button>
-                  
-                  <Separator orientation="vertical" className="h-6" />
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("- ", "")}
-                    title="Bullet List"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("1. ", "")}
-                    title="Numbered List"
-                  >
-                    <ListOrdered className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("> ", "")}
-                    title="Quote"
-                  >
-                    <Quote className="h-4 w-4" />
-                  </Button>
-                  
-                  <Separator orientation="vertical" className="h-6" />
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("[Link text](", ")")}
-                    title="Link"
-                  >
-                    <Link className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => insertFormatting("![Alt text](", ")")}
-                    title="Image"
-                  >
-                    <Image className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Content Editor */}
-              <div className="relative">
+              <div className="space-y-2">
+                <Label htmlFor="content">Content</Label>
                 <Textarea
-                  name="content"
-                  placeholder="Start writing your post..."
-                  value={post.content || ""}
-                  onChange={(e) => setPost(prev => ({ ...prev, content: e.target.value }))}
-                  className="min-h-96 border-none px-0 focus:ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none bg-transparent dark:text-gray-100"
-                  style={{ fontSize: '16px', lineHeight: '1.6' }}
+                  id="content"
+                  value={formData.content}
+                  onChange={(e) => handleInputChange('content', e.target.value)}
+                  placeholder="Write your post content here..."
+                  rows={20}
+                  className="font-mono"
                 />
               </div>
 
-              {/* Status Bar */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-                <div className="flex items-center space-x-4">
-                  <span className="flex items-center">
-                    <FileText className="h-4 w-4 mr-1" />
-                    {wordCount} words
-                  </span>
-                  <span className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1" />
-                    {readingTime} min read
-                  </span>
-                  <span className="flex items-center">
-                    <Target className="h-4 w-4 mr-1" />
-                    {post.platform}
-                  </span>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Label className="text-xs">Auto-save</Label>
-                  <input
-                    type="checkbox"
-                    checked={autoSave}
-                    onChange={(e) => setAutoSave(e.target.checked)}
-                    className="rounded"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="tags">Tags</Label>
+                <Input
+                  id="tags"
+                  value={formData.tags}
+                  onChange={(e) => handleInputChange('tags', e.target.value)}
+                  placeholder="productivity, remote work, tips (comma separated)"
+                />
               </div>
-            </div>
-          ) : (
-            /* Preview Mode */
-            <div className="p-6 prose prose-lg max-w-none dark:prose-invert">
-              <h1 className="text-3xl font-bold mb-4 dark:text-gray-100">{post.title}</h1>
-              {post.excerpt && (
-                <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 italic">{post.excerpt}</p>
-              )}
-              <div className="whitespace-pre-wrap">
-                {post.content?.split('\n').map((paragraph, index) => {
-                  // Basic markdown parsing for preview
-                  let content = paragraph;
-                  
-                  // Headers
-                  if (content.startsWith('# ')) {
-                    return <h1 key={index} className="text-2xl font-bold mt-6 mb-3">{content.substring(2)}</h1>;
-                  }
-                  if (content.startsWith('## ')) {
-                    return <h2 key={index} className="text-xl font-bold mt-5 mb-2">{content.substring(3)}</h2>;
-                  }
-                  if (content.startsWith('### ')) {
-                    return <h3 key={index} className="text-lg font-bold mt-4 mb-2">{content.substring(4)}</h3>;
-                  }
-                  
-                  // Bold and italic
-                  content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                  content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
-                  content = content.replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>');
-                  
-                  // Lists
-                  if (content.startsWith('- ')) {
-                    return <li key={index} className="ml-4">{content.substring(2)}</li>;
-                  }
-                  if (content.match(/^\d+\. /)) {
-                    return <li key={index} className="ml-4">{content.replace(/^\d+\. /, '')}</li>;
-                  }
-                  
-                  // Quote
-                  if (content.startsWith('> ')) {
-                    return <blockquote key={index} className="border-l-4 border-gray-300 pl-4 italic">{content.substring(2)}</blockquote>;
-                  }
-                  
-                  return content ? <p key={index} className="mb-4" dangerouslySetInnerHTML={{ __html: content }} /> : <br key={index} />;
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        {/* Settings Sidebar */}
-        {showSettings && (
-          <div className="w-80 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 p-6 space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-4 dark:text-gray-200">Post Settings</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={post.status}
-                    onValueChange={(value) => setPost(prev => ({ ...prev, status: value }))}
-                  >
+        {/* Settings Tab */}
+        <TabsContent value="settings" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Post Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="scheduled">Scheduled</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="archived">Archived</SelectItem>
+                      <SelectItem value="blog">Blog Post</SelectItem>
+                      <SelectItem value="article">Article</SelectItem>
+                      <SelectItem value="tutorial">Tutorial</SelectItem>
+                      <SelectItem value="guide">Guide</SelectItem>
+                      <SelectItem value="review">Review</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="platform">Platform</Label>
-                  <Select
-                    value={post.platform}
-                    onValueChange={(value) => setPost(prev => ({ ...prev, platform: value }))}
-                  >
+                <div className="space-y-2">
+                  <Label>Platform</Label>
+                  <Select value={formData.platform} onValueChange={(value) => handleInputChange('platform', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="personal_blog">Personal Blog</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="substack">Substack</SelectItem>
-                      <SelectItem value="linkedin">LinkedIn</SelectItem>
-                      <SelectItem value="hashnode">Hashnode</SelectItem>
                       <SelectItem value="dev_to">Dev.to</SelectItem>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
+                      <SelectItem value="substack">Substack</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select
-                    value={post.priority}
-                    onValueChange={(value) => setPost(prev => ({ ...prev, priority: value }))}
-                  >
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -630,98 +416,164 @@ export default function BlogEditor({ postId, onClose }: BlogEditorProps) {
                     </SelectContent>
                   </Select>
                 </div>
+              </CardContent>
+            </Card>
 
-                <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Statistics</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {formData.content.split(' ').filter(word => word.trim().length > 0).length}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Words</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {Math.ceil(formData.content.split(' ').filter(word => word.trim().length > 0).length / 200)}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Min Read</div>
+                  </div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {formData.content.length}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Characters</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* SEO Tab */}
+        <TabsContent value="seo" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                SEO Optimization
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="seoTitle">SEO Title</Label>
+                <Input
+                  id="seoTitle"
+                  value={formData.seoTitle}
+                  onChange={(e) => handleInputChange('seoTitle', e.target.value)}
+                  placeholder="Optimized title for search engines..."
+                  maxLength={60}
+                />
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {formData.seoTitle.length}/60 characters
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="seoDescription">SEO Description</Label>
+                <Textarea
+                  id="seoDescription"
+                  value={formData.seoDescription}
+                  onChange={(e) => handleInputChange('seoDescription', e.target.value)}
+                  placeholder="Meta description for search results..."
+                  rows={4}
+                  maxLength={160}
+                />
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {formData.seoDescription.length}/160 characters
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium mb-2">Search Preview</h4>
+                <div className="space-y-1">
+                  <div className="text-blue-600 text-lg">
+                    {formData.seoTitle || formData.title || 'Untitled Post'}
+                  </div>
+                  <div className="text-green-600 text-sm">
+                    example.com/blog/{formData.title?.toLowerCase().replace(/\s+/g, '-') || 'untitled'}
+                  </div>
+                  <div className="text-gray-600 text-sm">
+                    {formData.seoDescription || formData.excerpt || 'No description available.'}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Publish Tab */}
+        <TabsContent value="publish" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5" />
+                Publishing Options
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {formData.status === 'scheduled' && (
+                <div className="space-y-2">
                   <Label htmlFor="scheduledDate">Scheduled Date</Label>
                   <Input
-                    type="date"
-                    value={post.scheduledDate || ""}
-                    onChange={(e) => setPost(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                    id="scheduledDate"
+                    type="datetime-local"
+                    value={formData.scheduledDate}
+                    onChange={(e) => handleInputChange('scheduledDate', e.target.value)}
                   />
                 </div>
+              )}
 
-                <div>
-                  <Label htmlFor="tags">Tags (comma-separated)</Label>
+              {formData.status === 'published' && (
+                <div className="space-y-2">
+                  <Label htmlFor="publishedDate">Published Date</Label>
                   <Input
-                    placeholder="productivity, tips, guide"
-                    value={post.tags ? JSON.parse(post.tags).join(', ') : ""}
-                    onChange={(e) => setPost(prev => ({ 
-                      ...prev, 
-                      tags: JSON.stringify(e.target.value.split(',').map(t => t.trim()).filter(t => t))
-                    }))}
+                    id="publishedDate"
+                    type="datetime-local"
+                    value={formData.publishedDate}
+                    onChange={(e) => handleInputChange('publishedDate', e.target.value)}
                   />
                 </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isAiGenerated"
+                  checked={formData.isAiGenerated}
+                  onChange={(e) => handleInputChange('isAiGenerated', e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="isAiGenerated" className="flex items-center gap-2">
+                  <Zap className="h-4 w-4" />
+                  AI Generated Content
+                </Label>
               </div>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4 dark:text-gray-200">SEO Settings</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="seoTitle">SEO Title</Label>
-                  <Input
-                    placeholder="SEO-optimized title"
-                    value={post.seoTitle || ""}
-                    onChange={(e) => setPost(prev => ({ ...prev, seoTitle: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="seoDescription">SEO Description</Label>
-                  <Textarea
-                    placeholder="Meta description for search engines"
-                    value={post.seoDescription || ""}
-                    onChange={(e) => setPost(prev => ({ ...prev, seoDescription: e.target.value }))}
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="featuredImage">Featured Image URL</Label>
-                  <Input
-                    placeholder="https://example.com/image.jpg"
-                    value={post.featuredImage || ""}
-                    onChange={(e) => setPost(prev => ({ ...prev, featuredImage: e.target.value }))}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Statistics</h3>
-              
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Words</span>
-                  <span className="font-medium">{wordCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Reading Time</span>
-                  <span className="font-medium">{readingTime} min</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Characters</span>
-                  <span className="font-medium">{post.content?.length || 0}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">AI Generated</span>
-                  <input
-                    type="checkbox"
-                    checked={post.isAiGenerated || false}
-                    onChange={(e) => setPost(prev => ({ ...prev, isAiGenerated: e.target.checked }))}
-                    className="rounded"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
+};
+
+export default BlogEditor;

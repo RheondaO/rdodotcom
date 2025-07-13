@@ -194,7 +194,7 @@ export default function BlogContentStudio() {
 
   const createPostFromIdeaMutation = useMutation({
     mutationFn: async (ideaId: number) => {
-      const response = await fetch('/api/blog/ideas/${ideaId}/create-post', {
+      const response = await fetch(`/api/blog/ideas/${ideaId}/create-post`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -208,7 +208,7 @@ export default function BlogContentStudio() {
 
   const generateAIContentMutation = useMutation({
     mutationFn: async (ideaId: number) => {
-      const response = await fetch('/api/blog/ideas/${ideaId}/generate-ai-content', {
+      const response = await fetch(`/api/blog/ideas/${ideaId}/generate-ai-content`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -253,65 +253,106 @@ export default function BlogContentStudio() {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="space-y-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Blogging Content Studio</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">Professional content creation and workflow management</p>
         </div>
-        <div className="flex gap-3">
-          <Dialog open={newIdeaDialog} onOpenChange={setNewIdeaDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Lightbulb className="h-4 w-4 mr-2" />
-                New Idea
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Blog Idea</DialogTitle>
-              </DialogHeader>
-              <NewIdeaForm onSubmit={createIdeaMutation.mutate} />
-            </DialogContent>
-          </Dialog>
-          
-          <Button
-            onClick={() => {
-              setEditingPost(null);
-              setShowEditor(true);
-            }}
-          >
-            <PenTool className="h-4 w-4 mr-2" />
-            Write Post
-          </Button>
+        
+        {/* Quick Actions Bar */}
+        <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <PenTool className="h-5 w-5 text-purple-600" />
+            <span 
+              className="text-sm font-medium text-purple-600 hover:text-purple-800 cursor-pointer"
+              onClick={() => {
+                setEditingPost(null);
+                setShowEditor(true);
+              }}
+            >
+              Write New Post
+            </span>
+          </div>
+          <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+          <div className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-yellow-600" />
+            <span 
+              className="text-sm font-medium text-yellow-600 hover:text-yellow-800 cursor-pointer"
+              onClick={() => setNewIdeaDialog(true)}
+            >
+              Add Idea
+            </span>
+          </div>
+          <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-blue-600" />
+            <span className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
+              Schedule Content
+            </span>
+          </div>
+          <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-green-600" />
+            <span className="text-sm font-medium text-green-600 hover:text-green-800 cursor-pointer">
+              AI Generate
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Brand Selection */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {["relationONLY", "reallyObvi", "personal", "misc"].map((brand) => (
-          <button
-            key={brand}
-            onClick={() => setSelectedBrand(brand)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-              selectedBrand === brand
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-            }`}
+      {/* Hidden Dialogs */}
+      <Dialog open={newIdeaDialog} onOpenChange={setNewIdeaDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Blog Idea</DialogTitle>
+          </DialogHeader>
+          <NewIdeaForm onSubmit={createIdeaMutation.mutate} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Content Filter Bar */}
+      <div className="flex items-center gap-4 p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter:</span>
+          <select 
+            value={selectedBrand} 
+            onChange={(e) => setSelectedBrand(e.target.value)}
+            className="px-3 py-1 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500"
           >
-            {brand === "relationONLY" && "🌙 relationONLY Magazine"}
-            {brand === "reallyObvi" && "🖊️ Really Obvi Media Lab"}
-            {brand === "personal" && "✨ Personal Brand"}
-            {brand === "misc" && "🏈 Misc"}
-          </button>
-        ))}
+            <option value="all">All Content</option>
+            <option value="draft">Drafts</option>
+            <option value="published">Published</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort:</span>
+          <select className="px-3 py-1 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500">
+            <option value="recent">Most Recent</option>
+            <option value="title">Title A-Z</option>
+            <option value="status">Status</option>
+            <option value="priority">Priority</option>
+          </select>
+        </div>
+        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View:</span>
+          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-md p-1">
+            <button className="px-2 py-1 text-xs bg-white dark:bg-gray-700 rounded shadow-sm">Grid</button>
+            <button className="px-2 py-1 text-xs hover:bg-gray-200 dark:hover:bg-gray-600 rounded">List</button>
+          </div>
+        </div>
       </div>
 
       {/* Studio Tabs */}
       <Tabs value={selectedStudioTab} onValueChange={setSelectedStudioTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="progress">Progress</TabsTrigger>
-          <TabsTrigger value="queues">Queues</TabsTrigger>
+          <TabsTrigger value="posts">Blog Posts</TabsTrigger>
+          <TabsTrigger value="ideas">Ideas</TabsTrigger>
+          <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
@@ -430,40 +471,430 @@ export default function BlogContentStudio() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="progress" className="space-y-6">
+        <TabsContent value="posts" className="space-y-6">
+          {/* Blog Posts List View */}
           <Card>
             <CardHeader>
-              <CardTitle>Progress Tracker</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Blog Posts Management
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                Progress tracking coming soon...
+              <div className="space-y-4">
+                {blogPosts && blogPosts.length > 0 ? (
+                  <div className="space-y-3">
+                    {blogPosts.map((post) => (
+                      <div key={post.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-semibold text-lg">{post.title}</h3>
+                              <Badge className={getStatusColor(post.status)}>
+                                {post.status}
+                              </Badge>
+                              {post.priority && (
+                                <Badge className={getPriorityColor(post.priority)}>
+                                  {post.priority}
+                                </Badge>
+                              )}
+                              {post.isAiGenerated && (
+                                <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200">
+                                  <Zap className="h-3 w-3 mr-1" />
+                                  AI Generated
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {post.excerpt && (
+                              <p className="text-gray-600 dark:text-gray-400 mb-3">{post.excerpt}</p>
+                            )}
+                            
+                            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4" />
+                                {post.publishedDate ? format(new Date(post.publishedDate), 'MMM dd, yyyy') : 
+                                 post.scheduledDate ? `Scheduled ${format(new Date(post.scheduledDate), 'MMM dd, yyyy')}` : 
+                                 post.createdAt ? format(new Date(post.createdAt), 'MMM dd, yyyy') : 'No date'}
+                              </div>
+                              {post.platform && (
+                                <div className="flex items-center gap-1">
+                                  <BookOpen className="h-4 w-4" />
+                                  {post.platform}
+                                </div>
+                              )}
+                              {post.wordCount && (
+                                <div className="flex items-center gap-1">
+                                  <FileText className="h-4 w-4" />
+                                  {post.wordCount} words
+                                </div>
+                              )}
+                              {post.readingTime && (
+                                <div className="flex items-center gap-1">
+                                  <AlertCircle className="h-4 w-4" />
+                                  {post.readingTime} min read
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                setEditingPost(post.id);
+                                setShowEditor(true);
+                              }}
+                              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                // Preview functionality
+                              }}
+                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                            <select
+                              value={post.status}
+                              onChange={(e) => updatePostStatusMutation.mutate({ id: post.id, status: e.target.value })}
+                              className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+                            >
+                              <option value="draft">Draft</option>
+                              <option value="scheduled">Scheduled</option>
+                              <option value="published">Published</option>
+                              <option value="archived">Archived</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No blog posts yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first blog post to get started</p>
+                    <button
+                      onClick={() => {
+                        setEditingPost(null);
+                        setShowEditor(true);
+                      }}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      Write Your First Post
+                    </button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="queues" className="space-y-6">
+        <TabsContent value="ideas" className="space-y-6">
+          {/* Ideas Management */}
           <Card>
             <CardHeader>
-              <CardTitle>Design Queues</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5" />
+                Content Ideas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {blogIdeas && blogIdeas.length > 0 ? (
+                  <div className="grid gap-4">
+                    {blogIdeas.map((idea) => (
+                      <div key={idea.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-semibold">{idea.title}</h3>
+                              <Badge className={getStatusColor(idea.status)}>
+                                {idea.status}
+                              </Badge>
+                              {idea.priority && (
+                                <Badge className={getPriorityColor(idea.priority)}>
+                                  {idea.priority}
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {idea.description && (
+                              <p className="text-gray-600 dark:text-gray-400 mb-3">{idea.description}</p>
+                            )}
+                            
+                            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                              <div className="flex items-center gap-1">
+                                <BookOpen className="h-4 w-4" />
+                                {idea.category}
+                              </div>
+                              {idea.platform && (
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-4 w-4" />
+                                  {idea.platform}
+                                </div>
+                              )}
+                              {idea.estimatedReadTime && (
+                                <div className="flex items-center gap-1">
+                                  <AlertCircle className="h-4 w-4" />
+                                  {idea.estimatedReadTime} min read
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => createPostFromIdeaMutation.mutate(idea.id)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
+                            >
+                              <PenTool className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => generateAIContentMutation.mutate(idea.id)}
+                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
+                            >
+                              <Zap className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Lightbulb className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No ideas yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">Add your first content idea to get started</p>
+                    <button
+                      onClick={() => setNewIdeaDialog(true)}
+                      className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                    >
+                      Add Your First Idea
+                    </button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="calendar" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Content Calendar
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                Design queues coming soon...
+                Content calendar coming soon...
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
+          {/* Content Analytics Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Total Posts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-blue-600">{blogPosts?.length || 0}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {blogPosts?.filter(p => p.status === 'published').length || 0} published
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5" />
+                  Active Ideas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-yellow-600">{blogIdeas?.length || 0}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {blogIdeas?.filter(i => i.status === 'active').length || 0} active
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  This Month
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-green-600">
+                  {blogPosts?.filter(p => p.publishedDate && 
+                    new Date(p.publishedDate).getMonth() === new Date().getMonth()
+                  ).length || 0}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">posts published</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Zap className="h-5 w-5" />
+                  AI Generated
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-purple-600">
+                  {blogPosts?.filter(p => p.isAiGenerated).length || 0}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">posts with AI</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Content Performance Metrics */}
           <Card>
             <CardHeader>
-              <CardTitle>Analytics</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Content Performance
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                Analytics coming soon...
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Average Word Count</h4>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {blogPosts && blogPosts.length > 0 ? 
+                      Math.round(blogPosts.reduce((sum, post) => sum + (post.wordCount || 0), 0) / blogPosts.length) : 0
+                    }
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">words per post</div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Average Reading Time</h4>
+                  <div className="text-2xl font-bold text-green-600">
+                    {blogPosts && blogPosts.length > 0 ? 
+                      Math.round(blogPosts.reduce((sum, post) => sum + (post.readingTime || 0), 0) / blogPosts.length) : 0
+                    }
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">minutes per post</div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-white">Publication Rate</h4>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {blogPosts && blogPosts.length > 0 ? 
+                      Math.round((blogPosts.filter(p => p.status === 'published').length / blogPosts.length) * 100) : 0
+                    }%
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">completion rate</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Content Categories and Tags */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Popular Categories
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {blogIdeas && blogIdeas.length > 0 ? (
+                    Object.entries(
+                      blogIdeas.reduce((acc, idea) => {
+                        acc[idea.category] = (acc[idea.category] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    )
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5)
+                    .map(([category, count]) => (
+                      <div key={category} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <span className="font-medium capitalize">{category}</span>
+                        <Badge>{count}</Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                      No categories yet
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Platform Distribution
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {blogPosts && blogPosts.length > 0 ? (
+                    Object.entries(
+                      blogPosts.reduce((acc, post) => {
+                        acc[post.platform] = (acc[post.platform] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    )
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5)
+                    .map(([platform, count]) => (
+                      <div key={platform} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <span className="font-medium capitalize">{platform}</span>
+                        <Badge>{count}</Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+                      No platforms yet
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Content Status Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Content Status Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {['draft', 'scheduled', 'published', 'archived'].map(status => (
+                  <div key={status} className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="text-2xl font-bold mb-2">
+                      {blogPosts?.filter(p => p.status === status).length || 0}
+                    </div>
+                    <div className="text-sm font-medium capitalize text-gray-600 dark:text-gray-400">
+                      {status}
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

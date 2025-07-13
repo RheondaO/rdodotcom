@@ -80,8 +80,7 @@ import {
   type BlogIdeaType,
   type BlogCalendarType
 } from "@shared/schema";
-import { db, pool } from "./db";
-import { eq, desc, asc } from "drizzle-orm";
+// Note: Database imports will be replaced with Notion integration later
 
 export interface IStorage {
   // Daily Entries
@@ -580,9 +579,85 @@ export class MemStorage implements IStorage {
       estimatedDuration: 30
     });
 
-    // Blog posts will be initialized by the CombinedStorage class to avoid constructor conflicts
+    // Initialize with sample blog posts (will be replaced with Notion integration later)
+    this.createBlogPost({
+      title: "10 Productivity Tips for Remote Workers",
+      content: "Working from home can be challenging, but with the right strategies...",
+      excerpt: "Discover proven techniques to boost your productivity while working remotely.",
+      status: "published",
+      type: "blog",
+      platform: "personal_blog",
+      tags: JSON.stringify(["productivity", "remote work", "tips"]),
+      publishedDate: "2024-01-15",
+      priority: "high",
+      wordCount: 1200,
+      readingTime: 6,
+      seoTitle: "10 Productivity Tips for Remote Workers - Boost Your Efficiency",
+      seoDescription: "Learn how to maximize your productivity while working from home with these proven strategies and tips.",
+      isAiGenerated: false
+    });
 
-    // Blog ideas and calendar events will be initialized by the CombinedStorage class to avoid constructor conflicts
+    this.createBlogPost({
+      title: "The Future of AI in Content Creation",
+      content: "Artificial Intelligence is revolutionizing how we create content...",
+      excerpt: "Explore how AI is transforming the content creation landscape.",
+      status: "draft",
+      type: "blog",
+      platform: "medium",
+      tags: JSON.stringify(["ai", "content creation", "technology"]),
+      scheduledDate: "2024-01-25",
+      priority: "medium",
+      wordCount: 800,
+      readingTime: 4,
+      isAiGenerated: true
+    });
+
+    // Initialize with sample blog ideas (will be replaced with Notion integration later)
+    this.createBlogIdea({
+      title: "Building Sustainable Habits",
+      description: "A deep dive into the psychology of habit formation and practical strategies for building lasting habits.",
+      category: "lifestyle",
+      platform: "substack",
+      tags: JSON.stringify(["habits", "psychology", "self-improvement"]),
+      priority: "high",
+      status: "idea",
+      estimatedReadTime: 8,
+      targetAudience: "professionals seeking personal development",
+      aiPrompt: "Write about the science of habit formation and include practical examples"
+    });
+
+    this.createBlogIdea({
+      title: "The Rise of No-Code Development",
+      description: "How no-code platforms are democratizing software development and what it means for the future.",
+      category: "technology",
+      platform: "linkedin",
+      tags: JSON.stringify(["no-code", "development", "technology"]),
+      priority: "medium",
+      status: "in_progress",
+      estimatedReadTime: 6,
+      targetAudience: "developers and business professionals"
+    });
+
+    // Initialize with sample calendar events (will be replaced with Notion integration later)
+    this.createBlogCalendarEvent({
+      title: "Review and Edit AI Content Post",
+      type: "review",
+      platform: "medium",
+      date: "2024-01-22",
+      time: "14:00",
+      status: "scheduled",
+      notes: "Final review before publishing AI content creation article"
+    });
+
+    this.createBlogCalendarEvent({
+      title: "Publish Remote Work Tips",
+      type: "post",
+      platform: "personal_blog",
+      date: "2024-01-20",
+      time: "09:00",
+      status: "scheduled",
+      notes: "Share on social media after publishing"
+    });
   }
 
   // Daily Entries
@@ -2670,4 +2745,4 @@ class CombinedStorage extends MemStorage {
   }
 }
 
-export const storage = new CombinedStorage();
+export const storage = new MemStorage();
