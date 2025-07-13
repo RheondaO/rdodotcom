@@ -66,9 +66,10 @@ interface BlogPost {
 interface BlogEditorProps {
   postId?: number;
   onClose: () => void;
+  isReadOnly?: boolean;
 }
 
-const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
+const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose, isReadOnly = false }) => {
   const [activeTab, setActiveTab] = useState("content");
   const [showPreview, setShowPreview] = useState(false);
   const [formData, setFormData] = useState({
@@ -357,7 +358,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
           </Button>
           <Button
             onClick={handleSave}
-            disabled={saveMutation.isPending}
+            disabled={saveMutation.isPending || isReadOnly}
             className="flex items-center gap-2"
           >
             <Save className="h-4 w-4" />
@@ -405,6 +406,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="Enter post title..."
                   className="text-lg"
+                  disabled={isReadOnly}
                 />
               </div>
 
@@ -416,6 +418,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                   onChange={(e) => handleInputChange('excerpt', e.target.value)}
                   placeholder="Brief summary of the post..."
                   rows={3}
+                  disabled={isReadOnly}
                 />
               </div>
 
@@ -423,6 +426,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                 <Label htmlFor="content">Content</Label>
                 
                 {/* Rich Text Editor Toolbar */}
+                {!isReadOnly && (
                 <div className="border rounded-t-lg p-3 bg-gray-50 dark:bg-gray-800 border-b-0">
                   <div className="flex flex-wrap gap-1">
                     {/* Heading buttons */}
@@ -560,6 +564,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                     </Button>
                   </div>
                 </div>
+                )}
                 
                 <Textarea
                   id="content"
@@ -568,7 +573,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                   onChange={(e) => handleInputChange('content', e.target.value)}
                   placeholder="Write your post content here..."
                   rows={20}
-                  className="font-mono rounded-t-none border-t-0 focus:ring-0 focus:ring-offset-0 resize-none"
+                  className={`font-mono ${isReadOnly ? 'rounded-lg' : 'rounded-t-none border-t-0'} focus:ring-0 focus:ring-offset-0 resize-none`}
+                  disabled={isReadOnly}
                 />
               </div>
 
@@ -579,6 +585,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                   value={formData.tags}
                   onChange={(e) => handleInputChange('tags', e.target.value)}
                   placeholder="productivity, remote work, tips (comma separated)"
+                  disabled={isReadOnly}
                 />
               </div>
             </CardContent>
@@ -595,7 +602,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Type</Label>
-                  <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
+                  <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)} disabled={isReadOnly}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -611,7 +618,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
 
                 <div className="space-y-2">
                   <Label>Platform</Label>
-                  <Select value={formData.platform} onValueChange={(value) => handleInputChange('platform', value)}>
+                  <Select value={formData.platform} onValueChange={(value) => handleInputChange('platform', value)} disabled={isReadOnly}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -627,7 +634,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
 
                 <div className="space-y-2">
                   <Label>Priority</Label>
-                  <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
+                  <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)} disabled={isReadOnly}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -689,6 +696,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                   onChange={(e) => handleInputChange('seoTitle', e.target.value)}
                   placeholder="Optimized title for search engines..."
                   maxLength={60}
+                  disabled={isReadOnly}
                 />
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   {formData.seoTitle.length}/60 characters
@@ -704,6 +712,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                   placeholder="Meta description for search results..."
                   rows={4}
                   maxLength={160}
+                  disabled={isReadOnly}
                 />
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   {formData.seoDescription.length}/160 characters
@@ -740,7 +749,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)} disabled={isReadOnly}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -761,6 +770,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                     type="datetime-local"
                     value={formData.scheduledDate}
                     onChange={(e) => handleInputChange('scheduledDate', e.target.value)}
+                    disabled={isReadOnly}
                   />
                 </div>
               )}
@@ -773,6 +783,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                     type="datetime-local"
                     value={formData.publishedDate}
                     onChange={(e) => handleInputChange('publishedDate', e.target.value)}
+                    disabled={isReadOnly}
                   />
                 </div>
               )}
@@ -784,6 +795,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
                   checked={formData.isAiGenerated}
                   onChange={(e) => handleInputChange('isAiGenerated', e.target.checked)}
                   className="rounded border-gray-300"
+                  disabled={isReadOnly}
                 />
                 <Label htmlFor="isAiGenerated" className="flex items-center gap-2">
                   <Zap className="h-4 w-4" />

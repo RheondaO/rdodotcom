@@ -30,6 +30,7 @@ import {
   Target
 } from "lucide-react";
 import BlogEditor from "./BlogEditor";
+import { useAuth } from "../hooks/useAuth";
 
 interface BlogPost {
   id: number;
@@ -140,6 +141,10 @@ export default function BlogContentStudio() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  // Check if user has admin access for CRUD operations
+  const isReadOnly = !user?.isAdmin;
 
   const { data: blogPosts, isLoading: postsLoading } = useQuery<BlogPost[]>({
     queryKey: ['/api/blog/posts'],
@@ -253,6 +258,7 @@ export default function BlogContentStudio() {
           setShowEditor(false);
           setEditingPost(null);
         }}
+        isReadOnly={isReadOnly}
       />
     );
   }
@@ -271,10 +277,12 @@ export default function BlogContentStudio() {
           <div className="flex items-center gap-2">
             <PenTool className="h-5 w-5 text-purple-600" />
             <span 
-              className="text-sm font-medium text-purple-600 hover:text-purple-800 cursor-pointer"
+              className={`text-sm font-medium ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-purple-600 hover:text-purple-800 cursor-pointer'}`}
               onClick={() => {
-                setEditingPost(null);
-                setShowEditor(true);
+                if (!isReadOnly) {
+                  setEditingPost(null);
+                  setShowEditor(true);
+                }
               }}
             >
               Write New Post
@@ -284,8 +292,12 @@ export default function BlogContentStudio() {
           <div className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-yellow-600" />
             <span 
-              className="text-sm font-medium text-yellow-600 hover:text-yellow-800 cursor-pointer"
-              onClick={() => setNewIdeaDialog(true)}
+              className={`text-sm font-medium ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-yellow-600 hover:text-yellow-800 cursor-pointer'}`}
+              onClick={() => {
+                if (!isReadOnly) {
+                  setNewIdeaDialog(true);
+                }
+              }}
             >
               Add Idea
             </span>
@@ -298,9 +310,9 @@ export default function BlogContentStudio() {
             </span>
           </div>
           <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
-          <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-green-600" />
-            <span className="text-sm font-medium text-green-600 hover:text-green-800 cursor-pointer">
+          <div className={`flex items-center gap-2 ${isReadOnly ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+            <Zap className={`h-5 w-5 ${isReadOnly ? 'text-gray-400' : 'text-green-600'}`} />
+            <span className={`text-sm font-medium ${isReadOnly ? 'text-gray-400' : 'text-green-600 hover:text-green-800'}`}>
               AI Generate
             </span>
           </div>
@@ -313,7 +325,7 @@ export default function BlogContentStudio() {
           <DialogHeader>
             <DialogTitle>Create New Blog Idea</DialogTitle>
           </DialogHeader>
-          <NewIdeaForm onSubmit={createIdeaMutation.mutate} />
+          <NewIdeaForm onSubmit={createIdeaMutation.mutate} isReadOnly={isReadOnly} />
         </DialogContent>
       </Dialog>
 
@@ -463,9 +475,12 @@ export default function BlogContentStudio() {
                       <Button 
                         variant="ghost" 
                         size="sm"
+                        disabled={isReadOnly}
                         onClick={() => {
-                          setEditingPost(post.id);
-                          setShowEditor(true);
+                          if (!isReadOnly) {
+                            setEditingPost(post.id);
+                            setShowEditor(true);
+                          }
                         }}
                       >
                         <Edit className="h-4 w-4" />
@@ -565,8 +580,9 @@ export default function BlogContentStudio() {
                             </button>
                             <select
                               value={post.status}
-                              onChange={(e) => updatePostStatusMutation.mutate({ id: post.id, status: e.target.value })}
-                              className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+                              onChange={(e) => !isReadOnly && updatePostStatusMutation.mutate({ id: post.id, status: e.target.value })}
+                              disabled={isReadOnly}
+                              className={`px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}
                             >
                               <option value="draft">Draft</option>
                               <option value="scheduled">Scheduled</option>
@@ -585,10 +601,13 @@ export default function BlogContentStudio() {
                     <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first blog post to get started</p>
                     <button
                       onClick={() => {
-                        setEditingPost(null);
-                        setShowEditor(true);
+                        if (!isReadOnly) {
+                          setEditingPost(null);
+                          setShowEditor(true);
+                        }
                       }}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      disabled={isReadOnly}
+                      className={`px-4 py-2 rounded-lg transition-colors ${isReadOnly ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`}
                     >
                       Write Your First Post
                     </button>
@@ -654,14 +673,16 @@ export default function BlogContentStudio() {
                           
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => createPostFromIdeaMutation.mutate(idea.id)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
+                              onClick={() => !isReadOnly && createPostFromIdeaMutation.mutate(idea.id)}
+                              disabled={isReadOnly}
+                              className={`p-2 rounded-lg transition-colors ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900'}`}
                             >
                               <PenTool className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => generateAIContentMutation.mutate(idea.id)}
-                              className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900 rounded-lg transition-colors"
+                              onClick={() => !isReadOnly && generateAIContentMutation.mutate(idea.id)}
+                              disabled={isReadOnly}
+                              className={`p-2 rounded-lg transition-colors ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900'}`}
                             >
                               <Zap className="h-4 w-4" />
                             </button>
@@ -676,8 +697,9 @@ export default function BlogContentStudio() {
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No ideas yet</h3>
                     <p className="text-gray-500 dark:text-gray-400 mb-4">Add your first content idea to get started</p>
                     <button
-                      onClick={() => setNewIdeaDialog(true)}
-                      className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                      onClick={() => !isReadOnly && setNewIdeaDialog(true)}
+                      disabled={isReadOnly}
+                      className={`px-4 py-2 rounded-lg transition-colors ${isReadOnly ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-yellow-600 text-white hover:bg-yellow-700'}`}
                     >
                       Add Your First Idea
                     </button>
@@ -827,7 +849,8 @@ export default function BlogContentStudio() {
                                 variant="outline"
                                 size="sm"
                                 className="mt-3"
-                                onClick={() => setShowEditor(true)}
+                                disabled={isReadOnly}
+                                onClick={() => !isReadOnly && setShowEditor(true)}
                               >
                                 <Plus className="h-4 w-4 mr-2" />
                                 Schedule Content
@@ -1120,7 +1143,7 @@ export default function BlogContentStudio() {
   );
 }
 
-function NewIdeaForm({ onSubmit }: { onSubmit: (data: any) => void }) {
+function NewIdeaForm({ onSubmit, isReadOnly = false }: { onSubmit: (data: any) => void; isReadOnly?: boolean }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -1205,7 +1228,7 @@ function NewIdeaForm({ onSubmit }: { onSubmit: (data: any) => void }) {
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full" disabled={isReadOnly}>
         Create Idea
       </Button>
     </form>
