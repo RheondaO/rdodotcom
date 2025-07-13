@@ -1,13 +1,16 @@
 # Production Issue Diagnosis: Notion Tasks Widget Not Populating
 
 ## Problem Summary
-The "Notion Tasks - Today" widget shows up in the Productivity section but is not populating with tasks when deployed to production.
+The "Notion Tasks - Today" widget shows up in the Productivity section but is not populating with tasks when deployed to production, despite environment variables being configured.
 
 ## Root Cause Analysis
-The issue is most likely due to **missing environment variables** in the production deployment. The Notion integration requires two critical environment secrets that work in development but aren't configured in production:
+Since the environment variables are properly set in production deployment, the issue is likely one of these:
 
-1. `NOTION_INTEGRATION_SECRET` - Your Notion integration token
-2. `NOTION_PAGE_URL` - Your TABLEMAKER database URL
+1. **Network connectivity** - Production environment may have different network restrictions
+2. **Notion API rate limits** - Production might be hitting API limits
+3. **Database ID extraction** - The page URL might be parsed differently in production
+4. **Authentication context** - Notion integration permissions might differ in production
+5. **Runtime environment** - Node.js version or dependency differences
 
 ## Verification Steps
 
@@ -38,18 +41,25 @@ curl "https://your-deployed-app.replit.app/api/notion/tasks?date=$(date +%Y-%m-%
 # Expected error: 500 error or empty response
 ```
 
-## Enhanced Error Handling
-I've added improved error handling that will show specific error messages:
+## Enhanced Error Handling & Debugging
+I've added comprehensive error handling and logging for production debugging:
 
 ### Widget Error States:
 1. **"Loading tasks..."** - Normal loading state
-2. **"Connection Failed"** - Missing environment variables or invalid credentials
+2. **"Connection Failed"** - API connection issues or invalid credentials
 3. **"No tasks for today"** - Connection works but no tasks for selected date
 
 ### Server-Side Validation:
-- Checks for `NOTION_INTEGRATION_SECRET` before attempting connection
-- Checks for `NOTION_PAGE_URL` before attempting database access
-- Returns specific error messages for troubleshooting
+- Environment variable existence checks with detailed console logging
+- Database ID validation before API calls
+- Enhanced error messages with error type and code information
+- Comprehensive logging for all API operations
+
+### Production Debugging:
+- Console logs show: "✅ Environment variables configured"
+- Database connection success: "✅ Database connection successful"
+- Task fetching logs: "📋 Fetching Notion tasks for date: X"
+- Error logging with full error details including type and code
 
 ## Production Deployment Checklist
 

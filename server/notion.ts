@@ -25,7 +25,7 @@ function extractPageIdFromUrl(pageUrl: string): string {
     throw Error("Failed to extract page ID");
 }
 
-export const NOTION_DATABASE_ID = extractPageIdFromUrl(process.env.NOTION_PAGE_URL!);
+export const NOTION_DATABASE_ID = process.env.NOTION_PAGE_URL ? extractPageIdFromUrl(process.env.NOTION_PAGE_URL) : null;
 
 /**
  * Get the main database info
@@ -33,12 +33,18 @@ export const NOTION_DATABASE_ID = extractPageIdFromUrl(process.env.NOTION_PAGE_U
  */
 export async function getNotionDatabase() {
     try {
+        if (!NOTION_DATABASE_ID) {
+            throw new Error("NOTION_DATABASE_ID is not configured");
+        }
+        
         const database = await notion.databases.retrieve({
             database_id: NOTION_DATABASE_ID,
         });
         return database;
     } catch (error) {
         console.error("Error retrieving database:", error);
+        console.error("Database ID:", NOTION_DATABASE_ID);
+        console.error("Error details:", error);
         throw error;
     }
 }
@@ -95,8 +101,12 @@ export async function createDatabaseIfNotExists(title: string, properties: any) 
 }
 
 // Get all entries from your TABLEMAKER database
-export async function getNotionTasks(tasksDatabaseId: string = NOTION_DATABASE_ID) {
+export async function getNotionTasks(tasksDatabaseId: string = NOTION_DATABASE_ID || "") {
     try {
+        if (!tasksDatabaseId) {
+            throw new Error("Database ID is required");
+        }
+        
         const response = await notion.databases.query({
             database_id: tasksDatabaseId,
         });
@@ -126,7 +136,7 @@ export async function getNotionTasks(tasksDatabaseId: string = NOTION_DATABASE_I
 }
 
 // Create a new entry in your TABLEMAKER database
-export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE_ID, task: {
+export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE_ID || "", task: {
     title: string;
     description?: string;
     category?: string;
@@ -203,6 +213,10 @@ export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE
             checkbox: task.status === "Done"
         };
 
+        if (!tasksDatabaseId) {
+            throw new Error("Database ID is required");
+        }
+        
         const response = await notion.pages.create({
             parent: {
                 database_id: tasksDatabaseId
