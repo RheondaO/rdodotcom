@@ -15,6 +15,7 @@ import AppDevelopmentSection from "../components/AppDevelopmentSection";
 import ContentManagementSuite from "../components/ContentManagementSuite";
 import ContentCreationSection from "../components/ContentCreationSection";
 import BlogContentStudio from "../components/BlogContentStudio";
+import NotionIntegration from "../components/NotionIntegration";
 import QuickAddModal from "../components/QuickAddModal";
 import WeekView from "../components/WeekView";
 import MonthView from "../components/MonthView";
@@ -26,7 +27,7 @@ import { useTheme } from "../hooks/use-theme";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 
-type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap" | "blog-studio";
+type ViewType = "dashboard" | "health" | "habits" | "productivity" | "goals" | "reports" | "finances" | "groceries" | "content" | "rotationonly" | "apps" | "sitemap" | "blog-studio" | "notion";
 type TimeViewType = "day" | "week" | "month";
 
 function Dashboard() {
@@ -117,6 +118,7 @@ function Dashboard() {
       case "finances": return "Financial Tracking";
       case "groceries": return "Shopping Management";
       case "content": return "Content Management Suite";
+      case "notion": return "Notion Integration";
       case "sitemap": return "Site Map";
       default: return "Dashboard";
     }
@@ -138,6 +140,7 @@ function Dashboard() {
       case "finances": return "Manage your finances, bills, and spending";
       case "groceries": return "Plan and track your shopping list";
       case "content": return "Manage your content planning, creation, and scheduling";
+      case "notion": return "Sync and manage your tasks with Notion databases";
       case "sitemap": return "Quick access to all pages and sections";
       default: return "Track your daily habits and goals";
     }
@@ -273,6 +276,7 @@ function Dashboard() {
           {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "blog-studio" && <BlogContentStudio />}
+          {activeView === "notion" && <NotionIntegration />}
           {activeView === "sitemap" && (
             <SiteMapSection 
               onNavigate={(section: string) => setActiveView(section as ViewType)}

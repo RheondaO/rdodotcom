@@ -3,6 +3,14 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { authenticateUser, requireAuth, requireAdmin, adminLogin, adminLogout, type AuthenticatedRequest } from "./auth";
 import { 
+  getNotionDatabases, 
+  findDatabaseByTitle, 
+  getNotionTasks, 
+  createNotionTask, 
+  updateNotionTask, 
+  deleteNotionTask 
+} from "./notion";
+import { 
   insertDailyEntrySchema, 
   insertBillSchema, 
   insertBillPaymentSchema, 
@@ -1303,6 +1311,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(history);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch net worth history" });
+    }
+  });
+
+  // Notion Integration Routes
+  app.get("/api/notion/databases", async (req, res) => {
+    try {
+      const databases = await getNotionDatabases();
+      res.json(databases);
+    } catch (error) {
+      console.error("Error fetching Notion databases:", error);
+      res.status(500).json({ error: "Failed to fetch Notion databases" });
+    }
+  });
+
+  app.get("/api/notion/tasks", async (req, res) => {
+    try {
+      const tasks = await getNotionTasks();
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching Notion entries:", error);
+      res.status(500).json({ error: "Failed to fetch Notion entries" });
+    }
+  });
+
+  app.post("/api/notion/tasks", requireAuth, async (req, res) => {
+    try {
+      const task = await createNotionTask(undefined, req.body);
+      res.json(task);
+    } catch (error) {
+      console.error("Error creating Notion entry:", error);
+      res.status(500).json({ error: "Failed to create Notion entry" });
+    }
+  });
+
+  app.patch("/api/notion/tasks/:pageId", requireAuth, async (req, res) => {
+    try {
+      const { pageId } = req.params;
+      const task = await updateNotionTask(pageId, req.body);
+      res.json(task);
+    } catch (error) {
+      console.error("Error updating Notion task:", error);
+      res.status(500).json({ error: "Failed to update Notion task" });
+    }
+  });
+
+  app.delete("/api/notion/tasks/:pageId", requireAuth, async (req, res) => {
+    try {
+      const { pageId } = req.params;
+      await deleteNotionTask(pageId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting Notion task:", error);
+      res.status(500).json({ error: "Failed to delete Notion task" });
+    }
+  });
+
+  app.get("/api/notion/setup", async (req, res) => {
+    try {
+      const databases = await getNotionDatabases();
+      const hasRequiredDbs = true; // We have your existing TABLEMAKER database
+      
+      res.json({ 
+        isSetup: hasRequiredDbs, 
+        databases: databases.map(db => ({
+          id: db.id,
+          title: db.title && Array.isArray(db.title) && db.title.length > 0 
+            ? db.title[0].plain_text 
+            : "Untitled"
+        }))
+      });
+    } catch (error) {
+      console.error("Error checking Notion setup:", error);
+      res.status(500).json({ error: "Failed to check Notion setup" });
     }
   });
 
