@@ -62,12 +62,19 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
   // Fetch tasks filtered by the selected date
   const { data: tasks = [], isLoading, error } = useQuery({
     queryKey: ['/api/notion/tasks', selectedDate.toISOString().split('T')[0]],
-    queryFn: () => apiRequest('GET', `/api/notion/tasks?date=${selectedDate.toISOString().split('T')[0]}&view=day`),
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', `/api/notion/tasks?date=${selectedDate.toISOString().split('T')[0]}&view=day`);
+        const data = await response.json();
+        console.log('Fetched tasks data:', data);
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        return [];
+      }
+    },
     retry: 3,
     retryDelay: 1000,
-    onError: (error) => {
-      console.error('Notion tasks query failed:', error);
-    },
   });
 
   // Create task mutation
@@ -157,12 +164,12 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
     }
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = Array.isArray(tasks) ? tasks.filter(task => {
     if (filterStatus === "all") return true;
     if (filterStatus === "completed") return task.isCompleted;
     if (filterStatus === "pending") return !task.isCompleted;
     return task.status === filterStatus;
-  });
+  }) : [];
 
   const totalEstimatedTime = filteredTasks.reduce((sum, task) => sum + (task.estimatedDuration || 0), 0);
   const completedTasks = filteredTasks.filter(task => task.isCompleted);
