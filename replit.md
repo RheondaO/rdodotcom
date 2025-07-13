@@ -8,6 +8,12 @@ This is a comprehensive digital wellness and productivity platform called "Belle
 
 Preferred communication style: Simple, everyday language.
 
+### Component Separation Requirements
+- **Critical**: The two content studios must remain completely separate and independent
+- **BlogContentStudio**: Original design, handles professional blog content creation and workflow management
+- **ContentManagementSuite**: Enhanced with modern glassmorphism design, handles mini-game blocks and rotationONLY content
+- **Rule**: When editing one content studio, the other must remain unchanged
+
 ## System Architecture
 
 ### Frontend Architecture
