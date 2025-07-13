@@ -737,11 +737,11 @@ export default function BlogContentStudio() {
                   </thead>
                   <tbody>
                     {filteredAndSortedPosts?.map((post) => (
-                      <tr key={post.id} className="border-b hover:bg-gray-50">
+                      <tr key={post.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-3">
                           <div>
                             <div className="font-medium">{post.title}</div>
-                            <div className="text-sm text-gray-600 truncate max-w-xs">
+                            <div className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs">
                               {post.excerpt}
                             </div>
                           </div>
@@ -800,7 +800,7 @@ export default function BlogContentStudio() {
                   </tbody>
                 </table>
                 {(!filteredAndSortedPosts || filteredAndSortedPosts.length === 0) && (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No posts found matching your criteria.
                   </div>
                 )}
@@ -829,11 +829,11 @@ export default function BlogContentStudio() {
                   </thead>
                   <tbody>
                     {filteredAndSortedIdeas?.map((idea) => (
-                      <tr key={idea.id} className="border-b hover:bg-gray-50">
+                      <tr key={idea.id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-3">
                           <div>
                             <div className="font-medium">{idea.title}</div>
-                            <div className="text-sm text-gray-600 truncate max-w-xs">
+                            <div className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs">
                               {idea.description}
                             </div>
                           </div>
@@ -876,7 +876,7 @@ export default function BlogContentStudio() {
                   </tbody>
                 </table>
                 {(!filteredAndSortedIdeas || filteredAndSortedIdeas.length === 0) && (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No ideas found matching your criteria.
                   </div>
                 )}
