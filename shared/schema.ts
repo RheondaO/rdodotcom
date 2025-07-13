@@ -166,6 +166,115 @@ export interface Budget {
   createdAt?: Date;
 }
 
+export interface BudgetCategory {
+  id: number;
+  name: string;
+  description?: string;
+  color?: string;
+  parentId?: number;
+  isDefault?: boolean;
+  createdAt?: Date;
+}
+
+export interface Expense {
+  id: number;
+  amount: string;
+  description: string;
+  categoryId: number;
+  date: string;
+  isRecurring?: boolean;
+  recurringType?: string; // weekly, monthly, yearly
+  tags?: string; // JSON array string
+  paymentMethod?: string;
+  location?: string;
+  notes?: string;
+  createdAt?: Date;
+}
+
+export interface Debt {
+  id: number;
+  name: string;
+  type: string; // credit_card, loan, mortgage, student_loan
+  totalAmount: string;
+  currentBalance: string;
+  interestRate: string; // percentage
+  minimumPayment: string;
+  dueDate: number; // day of month
+  payoffStrategy?: string; // avalanche, snowball, custom
+  isActive?: boolean;
+  createdAt?: Date;
+}
+
+export interface DebtPayment {
+  id: number;
+  debtId: number;
+  amount: string;
+  date: string;
+  isExtraPayment?: boolean;
+  notes?: string;
+  createdAt?: Date;
+}
+
+export interface Investment {
+  id: number;
+  symbol: string;
+  name: string;
+  type: string; // stock, bond, etf, crypto, mutual_fund
+  quantity: string;
+  purchasePrice: string;
+  currentPrice: string;
+  marketValue: string;
+  platformId?: number;
+  purchaseDate: string;
+  lastPriceUpdate?: Date;
+  createdAt?: Date;
+}
+
+export interface InvestmentPlatform {
+  id: number;
+  name: string;
+  type: string; // brokerage, retirement, crypto_exchange
+  accountNumber?: string;
+  loginUrl?: string;
+  notes?: string;
+  createdAt?: Date;
+}
+
+export interface Account {
+  id: number;
+  name: string;
+  type: string; // checking, savings, credit_card, investment, retirement
+  institution: string;
+  balance: string;
+  interestRate?: string;
+  isActive?: boolean;
+  accountNumber?: string; // last 4 digits only for security
+  createdAt?: Date;
+}
+
+export interface NetWorthSnapshot {
+  id: number;
+  date: string;
+  totalAssets: string;
+  totalLiabilities: string;
+  netWorth: string;
+  notes?: string;
+  createdAt?: Date;
+}
+
+export interface FinancialGoal {
+  id: number;
+  name: string;
+  description?: string;
+  targetAmount: string;
+  currentAmount: string;
+  targetDate: string;
+  category: string; // emergency_fund, house_downpayment, retirement, vacation
+  isCompleted?: boolean;
+  monthlyContribution?: string;
+  createdAt?: Date;
+}
+
 export interface IncomeEntry {
   id: number;
   source: string;
@@ -595,6 +704,96 @@ export const insertBlogCalendarSchema = z.object({
   notes: z.string().optional()
 });
 
+export const insertBudgetCategorySchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  color: z.string().optional(),
+  parentId: z.number().optional(),
+  isDefault: z.boolean().default(false)
+});
+
+export const insertExpenseSchema = z.object({
+  amount: z.string().min(1, "Amount is required"),
+  description: z.string().min(1, "Description is required"),
+  categoryId: z.number().min(1, "Category is required"),
+  date: z.string().min(1, "Date is required"),
+  isRecurring: z.boolean().default(false),
+  recurringType: z.string().optional(),
+  tags: z.string().optional(),
+  paymentMethod: z.string().optional(),
+  location: z.string().optional(),
+  notes: z.string().optional()
+});
+
+export const insertDebtSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  type: z.string().min(1, "Type is required"),
+  totalAmount: z.string().min(1, "Total amount is required"),
+  currentBalance: z.string().min(1, "Current balance is required"),
+  interestRate: z.string().min(1, "Interest rate is required"),
+  minimumPayment: z.string().min(1, "Minimum payment is required"),
+  dueDate: z.number().min(1).max(31),
+  payoffStrategy: z.string().optional(),
+  isActive: z.boolean().default(true)
+});
+
+export const insertDebtPaymentSchema = z.object({
+  debtId: z.number().min(1, "Debt ID is required"),
+  amount: z.string().min(1, "Amount is required"),
+  date: z.string().min(1, "Date is required"),
+  isExtraPayment: z.boolean().default(false),
+  notes: z.string().optional()
+});
+
+export const insertInvestmentSchema = z.object({
+  symbol: z.string().min(1, "Symbol is required"),
+  name: z.string().min(1, "Name is required"),
+  type: z.string().min(1, "Type is required"),
+  quantity: z.string().min(1, "Quantity is required"),
+  purchasePrice: z.string().min(1, "Purchase price is required"),
+  currentPrice: z.string().min(1, "Current price is required"),
+  marketValue: z.string().min(1, "Market value is required"),
+  platformId: z.number().optional(),
+  purchaseDate: z.string().min(1, "Purchase date is required")
+});
+
+export const insertInvestmentPlatformSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  type: z.string().min(1, "Type is required"),
+  accountNumber: z.string().optional(),
+  loginUrl: z.string().optional(),
+  notes: z.string().optional()
+});
+
+export const insertAccountSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  type: z.string().min(1, "Type is required"),
+  institution: z.string().min(1, "Institution is required"),
+  balance: z.string().min(1, "Balance is required"),
+  interestRate: z.string().optional(),
+  isActive: z.boolean().default(true),
+  accountNumber: z.string().optional()
+});
+
+export const insertNetWorthSnapshotSchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  totalAssets: z.string().min(1, "Total assets is required"),
+  totalLiabilities: z.string().min(1, "Total liabilities is required"),
+  netWorth: z.string().min(1, "Net worth is required"),
+  notes: z.string().optional()
+});
+
+export const insertFinancialGoalSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  targetAmount: z.string().min(1, "Target amount is required"),
+  currentAmount: z.string().default("0"),
+  targetDate: z.string().min(1, "Target date is required"),
+  category: z.string().min(1, "Category is required"),
+  isCompleted: z.boolean().default(false),
+  monthlyContribution: z.string().optional()
+});
+
 // Insert types
 export type InsertDailyEntry = z.infer<typeof insertDailyEntrySchema>;
 export type InsertBill = z.infer<typeof insertBillSchema>;
@@ -616,3 +815,12 @@ export type InsertPerformanceInsights = z.infer<typeof insertPerformanceInsights
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 export type InsertBlogIdea = z.infer<typeof insertBlogIdeaSchema>;
 export type InsertBlogCalendar = z.infer<typeof insertBlogCalendarSchema>;
+export type InsertBudgetCategory = z.infer<typeof insertBudgetCategorySchema>;
+export type InsertExpense = z.infer<typeof insertExpenseSchema>;
+export type InsertDebt = z.infer<typeof insertDebtSchema>;
+export type InsertDebtPayment = z.infer<typeof insertDebtPaymentSchema>;
+export type InsertInvestment = z.infer<typeof insertInvestmentSchema>;
+export type InsertInvestmentPlatform = z.infer<typeof insertInvestmentPlatformSchema>;
+export type InsertAccount = z.infer<typeof insertAccountSchema>;
+export type InsertNetWorthSnapshot = z.infer<typeof insertNetWorthSnapshotSchema>;
+export type InsertFinancialGoal = z.infer<typeof insertFinancialGoalSchema>;

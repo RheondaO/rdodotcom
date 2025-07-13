@@ -60,7 +60,25 @@ import {
   type BlogIdea,
   type InsertBlogIdea,
   type BlogCalendar,
-  type InsertBlogCalendar
+  type InsertBlogCalendar,
+  type BudgetCategory,
+  type InsertBudgetCategory,
+  type Expense,
+  type InsertExpense,
+  type Debt,
+  type InsertDebt,
+  type DebtPayment,
+  type InsertDebtPayment,
+  type Investment,
+  type InsertInvestment,
+  type InvestmentPlatform,
+  type InsertInvestmentPlatform,
+  type Account,
+  type InsertAccount,
+  type NetWorthSnapshot,
+  type InsertNetWorthSnapshot,
+  type FinancialGoal,
+  type InsertFinancialGoal
 } from "@shared/schema";
 
 export interface IStorage {
@@ -257,6 +275,76 @@ export interface IStorage {
   updateBlogCalendarEvent(id: number, updates: Partial<BlogCalendar>): Promise<BlogCalendar>;
   deleteBlogCalendarEvent(id: number): Promise<void>;
 
+  // Finance Methods
+  // Budget Categories
+  getAllBudgetCategories(): Promise<BudgetCategory[]>;
+  createBudgetCategory(category: InsertBudgetCategory): Promise<BudgetCategory>;
+  updateBudgetCategory(id: number, updates: Partial<BudgetCategory>): Promise<BudgetCategory>;
+  deleteBudgetCategory(id: number): Promise<void>;
+
+  // Expenses
+  getAllExpenses(): Promise<Expense[]>;
+  getExpensesByDateRange(startDate: string, endDate: string): Promise<Expense[]>;
+  getExpensesByCategory(categoryId: number): Promise<Expense[]>;
+  createExpense(expense: InsertExpense): Promise<Expense>;
+  updateExpense(id: number, updates: Partial<Expense>): Promise<Expense>;
+  deleteExpense(id: number): Promise<void>;
+
+  // Debt Management
+  getAllDebts(): Promise<Debt[]>;
+  getActiveDebts(): Promise<Debt[]>;
+  createDebt(debt: InsertDebt): Promise<Debt>;
+  updateDebt(id: number, updates: Partial<Debt>): Promise<Debt>;
+  deleteDebt(id: number): Promise<void>;
+
+  // Debt Payments
+  getAllDebtPayments(): Promise<DebtPayment[]>;
+  getDebtPaymentsByDebt(debtId: number): Promise<DebtPayment[]>;
+  createDebtPayment(payment: InsertDebtPayment): Promise<DebtPayment>;
+  updateDebtPayment(id: number, updates: Partial<DebtPayment>): Promise<DebtPayment>;
+  deleteDebtPayment(id: number): Promise<void>;
+
+  // Investments
+  getAllInvestments(): Promise<Investment[]>;
+  getInvestmentsByPlatform(platformId: number): Promise<Investment[]>;
+  createInvestment(investment: InsertInvestment): Promise<Investment>;
+  updateInvestment(id: number, updates: Partial<Investment>): Promise<Investment>;
+  deleteInvestment(id: number): Promise<void>;
+
+  // Investment Platforms
+  getAllInvestmentPlatforms(): Promise<InvestmentPlatform[]>;
+  createInvestmentPlatform(platform: InsertInvestmentPlatform): Promise<InvestmentPlatform>;
+  updateInvestmentPlatform(id: number, updates: Partial<InvestmentPlatform>): Promise<InvestmentPlatform>;
+  deleteInvestmentPlatform(id: number): Promise<void>;
+
+  // Accounts
+  getAllAccounts(): Promise<Account[]>;
+  getActiveAccounts(): Promise<Account[]>;
+  createAccount(account: InsertAccount): Promise<Account>;
+  updateAccount(id: number, updates: Partial<Account>): Promise<Account>;
+  deleteAccount(id: number): Promise<void>;
+
+  // Net Worth Tracking
+  getAllNetWorthSnapshots(): Promise<NetWorthSnapshot[]>;
+  getNetWorthSnapshotsByDateRange(startDate: string, endDate: string): Promise<NetWorthSnapshot[]>;
+  createNetWorthSnapshot(snapshot: InsertNetWorthSnapshot): Promise<NetWorthSnapshot>;
+  updateNetWorthSnapshot(id: number, updates: Partial<NetWorthSnapshot>): Promise<NetWorthSnapshot>;
+  deleteNetWorthSnapshot(id: number): Promise<void>;
+
+  // Financial Goals
+  getAllFinancialGoals(): Promise<FinancialGoal[]>;
+  getActiveFinancialGoals(): Promise<FinancialGoal[]>;
+  createFinancialGoal(goal: InsertFinancialGoal): Promise<FinancialGoal>;
+  updateFinancialGoal(id: number, updates: Partial<FinancialGoal>): Promise<FinancialGoal>;
+  deleteFinancialGoal(id: number): Promise<void>;
+
+  // Finance Analytics
+  getBudgetAnalytics(month: string): Promise<any>;
+  getSpendingTrends(startDate: string, endDate: string): Promise<any>;
+  getDebtPayoffProjections(): Promise<any>;
+  getInvestmentPerformance(): Promise<any>;
+  getFinancialHealthScore(): Promise<any>;
+
   // Analytics methods
   getReportsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
   getHabitsAnalytics(startDate: string, endDate: string): Promise<any>;
@@ -299,6 +387,15 @@ export class MemStorage implements IStorage {
   private blogPosts: Map<number, BlogPost> = new Map();
   private blogIdeas: Map<number, BlogIdea> = new Map();
   private blogCalendarEvents: Map<number, BlogCalendar> = new Map();
+  private budgetCategories: Map<number, BudgetCategory> = new Map();
+  private expenses: Map<number, Expense> = new Map();
+  private debts: Map<number, Debt> = new Map();
+  private debtPayments: Map<number, DebtPayment> = new Map();
+  private investments: Map<number, Investment> = new Map();
+  private investmentPlatforms: Map<number, InvestmentPlatform> = new Map();
+  private accounts: Map<number, Account> = new Map();
+  private netWorthSnapshots: Map<number, NetWorthSnapshot> = new Map();
+  private financialGoals: Map<number, FinancialGoal> = new Map();
   private currentId = 1;
 
   constructor() {
