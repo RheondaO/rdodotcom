@@ -246,7 +246,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
           </div>
 
           {/* Brand Tabs */}
-          <div className="flex flex-wrap gap-2 pb-2 mt-4">
+          <div className="flex flex-wrap justify-center gap-2 pb-2 mt-4">
             <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
               <span>📰</span>
               <span>@rotationonly.mag</span>
