@@ -103,7 +103,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       engagement: 85,
       lastUpdated: "2025-06-15",
       status: "active" as "active" | "paused" | "completed",
-      color: "#8B5CF6",
+      color: "#6B7280",
       icon: "🌅"
     },
     {
@@ -117,7 +117,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       engagement: 92,
       lastUpdated: "2025-06-14",
       status: "active" as "active" | "paused" | "completed",
-      color: "#3B82F6",
+      color: "#6B7280",
       icon: "🌙"
     },
     {
@@ -131,7 +131,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       engagement: 78,
       lastUpdated: "2025-06-13",
       status: "active" as "active" | "paused" | "completed",
-      color: "#EF4444",
+      color: "#6B7280",
       icon: "🧪"
     },
     {
@@ -145,7 +145,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       engagement: 96,
       lastUpdated: "2025-06-12",
       status: "active" as "active" | "paused" | "completed",
-      color: "#EC4899",
+      color: "#6B7280",
       icon: "✨"
     },
     {
@@ -159,7 +159,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       engagement: 88,
       lastUpdated: "2025-06-11",
       status: "active" as "active" | "paused" | "completed",
-      color: "#10B981",
+      color: "#6B7280",
       icon: "🎯"
     },
     {
@@ -173,17 +173,17 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       engagement: 74,
       lastUpdated: "2025-06-10",
       status: "paused" as "active" | "paused" | "completed",
-      color: "#F59E0B",
+      color: "#6B7280",
       icon: "📚"
     }
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-      case "paused": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
-      case "completed": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
-      default: return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+      case "active": return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+      case "paused": return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+      case "completed": return "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500";
+      default: return "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400";
     }
   };
 
@@ -197,104 +197,95 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 p-6">
-      {/* Enhanced Header Section */}
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-8">
+    <div className="min-h-screen bg-white dark:bg-gray-900 p-4">
+      {/* Compact Header Section */}
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex justify-between items-center">
-            <div className="space-y-2">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                    <FileText className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                    <CheckCircle className="h-4 w-4 text-white" />
-                  </div>
-                </div>
-                <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    rotationONLY Content Studio
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg">Mini Game Blocks & Professional Content Management</p>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  rotationONLY Content Studio
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Mini Game Blocks & Professional Content Management</p>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button
                 variant={activeView === "overview" ? "default" : "outline"}
                 onClick={() => setActiveView("overview")}
-                className="hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                size="sm"
               >
                 Overview
               </Button>
               <Button
                 variant={activeView === "create" ? "default" : "outline"}
                 onClick={() => setActiveView("create")}
-                className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                size="sm"
               >
                 Create
               </Button>
               <Button
                 variant={activeView === "analytics" ? "default" : "outline"}
                 onClick={() => setActiveView("analytics")}
-                className="hover:bg-green-50 dark:hover:bg-green-900/20"
+                size="sm"
               >
                 Analytics
               </Button>
               <Button
                 variant={activeView === "progress" ? "default" : "outline"}
                 onClick={() => setActiveView("progress")}
-                className="hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                size="sm"
               >
                 Progress
               </Button>
             </div>
           </div>
 
-          {/* Enhanced Brand Tabs */}
-          <div className="flex gap-3 overflow-x-auto pb-2 mt-8">
-            <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-              <span className="text-lg">🌙</span>
-              <span className="font-semibold">relationONLY Magazine</span>
+          {/* Brand Tabs */}
+          <div className="flex gap-2 overflow-x-auto pb-2 mt-4">
+            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
+              <span>🌙</span>
+              <span>relationONLY Magazine</span>
             </div>
-            <div className="flex items-center gap-2 bg-gradient-to-r from-green-400 to-emerald-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-              <span className="text-lg">🖊️</span>
-              <span className="font-semibold">Really Obvi Media Lab</span>
+            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
+              <span>🖊️</span>
+              <span>Really Obvi Media Lab</span>
             </div>
-            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-400 to-cyan-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-              <span className="text-lg">✨</span>
-              <span className="font-semibold">Personal Brand</span>
+            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
+              <span>✨</span>
+              <span>Personal Brand</span>
             </div>
-            <div className="flex items-center gap-2 bg-gradient-to-r from-orange-400 to-red-400 text-white px-4 py-2 rounded-full shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-              <span className="text-lg">🏈</span>
-              <span className="font-semibold">Misc</span>
+            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600">
+              <span>🏈</span>
+              <span>Misc</span>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Mini-Game Block Studio Section */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-8">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Zap className="h-6 w-6 text-white" />
-                </div>
+        {/* Mini-Game Block Studio Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
+                <Zap className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   Mini-Game Block Studio
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400">Create and manage content blocks with workflow tracking</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Create and manage content blocks with workflow tracking</p>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowNewBlockForm(true)}
                 disabled={isReadOnly}
-                className="hover:bg-gray-50 dark:hover:bg-gray-700/50 border-gray-200 dark:border-gray-700"
+                size="sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 New Block
@@ -302,9 +293,8 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               <Button
                 onClick={() => setShowAnalyticsForm(true)}
                 disabled={isReadOnly}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg"
+                size="sm"
               >
-                <span className="text-lg mr-2">✨</span>
                 Add Analytics
               </Button>
             </div>
