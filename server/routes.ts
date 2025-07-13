@@ -1387,6 +1387,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/notion/setup", async (req, res) => {
     try {
+      // Check if environment variables are configured
+      if (!process.env.NOTION_INTEGRATION_SECRET) {
+        return res.status(500).json({ 
+          isSetup: false, 
+          error: "NOTION_INTEGRATION_SECRET not configured",
+          databases: []
+        });
+      }
+
+      if (!process.env.NOTION_PAGE_URL) {
+        return res.status(500).json({ 
+          isSetup: false, 
+          error: "NOTION_PAGE_URL not configured",
+          databases: []
+        });
+      }
+
       const databases = await getNotionDatabases();
       const hasRequiredDbs = true; // We have your existing TABLEMAKER database
       
@@ -1401,7 +1418,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error checking Notion setup:", error);
-      res.status(500).json({ error: "Failed to check Notion setup" });
+      res.status(500).json({ 
+        isSetup: false, 
+        error: "Failed to connect to Notion. Check your integration settings.",
+        databases: []
+      });
     }
   });
 

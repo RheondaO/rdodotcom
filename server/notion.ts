@@ -1,6 +1,16 @@
 import { Client } from "@notionhq/client";
 
-// Initialize Notion client
+// Initialize Notion client with better error handling
+if (!process.env.NOTION_INTEGRATION_SECRET) {
+    console.error("❌ NOTION_INTEGRATION_SECRET is not configured");
+    console.error("Please add your Notion integration secret to environment variables");
+}
+
+if (!process.env.NOTION_PAGE_URL) {
+    console.error("❌ NOTION_PAGE_URL is not configured");
+    console.error("Please add your Notion database URL to environment variables");
+}
+
 export const notion = new Client({
     auth: process.env.NOTION_INTEGRATION_SECRET!,
 });

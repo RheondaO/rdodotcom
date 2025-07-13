@@ -60,9 +60,11 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
   const queryClient = useQueryClient();
 
   // Fetch tasks filtered by the selected date
-  const { data: tasks = [], isLoading } = useQuery({
+  const { data: tasks = [], isLoading, error } = useQuery({
     queryKey: ['/api/notion/tasks', selectedDate.toISOString().split('T')[0]],
     queryFn: () => apiRequest(`/api/notion/tasks?date=${selectedDate.toISOString().split('T')[0]}&view=day`),
+    retry: 3,
+    retryDelay: 1000,
   });
 
   // Create task mutation
@@ -175,6 +177,23 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-2 text-sm text-muted-foreground">Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+          <h3 className="text-lg font-semibold mb-2">Connection Failed</h3>
+          <p className="text-muted-foreground mb-4">
+            Unable to connect to Notion. Please check your integration settings.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Verify NOTION_INTEGRATION_SECRET is configured in production environment.
+          </p>
         </div>
       </div>
     );
