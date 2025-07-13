@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { pgTable, serial, text, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
 
 // Type definitions for data models (no database tables)
 export interface DailyEntry {
@@ -566,6 +568,61 @@ export interface BlogCalendar {
   createdAt?: Date;
 }
 
+// Database Tables for Blog System
+export const blogPosts = pgTable('blog_posts', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  content: text('content'),
+  excerpt: text('excerpt'),
+  status: text('status').notNull().default('draft'),
+  type: text('type').notNull().default('blog'),
+  platform: text('platform').notNull(),
+  tags: text('tags'),
+  scheduledDate: text('scheduled_date'),
+  publishedDate: text('published_date'),
+  reviewDate: text('review_date'),
+  priority: text('priority').default('medium'),
+  wordCount: integer('word_count'),
+  readingTime: integer('reading_time'),
+  seoTitle: text('seo_title'),
+  seoDescription: text('seo_description'),
+  featuredImage: text('featured_image'),
+  isAiGenerated: boolean('is_ai_generated').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const blogIdeas = pgTable('blog_ideas', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description'),
+  category: text('category').notNull(),
+  platform: text('platform').notNull(),
+  tags: text('tags'),
+  priority: text('priority').default('medium'),
+  aiPrompt: text('ai_prompt'),
+  aiGeneratedContent: text('ai_generated_content'),
+  status: text('status').notNull().default('active'),
+  estimatedReadTime: integer('estimated_read_time'),
+  targetAudience: text('target_audience'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const blogCalendar = pgTable('blog_calendar', {
+  id: serial('id').primaryKey(),
+  postId: integer('post_id').references(() => blogPosts.id),
+  ideaId: integer('idea_id').references(() => blogIdeas.id),
+  title: text('title').notNull(),
+  type: text('type').notNull(),
+  platform: text('platform').notNull(),
+  date: text('date').notNull(),
+  time: text('time'),
+  status: text('status').notNull().default('scheduled'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // Insert schemas using Zod
 export const insertDailyEntrySchema = z.object({
   date: z.string(),
@@ -778,6 +835,11 @@ export const insertBlogCalendarSchema = z.object({
   status: z.string().default("scheduled"),
   notes: z.string().optional()
 });
+
+// Type exports for blog system
+export type BlogPostType = typeof blogPosts.$inferSelect;
+export type BlogIdeaType = typeof blogIdeas.$inferSelect;
+export type BlogCalendarType = typeof blogCalendar.$inferSelect;
 
 export const insertBudgetCategorySchema = z.object({
   name: z.string().min(1, "Name is required"),

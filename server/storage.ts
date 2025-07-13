@@ -7,28 +7,16 @@ import {
   type InsertBillPayment,
   type GroceryItem,
   type InsertGroceryItem,
-  type GroceryList,
-  type InsertGroceryList,
   type Goal,
   type InsertGoal,
   type Habit,
   type InsertHabit,
   type HabitLog,
   type InsertHabitLog,
-  type Medication,
-  type InsertMedication,
   type Todo,
   type InsertTodo,
-  type TimeBlock,
-  type InsertTimeBlock,
-  type FocusSession,
-  type InsertFocusSession,
   type Budget,
-  type InsertBudget,
-  type IncomeEntry,
-  type InsertIncomeEntry,
   type Challenge,
-  type InsertChallenge,
   type ContentCategory,
   type InsertContentCategory,
   type ContentType,
@@ -37,14 +25,6 @@ import {
   type InsertContentPiece,
   type ContentProgress,
   type InsertContentProgress,
-  type AppProject,
-  type InsertAppProject,
-  type AppTask,
-  type InsertAppTask,
-  type AppSprint,
-  type InsertAppSprint,
-  type AppTimeEntry,
-  type InsertAppTimeEntry,
   type MiniGameBlock,
   type InsertMiniGameBlock,
   type MiniGameDesign,
@@ -92,8 +72,16 @@ import {
   type PriceHistory,
   type InsertPriceHistory,
   type InvestmentTransaction,
-  type InsertInvestmentTransaction
+  type InsertInvestmentTransaction,
+  blogPosts,
+  blogIdeas,
+  blogCalendar,
+  type BlogPostType,
+  type BlogIdeaType,
+  type BlogCalendarType
 } from "@shared/schema";
+import { db, pool } from "./db";
+import { eq, desc, asc } from "drizzle-orm";
 
 export interface IStorage {
   // Daily Entries
@@ -592,85 +580,9 @@ export class MemStorage implements IStorage {
       estimatedDuration: 30
     });
 
-    // Initialize with sample blog posts
-    this.createBlogPost({
-      title: "10 Productivity Tips for Remote Workers",
-      content: "Working from home can be challenging, but with the right strategies...",
-      excerpt: "Discover proven techniques to boost your productivity while working remotely.",
-      status: "published",
-      type: "blog",
-      platform: "personal_blog",
-      tags: JSON.stringify(["productivity", "remote work", "tips"]),
-      publishedDate: "2024-01-15",
-      priority: "high",
-      wordCount: 1200,
-      readingTime: 6,
-      seoTitle: "10 Productivity Tips for Remote Workers - Boost Your Efficiency",
-      seoDescription: "Learn how to maximize your productivity while working from home with these proven strategies and tips.",
-      isAiGenerated: false
-    });
+    // Blog posts will be initialized by the CombinedStorage class to avoid constructor conflicts
 
-    this.createBlogPost({
-      title: "The Future of AI in Content Creation",
-      content: "Artificial Intelligence is revolutionizing how we create content...",
-      excerpt: "Explore how AI is transforming the content creation landscape.",
-      status: "draft",
-      type: "blog",
-      platform: "medium",
-      tags: JSON.stringify(["ai", "content creation", "technology"]),
-      scheduledDate: "2024-01-25",
-      priority: "medium",
-      wordCount: 800,
-      readingTime: 4,
-      isAiGenerated: true
-    });
-
-    // Initialize with sample blog ideas
-    this.createBlogIdea({
-      title: "Building Sustainable Habits",
-      description: "A deep dive into the psychology of habit formation and practical strategies for building lasting habits.",
-      category: "lifestyle",
-      platform: "substack",
-      tags: JSON.stringify(["habits", "psychology", "self-improvement"]),
-      priority: "high",
-      status: "idea",
-      estimatedReadTime: 8,
-      targetAudience: "professionals seeking personal development",
-      aiPrompt: "Write about the science of habit formation and include practical examples"
-    });
-
-    this.createBlogIdea({
-      title: "The Rise of No-Code Development",
-      description: "How no-code platforms are democratizing software development and what it means for the future.",
-      category: "technology",
-      platform: "linkedin",
-      tags: JSON.stringify(["no-code", "development", "technology"]),
-      priority: "medium",
-      status: "in_progress",
-      estimatedReadTime: 6,
-      targetAudience: "developers and business professionals"
-    });
-
-    // Initialize with sample calendar events
-    this.createBlogCalendarEvent({
-      title: "Review and Edit AI Content Post",
-      type: "review",
-      platform: "medium",
-      date: "2024-01-22",
-      time: "14:00",
-      status: "scheduled",
-      notes: "Final review before publishing AI content creation article"
-    });
-
-    this.createBlogCalendarEvent({
-      title: "Publish Remote Work Tips",
-      type: "post",
-      platform: "personal_blog",
-      date: "2024-01-20",
-      time: "09:00",
-      status: "scheduled",
-      notes: "Share on social media after publishing"
-    });
+    // Blog ideas and calendar events will be initialized by the CombinedStorage class to avoid constructor conflicts
   }
 
   // Daily Entries
@@ -2172,4 +2084,590 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database Storage for Blog System using direct SQL queries
+class BlogDatabaseStorage {
+  // Blog Posts
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_posts 
+      ORDER BY updated_at DESC
+    `);
+    return result.rows.map(row => ({
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      scheduledDate: row.scheduled_date,
+      publishedDate: row.published_date,
+      reviewDate: row.review_date,
+      wordCount: row.word_count,
+      readingTime: row.reading_time,
+      seoTitle: row.seo_title,
+      seoDescription: row.seo_description,
+      featuredImage: row.featured_image,
+      isAiGenerated: row.is_ai_generated
+    }));
+  }
+
+  async getBlogPostsByStatus(status: string): Promise<BlogPost[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_posts 
+      WHERE status = $1
+      ORDER BY updated_at DESC
+    `, [status]);
+    return result.rows.map(row => ({
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      scheduledDate: row.scheduled_date,
+      publishedDate: row.published_date,
+      reviewDate: row.review_date,
+      wordCount: row.word_count,
+      readingTime: row.reading_time,
+      seoTitle: row.seo_title,
+      seoDescription: row.seo_description,
+      featuredImage: row.featured_image,
+      isAiGenerated: row.is_ai_generated
+    }));
+  }
+
+  async getBlogPostsByPlatform(platform: string): Promise<BlogPost[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_posts 
+      WHERE platform = $1
+      ORDER BY updated_at DESC
+    `, [platform]);
+    return result.rows.map(row => ({
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      scheduledDate: row.scheduled_date,
+      publishedDate: row.published_date,
+      reviewDate: row.review_date,
+      wordCount: row.word_count,
+      readingTime: row.reading_time,
+      seoTitle: row.seo_title,
+      seoDescription: row.seo_description,
+      featuredImage: row.featured_image,
+      isAiGenerated: row.is_ai_generated
+    }));
+  }
+
+  async getBlogPost(id: number): Promise<BlogPost | undefined> {
+    const result = await pool.query(`
+      SELECT * FROM blog_posts 
+      WHERE id = $1
+    `, [id]);
+    if (result.rows.length === 0) return undefined;
+    
+    const row = result.rows[0];
+    return {
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      scheduledDate: row.scheduled_date,
+      publishedDate: row.published_date,
+      reviewDate: row.review_date,
+      wordCount: row.word_count,
+      readingTime: row.reading_time,
+      seoTitle: row.seo_title,
+      seoDescription: row.seo_description,
+      featuredImage: row.featured_image,
+      isAiGenerated: row.is_ai_generated
+    };
+  }
+
+  async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    const result = await pool.query(`
+      INSERT INTO blog_posts (
+        title, content, excerpt, status, type, platform, tags, 
+        scheduled_date, published_date, review_date, priority, 
+        word_count, reading_time, seo_title, seo_description, 
+        featured_image, is_ai_generated
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+      ) RETURNING *
+    `, [
+      post.title, post.content, post.excerpt, post.status, post.type, post.platform, 
+      post.tags, post.scheduledDate, post.publishedDate, post.reviewDate, post.priority,
+      post.wordCount, post.readingTime, post.seoTitle, post.seoDescription, 
+      post.featuredImage, post.isAiGenerated
+    ]);
+    
+    const row = result.rows[0];
+    return {
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      scheduledDate: row.scheduled_date,
+      publishedDate: row.published_date,
+      reviewDate: row.review_date,
+      wordCount: row.word_count,
+      readingTime: row.reading_time,
+      seoTitle: row.seo_title,
+      seoDescription: row.seo_description,
+      featuredImage: row.featured_image,
+      isAiGenerated: row.is_ai_generated
+    };
+  }
+
+  async updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost> {
+    const result = await pool.query(`
+      UPDATE blog_posts 
+      SET title = COALESCE($2, title),
+          content = COALESCE($3, content),
+          excerpt = COALESCE($4, excerpt),
+          status = COALESCE($5, status),
+          type = COALESCE($6, type),
+          platform = COALESCE($7, platform),
+          tags = COALESCE($8, tags),
+          scheduled_date = COALESCE($9, scheduled_date),
+          published_date = COALESCE($10, published_date),
+          review_date = COALESCE($11, review_date),
+          priority = COALESCE($12, priority),
+          word_count = COALESCE($13, word_count),
+          reading_time = COALESCE($14, reading_time),
+          seo_title = COALESCE($15, seo_title),
+          seo_description = COALESCE($16, seo_description),
+          featured_image = COALESCE($17, featured_image),
+          is_ai_generated = COALESCE($18, is_ai_generated),
+          updated_at = NOW()
+      WHERE id = $1
+      RETURNING *
+    `, [
+      id, updates.title, updates.content, updates.excerpt, updates.status, 
+      updates.type, updates.platform, updates.tags, updates.scheduledDate, 
+      updates.publishedDate, updates.reviewDate, updates.priority, 
+      updates.wordCount, updates.readingTime, updates.seoTitle, 
+      updates.seoDescription, updates.featuredImage, updates.isAiGenerated
+    ]);
+    
+    const row = result.rows[0];
+    return {
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      scheduledDate: row.scheduled_date,
+      publishedDate: row.published_date,
+      reviewDate: row.review_date,
+      wordCount: row.word_count,
+      readingTime: row.reading_time,
+      seoTitle: row.seo_title,
+      seoDescription: row.seo_description,
+      featuredImage: row.featured_image,
+      isAiGenerated: row.is_ai_generated
+    };
+  }
+
+  async deleteBlogPost(id: number): Promise<void> {
+    await pool.query(`DELETE FROM blog_posts WHERE id = $1`, [id]);
+  }
+
+  // Blog Ideas
+  async getAllBlogIdeas(): Promise<BlogIdea[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_ideas 
+      ORDER BY updated_at DESC
+    `);
+    return result.rows.map(row => ({
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      aiPrompt: row.ai_prompt,
+      aiGeneratedContent: row.ai_generated_content,
+      estimatedReadTime: row.estimated_read_time,
+      targetAudience: row.target_audience
+    }));
+  }
+
+  async getBlogIdeasByStatus(status: string): Promise<BlogIdea[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_ideas 
+      WHERE status = $1
+      ORDER BY updated_at DESC
+    `, [status]);
+    return result.rows.map(row => ({
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      aiPrompt: row.ai_prompt,
+      aiGeneratedContent: row.ai_generated_content,
+      estimatedReadTime: row.estimated_read_time,
+      targetAudience: row.target_audience
+    }));
+  }
+
+  async getBlogIdeasByPlatform(platform: string): Promise<BlogIdea[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_ideas 
+      WHERE platform = $1
+      ORDER BY updated_at DESC
+    `, [platform]);
+    return result.rows.map(row => ({
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      aiPrompt: row.ai_prompt,
+      aiGeneratedContent: row.ai_generated_content,
+      estimatedReadTime: row.estimated_read_time,
+      targetAudience: row.target_audience
+    }));
+  }
+
+  async createBlogIdea(idea: InsertBlogIdea): Promise<BlogIdea> {
+    const result = await pool.query(`
+      INSERT INTO blog_ideas (
+        title, description, category, platform, tags, priority, 
+        ai_prompt, ai_generated_content, status, estimated_read_time, target_audience
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+      ) RETURNING *
+    `, [
+      idea.title, idea.description, idea.category, idea.platform, 
+      idea.tags, idea.priority, idea.aiPrompt, idea.aiGeneratedContent, 
+      idea.status, idea.estimatedReadTime, idea.targetAudience
+    ]);
+    
+    const row = result.rows[0];
+    return {
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      aiPrompt: row.ai_prompt,
+      aiGeneratedContent: row.ai_generated_content,
+      estimatedReadTime: row.estimated_read_time,
+      targetAudience: row.target_audience
+    };
+  }
+
+  async updateBlogIdea(id: number, updates: Partial<BlogIdea>): Promise<BlogIdea> {
+    const result = await pool.query(`
+      UPDATE blog_ideas 
+      SET title = COALESCE($2, title),
+          description = COALESCE($3, description),
+          category = COALESCE($4, category),
+          platform = COALESCE($5, platform),
+          tags = COALESCE($6, tags),
+          priority = COALESCE($7, priority),
+          ai_prompt = COALESCE($8, ai_prompt),
+          ai_generated_content = COALESCE($9, ai_generated_content),
+          status = COALESCE($10, status),
+          estimated_read_time = COALESCE($11, estimated_read_time),
+          target_audience = COALESCE($12, target_audience),
+          updated_at = NOW()
+      WHERE id = $1
+      RETURNING *
+    `, [
+      id, updates.title, updates.description, updates.category, 
+      updates.platform, updates.tags, updates.priority, 
+      updates.aiPrompt, updates.aiGeneratedContent, updates.status, 
+      updates.estimatedReadTime, updates.targetAudience
+    ]);
+    
+    const row = result.rows[0];
+    return {
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      aiPrompt: row.ai_prompt,
+      aiGeneratedContent: row.ai_generated_content,
+      estimatedReadTime: row.estimated_read_time,
+      targetAudience: row.target_audience
+    };
+  }
+
+  async deleteBlogIdea(id: number): Promise<void> {
+    await pool.query(`DELETE FROM blog_ideas WHERE id = $1`, [id]);
+  }
+
+  async generateAIContent(ideaId: number): Promise<BlogIdea> {
+    const result = await pool.query(`
+      UPDATE blog_ideas 
+      SET ai_generated_content = $2, updated_at = NOW()
+      WHERE id = $1
+      RETURNING *
+    `, [ideaId, "AI-generated content placeholder - will be implemented with OpenAI integration"]);
+    
+    const row = result.rows[0];
+    return {
+      ...row,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      aiPrompt: row.ai_prompt,
+      aiGeneratedContent: row.ai_generated_content,
+      estimatedReadTime: row.estimated_read_time,
+      targetAudience: row.target_audience
+    };
+  }
+
+  // Blog Calendar
+  async getAllBlogCalendarEvents(): Promise<BlogCalendar[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_calendar 
+      ORDER BY date ASC
+    `);
+    return result.rows.map(row => ({
+      ...row,
+      postId: row.post_id,
+      ideaId: row.idea_id,
+      createdAt: row.created_at
+    }));
+  }
+
+  async getBlogCalendarEventsByDate(date: string): Promise<BlogCalendar[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_calendar 
+      WHERE date = $1
+      ORDER BY time ASC
+    `, [date]);
+    return result.rows.map(row => ({
+      ...row,
+      postId: row.post_id,
+      ideaId: row.idea_id,
+      createdAt: row.created_at
+    }));
+  }
+
+  async getBlogCalendarEventsByDateRange(startDate: string, endDate: string): Promise<BlogCalendar[]> {
+    const result = await pool.query(`
+      SELECT * FROM blog_calendar 
+      WHERE date >= $1 AND date <= $2
+      ORDER BY date ASC, time ASC
+    `, [startDate, endDate]);
+    return result.rows.map(row => ({
+      ...row,
+      postId: row.post_id,
+      ideaId: row.idea_id,
+      createdAt: row.created_at
+    }));
+  }
+
+  async createBlogCalendarEvent(event: InsertBlogCalendar): Promise<BlogCalendar> {
+    const result = await pool.query(`
+      INSERT INTO blog_calendar (
+        post_id, idea_id, title, type, platform, date, time, status, notes
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
+      ) RETURNING *
+    `, [
+      event.postId, event.ideaId, event.title, event.type, 
+      event.platform, event.date, event.time, event.status, event.notes
+    ]);
+    
+    const row = result.rows[0];
+    return {
+      ...row,
+      postId: row.post_id,
+      ideaId: row.idea_id,
+      createdAt: row.created_at
+    };
+  }
+
+  async updateBlogCalendarEvent(id: number, updates: Partial<BlogCalendar>): Promise<BlogCalendar> {
+    const result = await pool.query(`
+      UPDATE blog_calendar 
+      SET post_id = COALESCE($2, post_id),
+          idea_id = COALESCE($3, idea_id),
+          title = COALESCE($4, title),
+          type = COALESCE($5, type),
+          platform = COALESCE($6, platform),
+          date = COALESCE($7, date),
+          time = COALESCE($8, time),
+          status = COALESCE($9, status),
+          notes = COALESCE($10, notes)
+      WHERE id = $1
+      RETURNING *
+    `, [
+      id, updates.postId, updates.ideaId, updates.title, 
+      updates.type, updates.platform, updates.date, 
+      updates.time, updates.status, updates.notes
+    ]);
+    
+    const row = result.rows[0];
+    return {
+      ...row,
+      postId: row.post_id,
+      ideaId: row.idea_id,
+      createdAt: row.created_at
+    };
+  }
+
+  async deleteBlogCalendarEvent(id: number): Promise<void> {
+    await pool.query(`DELETE FROM blog_calendar WHERE id = $1`, [id]);
+  }
+}
+
+// Combined Storage that uses database for blog and in-memory for other features
+class CombinedStorage extends MemStorage {
+  private blogStorage: BlogDatabaseStorage;
+  
+  constructor() {
+    super();
+    this.blogStorage = new BlogDatabaseStorage();
+    this.initializeBlogData();
+  }
+
+  private async initializeBlogData() {
+    // Initialize with sample blog posts
+    await this.createBlogPost({
+      title: "10 Productivity Tips for Remote Workers",
+      content: "Working from home can be challenging, but with the right strategies...",
+      excerpt: "Discover proven techniques to boost your productivity while working remotely.",
+      status: "published",
+      type: "blog",
+      platform: "personal_blog",
+      tags: JSON.stringify(["productivity", "remote work", "tips"]),
+      publishedDate: "2024-01-15",
+      priority: "high",
+      wordCount: 1200,
+      readingTime: 6,
+      seoTitle: "10 Productivity Tips for Remote Workers - Boost Your Efficiency",
+      seoDescription: "Learn how to maximize your productivity while working from home with these proven strategies and tips.",
+      isAiGenerated: false
+    });
+
+    await this.createBlogPost({
+      title: "The Future of AI in Content Creation",
+      content: "Artificial Intelligence is revolutionizing how we create content...",
+      excerpt: "Explore how AI is transforming the content creation landscape.",
+      status: "draft",
+      type: "blog",
+      platform: "medium",
+      tags: JSON.stringify(["ai", "content creation", "technology"]),
+      scheduledDate: "2024-01-25",
+      priority: "medium",
+      wordCount: 800,
+      readingTime: 4,
+      isAiGenerated: true
+    });
+
+    // Initialize with sample blog ideas
+    await this.createBlogIdea({
+      title: "Building Sustainable Habits",
+      description: "A deep dive into the psychology of habit formation and practical strategies for building lasting habits.",
+      category: "lifestyle",
+      platform: "substack",
+      tags: JSON.stringify(["habits", "psychology", "self-improvement"]),
+      priority: "high",
+      status: "idea",
+      estimatedReadTime: 8,
+      targetAudience: "professionals seeking personal development",
+      aiPrompt: "Write about the science of habit formation and include practical examples"
+    });
+
+    await this.createBlogIdea({
+      title: "The Rise of No-Code Development",
+      description: "How no-code platforms are democratizing software development and what it means for the future.",
+      category: "technology",
+      platform: "linkedin",
+      tags: JSON.stringify(["no-code", "development", "technology"]),
+      priority: "medium",
+      status: "in_progress",
+      estimatedReadTime: 6,
+      targetAudience: "developers and business professionals"
+    });
+
+    // Initialize with sample calendar events
+    await this.createBlogCalendarEvent({
+      title: "Review and Edit AI Content Post",
+      type: "review",
+      platform: "medium",
+      date: "2024-01-22",
+      time: "14:00",
+      status: "scheduled",
+      notes: "Final review before publishing AI content creation article"
+    });
+
+    await this.createBlogCalendarEvent({
+      title: "Publish Remote Work Tips",
+      type: "post",
+      platform: "personal_blog",
+      date: "2024-01-20",
+      time: "09:00",
+      status: "scheduled",
+      notes: "Share on social media after publishing"
+    });
+  }
+
+  // Override blog methods to use database
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    return this.blogStorage.getAllBlogPosts();
+  }
+
+  async getBlogPostsByStatus(status: string): Promise<BlogPost[]> {
+    return this.blogStorage.getBlogPostsByStatus(status);
+  }
+
+  async getBlogPostsByPlatform(platform: string): Promise<BlogPost[]> {
+    return this.blogStorage.getBlogPostsByPlatform(platform);
+  }
+
+  async getBlogPost(id: number): Promise<BlogPost | undefined> {
+    return this.blogStorage.getBlogPost(id);
+  }
+
+  async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    return this.blogStorage.createBlogPost(post);
+  }
+
+  async updateBlogPost(id: number, updates: Partial<BlogPost>): Promise<BlogPost> {
+    return this.blogStorage.updateBlogPost(id, updates);
+  }
+
+  async deleteBlogPost(id: number): Promise<void> {
+    return this.blogStorage.deleteBlogPost(id);
+  }
+
+  async getAllBlogIdeas(): Promise<BlogIdea[]> {
+    return this.blogStorage.getAllBlogIdeas();
+  }
+
+  async getBlogIdeasByStatus(status: string): Promise<BlogIdea[]> {
+    return this.blogStorage.getBlogIdeasByStatus(status);
+  }
+
+  async getBlogIdeasByPlatform(platform: string): Promise<BlogIdea[]> {
+    return this.blogStorage.getBlogIdeasByPlatform(platform);
+  }
+
+  async createBlogIdea(idea: InsertBlogIdea): Promise<BlogIdea> {
+    return this.blogStorage.createBlogIdea(idea);
+  }
+
+  async updateBlogIdea(id: number, updates: Partial<BlogIdea>): Promise<BlogIdea> {
+    return this.blogStorage.updateBlogIdea(id, updates);
+  }
+
+  async deleteBlogIdea(id: number): Promise<void> {
+    return this.blogStorage.deleteBlogIdea(id);
+  }
+
+  async generateAIContent(ideaId: number): Promise<BlogIdea> {
+    return this.blogStorage.generateAIContent(ideaId);
+  }
+
+  async getAllBlogCalendarEvents(): Promise<BlogCalendar[]> {
+    return this.blogStorage.getAllBlogCalendarEvents();
+  }
+
+  async getBlogCalendarEventsByDate(date: string): Promise<BlogCalendar[]> {
+    return this.blogStorage.getBlogCalendarEventsByDate(date);
+  }
+
+  async getBlogCalendarEventsByDateRange(startDate: string, endDate: string): Promise<BlogCalendar[]> {
+    return this.blogStorage.getBlogCalendarEventsByDateRange(startDate, endDate);
+  }
+
+  async createBlogCalendarEvent(event: InsertBlogCalendar): Promise<BlogCalendar> {
+    return this.blogStorage.createBlogCalendarEvent(event);
+  }
+
+  async updateBlogCalendarEvent(id: number, updates: Partial<BlogCalendar>): Promise<BlogCalendar> {
+    return this.blogStorage.updateBlogCalendarEvent(id, updates);
+  }
+
+  async deleteBlogCalendarEvent(id: number): Promise<void> {
+    return this.blogStorage.deleteBlogCalendarEvent(id);
+  }
+}
+
+export const storage = new CombinedStorage();
