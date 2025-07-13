@@ -247,7 +247,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  rotationONLY Content Studio
+                  𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">Mini Game Blocks & Professional Content Management</p>
               </div>
