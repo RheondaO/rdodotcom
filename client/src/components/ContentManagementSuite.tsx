@@ -382,10 +382,6 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                     </CardHeader>
                     <CardContent className="pt-6">
                       <div className="space-y-5">
-                        <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3">
-                          <Calendar className="h-4 w-4 text-blue-600" />
-                          <span className="font-medium">Last updated: {block.lastUpdated}</span>
-                        </div>
                         
                         <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4">
                           <div className="flex justify-between items-center mb-2">
