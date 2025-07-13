@@ -23,7 +23,23 @@ import {
   BookOpen,
   Clock,
   Share2,
-  ChevronDown
+  ChevronDown,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Link,
+  List,
+  ListOrdered,
+  Quote,
+  Code,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Type,
+  Heading1,
+  Heading2,
+  Heading3
 } from 'lucide-react';
 
 interface BlogPost {
@@ -72,6 +88,71 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
   });
 
   const queryClient = useQueryClient();
+  const [textareaRef, setTextareaRef] = useState<HTMLTextAreaElement | null>(null);
+
+  // Rich text formatting functions
+  const insertFormatting = (prefix: string, suffix: string = '') => {
+    if (!textareaRef) return;
+    
+    const start = textareaRef.selectionStart;
+    const end = textareaRef.selectionEnd;
+    const selectedText = textareaRef.value.substring(start, end);
+    const beforeText = textareaRef.value.substring(0, start);
+    const afterText = textareaRef.value.substring(end);
+    
+    const newText = beforeText + prefix + selectedText + suffix + afterText;
+    
+    setFormData(prev => ({ ...prev, content: newText }));
+    
+    // Set cursor position after formatting
+    setTimeout(() => {
+      textareaRef.focus();
+      textareaRef.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+    }, 0);
+  };
+
+  const formatText = (type: string) => {
+    switch (type) {
+      case 'bold':
+        insertFormatting('**', '**');
+        break;
+      case 'italic':
+        insertFormatting('*', '*');
+        break;
+      case 'underline':
+        insertFormatting('<u>', '</u>');
+        break;
+      case 'strikethrough':
+        insertFormatting('~~', '~~');
+        break;
+      case 'code':
+        insertFormatting('`', '`');
+        break;
+      case 'link':
+        insertFormatting('[', '](url)');
+        break;
+      case 'h1':
+        insertFormatting('# ');
+        break;
+      case 'h2':
+        insertFormatting('## ');
+        break;
+      case 'h3':
+        insertFormatting('### ');
+        break;
+      case 'quote':
+        insertFormatting('> ');
+        break;
+      case 'unordered-list':
+        insertFormatting('- ');
+        break;
+      case 'ordered-list':
+        insertFormatting('1. ');
+        break;
+      default:
+        break;
+    }
+  };
 
   // Fetch existing post if editing
   const { data: post, isLoading } = useQuery<BlogPost>({
@@ -340,13 +421,154 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose }) => {
 
               <div className="space-y-2">
                 <Label htmlFor="content">Content</Label>
+                
+                {/* Rich Text Editor Toolbar */}
+                <div className="border rounded-t-lg p-3 bg-gray-50 dark:bg-gray-800 border-b-0">
+                  <div className="flex flex-wrap gap-1">
+                    {/* Heading buttons */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('h1')}
+                      className="h-8 px-2"
+                      title="Heading 1"
+                    >
+                      <Heading1 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('h2')}
+                      className="h-8 px-2"
+                      title="Heading 2"
+                    >
+                      <Heading2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('h3')}
+                      className="h-8 px-2"
+                      title="Heading 3"
+                    >
+                      <Heading3 className="h-4 w-4" />
+                    </Button>
+                    
+                    <Separator orientation="vertical" className="mx-1 h-8" />
+                    
+                    {/* Text formatting buttons */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('bold')}
+                      className="h-8 px-2"
+                      title="Bold"
+                    >
+                      <Bold className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('italic')}
+                      className="h-8 px-2"
+                      title="Italic"
+                    >
+                      <Italic className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('underline')}
+                      className="h-8 px-2"
+                      title="Underline"
+                    >
+                      <Underline className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('strikethrough')}
+                      className="h-8 px-2"
+                      title="Strikethrough"
+                    >
+                      <Strikethrough className="h-4 w-4" />
+                    </Button>
+                    
+                    <Separator orientation="vertical" className="mx-1 h-8" />
+                    
+                    {/* List buttons */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('unordered-list')}
+                      className="h-8 px-2"
+                      title="Bullet List"
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('ordered-list')}
+                      className="h-8 px-2"
+                      title="Numbered List"
+                    >
+                      <ListOrdered className="h-4 w-4" />
+                    </Button>
+                    
+                    <Separator orientation="vertical" className="mx-1 h-8" />
+                    
+                    {/* Quote and Code buttons */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('quote')}
+                      className="h-8 px-2"
+                      title="Quote"
+                    >
+                      <Quote className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('code')}
+                      className="h-8 px-2"
+                      title="Inline Code"
+                    >
+                      <Code className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => formatText('link')}
+                      className="h-8 px-2"
+                      title="Link"
+                    >
+                      <Link className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
                 <Textarea
                   id="content"
+                  ref={setTextareaRef}
                   value={formData.content}
                   onChange={(e) => handleInputChange('content', e.target.value)}
                   placeholder="Write your post content here..."
                   rows={20}
-                  className="font-mono"
+                  className="font-mono rounded-t-none border-t-0 focus:ring-0 focus:ring-offset-0 resize-none"
                 />
               </div>
 
