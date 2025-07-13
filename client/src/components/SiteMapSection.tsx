@@ -30,7 +30,25 @@ import {
   Moon,
   Sun,
   Code2,
-  Download
+  Download,
+  CreditCard,
+  Building,
+  PieChart,
+  Lightbulb,
+  Edit3,
+  Grid3X3,
+  Sparkles,
+  LineChart,
+  Coins,
+  TrendingDown,
+  Calculator,
+  Gamepad2,
+  Newspaper,
+  Music,
+  Microscope,
+  Briefcase as BriefcaseIcon,
+  Globe,
+  Flame
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -42,19 +60,26 @@ interface SiteMapSectionProps {
 
 export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteMapSectionProps) {
   const handleExportData = () => {
-    // Create sample data export
+    // Create comprehensive data export
     const exportData = {
       exportDate: new Date().toISOString(),
       dataType: "Belle Journal Export",
       sections: {
-        health: "Health tracking data",
-        habits: "Habit completion records",
-        productivity: "Work time and focus sessions",
-        goals: "Personal goals and achievements",
-        finances: "Financial tracking and budgets",
-        groceries: "Shopping lists and items",
-        content: "Content management records",
-        apps: "Development projects and tasks"
+        health: "Health tracking data with water intake and wellness metrics",
+        habits: "Habit completion records with mood and energy tracking",
+        productivity: "Work time, focus sessions, and time block management",
+        goals: "Personal goals with progress monitoring and achievements",
+        finances: "Complete financial overview with budget, investment, and bill tracking",
+        budgets: "Advanced budget management with category analytics",
+        investments: "Portfolio tracking with performance metrics",
+        bills: "Bill management with due dates and payment tracking",
+        income: "Multiple income source tracking with recurring entries",
+        groceries: "Smart shopping lists with meal planning",
+        blogging: "Blog content studio with ideas, posts, and workflow management",
+        content: "RotationONLY content studio with mini-game creation tools",
+        apps: "Development projects with task and sprint management",
+        analytics: "Social media performance and engagement metrics",
+        reports: "Comprehensive progress reports and insights"
       }
     };
     
@@ -76,15 +101,16 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       icon: Home,
       color: "from-pink-400 to-purple-500",
       items: [
-        { key: "dashboard", label: "Dashboard Home", icon: Home, description: "Daily productivity hub with quick stats" }
+        { key: "dashboard", label: "Dashboard Home", icon: Home, description: "Daily productivity hub with quick stats and overview" }
       ]
     },
     {
-      category: "Content Studio",
-      icon: Moon,
+      category: "Content Creation Studios",
+      icon: PenTool,
       color: "from-purple-400 to-indigo-500",
       items: [
-        { key: "content", label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio", icon: Moon, description: "Astrological content management and mini-game design studio" }
+        { key: "content", label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio", icon: Moon, description: "Mini-game content creation for 7 brand categories (@mag, @econ, @xxx, @ext, @stem, @music, @ceo)" },
+        { key: "blogging", label: "Blog Content Studio", icon: Edit3, description: "Professional blog workflow with ideas management, grid/list views, and content calendar" }
       ]
     },
     {
@@ -92,9 +118,31 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       icon: Target,
       color: "from-blue-400 to-indigo-500",
       items: [
-        { key: "goals", label: "Goals & Achievements", icon: Target, description: "Personal and professional goal tracking" },
-        { key: "productivity", label: "Work & Time", icon: Briefcase, description: "Work hours, focus sessions, and time blocks" },
-        { key: "reports", label: "Reports & Analytics", icon: BarChart3, description: "Progress reports and data insights" }
+        { key: "goals", label: "Goals & Achievements", icon: Target, description: "Personal and professional goal tracking with progress monitoring" },
+        { key: "productivity", label: "Work & Time", icon: Briefcase, description: "Work hours, focus sessions, time blocks, and productivity tracking" },
+        { key: "reports", label: "Reports & Analytics", icon: BarChart3, description: "Comprehensive progress reports with social media analytics integration" }
+      ]
+    },
+    {
+      category: "Advanced Financial Management",
+      icon: DollarSign,
+      color: "from-green-400 to-emerald-500",
+      items: [
+        { key: "finances", label: "Finance Dashboard", icon: DollarSign, description: "Complete financial overview with budget tracking and expense management" },
+        { key: "budget", label: "Budget Management", icon: Calculator, description: "Advanced budgeting with category management and spending analytics" },
+        { key: "investments", label: "Investment Tracking", icon: TrendingUp, description: "Portfolio management with performance tracking and goal monitoring" },
+        { key: "bills", label: "Bill Management", icon: CreditCard, description: "Automated bill tracking with due dates and payment reminders" },
+        { key: "income", label: "Income Tracking", icon: Coins, description: "Multiple income source tracking with recurring and one-time entries" }
+      ]
+    },
+    {
+      category: "Analytics & Insights",
+      icon: LineChart,
+      color: "from-cyan-400 to-blue-500",
+      items: [
+        { key: "analytics", label: "Social Media Analytics", icon: LineChart, description: "Content performance tracking across platforms with engagement metrics" },
+        { key: "financial-analytics", label: "Financial Analytics", icon: PieChart, description: "Advanced financial insights with spending patterns and trend analysis" },
+        { key: "productivity-analytics", label: "Productivity Analytics", icon: Activity, description: "Work efficiency metrics and time allocation analysis" }
       ]
     },
     {
@@ -102,15 +150,7 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       icon: ShoppingCart,
       color: "from-orange-400 to-amber-500",
       items: [
-        { key: "groceries", label: "Grocery Management", icon: ShoppingCart, description: "Shopping lists and meal planning" }
-      ]
-    },
-    {
-      category: "Financial Management",
-      icon: DollarSign,
-      color: "from-green-400 to-emerald-500",
-      items: [
-        { key: "finances", label: "Finance Tracker", icon: DollarSign, description: "Budget, bills, and expense tracking" }
+        { key: "groceries", label: "Grocery Management", icon: ShoppingCart, description: "Smart shopping lists with meal planning and inventory tracking" }
       ]
     },
     {
@@ -118,8 +158,8 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       icon: Heart,
       color: "from-red-400 to-pink-500",
       items: [
-        { key: "habits", label: "Habits & Mood", icon: Zap, description: "Daily habits, mood, and energy tracking" },
-        { key: "health", label: "Health Tracking", icon: Heart, description: "Basic health metrics and wellness" }
+        { key: "habits", label: "Habits & Mood", icon: Zap, description: "Daily habits tracking with mood and energy monitoring" },
+        { key: "health", label: "Health Tracking", icon: Heart, description: "Comprehensive health metrics including water intake and wellness goals" }
       ]
     },
     {
@@ -127,7 +167,7 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       icon: Code2,
       color: "from-purple-400 to-indigo-500",
       items: [
-        { key: "apps", label: "App Development", icon: Code2, description: "Project management for software development" }
+        { key: "apps", label: "App Development", icon: Code2, description: "Full-stack project management with task tracking and sprint planning" }
       ]
     }
   ];
@@ -137,9 +177,13 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
     { key: "habits", label: "Log Habits", icon: CheckSquare, description: "Mark today's habits as complete" },
     { key: "productivity", label: "Start Focus Timer", icon: Timer, description: "Begin a focused work session" },
     { key: "finances", label: "Add Expense", icon: Receipt, description: "Log a new expense or transaction" },
+    { key: "blogging", label: "Write Blog Post", icon: Edit3, description: "Create a new blog post with AI assistance" },
+    { key: "content", label: "Design Mini-Game", icon: Gamepad2, description: "Create rotationONLY content for brand categories" },
+    { key: "budget", label: "Update Budget", icon: Calculator, description: "Manage budgets and track spending" },
+    { key: "investments", label: "Track Investments", icon: TrendingUp, description: "Monitor portfolio performance" },
+    { key: "analytics", label: "View Analytics", icon: LineChart, description: "Check content and financial performance" },
     { key: "groceries", label: "Create Shopping List", icon: List, description: "Plan your next grocery trip" },
-    { key: "goals", label: "Update Goals", icon: TrendingUp, description: "Track progress on your goals" },
-    { key: "content", label: "Design Mini-Game", icon: Moon, description: "Create content for 𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio" }
+    { key: "goals", label: "Update Goals", icon: Target, description: "Track progress on your goals" }
   ];
 
   return (
@@ -257,7 +301,8 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
             </h3>
             <p className="text-sm text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
               Use the sidebar navigation for quick access to any section. The Site Map provides an overview of all available features. 
-              You can also collapse the sidebar for more screen space using the toggle button.
+              New features include: Advanced financial management with investment tracking, comprehensive blogging workflow with grid/list views, 
+              rotationONLY content studio with 7 brand categories, enhanced analytics dashboard, and improved access control for public/admin users.
             </p>
           </div>
         </CardContent>
