@@ -497,11 +497,12 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                         placeholder="Enter block name"
                         value={newBlock.name}
                         onChange={(e) => setNewBlock({...newBlock, name: e.target.value})}
+                        disabled={isReadOnly}
                       />
                     </div>
                     <div>
                       <Label htmlFor="category">Category</Label>
-                      <Select value={newBlock.category} onValueChange={(value) => setNewBlock({...newBlock, category: value})}>
+                      <Select value={newBlock.category} onValueChange={(value) => setNewBlock({...newBlock, category: value})} disabled={isReadOnly}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
@@ -523,12 +524,13 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                       placeholder="Describe the content block"
                       value={newBlock.description}
                       onChange={(e) => setNewBlock({...newBlock, description: e.target.value})}
+                      disabled={isReadOnly}
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="frequency">Frequency</Label>
-                      <Select value={newBlock.frequency} onValueChange={(value) => setNewBlock({...newBlock, frequency: value})}>
+                      <Select value={newBlock.frequency} onValueChange={(value) => setNewBlock({...newBlock, frequency: value})} disabled={isReadOnly}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select frequency" />
                         </SelectTrigger>
@@ -546,6 +548,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                         type="color"
                         value={newBlock.color}
                         onChange={(e) => setNewBlock({...newBlock, color: e.target.value})}
+                        disabled={isReadOnly}
                       />
                     </div>
                   </div>
@@ -561,7 +564,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                         category: "engagement"
                       });
                     }}
-                    disabled={!newBlock.name}
+                    disabled={isReadOnly || !newBlock.name}
                     className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
                   >
                     Create Block
