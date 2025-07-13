@@ -78,7 +78,12 @@ const mockExpenseBreakdown = [
   { category: "Other", amount: 298, budget: 350, percentage: 85 }
 ];
 
-export default function ComprehensiveFinanceSection() {
+interface ComprehensiveFinanceSectionProps {
+  selectedDate: Date;
+  isReadOnly: boolean;
+}
+
+export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }: ComprehensiveFinanceSectionProps) {
   const [selectedView, setSelectedView] = useState<string>("overview");
 
   const formatCurrency = (amount: number) => {
@@ -113,16 +118,18 @@ export default function ComprehensiveFinanceSection() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Financial Dashboard</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Transaction
-          </Button>
-          <Button variant="outline" size="sm">
-            <Calendar className="h-4 w-4 mr-2" />
-            Monthly Report
-          </Button>
-        </div>
+        {!isReadOnly && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Transaction
+            </Button>
+            <Button variant="outline" size="sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              Monthly Report
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Financial Overview Cards */}
@@ -346,11 +353,11 @@ export default function ComprehensiveFinanceSection() {
         </TabsList>
 
         <TabsContent value="budget" className="space-y-4">
-          <BudgetManagement />
+          <BudgetManagement isReadOnly={isReadOnly} />
         </TabsContent>
 
         <TabsContent value="investments" className="space-y-4">
-          <InvestmentTracking />
+          <InvestmentTracking isReadOnly={isReadOnly} />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">

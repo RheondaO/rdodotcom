@@ -127,7 +127,11 @@ interface Debt {
   createdAt?: Date;
 }
 
-export default function BudgetManagement() {
+interface BudgetManagementProps {
+  isReadOnly: boolean;
+}
+
+export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -306,34 +310,38 @@ export default function BudgetManagement() {
             <BarChart3 className="h-4 w-4 mr-2" />
             {showTrends ? "Hide" : "Show"} Trends
           </Button>
-          <Dialog open={newExpenseDialog} onOpenChange={setNewExpenseDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Expense
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Expense</DialogTitle>
-              </DialogHeader>
-              <ExpenseForm onSubmit={createExpenseMutation.mutate} />
-            </DialogContent>
-          </Dialog>
-          <Dialog open={newBudgetDialog} onOpenChange={setNewBudgetDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                New Budget
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Budget</DialogTitle>
-              </DialogHeader>
-              <BudgetForm onSubmit={createBudgetMutation.mutate} />
-            </DialogContent>
-          </Dialog>
+          {!isReadOnly && (
+            <>
+              <Dialog open={newExpenseDialog} onOpenChange={setNewExpenseDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Expense
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Expense</DialogTitle>
+                  </DialogHeader>
+                  <ExpenseForm onSubmit={createExpenseMutation.mutate} />
+                </DialogContent>
+              </Dialog>
+              <Dialog open={newBudgetDialog} onOpenChange={setNewBudgetDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Budget
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Budget</DialogTitle>
+                  </DialogHeader>
+                  <BudgetForm onSubmit={createBudgetMutation.mutate} />
+                </DialogContent>
+              </Dialog>
+            </>
+          )}
         </div>
       </div>
 
@@ -573,14 +581,16 @@ export default function BudgetManagement() {
                       <TableCell>${expense.amount}</TableCell>
                       <TableCell>{expense.paymentMethod || "N/A"}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {!isReadOnly && (
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -593,20 +603,22 @@ export default function BudgetManagement() {
         <TabsContent value="debts" className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Debt Management</h2>
-            <Dialog open={newDebtDialog} onOpenChange={setNewDebtDialog}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Debt
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New Debt</DialogTitle>
-                </DialogHeader>
-                <DebtForm onSubmit={createDebtMutation.mutate} />
-              </DialogContent>
-            </Dialog>
+            {!isReadOnly && (
+              <Dialog open={newDebtDialog} onOpenChange={setNewDebtDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Debt
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Debt</DialogTitle>
+                  </DialogHeader>
+                  <DebtForm onSubmit={createDebtMutation.mutate} />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
 
           <div className="grid gap-4">

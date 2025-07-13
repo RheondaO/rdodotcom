@@ -129,7 +129,11 @@ interface InvestmentTransaction {
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-export default function InvestmentTracking() {
+interface InvestmentTrackingProps {
+  isReadOnly: boolean;
+}
+
+export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -345,48 +349,52 @@ export default function InvestmentTracking() {
               <SelectItem value="ALL">All Time</SelectItem>
             </SelectContent>
           </Select>
-          <Dialog open={newAccountDialog} onOpenChange={setNewAccountDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Account
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Account</DialogTitle>
-              </DialogHeader>
-              <AccountForm onSubmit={createAccountMutation.mutate} />
-            </DialogContent>
-          </Dialog>
-          <Dialog open={newPortfolioDialog} onOpenChange={setNewPortfolioDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                New Portfolio
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Portfolio</DialogTitle>
-              </DialogHeader>
-              <PortfolioForm onSubmit={createPortfolioMutation.mutate} />
-            </DialogContent>
-          </Dialog>
-          <Dialog open={newInvestmentDialog} onOpenChange={setNewInvestmentDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Investment
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Investment</DialogTitle>
-              </DialogHeader>
-              <InvestmentForm onSubmit={createInvestmentMutation.mutate} />
-            </DialogContent>
-          </Dialog>
+          {!isReadOnly && (
+            <>
+              <Dialog open={newAccountDialog} onOpenChange={setNewAccountDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Account
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Account</DialogTitle>
+                  </DialogHeader>
+                  <AccountForm onSubmit={createAccountMutation.mutate} />
+                </DialogContent>
+              </Dialog>
+              <Dialog open={newPortfolioDialog} onOpenChange={setNewPortfolioDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Portfolio
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Portfolio</DialogTitle>
+                  </DialogHeader>
+                  <PortfolioForm onSubmit={createPortfolioMutation.mutate} />
+                </DialogContent>
+              </Dialog>
+              <Dialog open={newInvestmentDialog} onOpenChange={setNewInvestmentDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Investment
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Investment</DialogTitle>
+                  </DialogHeader>
+                  <InvestmentForm onSubmit={createInvestmentMutation.mutate} />
+                </DialogContent>
+              </Dialog>
+            </>
+          )}
         </div>
       </div>
 
@@ -536,10 +544,12 @@ export default function InvestmentTracking() {
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
+                    {!isReadOnly && (
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                    )}
                     <Button variant="outline" size="sm">
                       <BarChart3 className="h-4 w-4 mr-2" />
                       View Details
@@ -554,23 +564,25 @@ export default function InvestmentTracking() {
         <TabsContent value="holdings" className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Investment Holdings</h2>
-            <Dialog open={newTransactionDialog} onOpenChange={setNewTransactionDialog}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Record Transaction
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Record Transaction</DialogTitle>
-                </DialogHeader>
-                <TransactionForm 
-                  onSubmit={createTransactionMutation.mutate} 
-                  investments={investments || []}
-                />
-              </DialogContent>
-            </Dialog>
+            {!isReadOnly && (
+              <Dialog open={newTransactionDialog} onOpenChange={setNewTransactionDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Record Transaction
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Record Transaction</DialogTitle>
+                  </DialogHeader>
+                  <TransactionForm 
+                    onSubmit={createTransactionMutation.mutate} 
+                    investments={investments || []}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
 
           <Card>
@@ -621,17 +633,19 @@ export default function InvestmentTracking() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => {
-                              setSelectedInvestmentId(investment.id);
-                              setNewTransactionDialog(true);
-                            }}>
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          {!isReadOnly && (
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedInvestmentId(investment.id);
+                                setNewTransactionDialog(true);
+                              }}>
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -671,10 +685,12 @@ export default function InvestmentTracking() {
                       Account: ***{account.accountNumber || "0000"}
                     </span>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
+                      {!isReadOnly && (
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      )}
                       <Button variant="outline" size="sm">
                         <Activity className="h-4 w-4 mr-2" />
                         View History
@@ -724,14 +740,16 @@ export default function InvestmentTracking() {
                         <TableCell>${transaction.totalAmount}</TableCell>
                         <TableCell>{transaction.fees ? `$${transaction.fees}` : "—"}</TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          {!isReadOnly && (
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
