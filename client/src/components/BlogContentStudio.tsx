@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, addMonths, subMonths, isToday, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,12 @@ import {
   Zap,
   BookOpen,
   Users,
-  CheckCircle
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  MapPin,
+  Target
 } from "lucide-react";
 import BlogEditor from "./BlogEditor";
 
@@ -131,6 +136,8 @@ export default function BlogContentStudio() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [sortBy, setSortBy] = useState("updatedAt");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -684,14 +691,223 @@ export default function BlogContentStudio() {
         <TabsContent value="calendar" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Content Calendar
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Content Calendar
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentCalendarDate(subMonths(currentCalendarDate, 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium min-w-[120px] text-center">
+                    {format(currentCalendarDate, 'MMMM yyyy')}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentCalendarDate(addMonths(currentCalendarDate, 1))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                Content calendar coming soon...
+              {/* Calendar Grid */}
+              <div className="space-y-4">
+                {/* Calendar Header */}
+                <div className="grid grid-cols-7 gap-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <div>Sun</div>
+                  <div>Mon</div>
+                  <div>Tue</div>
+                  <div>Wed</div>
+                  <div>Thu</div>
+                  <div>Fri</div>
+                  <div>Sat</div>
+                </div>
+
+                {/* Calendar Days */}
+                <div className="grid grid-cols-7 gap-2">
+                  {(() => {
+                    const monthStart = startOfMonth(currentCalendarDate);
+                    const monthEnd = endOfMonth(currentCalendarDate);
+                    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday
+                    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+                    const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+
+                    return days.map((day) => {
+                      const dayPosts = (blogPosts || []).filter(post => {
+                        const postDate = post.scheduledDate || post.publishedDate;
+                        return postDate && isSameDay(parseISO(postDate), day);
+                      });
+
+                      const isCurrentMonth = isSameMonth(day, currentCalendarDate);
+                      const isSelected = selectedDate && isSameDay(day, selectedDate);
+                      const isToday_ = isToday(day);
+
+                      return (
+                        <div
+                          key={day.toISOString()}
+                          className={`
+                            min-h-[80px] p-2 border rounded-lg cursor-pointer transition-all
+                            ${isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}
+                            ${isSelected ? 'ring-2 ring-purple-500' : ''}
+                            ${isToday_ ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' : 'border-gray-200 dark:border-gray-700'}
+                            hover:bg-gray-50 dark:hover:bg-gray-750
+                          `}
+                          onClick={() => setSelectedDate(day)}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`
+                              text-sm font-medium
+                              ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}
+                              ${isToday_ ? 'text-purple-600 dark:text-purple-400' : ''}
+                            `}>
+                              {format(day, 'd')}
+                            </span>
+                            {isToday_ && (
+                              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                            )}
+                          </div>
+
+                          {/* Posts for this day */}
+                          <div className="space-y-1">
+                            {dayPosts.slice(0, 2).map((post) => (
+                              <div
+                                key={post.id}
+                                className={`
+                                  px-2 py-1 rounded text-xs truncate
+                                  ${post.status === 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
+                                  ${post.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
+                                  ${post.status === 'draft' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' : ''}
+                                `}
+                                title={post.title}
+                              >
+                                {post.title}
+                              </div>
+                            ))}
+                            {dayPosts.length > 2 && (
+                              <div className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400">
+                                +{dayPosts.length - 2} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+
+                {/* Selected Date Details */}
+                {selectedDate && (
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle className="text-lg">
+                        {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {(() => {
+                        const dayPosts = (blogPosts || []).filter(post => {
+                          const postDate = post.scheduledDate || post.publishedDate;
+                          return postDate && isSameDay(parseISO(postDate), selectedDate);
+                        });
+
+                        if (dayPosts.length === 0) {
+                          return (
+                            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                              <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                              <p>No content scheduled for this date</p>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-3"
+                                onClick={() => setShowEditor(true)}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Schedule Content
+                              </Button>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-4">
+                            {dayPosts.map((post) => (
+                              <div
+                                key={post.id}
+                                className="flex items-start gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                              >
+                                <div className="flex-shrink-0 mt-1">
+                                  {post.status === 'published' && (
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                  )}
+                                  {post.status === 'scheduled' && (
+                                    <Clock className="h-5 w-5 text-blue-500" />
+                                  )}
+                                  {post.status === 'draft' && (
+                                    <FileText className="h-5 w-5 text-gray-400" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                                      {post.title}
+                                    </h4>
+                                    <Badge variant="secondary" className="text-xs">
+                                      {post.platform}
+                                    </Badge>
+                                  </div>
+                                  {post.excerpt && (
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                      {post.excerpt}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {post.scheduledDate ? 
+                                        format(parseISO(post.scheduledDate), 'h:mm a') : 
+                                        'No time set'
+                                      }
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Target className="h-3 w-3" />
+                                      {post.priority || 'medium'}
+                                    </div>
+                                    {post.wordCount && (
+                                      <div className="flex items-center gap-1">
+                                        <FileText className="h-3 w-3" />
+                                        {post.wordCount} words
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditingPost(post.id);
+                                      setShowEditor(true);
+                                    }}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </CardContent>
           </Card>
