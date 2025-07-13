@@ -348,70 +348,105 @@ export default function BlogContentStudio() {
 
         <TabsContent value="workflow" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <Lightbulb className="h-4 w-4 mr-2 text-blue-500" />
-                  Ideas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{workflowStatus?.workflow.ideaStage || 0}</div>
-                <p className="text-xs text-muted-foreground">Brainstorming stage</p>
-              </CardContent>
-            </Card>
+            {/* Ideas Stage */}
+            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 border border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full -mr-10 -mt-10"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                    <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                    Stage 1
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Ideas</h3>
+                <p className="text-sm text-blue-600 dark:text-blue-400 mb-3">Brainstorming & Ideation</p>
+                <div className="text-3xl font-bold text-blue-700 dark:text-blue-300">
+                  {workflowStatus?.workflow.ideaStage || 0}
+                </div>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <BookOpen className="h-4 w-4 mr-2 text-yellow-500" />
-                  Research
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{workflowStatus?.workflow.research || 0}</div>
-                <p className="text-xs text-muted-foreground">In development</p>
-              </CardContent>
-            </Card>
+            {/* Research Stage */}
+            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-6 border border-yellow-200 dark:border-yellow-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-500/10 rounded-full -mr-10 -mt-10"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-2 bg-yellow-500/20 rounded-lg">
+                    <BookOpen className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <div className="text-xs font-semibold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider">
+                    Stage 2
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Research</h3>
+                <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-3">Information Gathering</p>
+                <div className="text-3xl font-bold text-yellow-700 dark:text-yellow-300">
+                  {workflowStatus?.workflow.research || 0}
+                </div>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <Edit className="h-4 w-4 mr-2 text-orange-500" />
-                  Drafting
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{workflowStatus?.workflow.drafting || 0}</div>
-                <p className="text-xs text-muted-foreground">Writing stage</p>
-              </CardContent>
-            </Card>
+            {/* Drafting Stage */}
+            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 p-6 border border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-orange-500/10 rounded-full -mr-10 -mt-10"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-2 bg-orange-500/20 rounded-lg">
+                    <Edit className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div className="text-xs font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wider">
+                    Stage 3
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Drafting</h3>
+                <p className="text-sm text-orange-600 dark:text-orange-400 mb-3">Content Creation</p>
+                <div className="text-3xl font-bold text-orange-700 dark:text-orange-300">
+                  {workflowStatus?.workflow.drafting || 0}
+                </div>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <Eye className="h-4 w-4 mr-2 text-purple-500" />
-                  Review
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{workflowStatus?.workflow.review || 0}</div>
-                <p className="text-xs text-muted-foreground">Ready for review</p>
-              </CardContent>
-            </Card>
+            {/* Review Stage */}
+            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-6 border border-purple-200 dark:border-purple-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full -mr-10 -mt-10"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-2 bg-purple-500/20 rounded-lg">
+                    <Eye className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+                    Stage 4
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Review</h3>
+                <p className="text-sm text-purple-600 dark:text-purple-400 mb-3">Quality Assurance</p>
+                <div className="text-3xl font-bold text-purple-700 dark:text-purple-300">
+                  {workflowStatus?.workflow.review || 0}
+                </div>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
-                  Published
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{workflowStatus?.workflow.published || 0}</div>
-                <p className="text-xs text-muted-foreground">Live content</p>
-              </CardContent>
-            </Card>
+            {/* Published Stage */}
+            <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-6 border border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-green-500/10 rounded-full -mr-10 -mt-10"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-2 bg-green-500/20 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="text-xs font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider">
+                    Stage 5
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1">Published</h3>
+                <p className="text-sm text-green-600 dark:text-green-400 mb-3">Live Content</p>
+                <div className="text-3xl font-bold text-green-700 dark:text-green-300">
+                  {workflowStatus?.workflow.published || 0}
+                </div>
+              </div>
+            </div>
           </div>
 
           <Card>
