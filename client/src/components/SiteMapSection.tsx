@@ -124,7 +124,7 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       ]
     },
     {
-      category: "Advanced Financial Management",
+      category: "Financial Management",
       icon: DollarSign,
       color: "from-green-400 to-emerald-500",
       items: [
