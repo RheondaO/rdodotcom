@@ -503,7 +503,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                 variant="outline"
                 size="sm"
                 disabled={isReadOnly}
-                className={`bg-white/60 dark:[background-color:var(--custom-dark)]/60 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white dark:hover:[background-color:var(--custom-dark)]'}`}
+                className={`bg-white/60 dark:bg-gray-900/60 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white dark:hover:[background-color:var(--custom-dark)]'}`}
               >
                 Open Content Studio →
               </Button>
@@ -541,7 +541,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Flame className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -552,7 +552,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
             <div className="space-y-3">
               {todaysHabits.length > 0 ? (
                 todaysHabits.map(habit => (
-                  <div key={habit.id} className="flex items-center justify-between p-3 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-lg">
+                  <div key={habit.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <div className={`w-2 h-2 rounded-full ${habit.completed ? 'bg-green-500' : 'bg-gray-300'}`} />
                       <div>
@@ -584,7 +584,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardContent>
         </Card>
 
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <CheckSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -595,7 +595,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
             <div className="space-y-3">
               {todaysTodos.length > 0 ? (
                 todaysTodos.map(todo => (
-                  <div key={todo.id} className="flex items-center justify-between p-3 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-lg">
+                  <div key={todo.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <div className={`w-2 h-2 rounded-full ${
                         todo.priority === 'high' ? 'bg-red-500' : 
@@ -632,7 +632,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardContent>
         </Card>
 
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -703,7 +703,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
 
       {/* Goals & Medications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -713,7 +713,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           <CardContent>
             <div className="space-y-4">
               {upcomingGoals.map(goal => (
-                <div key={goal.id} className="p-3 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-lg">
+                <div key={goal.id} className="p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-gray-900 dark:text-white">{goal.title}</h4>
                     <Badge variant="outline" className="text-xs">
@@ -741,7 +741,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardContent>
         </Card>
 
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -751,7 +751,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           <CardContent>
             <div className="space-y-3">
               {aiInsights.map(insight => (
-                <div key={insight.id} className="p-3 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-lg border-l-4 border-purple-400">
+                <div key={insight.id} className="p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg border-l-4 border-purple-400">
                   <div className="flex items-start space-x-3">
                     <span className="text-lg">{insight.icon}</span>
                     <div className="flex-1">
@@ -812,7 +812,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               onClick={() => !isReadOnly && onNavigate('reports')}
               disabled={isReadOnly}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:[background-color:var(--custom-dark)]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <span className="text-xs">Progress Reports</span>
@@ -822,7 +822,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               onClick={() => !isReadOnly && onNavigate('finances')}
               disabled={isReadOnly}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:[background-color:var(--custom-dark)]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
               <span className="text-xs">Finances</span>
@@ -832,7 +832,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               onClick={() => !isReadOnly && onNavigate('groceries')}
               disabled={isReadOnly}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:[background-color:var(--custom-dark)]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <CheckSquare className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               <span className="text-xs">Shopping</span>
@@ -842,7 +842,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               onClick={() => !isReadOnly && onNavigate('goals')}
               disabled={isReadOnly}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:[background-color:var(--custom-dark)]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Award className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               <span className="text-xs">Achievements</span>
