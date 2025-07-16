@@ -1,0 +1,49 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /dashboard
+Disallow: /admin
+Disallow: /auth-check
+
+# Sitemap
+Sitemap: https://belle-journal.replit.app/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Specific directives for major search engines
+User-agent: Googlebot
+Allow: /
+Allow: /about
+Allow: /dashboard
+Disallow: /admin
+Disallow: /auth-check
+
+User-agent: Bingbot
+Allow: /
+Allow: /about
+Allow: /dashboard
+Disallow: /admin
+Disallow: /auth-check
+
+User-agent: Slurp
+Allow: /
+Allow: /about
+Allow: /dashboard
+Disallow: /admin
+Disallow: /auth-check
+
+# Rich media
+User-agent: *
+Allow: /favicon-sparkle.svg
+Allow: /og-image.jpg
+Allow: /profile-image.jpg
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.ico
+Allow: /*.webp

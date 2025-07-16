@@ -6,6 +6,8 @@ import { Button } from "../components/ui/button";
 import { Target, TrendingUp, BookOpen, Calendar, ExternalLink, LogIn, Sparkles } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import AdminLoginForm from "../components/AdminLoginForm";
+import SEOHead from "../components/SEOHead";
+import { generateWebsiteStructuredData, generateOrganizationStructuredData, BELLE_JOURNAL_WEBSITE_DATA } from "../utils/structuredData";
 
 interface PublicStats {
   totalGoals: number;
@@ -64,6 +66,13 @@ export default function PublicView() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
+      <SEOHead 
+        title="Rheonda Ogletree - Digital Wellness & Productivity Expert | Belle Journal"
+        description="Rheonda Ogletree is a leading digital wellness and productivity expert. Discover Belle Journal - your comprehensive platform for personal growth, habit tracking, and life optimization."
+        keywords={["Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda", "digital wellness", "productivity expert", "Belle Journal", "personal development", "habit tracking", "life coach", "wellness consultant"]}
+        structuredData={generateWebsiteStructuredData(BELLE_JOURNAL_WEBSITE_DATA)}
+      />
+      
       {/* Header */}
       <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -79,6 +88,14 @@ export default function PublicView() {
             <Badge variant="outline" className="text-purple-600 border-purple-200">
               Building in Public
             </Badge>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => window.location.href = '/about'}
+              className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+            >
+              About Rheonda
+            </Button>
             <Button 
               variant="ghost" 
               size="sm"
@@ -233,14 +250,29 @@ export default function PublicView() {
         )}
 
         {/* About Section */}
-        <div className="text-center bg-white/50 dark:bg-gray-800/50 rounded-2xl p-12 backdrop-blur-sm">
+        <div className="text-center bg-white/50 dark:bg-gray-800/50 rounded-2xl p-12 backdrop-blur-sm mb-16">
           <h2 className="text-3xl font-bold mb-6">About This Journey</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-8">
             This is my personal productivity dashboard where I track my daily habits, work towards meaningful goals, 
             and create content about building better systems. I believe in building in public and sharing the journey 
             of continuous improvement. This dashboard helps me stay accountable and motivated while providing 
             transparency into my personal development process.
           </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => window.location.href = '/about'}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              Learn More About Rheonda
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/rheonda-ogletree-blog'}
+              variant="outline"
+              className="border-purple-200 text-purple-600 hover:bg-purple-50"
+            >
+              Read Featured Article
+            </Button>
+          </div>
         </div>
       </main>
 

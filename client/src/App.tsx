@@ -2,6 +2,8 @@ import { Switch, Route } from "wouter";
 import Dashboard from "./pages/Dashboard";
 import PublicView from "./pages/PublicView";
 import AuthCheck from "./pages/AuthCheck";
+import About from "./pages/About";
+import RheondaOgletreeBlog from "./pages/RheondaOgletreeBlog";
 import NotFoundPage from "./pages/not-found";
 import { ThemeProvider } from "./hooks/use-theme";
 import { Toaster } from "./components/ui/toaster";
@@ -56,6 +58,12 @@ function App() {
           </Route>
           <Route path="/auth-check">
             <AuthCheck />
+          </Route>
+          <Route path="/about">
+            <About />
+          </Route>
+          <Route path="/rheonda-ogletree-blog">
+            <RheondaOgletreeBlog />
           </Route>
           <Route path="/">
             <PublicView />
