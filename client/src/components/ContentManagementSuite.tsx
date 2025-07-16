@@ -483,7 +483,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
           {activeView === "create" && (
             <div className="space-y-6">
-              <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+              <Card className="bg-white/70 dark:bg-[#0c0910] backdrop-blur-sm border border-pink-200/50 dark:border-pink-800/50 shadow-lg rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Create New Content Block</CardTitle>
                 </CardHeader>
@@ -575,7 +575,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
           {activeView === "analytics" && (
             <div className="space-y-6">
-              <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+              <Card className="bg-white/70 dark:bg-[#0c0910] backdrop-blur-sm border border-pink-200/50 dark:border-pink-800/50 shadow-lg rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Analytics Dashboard</CardTitle>
                 </CardHeader>
@@ -591,7 +591,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
           {activeView === "progress" && (
             <div className="space-y-6">
-              <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+              <Card className="bg-white/70 dark:bg-[#0c0910] backdrop-blur-sm border border-pink-200/50 dark:border-pink-800/50 shadow-lg rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Progress Tracking</CardTitle>
                 </CardHeader>
