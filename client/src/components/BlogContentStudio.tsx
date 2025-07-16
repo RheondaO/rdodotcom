@@ -365,13 +365,13 @@ export default function BlogContentStudio() {
         <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View:</span>
-          <div className="flex bg-gray-100 dark:bg-gray-800 rounded-md p-1">
+          <div className="flex bg-gray-100 dark:bg-gray-900 rounded-md p-1">
             <button 
               onClick={() => setViewMode('grid')}
               className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
                 viewMode === 'grid' 
-                  ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                  : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-white dark:bg-gray-800 shadow-sm' 
+                  : 'hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               <Grid3X3 className="h-3 w-3" />
@@ -381,8 +381,8 @@ export default function BlogContentStudio() {
               onClick={() => setViewMode('list')}
               className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
                 viewMode === 'list' 
-                  ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                  : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-white dark:bg-gray-800 shadow-sm' 
+                  : 'hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               <List className="h-3 w-3" />
