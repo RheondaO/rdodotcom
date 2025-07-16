@@ -198,7 +198,7 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
             Site Map
           </h1>
           <p className="text-muted-foreground dark:text-gray-300 mt-1 max-w-2xl mx-auto">
-            Quick access to all sections of Belle Journal. Click any item below to navigate directly to that page.
+            Quick access to all sections of Belle Journal.
           </p>
         </div>
       </div>
