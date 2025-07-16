@@ -98,10 +98,10 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
   const siteMapSections = [
     {
       category: "Main Dashboard",
-      icon: Home,
+      icon: Sparkles,
       color: "from-pink-400 to-purple-500",
       items: [
-        { key: "dashboard", label: "Dashboard Home", icon: Home, description: "Daily productivity hub with quick stats and overview" }
+        { key: "dashboard", label: "Dashboard Home", icon: Sparkles, description: "Daily productivity hub with quick stats and overview" }
       ]
     },
     {
