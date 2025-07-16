@@ -158,18 +158,19 @@ export function generateOrganizationStructuredData() {
 export const RHEONDA_PERSON_DATA: PersonStructuredData = {
   name: "Rheonda Ogletree",
   alternateName: ["Rheonda D Ogletree", "Rheonda"],
-  jobTitle: "Digital Wellness & Productivity Expert",
-  description: "Leading expert in digital wellness, productivity optimization, and personal development. Creator of Belle Journal - a comprehensive platform for life optimization and habit tracking.",
+  jobTitle: "Digital Wellness & Productivity Expert, Entrepreneur, Prompt Engineer",
+  description: "Leading expert in digital wellness, productivity optimization, and personal development. Creator of Belle Journal - a comprehensive platform for life optimization and habit tracking. Entrepreneur behind Really Obvious Media Lab and rotationonly digital magazine.",
   url: typeof window !== 'undefined' ? window.location.origin : "",
   image: "/profile-image.jpg",
   sameAs: [
     "https://twitter.com/RheondaOgletree",
     "https://linkedin.com/in/rheonda-ogletree",
     "https://instagram.com/rheonda.ogletree",
-    "https://facebook.com/rheonda.ogletree"
+    "https://facebook.com/rheonda.ogletree",
+    "https://music.apple.com/artist/rotationonly"
   ],
   worksFor: {
-    name: "Belle Journal",
+    name: "Really Obvious Media Lab",
     url: typeof window !== 'undefined' ? window.location.origin : ""
   },
   knowsAbout: [
@@ -183,7 +184,22 @@ export const RHEONDA_PERSON_DATA: PersonStructuredData = {
     "Goal Setting",
     "Time Management",
     "Mindfulness",
-    "Work-Life Balance"
+    "Work-Life Balance",
+    "Entrepreneurship",
+    "Vibe Coding",
+    "Replit Development",
+    "Web App Development",
+    "Prompt Engineering",
+    "AI",
+    "Artificial Intelligence",
+    "Blogging",
+    "Journal Writing",
+    "Habit Trackers",
+    "Girl Boss",
+    "Business Development",
+    "Digital Magazine Publishing",
+    "Content Creation",
+    "Media Production"
   ],
   awards: [
     "Digital Wellness Pioneer Award",
@@ -193,7 +209,7 @@ export const RHEONDA_PERSON_DATA: PersonStructuredData = {
 
 export const BELLE_JOURNAL_WEBSITE_DATA: WebsiteStructuredData = {
   name: "Belle Journal - Rheonda Ogletree",
-  description: "Your comprehensive digital wellness and productivity platform. Track habits, manage goals, and optimize your life with expert guidance from Rheonda Ogletree.",
+  description: "Your comprehensive digital wellness and productivity platform. Track habits, manage goals, and optimize your life with expert guidance from Rheonda Ogletree. Built with Replit and featuring AI-powered insights.",
   url: typeof window !== 'undefined' ? window.location.origin : "",
   author: RHEONDA_PERSON_DATA,
   publisher: RHEONDA_PERSON_DATA,
@@ -207,7 +223,29 @@ export const BELLE_JOURNAL_WEBSITE_DATA: WebsiteStructuredData = {
     "personal development",
     "life optimization",
     "wellness platform",
-    "Belle Journal"
+    "Belle Journal",
+    "Entrepreneurship",
+    "Vibe Coding",
+    "Replit",
+    "Web App",
+    "Prompt Engineer",
+    "Prompt Engineering",
+    "AI",
+    "Artificial Intelligence",
+    "Blogging",
+    "Journal",
+    "habit trackers",
+    "girl boss",
+    "business",
+    "really obvious media lab",
+    "really obvi media lab",
+    "rotationonly",
+    "rotationonly.mag",
+    "rotationonly magazine",
+    "rotationonly digital magazine",
+    "really obvi media",
+    "@rotationonly on apple music",
+    "RODML"
   ],
   inLanguage: "en-US",
   copyrightYear: new Date().getFullYear(),

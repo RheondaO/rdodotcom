@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Allow: /about
 Allow: /dashboard
+Allow: /rheonda-ogletree-blog
 Disallow: /admin
 Disallow: /auth-check
 
@@ -16,6 +17,7 @@ User-agent: Googlebot
 Allow: /
 Allow: /about
 Allow: /dashboard
+Allow: /rheonda-ogletree-blog
 Disallow: /admin
 Disallow: /auth-check
 
@@ -23,6 +25,7 @@ User-agent: Bingbot
 Allow: /
 Allow: /about
 Allow: /dashboard
+Allow: /rheonda-ogletree-blog
 Disallow: /admin
 Disallow: /auth-check
 
@@ -30,6 +33,7 @@ User-agent: Slurp
 Allow: /
 Allow: /about
 Allow: /dashboard
+Allow: /rheonda-ogletree-blog
 Disallow: /admin
 Disallow: /auth-check
 

@@ -53,6 +53,7 @@ This document outlines the comprehensive SEO implementation for Belle Journal, d
 #### Target Keywords
 Primary: "Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda"
 Secondary: "digital wellness", "productivity expert", "Belle Journal", "personal development"
+Additional: "Entrepreneurship", "Vibe Coding", "Replit", "Web App", "Prompt Engineer", "Prompt Engineering", "AI", "Artificial Intelligence", "Blogging", "Journal", "habit trackers", "girl boss", "business", "really obvious media lab", "really obvi media lab", "rotationonly", "rotationonly.mag", "rotationonly magazine", "rotationonly digital magazine", "really obvi media", "@rotationonly on apple music", "RODML"
 
 #### Content Pages
 1. **Home Page** (`/`) - Primary landing page with comprehensive SEO

@@ -69,7 +69,7 @@ export default function PublicView() {
       <SEOHead 
         title="Rheonda Ogletree - Digital Wellness & Productivity Expert | Belle Journal"
         description="Rheonda Ogletree is a leading digital wellness and productivity expert. Discover Belle Journal - your comprehensive platform for personal growth, habit tracking, and life optimization."
-        keywords={["Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda", "digital wellness", "productivity expert", "Belle Journal", "personal development", "habit tracking", "life coach", "wellness consultant"]}
+        keywords={["Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda", "digital wellness", "productivity expert", "Belle Journal", "personal development", "habit tracking", "life coach", "wellness consultant", "Entrepreneurship", "Vibe Coding", "Replit", "Web App", "Prompt Engineer", "Prompt Engineering", "AI", "Artificial Intelligence", "Blogging", "Journal", "habit trackers", "girl boss", "business", "really obvious media lab", "really obvi media lab", "rotationonly", "rotationonly.mag", "rotationonly magazine", "rotationonly digital magazine", "really obvi media", "@rotationonly on apple music", "RODML"]}
         structuredData={generateWebsiteStructuredData(BELLE_JOURNAL_WEBSITE_DATA)}
       />
       

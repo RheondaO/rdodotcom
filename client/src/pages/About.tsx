@@ -12,7 +12,7 @@ export default function About() {
       <SEOHead 
         title="About Rheonda Ogletree - Digital Wellness & Productivity Expert"
         description="Learn about Rheonda Ogletree (Rheonda D Ogletree), a leading digital wellness and productivity expert. Discover her expertise in personal development, habit tracking, and life optimization."
-        keywords={["Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda", "about", "biography", "digital wellness expert", "productivity consultant", "personal development coach", "Belle Journal creator"]}
+        keywords={["Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda", "about", "biography", "digital wellness expert", "productivity consultant", "personal development coach", "Belle Journal creator", "Entrepreneurship", "Vibe Coding", "Replit", "Web App", "Prompt Engineer", "Prompt Engineering", "AI", "Artificial Intelligence", "Blogging", "Journal", "habit trackers", "girl boss", "business", "really obvious media lab", "really obvi media lab", "rotationonly", "rotationonly.mag", "rotationonly magazine", "rotationonly digital magazine", "really obvi media", "@rotationonly on apple music", "RODML"]}
         structuredData={generatePersonStructuredData(RHEONDA_PERSON_DATA)}
       />
       
@@ -67,13 +67,16 @@ export default function About() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                Rheonda Ogletree is a pioneering digital wellness and productivity expert who has dedicated her career to helping individuals optimize their personal and professional lives through innovative technology solutions.
+                <strong>Rheonda Ogletree</strong> is a pioneering digital wellness and productivity expert, entrepreneur, and prompt engineer who has dedicated her career to helping individuals optimize their personal and professional lives through innovative technology solutions.
               </p>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                As the creator of Belle Journal, Rheonda has combined her expertise in personal development, habit formation, and digital wellness to create a comprehensive platform that empowers users to track their progress, build meaningful habits, and achieve their goals.
+                As the creator of Belle Journal built on Replit with AI-powered insights, Rheonda has combined her expertise in personal development, habit formation, and digital wellness to create a comprehensive web app that empowers users to track their habits, build meaningful goals, and achieve sustainable growth.
               </p>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                With years of experience in the wellness and productivity space, Rheonda specializes in helping people create sustainable systems for personal growth and life optimization.
+                Beyond Belle Journal, Rheonda is the entrepreneur behind <strong>Really Obvious Media Lab (RODML)</strong> and the <strong>rotationonly digital magazine</strong>, showcasing her expertise in blogging, content creation, and digital publishing. Her approach to "vibe coding" and business development has made her a recognized girl boss in the tech and wellness space.
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                With extensive experience in AI, artificial intelligence, and prompt engineering, Rheonda specializes in helping people create sustainable systems for personal growth and life optimization through innovative habit trackers and productivity tools.
               </p>
             </CardContent>
           </Card>
@@ -116,9 +119,9 @@ export default function About() {
                 <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3">
                   <Target className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Digital Wellness</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Digital Wellness & AI</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Helping people develop healthy relationships with technology and digital environments
+                  Helping people develop healthy relationships with technology through AI-powered insights and prompt engineering
                 </p>
               </div>
               
@@ -126,9 +129,9 @@ export default function About() {
                 <div className="w-12 h-12 bg-pink-500 rounded-lg flex items-center justify-center mx-auto mb-3">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Productivity Optimization</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Entrepreneurship & Business</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Creating systems and workflows that maximize efficiency and minimize overwhelm
+                  Girl boss approach to building successful businesses including Really Obvious Media Lab and rotationonly magazine
                 </p>
               </div>
               
@@ -136,9 +139,9 @@ export default function About() {
                 <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3">
                   <Users className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Personal Development</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Vibe Coding & Web Apps</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Guiding individuals through transformative journeys of self-improvement and growth
+                  Creating innovative web applications on Replit with a focus on user experience and productivity optimization
                 </p>
               </div>
             </div>
@@ -158,23 +161,27 @@ export default function About() {
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Personal productivity consultations</span>
+                  <span className="text-gray-700 dark:text-gray-300">Personal productivity consultations and habit trackers</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Digital wellness coaching</span>
+                  <span className="text-gray-700 dark:text-gray-300">Digital wellness coaching with AI-powered insights</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Habit formation and tracking guidance</span>
+                  <span className="text-gray-700 dark:text-gray-300">Entrepreneurship and business development through Really Obvious Media Lab</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Life optimization strategies</span>
+                  <span className="text-gray-700 dark:text-gray-300">Vibe coding and web app development on Replit</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Wellness platform development</span>
+                  <span className="text-gray-700 dark:text-gray-300">Digital magazine publishing and content creation (rotationonly)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Prompt engineering and artificial intelligence consulting</span>
                 </li>
               </ul>
             </CardContent>
@@ -199,19 +206,25 @@ export default function About() {
                   <Badge variant="secondary" className="bg-pink-100 text-pink-800 dark:bg-pink-800 dark:text-pink-200">
                     2023
                   </Badge>
-                  <span className="text-gray-700 dark:text-gray-300">Digital Wellness Pioneer Award</span>
+                  <span className="text-gray-700 dark:text-gray-300">Really Obvious Media Lab (RODML) Launch</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200">
                     2023
                   </Badge>
-                  <span className="text-gray-700 dark:text-gray-300">Belle Journal Platform Launch</span>
+                  <span className="text-gray-700 dark:text-gray-300">Belle Journal Web App Launch (Built on Replit)</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200">
                     2022
                   </Badge>
-                  <span className="text-gray-700 dark:text-gray-300">Certified Wellness Technology Specialist</span>
+                  <span className="text-gray-700 dark:text-gray-300">rotationonly Digital Magazine Launch</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
+                    2022
+                  </Badge>
+                  <span className="text-gray-700 dark:text-gray-300">Certified AI & Prompt Engineering Specialist</span>
                 </div>
               </div>
             </CardContent>
@@ -240,12 +253,21 @@ export default function About() {
                   <p className="text-gray-700 dark:text-gray-300">
                     <strong>Instagram:</strong> @rheonda.ogletree
                   </p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <strong>Apple Music:</strong> @rotationonly
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    <strong>Really Obvi Media:</strong> Really Obvious Media Lab (RODML)
+                  </p>
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Platform</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Platforms & Projects</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">
-                  Experience Belle Journal - the comprehensive digital wellness platform created by Rheonda Ogletree for personal growth and productivity optimization.
+                  Experience Belle Journal - the comprehensive digital wellness web app created by Rheonda Ogletree for personal growth and productivity optimization. Built with vibe coding on Replit, featuring AI-powered habit trackers and journal capabilities.
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm">
+                  <strong>Also explore:</strong> Really Obvious Media Lab (RODML) for entrepreneurship resources and rotationonly digital magazine for cutting-edge content.
                 </p>
                 <Link href="/">
                   <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">

@@ -145,6 +145,8 @@ Preferred communication style: Simple, everyday language.
 - **Search Engine Optimization**:
   - Primary targeting: "Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda"
   - Secondary targeting: "digital wellness", "productivity expert", "Belle Journal"
+  - Business & Tech targeting: "Entrepreneurship", "Vibe Coding", "Replit", "Web App", "Prompt Engineer", "AI", "girl boss", "business"
+  - Brand targeting: "really obvious media lab", "rotationonly", "rotationonly.mag", "RODML", "@rotationonly on apple music"
   - Rich snippets and enhanced search results appearance
   - Social media sharing optimization
 - **Implementation Files**:
