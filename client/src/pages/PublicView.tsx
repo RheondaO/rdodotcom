@@ -74,7 +74,7 @@ export default function PublicView() {
       />
       
       {/* Header */}
-      <header className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
+      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md">
