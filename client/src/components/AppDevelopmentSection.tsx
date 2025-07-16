@@ -243,7 +243,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
         <div>
           <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent mb-2">
-            App Development
+            AI App Development & Coding
           </h1>
           <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
             Manage your development projects with professional project management tools similar to Asana and Jira.

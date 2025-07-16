@@ -117,7 +117,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Financial Dashboard</h1>
+        <h1 className="text-3xl font-bold">Finance & Budget Management</h1>
         {!isReadOnly && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm">

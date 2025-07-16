@@ -169,7 +169,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-600 bg-clip-text text-transparent">
-          {getDateLabel()}'s Tasks & Schedule
+          {getDateLabel()}'s Productivity & Tasks
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Stay focused and productive with organized task management

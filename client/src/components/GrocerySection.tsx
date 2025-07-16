@@ -93,7 +93,7 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
     <section>
       <h3 className="text-2xl font-heading font-bold text-purple-600 mb-6 flex items-center">
         <ShoppingCart className="text-purple-500 mr-3 h-6 w-6" />
-        Shopping List 🛒
+        Shopping & Grocery Management
       </h3>
       
       <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">

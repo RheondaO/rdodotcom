@@ -28,7 +28,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
     <section className="mb-8">
       <h3 className="text-2xl font-heading font-bold text-pink-600 mb-6 flex items-center">
         <Heart className="text-pink-500 mr-3 h-6 w-6" />
-        Health & Wellness 💕
+        Health & Wellness Tracking
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
