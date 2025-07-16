@@ -365,11 +365,7 @@ export default function BlogContentStudio() {
           <div className="flex bg-gray-100 dark:bg-gray-900 rounded-md p-1">
             <button 
               onClick={() => setViewMode('grid')}
-              className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
-                viewMode === 'grid' 
-                  ? 'bg-white dark:bg-gray-800 shadow-sm' 
-                  : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
+              className="px-3 py-1 text-xs rounded flex items-center gap-1 dark:bg-gray-800 shadow-sm bg-[#0d0911]"
             >
               <Grid3X3 className="h-3 w-3" />
               Grid
