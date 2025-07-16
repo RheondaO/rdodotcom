@@ -74,7 +74,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     { key: "health" as ViewType, label: "Health", icon: Heart },
     { key: "productivity" as ViewType, label: "Productivity", icon: Briefcase },
     { key: "reports" as ViewType, label: "Reports", icon: BarChart3 },
-    { key: "sitemap" as ViewType, label: "Site Map", icon: Sparkles },
+    { key: "sitemap" as ViewType, label: "Site Map", icon: Map },
   ];
 
   // Calculate progress metrics
