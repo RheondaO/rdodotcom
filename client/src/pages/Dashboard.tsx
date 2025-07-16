@@ -160,7 +160,7 @@ function Dashboard() {
 
       <main className="flex-1 overflow-auto">
         {/* Header with Belle Journal title and date navigation */}
-        <header className="bg-white/70 dark:[background-color:var(--custom-dark)]/70 backdrop-blur-sm border-b border-pink-200 dark:border-purple-800 px-6 py-3 shadow-sm">
+        <header className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border-b border-pink-200 dark:border-purple-800 px-6 py-3 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 dark:from-pink-500 dark:to-purple-600 rounded-xl flex items-center justify-center shadow-md">
