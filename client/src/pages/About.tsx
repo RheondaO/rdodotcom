@@ -124,8 +124,8 @@ export default function About() {
       <footer className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Coming soon: a deeper look into the mind behind Belle Journal.
-            <span className="text-purple-600 font-medium"> Building in public, sharing the journey.</span>
+            Built with transparency and accountability in mind. 
+            <span className="text-purple-600 font-medium"> Building in public, one day at a time.</span>
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
             © 2025 Really Obvious Media Lab. All rights reserved.
