@@ -67,10 +67,10 @@ export default function NotFound() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link href="/">
+                  <Link href="/dashboard">
                     <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
                       <Home className="mr-2 h-4 w-4" />
-                      Back to Home
+                      Explore Belle Journal
                     </Button>
                   </Link>
                   <Link href="/about">
