@@ -37,7 +37,7 @@ export default function Custom404() {
         ))}
       </div>
 
-      <Card className="w-full max-w-md mx-4 relative z-10 bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border border-purple-200 dark:border-purple-700 shadow-2xl">
+      <Card className="w-full max-w-md mx-4 relative z-10 bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm border border-purple-200 dark:border-purple-700 shadow-2xl">
         <CardContent className="pt-8 pb-6 text-center">
           {/* Main sparkle icon */}
           <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-pulse">
