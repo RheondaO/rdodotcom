@@ -1,9 +1,10 @@
 import { Switch, Route } from "wouter";
 import Dashboard from "./pages/Dashboard";
-import PublicView from "./pages/PublicView";
 import AuthCheck from "./pages/AuthCheck";
 import About from "./pages/About";
 import RheondaOgletreeBlog from "./pages/RheondaOgletreeBlog";
+import PublicView from "./pages/PublicView";
+import Custom404 from "./pages/Custom404";
 import NotFoundPage from "./pages/not-found";
 import { ThemeProvider } from "./hooks/use-theme";
 import { Toaster } from "./components/ui/toaster";
@@ -67,6 +68,9 @@ function App() {
           </Route>
           <Route path="/">
             <PublicView />
+          </Route>
+          <Route path="/404">
+            <Custom404 />
           </Route>
           <Route>
             <NotFoundPage />
