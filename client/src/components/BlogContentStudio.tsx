@@ -279,53 +279,51 @@ export default function BlogContentStudio() {
           </p>
         </div>
       </div>
-      
       {/* Quick Actions Bar */}
-        <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-          <div className="flex items-center gap-2">
-            <PenTool className="h-5 w-5 text-purple-600" />
-            <span 
-              className={`text-sm font-medium ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-purple-600 hover:text-purple-800 cursor-pointer'}`}
-              onClick={() => {
-                if (!isReadOnly) {
-                  setEditingPost(null);
-                  setShowEditor(true);
-                }
-              }}
-            >
-              Write New Post
-            </span>
-          </div>
-          <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
-          <div className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-yellow-600" />
-            <span 
-              className={`text-sm font-medium ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-yellow-600 hover:text-yellow-800 cursor-pointer'}`}
-              onClick={() => {
-                if (!isReadOnly) {
-                  setNewIdeaDialog(true);
-                }
-              }}
-            >
-              Add Idea
-            </span>
-          </div>
-          <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
-              Schedule Content
-            </span>
-          </div>
-          <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
-          <div className={`flex items-center gap-2 ${isReadOnly ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
-            <Zap className={`h-5 w-5 ${isReadOnly ? 'text-gray-400' : 'text-green-600'}`} />
-            <span className={`text-sm font-medium ${isReadOnly ? 'text-gray-400' : 'text-green-600 hover:text-green-800'}`}>
-              AI Generate
-            </span>
-          </div>
+      <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+        <div className="flex items-center gap-2">
+          <PenTool className="h-5 w-5 text-purple-600" />
+          <span 
+            className={`text-sm font-medium ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-purple-600 hover:text-purple-800 cursor-pointer'}`}
+            onClick={() => {
+              if (!isReadOnly) {
+                setEditingPost(null);
+                setShowEditor(true);
+              }
+            }}
+          >
+            Write New Post
+          </span>
         </div>
-
+        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="flex items-center gap-2">
+          <Lightbulb className="h-5 w-5 text-yellow-600" />
+          <span 
+            className={`text-sm font-medium ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-yellow-600 hover:text-yellow-800 cursor-pointer'}`}
+            onClick={() => {
+              if (!isReadOnly) {
+                setNewIdeaDialog(true);
+              }
+            }}
+          >
+            Add Idea
+          </span>
+        </div>
+        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-blue-600" />
+          <span className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
+            Schedule Content
+          </span>
+        </div>
+        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className={`flex items-center gap-2 ${isReadOnly ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+          <Zap className={`h-5 w-5 ${isReadOnly ? 'text-gray-400' : 'text-green-600'}`} />
+          <span className={`text-sm font-medium ${isReadOnly ? 'text-gray-400' : 'text-green-600 hover:text-green-800'}`}>
+            AI Generate
+          </span>
+        </div>
+      </div>
       {/* Hidden Dialogs */}
       <Dialog open={newIdeaDialog} onOpenChange={setNewIdeaDialog}>
         <DialogContent>
@@ -335,9 +333,8 @@ export default function BlogContentStudio() {
           <NewIdeaForm onSubmit={createIdeaMutation.mutate} isReadOnly={isReadOnly} />
         </DialogContent>
       </Dialog>
-
       {/* Content Filter Bar */}
-      <div className="flex items-center gap-4 p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
+      <div className="flex items-center gap-4 p-3 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg bg-[#17111d]">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter:</span>
           <select 
@@ -391,7 +388,6 @@ export default function BlogContentStudio() {
           </div>
         </div>
       </div>
-
       {/* Studio Tabs */}
       <Tabs value={selectedStudioTab} onValueChange={setSelectedStudioTab}>
         <TabsList className="grid w-full grid-cols-5">
@@ -534,7 +530,7 @@ export default function BlogContentStudio() {
                 {blogPosts && blogPosts.length > 0 ? (
                   viewMode === 'grid' ? (
                     // Grid View
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {blogPosts.map((post) => (
                         <div key={post.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                           <div className="flex flex-col h-full">
@@ -627,10 +623,10 @@ export default function BlogContentStudio() {
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </div>)
                   ) : (
                     // List View
-                    <div className="space-y-2">
+                    (<div className="space-y-2">
                       <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 rounded-lg">
                         <div className="col-span-4">Title</div>
                         <div className="col-span-2">Status</div>
@@ -723,7 +719,7 @@ export default function BlogContentStudio() {
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </div>)
                   )
                 ) : (
                   <div className="text-center py-12">
