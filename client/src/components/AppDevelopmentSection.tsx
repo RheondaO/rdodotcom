@@ -266,7 +266,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 className={`px-4 py-2 text-sm rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
                   activeView === tab.key
                     ? "bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-sm"
-                    : "text-muted-foreground hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400"
+                    : "text-[#4b5563] hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400"
                 }`}
               >
                 <Icon className="h-4 w-4" />
