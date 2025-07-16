@@ -255,7 +255,7 @@ export default function PublicView() {
               onClick={() => window.location.href = '/about'}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             >
-              Learn More About Rheonda
+              Meet the Admin
             </Button>
             <Button 
               onClick={() => window.location.href = '/rheonda-ogletree-blog'}
