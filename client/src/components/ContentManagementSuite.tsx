@@ -349,7 +349,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <div className="space-y-6">
               {/* Stats Overview */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)] backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -363,7 +363,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)] backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -377,7 +377,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)] backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -391,7 +391,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)] backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
