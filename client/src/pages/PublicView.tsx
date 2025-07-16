@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Target, TrendingUp, BookOpen, Calendar, ExternalLink, LogIn, Sparkles } from "lucide-react";
+import { Target, TrendingUp, BookOpen, Calendar, ExternalLink, LogIn, Sparkles, Heart } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import AdminLoginForm from "../components/AdminLoginForm";
 import SEOHead from "../components/SEOHead";
@@ -255,6 +255,7 @@ export default function PublicView() {
               onClick={() => window.location.href = '/about'}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             >
+              <Heart className="mr-2 h-4 w-4" />
               Meet the Admin
             </Button>
             <Button 
@@ -262,6 +263,7 @@ export default function PublicView() {
               variant="outline"
               className="border-purple-200 text-purple-600 hover:bg-purple-50"
             >
+              <Sparkles className="mr-2 h-4 w-4" />
               Read the Blog
             </Button>
           </div>
