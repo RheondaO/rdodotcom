@@ -60,7 +60,7 @@ export default function QuickAddModal({ open, onOpenChange, selectedDate }: Quic
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-md bg-white/95 backdrop-blur-sm border-0 rounded-3xl shadow-2xl">
+      <DialogContent className="w-full max-w-md bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-0 rounded-3xl shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent text-center">
             Quick Add Entry ✨
@@ -76,12 +76,12 @@ export default function QuickAddModal({ open, onOpenChange, selectedDate }: Quic
                 <Button
                   key={action.key}
                   variant="outline"
-                  className="p-6 h-auto flex flex-col items-center space-y-3 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 border-pink-200 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-lg hover:scale-105"
+                  className="p-6 h-auto flex flex-col items-center space-y-3 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 dark:hover:from-pink-900/30 dark:hover:to-purple-900/30 border-pink-200 dark:border-gray-600 rounded-2xl shadow-sm transition-all duration-200 hover:shadow-lg hover:scale-105"
                   onClick={() => handleQuickAdd(action.key)}
                   disabled={updateDailyEntry.isPending}
                 >
                   <Icon className={`h-8 w-8 ${action.color}`} />
-                  <span className="text-sm font-medium text-gray-700">{action.label}</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{action.label}</span>
                 </Button>
               );
             })}

@@ -445,7 +445,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
       </div>
 
       {/* Annual Content Overview */}
-      <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -541,7 +541,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Flame className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -584,7 +584,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardContent>
         </Card>
 
-        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <CheckSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -632,7 +632,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardContent>
         </Card>
 
-        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -703,7 +703,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
 
       {/* Goals & Medications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -741,7 +741,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardContent>
         </Card>
 
-        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
