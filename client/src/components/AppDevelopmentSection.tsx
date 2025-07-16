@@ -464,7 +464,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       {activeView === "projects" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h2>
+            <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Projects</h2>
             <Button 
               onClick={() => setShowNewProjectForm(true)}
               disabled={isReadOnly}
@@ -567,7 +567,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tasks</h2>
+              <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Tasks</h2>
               {selectedProject && (
                 <Badge variant="outline" className="text-sm">
                   {projects.find(p => p.id === selectedProject)?.name}
@@ -682,7 +682,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       {activeView === "testing" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Testing & Quality Assurance</h2>
+            <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Testing & Quality Assurance</h2>
             <div className="flex gap-2">
               <Button 
                 disabled={isReadOnly}
@@ -839,7 +839,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       {activeView === "time" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Time Tracking</h2>
+            <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Time Tracking</h2>
             {!isTimerRunning && (
               <Button 
                 onClick={() => !isReadOnly && startTimer()}
