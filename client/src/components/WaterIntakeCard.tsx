@@ -30,19 +30,21 @@ export default function WaterIntakeCard({ selectedDate, isEditable = true }: Wat
   };
 
   return (
-    <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
+    <Card className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
+      !isEditable ? 'opacity-60' : ''
+    }`}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
-            <h4 className="font-heading font-semibold text-gray-800">Water Intake</h4>
+            <h4 className="font-heading font-semibold text-gray-800 dark:text-white">Water Intake</h4>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={isEditable ? handleAddWater : undefined}
             disabled={!isEditable || waterIntake >= waterGoal || updateDailyEntry.isPending}
-            className={`hover:bg-blue-50 rounded-xl ${!isEditable ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl ${!isEditable ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Plus className="h-4 w-4 text-blue-500" />
           </Button>
@@ -58,6 +60,7 @@ export default function WaterIntakeCard({ selectedDate, isEditable = true }: Wat
               stroke="#E5E7EB" 
               strokeWidth="8" 
               fill="none"
+              className="dark:stroke-gray-700"
             />
             <circle 
               cx="50" 
