@@ -362,7 +362,7 @@ export default function BlogContentStudio() {
         <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View:</span>
-          <div className="flex bg-gray-100 dark:bg-gray-900 rounded-md p-1">
+          <div className="flex dark:bg-gray-900 rounded-md p-1 bg-[#17111d]">
             <button 
               onClick={() => setViewMode('grid')}
               className="px-3 py-1 text-xs rounded flex items-center gap-1 dark:bg-gray-800 shadow-sm bg-[#0d0911]"
