@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, Calendar, Clock, User, Share2, BookOpen, Target, TrendingUp } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, User, Share2, BookOpen, Target, TrendingUp, Home, Sparkles, Star } from "lucide-react";
 import { Link } from "wouter";
 import SEOHead from "../components/SEOHead";
 import { generateBlogPostStructuredData, RHEONDA_PERSON_DATA } from "../utils/structuredData";
@@ -66,134 +66,95 @@ export default function RheondaOgletreeBlog() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12">
-        {/* Article Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-4">
-            <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200">
-              Featured Article
-            </Badge>
-            <Badge variant="outline" className="text-purple-600 border-purple-200">
-              Digital Wellness
-            </Badge>
-          </div>
-          
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-            Rheonda Ogletree: Pioneering Digital Wellness and Productivity Excellence
-          </h1>
-          
-          <div className="flex items-center gap-6 text-gray-600 dark:text-gray-400 mb-8">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span>By Rheonda Ogletree</span>
+      <main className="min-h-screen flex items-center justify-center px-6 py-12">
+        <div className="max-w-2xl mx-auto text-center">
+          {/* Sparkles Animation */}
+          <div className="relative mb-8">
+            <div className="absolute -top-4 -left-4 text-purple-400 animate-pulse">
+              <Sparkles className="h-8 w-8" />
             </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>January 16, 2025</span>
+            <div className="absolute -top-2 -right-6 text-pink-400 animate-bounce">
+              <Star className="h-6 w-6" />
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              <span>6 min read</span>
+            <div className="absolute -bottom-4 left-8 text-orange-400 animate-pulse delay-300">
+              <Sparkles className="h-6 w-6" />
             </div>
-          </div>
-          
-          <p className="text-xl text-gray-700 dark:text-gray-300 leading-relaxed mb-8">
-            Discover how Rheonda Ogletree (Rheonda D Ogletree) is revolutionizing digital wellness and productivity through innovative solutions, expert guidance, and the Belle Journal platform.
-          </p>
-        </div>
-
-        {/* Article Content */}
-        <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
-          <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">The Visionary Behind Belle Journal</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-              <strong>Rheonda Ogletree</strong> stands as a beacon of innovation in the digital wellness and productivity space. Known also as <strong>Rheonda D Ogletree</strong>, she has dedicated her career to helping individuals and organizations optimize their daily routines, build sustainable habits, and achieve meaningful personal growth through cutting-edge technology solutions, AI, and prompt engineering.
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              As the creator and visionary behind Belle Journal, built with vibe coding on Replit, Rheonda has combined her extensive knowledge of human behavior, productivity science, and digital wellness to create a comprehensive web app that serves as a personal assistant for life optimization. Her approach integrates artificial intelligence, prompt engineering, and human-centered design, making complex wellness concepts accessible to everyone through innovative habit trackers and journal capabilities.
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Expertise That Transforms Lives</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-              <strong>Rheonda's</strong> expertise spans multiple domains including habit formation, goal setting, time management, digital wellness strategies, entrepreneurship, and AI-powered business development. As a recognized girl boss in the tech space, she believes that true productivity comes not from working harder, but from working smarter with the right systems and tools in place. This philosophy is evident in every aspect of Belle Journal, from its intuitive interface to its sophisticated habit trackers and AI-powered insights.
-            </p>
+            <div className="absolute -bottom-2 -right-4 text-purple-400 animate-bounce delay-500">
+              <Star className="h-8 w-8" />
+            </div>
             
-            <div className="grid md:grid-cols-3 gap-6 mt-6">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <Target className="h-6 w-6 text-white" />
+            {/* Main Coming Soon Display */}
+            <Card className="relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
+              <CardContent className="p-12">
+                <div className="mb-6">
+                  <div className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+                    ✨
+                  </div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Blog Coming Soon
+                  </h1>
+                  <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
+                    I'm crafting thoughtful content about digital wellness, productivity, and entrepreneurship. 
+                    Stay tuned for insights on building better systems and living intentionally.
+                  </p>
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Goal Achievement</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Expert strategies for setting and achieving meaningful goals
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 bg-pink-500 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <TrendingUp className="h-6 w-6 text-white" />
+
+                {/* Sparkle Decorations */}
+                <div className="flex justify-center items-center gap-4 mb-8">
+                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"></div>
+                  <div className="w-4 h-4 bg-orange-400 rounded-full animate-pulse delay-200"></div>
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce delay-400"></div>
+                  <div className="w-3 h-3 bg-pink-400 rounded-full animate-pulse delay-600"></div>
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Habit Formation</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Science-based approaches to building lasting habits
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <BookOpen className="h-6 w-6 text-white" />
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/">
+                    <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+                      <Home className="mr-2 h-4 w-4" />
+                      Explore Belle Journal
+                    </Button>
+                  </Link>
+                  <Link href="/about">
+                    <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Meet the Admin
+                    </Button>
+                  </Link>
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Digital Wellness</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Balancing technology use for optimal well-being
-                </p>
-              </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Inspirational Quote */}
+          <div className="mt-12">
+            <div className="bg-white/40 dark:bg-gray-900/40 backdrop-blur-sm rounded-lg p-6 border border-purple-200/30 dark:border-purple-800/30">
+              <blockquote className="text-lg font-light text-gray-700 dark:text-gray-200 italic">
+                "The best time to plant a tree was 20 years ago. The second best time is now."
+              </blockquote>
+              <footer className="mt-2">
+                <cite className="text-sm text-purple-600 dark:text-purple-400">
+                  — Building in public, one post at a time ✨
+                </cite>
+              </footer>
             </div>
-          </div>
-
-          <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">The Belle Journal Platform</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-              The Belle Journal web app represents years of research and development in the field of personal productivity and wellness. Built with vibe coding on Replit, under <strong>Rheonda's</strong> guidance, it has evolved into a comprehensive ecosystem that includes habit tracking, goal management, financial monitoring, health metrics, and content creation tools. This holistic approach reflects her understanding that true wellness encompasses all aspects of life, enhanced by AI and prompt engineering capabilities.
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              What sets <strong>Rheonda Ogletree</strong> apart in the crowded productivity space is her commitment to sustainable, long-term solutions rather than quick fixes. As an entrepreneur behind Really Obvious Media Lab (RODML) and rotationonly digital magazine, she emphasizes the importance of building systems that adapt to individual lifestyles and preferences, making personal development a sustainable journey rather than a temporary sprint.
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Innovation and Integration</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-              Through Belle Journal, <strong>Rheonda</strong> has created a space where users can track their progress, identify patterns, and make informed decisions about their personal development journey. The web app's integration with tools like Notion demonstrates her forward-thinking approach to productivity technology, ensuring that users can leverage their existing workflows while accessing powerful new capabilities through AI and prompt engineering.
-            </p>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              Looking ahead, <strong>Rheonda Ogletree</strong> continues to innovate in the digital wellness space through Really Obvious Media Lab and rotationonly magazine, exploring new ways to help people achieve their goals and live more fulfilling lives. Her work in entrepreneurship, blogging, and artificial intelligence represents the cutting edge of productivity technology, combining scientific research with practical application to create solutions that truly make a difference in people's lives.
-            </p>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-8 text-white text-center">
-          <h2 className="text-2xl font-bold mb-4">Experience Belle Journal Today</h2>
-          <p className="text-purple-100 mb-6">
-            Join thousands of users who have transformed their lives with Rheonda Ogletree's innovative digital wellness platform.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/">
-              <Button className="bg-white text-purple-600 hover:bg-purple-50">
-                Explore Belle Journal
-              </Button>
-            </Link>
-            <Link href="/about">
-              <Button variant="outline" className="border-white text-white hover:bg-white/10">
-                Learn More About Rheonda
-              </Button>
-            </Link>
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800">
+        <div className="max-w-6xl mx-auto px-6 py-4 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Coming soon: insights, stories, and strategies for digital wellness.
+            <span className="text-purple-600 font-medium"> Building in public, one post at a time.</span>
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+            © 2025 Really Obvious Media Lab. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
