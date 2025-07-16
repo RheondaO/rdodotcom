@@ -96,7 +96,7 @@ export default function About() {
                   <Link href="/blog">
                     <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Read Blog
+                      Read the Blog
                     </Button>
                   </Link>
                 </div>

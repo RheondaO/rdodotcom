@@ -262,7 +262,7 @@ export default function PublicView() {
               variant="outline"
               className="border-purple-200 text-purple-600 hover:bg-purple-50"
             >
-              Read Featured Article
+              Read the Blog
             </Button>
           </div>
         </div>
