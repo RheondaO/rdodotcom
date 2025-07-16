@@ -137,7 +137,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
   };
 
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-pink-100 dark:border-purple-800 flex flex-col shadow-xl h-screen overflow-hidden`}>
         {/* Toggle Button */}
         <div className="px-6 py-3 border-b border-pink-100 dark:border-purple-800">
           <Button
@@ -174,7 +174,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
             <div className="space-y-4">
               <div 
                 onClick={handleWaterClick}
-                className="flex items-center justify-between bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:[background-color:var(--custom-dark)]/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
               >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
@@ -188,7 +188,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
               <div 
                 onClick={handleExerciseClick}
-                className="flex items-center justify-between bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:[background-color:var(--custom-dark)]/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
               >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full shadow-sm"></div>
@@ -205,7 +205,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
               <div 
                 onClick={handleMealsClick}
-                className="flex items-center justify-between bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:[background-color:var(--custom-dark)]/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
+                className="flex items-center justify-between bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm cursor-pointer hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-lg"
               >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm"></div>
