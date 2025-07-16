@@ -239,7 +239,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     <div className="min-h-screen bg-white dark:bg-gray-900 p-4">
       {/* Compact Header Section */}
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center justify-between">
               <div>
@@ -312,7 +312,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
         </div>
 
         {/* Mini-Game Block Studio Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
@@ -349,7 +349,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <div className="space-y-6">
               {/* Stats Overview */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -363,7 +363,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -377,7 +377,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -391,7 +391,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -409,7 +409,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               {/* Enhanced Content Blocks Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {displayBlocks.map((block) => (
-                  <Card key={block.id} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
+                  <Card key={block.id} className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50" style={{ background: `linear-gradient(135deg, ${block.color}15 0%, ${block.color}08 100%)` }}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
