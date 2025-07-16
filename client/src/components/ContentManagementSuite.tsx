@@ -224,6 +224,27 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
       case "completed": return "bg-gray-100 text-gray-500 dark:[background-color:var(--custom-dark)] dark:text-gray-500";
       default: return "bg-gray-100 text-gray-500 dark:[background-color:var(--custom-dark)] dark:text-gray-400";
     }
+  }
+
+  const getTagColor = (tag: string) => {
+    switch (tag) {
+      case 'rotationonly.mag':
+        return 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 dark:from-blue-900 dark:to-blue-800 dark:text-blue-200 dark:border-blue-600';
+      case 'rotationonly.econ':
+        return 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300 dark:from-green-900 dark:to-green-800 dark:text-green-200 dark:border-green-600';
+      case 'rotationonly.xxx':
+        return 'bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-300 dark:from-red-900 dark:to-red-800 dark:text-red-200 dark:border-red-600';
+      case 'rotationonly.ext':
+        return 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-300 dark:from-purple-900 dark:to-purple-800 dark:text-purple-200 dark:border-purple-600';
+      case 'rotationonly.stem':
+        return 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border border-orange-300 dark:from-orange-900 dark:to-orange-800 dark:text-orange-200 dark:border-orange-600';
+      case 'rotationonly.music':
+        return 'bg-gradient-to-r from-pink-100 to-pink-200 text-pink-800 border border-pink-300 dark:from-pink-900 dark:to-pink-800 dark:text-pink-200 dark:border-pink-600';
+      case 'rotationonly.ceo':
+        return 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border border-yellow-300 dark:from-yellow-900 dark:to-yellow-800 dark:text-yellow-200 dark:border-yellow-600';
+      default:
+        return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300 dark:from-gray-700 dark:to-gray-600 dark:text-gray-200 dark:border-gray-500';
+    }
   };
 
   const totalStats = {
@@ -298,10 +319,10 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             {Object.keys(tagToBlockMapping).map((tag) => (
               <div 
                 key={tag}
-                className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-colors ${
+                className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-all duration-200 ${
                   selectedFilter === tag 
-                    ? 'bg-gray-200 dark:[background-color:var(--custom-dark)] text-gray-900 dark:text-gray-100' 
-                    : 'bg-gray-100 dark:[background-color:var(--custom-dark)] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:[background-color:var(--custom-dark)]'
+                    ? `${getTagColor(tag)} shadow-md transform scale-105` 
+                    : `${getTagColor(tag)} opacity-75 hover:opacity-100 hover:shadow-sm hover:transform hover:scale-102`
                 }`}
                 onClick={() => setSelectedFilter(tag)}
               >
