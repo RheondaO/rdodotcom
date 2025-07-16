@@ -229,19 +229,19 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   const getTagColor = (tag: string) => {
     switch (tag) {
       case 'rotationonly.mag':
-        return 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 dark:from-blue-900 dark:to-blue-800 dark:text-blue-200 dark:border-blue-600';
-      case 'rotationonly.econ':
-        return 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300 dark:from-green-900 dark:to-green-800 dark:text-green-200 dark:border-green-600';
-      case 'rotationonly.xxx':
-        return 'bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-300 dark:from-red-900 dark:to-red-800 dark:text-red-200 dark:border-red-600';
-      case 'rotationonly.ext':
-        return 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-300 dark:from-purple-900 dark:to-purple-800 dark:text-purple-200 dark:border-purple-600';
-      case 'rotationonly.stem':
-        return 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border border-orange-300 dark:from-orange-900 dark:to-orange-800 dark:text-orange-200 dark:border-orange-600';
-      case 'rotationonly.music':
         return 'bg-gradient-to-r from-pink-100 to-pink-200 text-pink-800 border border-pink-300 dark:from-pink-900 dark:to-pink-800 dark:text-pink-200 dark:border-pink-600';
+      case 'rotationonly.econ':
+        return 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-300 dark:from-purple-900 dark:to-purple-800 dark:text-purple-200 dark:border-purple-600';
+      case 'rotationonly.xxx':
+        return 'bg-gradient-to-r from-rose-100 to-rose-200 text-rose-800 border border-rose-300 dark:from-rose-900 dark:to-rose-800 dark:text-rose-200 dark:border-rose-600';
+      case 'rotationonly.ext':
+        return 'bg-gradient-to-r from-fuchsia-100 to-fuchsia-200 text-fuchsia-800 border border-fuchsia-300 dark:from-fuchsia-900 dark:to-fuchsia-800 dark:text-fuchsia-200 dark:border-fuchsia-600';
+      case 'rotationonly.stem':
+        return 'bg-gradient-to-r from-violet-100 to-violet-200 text-violet-800 border border-violet-300 dark:from-violet-900 dark:to-violet-800 dark:text-violet-200 dark:border-violet-600';
+      case 'rotationonly.music':
+        return 'bg-gradient-to-r from-pink-200 to-pink-300 text-pink-800 border border-pink-400 dark:from-pink-800 dark:to-pink-700 dark:text-pink-200 dark:border-pink-500';
       case 'rotationonly.ceo':
-        return 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border border-yellow-300 dark:from-yellow-900 dark:to-yellow-800 dark:text-yellow-200 dark:border-yellow-600';
+        return 'bg-gradient-to-r from-purple-200 to-purple-300 text-purple-800 border border-purple-400 dark:from-purple-800 dark:to-purple-700 dark:text-purple-200 dark:border-purple-500';
       default:
         return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300 dark:from-gray-700 dark:to-gray-600 dark:text-gray-200 dark:border-gray-500';
     }
