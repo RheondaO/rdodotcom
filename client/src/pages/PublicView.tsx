@@ -91,14 +91,6 @@ export default function PublicView() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => window.location.href = '/about'}
-              className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-            >
-              About Rheonda
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
               onClick={handleAdminLoginClick}
               className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
             >
@@ -282,6 +274,9 @@ export default function PublicView() {
           <p className="text-gray-600 dark:text-gray-400">
             Built with transparency and accountability in mind. 
             <span className="text-purple-600 font-semibold"> Building in public, one day at a time.</span>
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+            © 2025 Really Obvious Media Lab. All rights reserved.
           </p>
         </div>
       </footer>
