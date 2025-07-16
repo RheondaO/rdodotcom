@@ -21,10 +21,16 @@ export default function WorkTimeSection({ selectedDate }: WorkTimeSectionProps) 
 
   return (
     <section className="mb-8">
-      <h3 className="text-2xl font-heading font-bold text-purple-600 mb-6 flex items-center">
-        <Briefcase className="text-purple-500 mr-3 h-6 w-6" />
-        Work & Screen Time 💻
-      </h3>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+            Work & Screen Time
+          </h3>
+          <p className="text-muted-foreground dark:text-gray-300 mt-1">
+            Track your work hours and screen time usage
+          </p>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         

@@ -117,7 +117,14 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Finance & Budget Management</h1>
+        <div>
+          <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+            Finance & Budget Management
+          </h3>
+          <p className="text-muted-foreground dark:text-gray-300 mt-1">
+            Comprehensive financial tracking and budget management
+          </p>
+        </div>
         {!isReadOnly && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm">

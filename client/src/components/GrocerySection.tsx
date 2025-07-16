@@ -76,13 +76,19 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
   if (isLoading) {
     return (
       <section>
-        <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-          <ShoppingCart className="text-secondary mr-3 h-5 w-5" />
-          Shopping List
-        </h3>
-        <Card className="bg-white shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+              Shopping & Grocery Management
+            </h3>
+            <p className="text-muted-foreground dark:text-gray-300 mt-1">
+              Organize your grocery shopping and expense tracking
+            </p>
+          </div>
+        </div>
+        <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
-            <div className="text-center text-neutral-cool">Loading...</div>
+            <div className="text-center text-gray-500 dark:text-gray-400">Loading...</div>
           </CardContent>
         </Card>
       </section>
