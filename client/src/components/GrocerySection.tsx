@@ -86,7 +86,7 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
             </p>
           </div>
         </div>
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
+        <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="text-center text-gray-500 dark:text-gray-400">Loading...</div>
           </CardContent>
@@ -108,7 +108,7 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
         </div>
       </div>
       
-      <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
+      <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl overflow-hidden">
         <div className="p-6 border-b border-pink-100 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-heading font-semibold text-gray-800 dark:text-white">Shopping List</h4>
