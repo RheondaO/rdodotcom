@@ -273,9 +273,9 @@ export default function PublicView() {
       {/* Footer */}
       <footer className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800 mt-20">
         <div className="max-w-6xl mx-auto px-6 py-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Built with transparency and accountability in mind. 
-            <span className="text-purple-600 font-semibold"> Building in public, one day at a time.</span>
+            <span className="text-purple-600 font-medium"> Building in public, one day at a time.</span>
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
             © 2025 Really Obvious Media Lab. All rights reserved.
