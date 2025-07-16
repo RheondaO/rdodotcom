@@ -57,7 +57,7 @@ export default function About() {
             </div>
             
             {/* Main Coming Soon Display */}
-            <Card className="relative bg-white/60 dark:[background-color:var(--custom-dark)]/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
+            <Card className="relative bg-white/60 dark:bg-[#17111d]/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
               <CardContent className="p-12">
                 <div className="mb-6">
                   {/* Profile Circle with RDO */}
