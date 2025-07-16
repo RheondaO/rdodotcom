@@ -445,7 +445,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
       </div>
 
       {/* Annual Content Overview */}
-      <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
