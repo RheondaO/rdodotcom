@@ -422,7 +422,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                     <CardContent className="pt-6">
                       <div className="space-y-5">
                         
-                        <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4">
+                        <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-[var(--custom-dark)] dark:to-[var(--custom-dark)] rounded-xl p-4">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Annual Progress</span>
                             <span className="text-lg font-bold text-gray-900 dark:text-gray-100">{Math.round((block.publishedPosts / block.totalPosts) * 100)}%</span>
@@ -434,7 +434,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                         </div>
                         
                         {/* Designed/Reviewed/Approved Counts */}
-                        <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-4">
+                        <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-[var(--custom-dark)] dark:to-[var(--custom-dark)] rounded-xl p-4">
                           <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                               <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{block.designedPosts}</div>
