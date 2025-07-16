@@ -409,7 +409,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               {/* Enhanced Content Blocks Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {displayBlocks.map((block) => (
-                  <Card key={block.id} className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
+                  <Card key={block.id} className="bg-white/70 dark:bg-[#0c0910] backdrop-blur-sm border border-pink-200/50 dark:border-pink-800/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50" style={{ background: `linear-gradient(135deg, ${block.color}15 0%, ${block.color}08 100%)` }}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
