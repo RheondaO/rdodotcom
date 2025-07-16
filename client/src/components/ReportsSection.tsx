@@ -193,6 +193,18 @@ const COLORS = ['#8B5CF6', '#06D6A0', '#FFD23F', '#EE6C4D'];
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+            Reports & Analytics Dashboard
+          </h3>
+          <p className="text-muted-foreground dark:text-gray-300 mt-1">
+            Comprehensive insights and progress tracking across all metrics
+          </p>
+        </div>
+      </div>
+      
       {/* Period Toggle */}
       <Tabs defaultValue="weekly" className="w-full">
         <TabsList>

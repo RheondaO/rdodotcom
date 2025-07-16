@@ -279,8 +279,8 @@ export default function BlogContentStudio() {
           </p>
         </div>
       </div>
-        
-        {/* Quick Actions Bar */}
+      
+      {/* Quick Actions Bar */}
         <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div className="flex items-center gap-2">
             <PenTool className="h-5 w-5 text-purple-600" />
@@ -325,7 +325,6 @@ export default function BlogContentStudio() {
             </span>
           </div>
         </div>
-      </div>
 
       {/* Hidden Dialogs */}
       <Dialog open={newIdeaDialog} onOpenChange={setNewIdeaDialog}>
