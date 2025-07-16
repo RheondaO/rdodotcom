@@ -242,7 +242,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           <Code2 className="h-10 w-10 text-white" />
         </div>
         <div>
-          <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-purple-500 to-indigo-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
             AI App Development & Coding
           </h1>
           <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">

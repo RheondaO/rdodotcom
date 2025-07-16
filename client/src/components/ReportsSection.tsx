@@ -172,7 +172,7 @@ const COLORS = ['#8B5CF6', '#06D6A0', '#FFD23F', '#EE6C4D'];
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Reports & Analytics Dashboard</h2>
+          <h2 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">Reports & Analytics Dashboard</h2>
           <div className="h-10 w-32 bg-gray-200 animate-pulse rounded"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
