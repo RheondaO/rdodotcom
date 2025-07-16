@@ -219,10 +219,10 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
-      case "paused": return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
-      case "completed": return "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500";
-      default: return "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400";
+      case "active": return "bg-gray-100 text-gray-700 dark:[background-color:var(--custom-dark)] dark:text-gray-300";
+      case "paused": return "bg-gray-100 text-gray-600 dark:[background-color:var(--custom-dark)] dark:text-gray-400";
+      case "completed": return "bg-gray-100 text-gray-500 dark:[background-color:var(--custom-dark)] dark:text-gray-500";
+      default: return "bg-gray-100 text-gray-500 dark:[background-color:var(--custom-dark)] dark:text-gray-400";
     }
   };
 
@@ -236,10 +236,10 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 p-4">
+    <div className="min-h-screen bg-white dark:[background-color:var(--custom-dark)] p-4">
       {/* Compact Header Section */}
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-white dark:[background-color:var(--custom-dark)] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center justify-between">
               <div>
@@ -288,8 +288,8 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <div 
               className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-colors ${
                 selectedFilter === null 
-                  ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100' 
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-gray-200 dark:[background-color:var(--custom-dark)] text-gray-900 dark:text-gray-100' 
+                  : 'bg-gray-100 dark:[background-color:var(--custom-dark)] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:[background-color:var(--custom-dark)]'
               }`}
               onClick={() => setSelectedFilter(null)}
             >
@@ -300,8 +300,8 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 key={tag}
                 className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-colors ${
                   selectedFilter === tag 
-                    ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100' 
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    ? 'bg-gray-200 dark:[background-color:var(--custom-dark)] text-gray-900 dark:text-gray-100' 
+                    : 'bg-gray-100 dark:[background-color:var(--custom-dark)] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:[background-color:var(--custom-dark)]'
                 }`}
                 onClick={() => setSelectedFilter(tag)}
               >
@@ -312,7 +312,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
         </div>
 
         {/* Mini-Game Block Studio Section */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:[background-color:var(--custom-dark)] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
@@ -349,7 +349,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <div className="space-y-6">
               {/* Stats Overview */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -363,7 +363,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -377,7 +377,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -391,7 +391,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
+                <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -409,7 +409,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               {/* Enhanced Content Blocks Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {displayBlocks.map((block) => (
-                  <Card key={block.id} className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
+                  <Card key={block.id} className="bg-white/70 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50" style={{ background: `linear-gradient(135deg, ${block.color}15 0%, ${block.color}08 100%)` }}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -453,7 +453,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                         
                         {/* Enhanced Progress Bar */}
                         <div className="relative">
-                          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-2 bg-gray-200 dark:[background-color:var(--custom-dark)] rounded-full overflow-hidden">
                             <div 
                               className="h-full rounded-full transition-all duration-1000 shadow-sm"
                               style={{ 
@@ -483,7 +483,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
           {activeView === "create" && (
             <div className="space-y-6">
-              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+              <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Create New Content Block</CardTitle>
                 </CardHeader>
@@ -575,7 +575,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
           {activeView === "analytics" && (
             <div className="space-y-6">
-              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+              <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Analytics Dashboard</CardTitle>
                 </CardHeader>
@@ -591,7 +591,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
           {activeView === "progress" && (
             <div className="space-y-6">
-              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
+              <Card className="bg-white/70 dark:[background-color:var(--custom-dark)]/70 backdrop-blur-sm border-0 shadow-lg rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-xl font-bold text-gray-800 dark:text-gray-200">Progress Tracking</CardTitle>
                 </CardHeader>

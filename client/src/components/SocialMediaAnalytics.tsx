@@ -709,7 +709,7 @@ export default function SocialMediaAnalytics({ miniGameBlocks, miniGameDesigns }
             <CardContent>
               <div className="space-y-4">
                 {dayOfWeekData.map((day, index) => (
-                  <div key={day.day} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div key={day.day} className="flex items-center justify-between p-4 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded-lg">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
                         {day.day.charAt(0)}

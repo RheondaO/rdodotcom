@@ -74,7 +74,7 @@ export default function PublicView() {
       />
       
       {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
+      <header className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md">
@@ -104,7 +104,7 @@ export default function PublicView() {
       {/* Inspirational Quote - Hero */}
       <section className="py-8">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <div className="relative bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-pink-200/50 dark:border-pink-800/50">
+          <div className="relative bg-white/60 dark:[background-color:var(--custom-dark)]/40 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-pink-200/50 dark:border-pink-800/50">
             <div className="absolute top-4 left-6 text-pink-300 dark:text-pink-400">
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
@@ -242,7 +242,7 @@ export default function PublicView() {
         )}
 
         {/* About Section */}
-        <div className="text-center bg-white/50 dark:bg-gray-800/50 rounded-2xl p-12 backdrop-blur-sm mb-16">
+        <div className="text-center bg-white/50 dark:[background-color:var(--custom-dark)]/50 rounded-2xl p-12 backdrop-blur-sm mb-16">
           <h2 className="text-3xl font-bold mb-6">About This Journey</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-8">
             This is my personal productivity dashboard where I track my daily habits, work towards meaningful goals, 
@@ -271,7 +271,7 @@ export default function PublicView() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800 mt-20">
+      <footer className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800 mt-20">
         <div className="max-w-6xl mx-auto px-6 py-8 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Built with transparency and accountability in mind. 

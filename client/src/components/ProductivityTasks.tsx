@@ -148,19 +148,19 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
 
   const getPriorityColor = (priority: string | null) => {
     switch (priority) {
-      case "High": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      case "Medium": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case "Low": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      default: return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      case "High": return "bg-red-100 text-red-800 dark:[background-color:var(--custom-dark)] dark:text-red-200";
+      case "Medium": return "bg-yellow-100 text-yellow-800 dark:[background-color:var(--custom-dark)] dark:text-yellow-200";
+      case "Low": return "bg-green-100 text-green-800 dark:[background-color:var(--custom-dark)] dark:text-green-200";
+      default: return "bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-200";
     }
   };
 
   const getStatusColor = (status: string | null) => {
     switch (status) {
-      case "Done": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "In Progress": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "Blocked": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      default: return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      case "Done": return "bg-green-100 text-green-800 dark:[background-color:var(--custom-dark)] dark:text-green-200";
+      case "In Progress": return "bg-blue-100 text-blue-800 dark:[background-color:var(--custom-dark)] dark:text-blue-200";
+      case "Blocked": return "bg-red-100 text-red-800 dark:[background-color:var(--custom-dark)] dark:text-red-200";
+      default: return "bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-200";
     }
   };
 

@@ -252,7 +252,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
             </div>
           ) : (
             Array.isArray(timeBlocks) && timeBlocks.map((block: any) => (
-              <div key={block.id} className="flex items-center space-x-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+              <div key={block.id} className="flex items-center space-x-3 p-3 bg-white dark:[background-color:var(--custom-dark)] rounded-xl border border-gray-100 dark:border-gray-700">
                 <div className="flex-shrink-0 text-center">
                   <div className="text-sm font-medium text-blue-600">{block.startTime}</div>
                   <div className="text-xs text-gray-500">{block.endTime}</div>

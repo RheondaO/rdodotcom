@@ -50,6 +50,7 @@
   --destructive-foreground: 60 9% 98%;
   --ring: 315 85% 55%;
   --radius: 1rem;
+  --custom-dark: #17111d; /* Custom dark shade */
 }
 
 .dark {
@@ -85,6 +86,7 @@
   --sidebar-accent-foreground: 0 0% 98%; /* Pure white text */
   --sidebar-border: 270 20% 12%;
   --sidebar-ring: 315 90% 58%;
+  --custom-dark: #17111d; /* Custom dark shade */
 }
 
 @layer base {

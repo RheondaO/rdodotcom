@@ -236,20 +236,20 @@ export default function BlogContentStudio() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
-      case 'scheduled': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'published': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'archived': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+      case 'draft': return 'bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-200';
+      case 'scheduled': return 'bg-yellow-100 text-yellow-800 dark:[background-color:var(--custom-dark)] dark:text-yellow-200';
+      case 'published': return 'bg-green-100 text-green-800 dark:[background-color:var(--custom-dark)] dark:text-green-200';
+      case 'archived': return 'bg-red-100 text-red-800 dark:[background-color:var(--custom-dark)] dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-200';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'low': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'high': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+      case 'low': return 'bg-blue-100 text-blue-800 dark:[background-color:var(--custom-dark)] dark:text-blue-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:[background-color:var(--custom-dark)] dark:text-yellow-200';
+      case 'high': return 'bg-red-100 text-red-800 dark:[background-color:var(--custom-dark)] dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-200';
     }
   };
 
@@ -280,7 +280,7 @@ export default function BlogContentStudio() {
         </div>
       </div>
       {/* Quick Actions Bar */}
-      <div className="flex items-center gap-4 p-4 dark:bg-gray-900 rounded-lg bg-[#17111d]">
+      <div className="flex items-center gap-4 p-4 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded-lg">
         <div className="flex items-center gap-2">
           <PenTool className="h-5 w-5 text-purple-600" />
           <span 
@@ -295,7 +295,7 @@ export default function BlogContentStudio() {
             Write New Post
           </span>
         </div>
-        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="h-4 w-px bg-gray-300 dark:[background-color:var(--custom-dark)]" />
         <div className="flex items-center gap-2">
           <Lightbulb className="h-5 w-5 text-yellow-600" />
           <span 
@@ -309,14 +309,14 @@ export default function BlogContentStudio() {
             Add Idea
           </span>
         </div>
-        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="h-4 w-px bg-gray-300 dark:[background-color:var(--custom-dark)]" />
         <div className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-blue-600" />
           <span className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
             Schedule Content
           </span>
         </div>
-        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="h-4 w-px bg-gray-300 dark:[background-color:var(--custom-dark)]" />
         <div className={`flex items-center gap-2 ${isReadOnly ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
           <Zap className={`h-5 w-5 ${isReadOnly ? 'text-gray-400' : 'text-green-600'}`} />
           <span className={`text-sm font-medium ${isReadOnly ? 'text-gray-400' : 'text-green-600 hover:text-green-800'}`}>
@@ -334,13 +334,13 @@ export default function BlogContentStudio() {
         </DialogContent>
       </Dialog>
       {/* Content Filter Bar */}
-      <div className="flex items-center gap-4 p-3 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg bg-[#17111d]">
+      <div className="flex items-center gap-4 p-3 dark:[background-color:var(--custom-dark)] border border-gray-200 dark:border-gray-700 rounded-lg dark:[background-color:var(--custom-dark)]">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter:</span>
           <select 
             value={selectedBrand} 
             onChange={(e) => setSelectedBrand(e.target.value)}
-            className="px-3 py-1 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500"
+            className="px-3 py-1 text-sm bg-gray-50 dark:[background-color:var(--custom-dark)] border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500"
           >
             <option value="all">All Content</option>
             <option value="draft">Drafts</option>
@@ -349,23 +349,23 @@ export default function BlogContentStudio() {
             <option value="archived">Archived</option>
           </select>
         </div>
-        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="h-4 w-px bg-gray-300 dark:[background-color:var(--custom-dark)]" />
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort:</span>
-          <select className="px-3 py-1 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500">
+          <select className="px-3 py-1 text-sm bg-gray-50 dark:[background-color:var(--custom-dark)] border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-purple-500">
             <option value="recent">Most Recent</option>
             <option value="title">Title A-Z</option>
             <option value="status">Status</option>
             <option value="priority">Priority</option>
           </select>
         </div>
-        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+        <div className="h-4 w-px bg-gray-300 dark:[background-color:var(--custom-dark)]" />
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View:</span>
-          <div className="flex dark:bg-gray-900 rounded-md p-1 bg-[#17111d]">
+          <div className="flex dark:[background-color:var(--custom-dark)] rounded-md p-1 dark:[background-color:var(--custom-dark)]">
             <button 
               onClick={() => setViewMode('grid')}
-              className="px-3 py-1 text-xs rounded flex items-center gap-1 dark:bg-gray-800 shadow-sm bg-[#0d0911]"
+              className="px-3 py-1 text-xs rounded flex items-center gap-1 dark:[background-color:var(--custom-dark)] shadow-sm bg-[#0d0911]"
             >
               <Grid3X3 className="h-3 w-3" />
               Grid
@@ -374,8 +374,8 @@ export default function BlogContentStudio() {
               onClick={() => setViewMode('list')}
               className={`px-3 py-1 text-xs rounded flex items-center gap-1 ${
                 viewMode === 'list' 
-                  ? 'bg-white dark:bg-gray-800 shadow-sm' 
-                  : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                  ? 'bg-white dark:[background-color:var(--custom-dark)] shadow-sm' 
+                  : 'hover:bg-gray-200 dark:hover:[background-color:var(--custom-dark)]'
               }`}
             >
               <List className="h-3 w-3" />
@@ -452,7 +452,7 @@ export default function BlogContentStudio() {
             <CardContent>
               <div className="space-y-3">
                 {blogIdeas && blogIdeas.slice(0, 3).map((idea) => (
-                  <div key={idea.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div key={idea.id} className="flex items-center justify-between p-3 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded-lg">
                     <div>
                       <div className="font-medium">{idea.title}</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">{idea.category}</div>
@@ -482,7 +482,7 @@ export default function BlogContentStudio() {
             <CardContent>
               <div className="space-y-3">
                 {blogPosts && blogPosts.slice(0, 3).map((post) => (
-                  <div key={post.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div key={post.id} className="flex items-center justify-between p-3 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded-lg">
                     <div>
                       <div className="font-medium">{post.title}</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">{post.platform}</div>
@@ -528,7 +528,7 @@ export default function BlogContentStudio() {
                     // Grid View
                     (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {blogPosts.map((post) => (
-                        <div key={post.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                        <div key={post.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:[background-color:var(--custom-dark)] transition-colors">
                           <div className="flex flex-col h-full">
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
@@ -608,7 +608,7 @@ export default function BlogContentStudio() {
                                 value={post.status}
                                 onChange={(e) => !isReadOnly && updatePostStatusMutation.mutate({ id: post.id, status: e.target.value })}
                                 disabled={isReadOnly}
-                                className={`px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}
+                                className={`px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:[background-color:var(--custom-dark)] ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}
                               >
                                 <option value="draft">Draft</option>
                                 <option value="scheduled">Scheduled</option>
@@ -623,7 +623,7 @@ export default function BlogContentStudio() {
                   ) : (
                     // List View
                     (<div className="space-y-2">
-                      <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded-lg">
                         <div className="col-span-4">Title</div>
                         <div className="col-span-2">Status</div>
                         <div className="col-span-2">Platform</div>
@@ -632,7 +632,7 @@ export default function BlogContentStudio() {
                         <div className="col-span-1">Actions</div>
                       </div>
                       {blogPosts.map((post) => (
-                        <div key={post.id} className="grid grid-cols-12 gap-4 px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
+                        <div key={post.id} className="grid grid-cols-12 gap-4 px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:[background-color:var(--custom-dark)] transition-colors">
                           <div className="col-span-4">
                             <div className="flex flex-col">
                               <h3 className="font-semibold text-base line-clamp-1">{post.title}</h3>
@@ -704,7 +704,7 @@ export default function BlogContentStudio() {
                                 value={post.status}
                                 onChange={(e) => !isReadOnly && updatePostStatusMutation.mutate({ id: post.id, status: e.target.value })}
                                 disabled={isReadOnly}
-                                className={`px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}
+                                className={`px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:[background-color:var(--custom-dark)] ${isReadOnly ? 'cursor-not-allowed opacity-50' : ''}`}
                               >
                                 <option value="draft">Draft</option>
                                 <option value="scheduled">Scheduled</option>
@@ -755,7 +755,7 @@ export default function BlogContentStudio() {
                 {blogIdeas && blogIdeas.length > 0 ? (
                   <div className="grid gap-4">
                     {blogIdeas.map((idea) => (
-                      <div key={idea.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <div key={idea.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:[background-color:var(--custom-dark)] transition-colors">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
@@ -900,9 +900,9 @@ export default function BlogContentStudio() {
                           key={day.toISOString()}
                           className={`
                             min-h-[80px] p-2 border rounded-lg cursor-pointer transition-all
-                            ${isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}
+                            ${isCurrentMonth ? 'bg-white dark:[background-color:var(--custom-dark)]' : 'bg-gray-50 dark:[background-color:var(--custom-dark)]'}
                             ${isSelected ? 'ring-2 ring-purple-500' : ''}
-                            ${isToday_ ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' : 'border-gray-200 dark:border-gray-700'}
+                            ${isToday_ ? 'bg-purple-50 dark:[background-color:var(--custom-dark)]/20 border-purple-200 dark:border-purple-800' : 'border-gray-200 dark:border-gray-700'}
                             hover:bg-gray-50 dark:hover:bg-gray-750
                           `}
                           onClick={() => setSelectedDate(day)}
@@ -927,9 +927,9 @@ export default function BlogContentStudio() {
                                 key={post.id}
                                 className={`
                                   px-2 py-1 rounded text-xs truncate
-                                  ${post.status === 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
-                                  ${post.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
-                                  ${post.status === 'draft' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' : ''}
+                                  ${post.status === 'published' ? 'bg-green-100 text-green-800 dark:[background-color:var(--custom-dark)]/30 dark:text-green-400' : ''}
+                                  ${post.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:[background-color:var(--custom-dark)]/30 dark:text-blue-400' : ''}
+                                  ${post.status === 'draft' ? 'bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-300' : ''}
                                 `}
                                 title={post.title}
                               >
@@ -937,7 +937,7 @@ export default function BlogContentStudio() {
                               </div>
                             ))}
                             {dayPosts.length > 2 && (
-                              <div className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400">
+                              <div className="px-2 py-1 bg-gray-100 dark:[background-color:var(--custom-dark)] rounded text-xs text-gray-600 dark:text-gray-400">
                                 +{dayPosts.length - 2} more
                               </div>
                             )}
@@ -987,7 +987,7 @@ export default function BlogContentStudio() {
                             {dayPosts.map((post) => (
                               <div
                                 key={post.id}
-                                className="flex items-start gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                className="flex items-start gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:[background-color:var(--custom-dark)] transition-colors"
                               >
                                 <div className="flex-shrink-0 mt-1">
                                   {post.status === 'published' && (
@@ -1189,7 +1189,7 @@ export default function BlogContentStudio() {
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 5)
                     .map(([category, count]) => (
-                      <div key={category} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <div key={category} className="flex items-center justify-between p-2 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded">
                         <span className="font-medium capitalize">{category}</span>
                         <Badge>{count}</Badge>
                       </div>
@@ -1222,7 +1222,7 @@ export default function BlogContentStudio() {
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 5)
                     .map(([platform, count]) => (
-                      <div key={platform} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <div key={platform} className="flex items-center justify-between p-2 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded">
                         <span className="font-medium capitalize">{platform}</span>
                         <Badge>{count}</Badge>
                       </div>
@@ -1248,7 +1248,7 @@ export default function BlogContentStudio() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {['draft', 'scheduled', 'published', 'archived'].map(status => (
-                  <div key={status} className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div key={status} className="text-center p-4 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded-lg">
                     <div className="text-2xl font-bold mb-2">
                       {blogPosts?.filter(p => p.status === status).length || 0}
                     </div>

@@ -44,7 +44,7 @@ export default function RheondaOgletreeBlog() {
       />
       
       {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
+      <header className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <Link href="/">
@@ -84,7 +84,7 @@ export default function RheondaOgletreeBlog() {
             </div>
             
             {/* Main Coming Soon Display */}
-            <Card className="relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
+            <Card className="relative bg-white/60 dark:[background-color:var(--custom-dark)]/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
               <CardContent className="p-12">
                 <div className="mb-6">
                   <div className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
@@ -129,7 +129,7 @@ export default function RheondaOgletreeBlog() {
 
           {/* Inspirational Quote */}
           <div className="mt-12">
-            <div className="bg-white/40 dark:bg-gray-900/40 backdrop-blur-sm rounded-lg p-6 border border-purple-200/30 dark:border-purple-800/30">
+            <div className="bg-white/40 dark:[background-color:var(--custom-dark)]/40 backdrop-blur-sm rounded-lg p-6 border border-purple-200/30 dark:border-purple-800/30">
               <blockquote className="text-lg font-light text-gray-700 dark:text-gray-200 italic">
                 "The best time to plant a tree was 20 years ago. The second best time is now."
               </blockquote>
@@ -144,7 +144,7 @@ export default function RheondaOgletreeBlog() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800">
+      <footer className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Built with transparency and accountability in mind. 

@@ -224,11 +224,11 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose, isReadOnly = f
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      case 'draft': return 'bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-200';
       case 'scheduled': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200';
       case 'published': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
       case 'archived': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      default: return 'bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-200';
     }
   };
 
@@ -237,7 +237,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose, isReadOnly = f
       case 'low': return 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200';
       case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200';
       case 'high': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+      default: return 'bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)] dark:text-gray-200';
     }
   };
 
@@ -427,7 +427,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose, isReadOnly = f
                 
                 {/* Rich Text Editor Toolbar */}
                 {!isReadOnly && (
-                <div className="border rounded-t-lg p-3 bg-gray-50 dark:bg-gray-800 border-b-0">
+                <div className="border rounded-t-lg p-3 bg-gray-50 dark:[background-color:var(--custom-dark)] border-b-0">
                   <div className="flex flex-wrap gap-1">
                     {/* Heading buttons */}
                     <Button
@@ -654,20 +654,20 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose, isReadOnly = f
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="text-center p-4 bg-blue-50 dark:[background-color:var(--custom-dark)]/20 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600">
                       {formData.content.split(' ').filter(word => word.trim().length > 0).length}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Words</div>
                   </div>
-                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="text-center p-4 bg-green-50 dark:[background-color:var(--custom-dark)]/20 rounded-lg">
                     <div className="text-2xl font-bold text-green-600">
                       {Math.ceil(formData.content.split(' ').filter(word => word.trim().length > 0).length / 200)}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Min Read</div>
                   </div>
                 </div>
-                <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <div className="text-center p-4 bg-purple-50 dark:[background-color:var(--custom-dark)]/20 rounded-lg">
                   <div className="text-2xl font-bold text-purple-600">
                     {formData.content.length}
                   </div>
@@ -719,7 +719,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ postId, onClose, isReadOnly = f
                 </div>
               </div>
 
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="p-4 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded-lg">
                 <h4 className="font-medium mb-2">Search Preview</h4>
                 <div className="space-y-1">
                   <div className="text-blue-600 text-lg">
