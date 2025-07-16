@@ -280,7 +280,7 @@ export default function BlogContentStudio() {
         </div>
       </div>
       {/* Quick Actions Bar */}
-      <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+      <div className="flex items-center gap-4 p-4 dark:bg-gray-900 rounded-lg bg-[#17111d]">
         <div className="flex items-center gap-2">
           <PenTool className="h-5 w-5 text-purple-600" />
           <span 
