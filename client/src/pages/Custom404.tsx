@@ -3,7 +3,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Sparkles, Home } from "lucide-react";
 import { Link } from "wouter";
-import { SEOHead } from "../components/SEOHead";
+import SEOHead from "../components/SEOHead";
 
 export default function Custom404() {
   return (
