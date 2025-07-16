@@ -219,10 +219,10 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-gray-100 text-gray-700 dark:[background-color:var(--custom-dark)] dark:text-gray-300";
-      case "paused": return "bg-gray-100 text-gray-600 dark:[background-color:var(--custom-dark)] dark:text-gray-400";
-      case "completed": return "bg-gray-100 text-gray-500 dark:[background-color:var(--custom-dark)] dark:text-gray-500";
-      default: return "bg-gray-100 text-gray-500 dark:[background-color:var(--custom-dark)] dark:text-gray-400";
+      case "active": return "bg-gray-100 text-gray-700 dark:bg-[#17111d] dark:text-gray-300";
+      case "paused": return "bg-gray-100 text-gray-600 dark:bg-[#17111d] dark:text-gray-400";
+      case "completed": return "bg-gray-100 text-gray-500 dark:bg-[#17111d] dark:text-gray-500";
+      default: return "bg-gray-100 text-gray-500 dark:bg-[#17111d] dark:text-gray-400";
     }
   }
 
@@ -257,10 +257,10 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   };
 
   return (
-    <div className="min-h-screen bg-white dark:[background-color:var(--custom-dark)] p-4">
+    <div className="min-h-screen bg-white dark:bg-[#17111d] p-4">
       {/* Compact Header Section */}
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="bg-white dark:[background-color:var(--custom-dark)] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-white dark:bg-[#17111d] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center justify-between">
               <div>
@@ -309,8 +309,8 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <div 
               className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-colors ${
                 selectedFilter === null 
-                  ? 'bg-gray-200 dark:[background-color:var(--custom-dark)] text-gray-900 dark:text-gray-100' 
-                  : 'bg-gray-100 dark:[background-color:var(--custom-dark)] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:[background-color:var(--custom-dark)]'
+                  ? 'bg-gray-200 dark:bg-[#17111d] text-gray-900 dark:text-gray-100' 
+                  : 'bg-gray-100 dark:bg-[#17111d] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:[background-color:var(--custom-dark)]'
               }`}
               onClick={() => setSelectedFilter(null)}
             >
@@ -333,7 +333,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
         </div>
 
         {/* Mini-Game Block Studio Section */}
-        <div className="bg-white dark:[background-color:var(--custom-dark)] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-[#17111d] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
@@ -474,7 +474,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                         
                         {/* Enhanced Progress Bar */}
                         <div className="relative">
-                          <div className="h-2 bg-gray-200 dark:[background-color:var(--custom-dark)] rounded-full overflow-hidden">
+                          <div className="h-2 bg-gray-200 dark:bg-[#17111d] rounded-full overflow-hidden">
                             <div 
                               className="h-full rounded-full transition-all duration-1000 shadow-sm"
                               style={{ 

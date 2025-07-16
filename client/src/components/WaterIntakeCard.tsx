@@ -30,7 +30,7 @@ export default function WaterIntakeCard({ selectedDate, isEditable = true }: Wat
   };
 
   return (
-    <Card className={`bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
+    <Card className={`bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
       !isEditable ? 'opacity-60' : ''
     }`}>
       <CardContent className="p-6">

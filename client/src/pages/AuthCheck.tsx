@@ -64,7 +64,7 @@ export default function AuthCheck() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Authentication Status */}
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:[background-color:var(--custom-dark)]">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-[#17111d]">
                 <div className="flex items-center gap-3">
                   <User className="h-5 w-5 text-purple-600" />
                   <span className="font-medium">Logged In</span>
@@ -75,7 +75,7 @@ export default function AuthCheck() {
               </div>
 
               {/* Admin Status */}
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:[background-color:var(--custom-dark)]">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-[#17111d]">
                 <div className="flex items-center gap-3">
                   <Shield className="h-5 w-5 text-purple-600" />
                   <span className="font-medium">Admin Access</span>
@@ -87,7 +87,7 @@ export default function AuthCheck() {
 
               {/* User Info */}
               {authStatus?.user && (
-                <div className="p-4 rounded-lg bg-gray-50 dark:[background-color:var(--custom-dark)]">
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-[#17111d]">
                   <h3 className="font-medium mb-3 flex items-center gap-2">
                     <User className="h-4 w-4" />
                     User Information
@@ -119,14 +119,14 @@ export default function AuthCheck() {
                 )}
 
                 {authStatus?.authenticated && !authStatus?.isAdmin && (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:[background-color:var(--custom-dark)]/20 text-blue-700 dark:text-blue-300">
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-[#17111d]/20 text-blue-700 dark:text-blue-300">
                     <AlertCircle className="h-4 w-4" />
                     <span className="text-sm">You are logged in but don't have admin access to the dashboard.</span>
                   </div>
                 )}
 
                 {authStatus?.isAdmin && (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:[background-color:var(--custom-dark)]/20 text-green-700 dark:text-green-300">
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-[#17111d]/20 text-green-700 dark:text-green-300">
                     <Shield className="h-4 w-4" />
                     <span className="text-sm">You have full admin access to the dashboard!</span>
                   </div>

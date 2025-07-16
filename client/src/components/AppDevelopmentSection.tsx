@@ -114,14 +114,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const getStatusColor = (status: string) => {
     const colors = {
-      planning: "bg-blue-100 text-blue-800 dark:[background-color:var(--custom-dark)]/30 dark:text-blue-400",
-      in_progress: "bg-yellow-100 text-yellow-800 dark:[background-color:var(--custom-dark)]/30 dark:text-yellow-400",
-      testing: "bg-purple-100 text-purple-800 dark:[background-color:var(--custom-dark)]/30 dark:text-purple-400",
-      deployed: "bg-green-100 text-green-800 dark:[background-color:var(--custom-dark)]/30 dark:text-green-400",
-      on_hold: "bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)]/30 dark:text-gray-400",
-      todo: "bg-gray-100 text-gray-800 dark:[background-color:var(--custom-dark)]/30 dark:text-gray-400",
+      planning: "bg-blue-100 text-blue-800 dark:bg-[#17111d]/30 dark:text-blue-400",
+      in_progress: "bg-yellow-100 text-yellow-800 dark:bg-[#17111d]/30 dark:text-yellow-400",
+      testing: "bg-purple-100 text-purple-800 dark:bg-[#17111d]/30 dark:text-purple-400",
+      deployed: "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400",
+      on_hold: "bg-gray-100 text-gray-800 dark:bg-[#17111d]/30 dark:text-gray-400",
+      todo: "bg-gray-100 text-gray-800 dark:bg-[#17111d]/30 dark:text-gray-400",
       review: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-      done: "bg-green-100 text-green-800 dark:[background-color:var(--custom-dark)]/30 dark:text-green-400"
+      done: "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400"
     };
     return colors[status as keyof typeof colors] || colors.planning;
   };
@@ -358,7 +358,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <CardContent>
               <div className="space-y-4">
                 {activeProjects.map((project) => (
-                  <div key={project.id} className="p-4 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl">
+                  <div key={project.id} className="p-4 bg-white/60 dark:bg-[#17111d]/60 rounded-xl">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
@@ -578,7 +578,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <select
                 value={selectedProject || ""}
                 onChange={(e) => setSelectedProject(e.target.value ? Number(e.target.value) : null)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white dark:[background-color:var(--custom-dark)]"
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-[#17111d]"
               >
                 <option value="">All Projects</option>
                 {projects.map(p => (
@@ -646,7 +646,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   </div>
 
                   {task.comments && (
-                    <div className="mt-3 p-2 bg-gray-50 dark:[background-color:var(--custom-dark)]/50 rounded text-sm">
+                    <div className="mt-3 p-2 bg-gray-50 dark:bg-[#17111d]/50 rounded text-sm">
                       <span className="text-muted-foreground dark:text-gray-400">Notes:</span>
                       <span className="ml-1">{task.comments}</span>
                     </div>
@@ -716,7 +716,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent>
                 <div className="space-y-4">
                   {testingTasks.map((task) => (
-                    <div key={task.id} className="p-4 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl border-l-4 border-orange-400">
+                    <div key={task.id} className="p-4 bg-white/60 dark:bg-[#17111d]/60 rounded-xl border-l-4 border-orange-400">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
@@ -864,7 +864,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {projects.map((project) => (
-                  <div key={project.id} className="p-4 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl">
+                  <div key={project.id} className="p-4 bg-white/60 dark:bg-[#17111d]/60 rounded-xl">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
                         {getProjectIcon(project.projectType)}
@@ -913,7 +913,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     <input
                       type="text"
                       placeholder="What are you working on?"
-                      className={`w-full p-3 border rounded-lg dark:[background-color:var(--custom-dark)] dark:border-gray-600 ${
+                      className={`w-full p-3 border rounded-lg dark:bg-[#17111d] dark:border-gray-600 ${
                         isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                       value={activeTask}
@@ -925,7 +925,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <div>
                     <label className="block text-sm font-medium mb-2">Project</label>
                     <select
-                      className={`w-full p-3 border rounded-lg dark:[background-color:var(--custom-dark)] dark:border-gray-600 ${
+                      className={`w-full p-3 border rounded-lg dark:bg-[#17111d] dark:border-gray-600 ${
                         isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                       value={selectedProject || ""}
@@ -992,7 +992,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent>
                 <div className="space-y-3">
                   {timeEntries.map((entry) => (
-                    <div key={entry.id} className="p-4 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl border">
+                    <div key={entry.id} className="p-4 bg-white/60 dark:bg-[#17111d]/60 rounded-xl border">
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="font-medium text-gray-900 dark:text-white">

@@ -60,7 +60,7 @@ export default function QuickAddModal({ open, onOpenChange, selectedDate }: Quic
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-md bg-white/95 dark:[background-color:var(--custom-dark)]/95 backdrop-blur-sm border-0 rounded-3xl shadow-2xl">
+      <DialogContent className="w-full max-w-md bg-white/95 dark:bg-[#17111d]/95 backdrop-blur-sm border-0 rounded-3xl shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent text-center">
             Quick Add Entry ✨

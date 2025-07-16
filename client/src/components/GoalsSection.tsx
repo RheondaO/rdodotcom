@@ -197,7 +197,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
               New Goal {goals.length >= 5 ? "(5/5)" : `(${goals.length}/5)`}
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-white dark:[background-color:var(--custom-dark)] border-0 rounded-2xl">
+          <DialogContent className="bg-white dark:bg-[#17111d] border-0 rounded-2xl">
             <DialogHeader>
               <DialogTitle className="text-gray-900 dark:text-white">Create New Goal</DialogTitle>
             </DialogHeader>
@@ -209,7 +209,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
                   value={newGoal.title}
                   onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
                   placeholder="e.g., Read 12 books this year"
-                  className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                  className="dark:bg-[#17111d] dark:text-white"
                 />
               </div>
               
@@ -220,7 +220,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
                   value={newGoal.description}
                   onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
                   placeholder="Why is this goal important to you?"
-                  className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                  className="dark:bg-[#17111d] dark:text-white"
                 />
               </div>
               
@@ -228,7 +228,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
                 <div>
                   <Label htmlFor="category" className="text-gray-700 dark:text-gray-300">Category</Label>
                   <Select value={newGoal.category} onValueChange={(value) => setNewGoal({ ...newGoal, category: value })}>
-                    <SelectTrigger className="dark:[background-color:var(--custom-dark)] dark:text-white">
+                    <SelectTrigger className="dark:bg-[#17111d] dark:text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -246,7 +246,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
                     type="date"
                     value={newGoal.targetDate}
                     onChange={(e) => setNewGoal({ ...newGoal, targetDate: e.target.value })}
-                    className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                    className="dark:bg-[#17111d] dark:text-white"
                   />
                 </div>
               </div>
@@ -260,7 +260,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
                     value={newGoal.targetValue || ""}
                     onChange={(e) => setNewGoal({ ...newGoal, targetValue: e.target.value })}
                     placeholder="e.g., 12"
-                    className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                    className="dark:bg-[#17111d] dark:text-white"
                   />
                 </div>
                 
@@ -271,7 +271,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
                     value={newGoal.unit}
                     onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })}
                     placeholder="e.g., books, dollars, hours"
-                    className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                    className="dark:bg-[#17111d] dark:text-white"
                   />
                 </div>
               </div>
@@ -380,7 +380,7 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: Goa
   };
 
   return (
-    <div className={`bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl p-4 backdrop-blur-sm border-l-4 ${
+    <div className={`bg-white/60 dark:bg-[#17111d]/60 rounded-xl p-4 backdrop-blur-sm border-l-4 ${
       isCompleted ? 'border-yellow-400' : 'border-pink-400'
     }`}>
       <div className="space-y-4">
@@ -450,7 +450,7 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: Goa
 
         {/* Edit Progress */}
         {isEditing && !isCompleted && (
-          <div className="space-y-2 p-3 bg-gray-50 dark:[background-color:var(--custom-dark)] rounded-lg">
+          <div className="space-y-2 p-3 bg-gray-50 dark:bg-[#17111d] rounded-lg">
             <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Update Progress
             </Label>
@@ -459,7 +459,7 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: Goa
                 type="number"
                 value={editValue || ""}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="flex-1 dark:[background-color:var(--custom-dark)] dark:text-white"
+                className="flex-1 dark:bg-[#17111d] dark:text-white"
                 min="0"
                 max={goal.targetValue || undefined}
               />

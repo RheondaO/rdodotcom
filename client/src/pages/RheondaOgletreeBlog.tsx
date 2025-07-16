@@ -44,7 +44,7 @@ export default function RheondaOgletreeBlog() {
       />
       
       {/* Header */}
-      <header className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
+      <header className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <Link href="/">

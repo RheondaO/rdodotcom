@@ -236,7 +236,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
               Add Medication
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-white dark:[background-color:var(--custom-dark)] border-0 rounded-2xl">
+          <DialogContent className="bg-white dark:bg-[#17111d] border-0 rounded-2xl">
             <DialogHeader>
               <DialogTitle className="text-gray-900 dark:text-white">Add New Medication</DialogTitle>
             </DialogHeader>
@@ -248,7 +248,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
                   value={newMedication.name}
                   onChange={(e) => setNewMedication({ ...newMedication, name: e.target.value })}
                   placeholder="e.g., Vitamin D3"
-                  className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                  className="dark:bg-[#17111d] dark:text-white"
                 />
               </div>
               
@@ -259,14 +259,14 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
                   value={newMedication.dosage}
                   onChange={(e) => setNewMedication({ ...newMedication, dosage: e.target.value })}
                   placeholder="e.g., 2000 IU, 500mg"
-                  className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                  className="dark:bg-[#17111d] dark:text-white"
                 />
               </div>
               
               <div>
                 <Label>Frequency</Label>
                 <Select value={newMedication.frequency} onValueChange={(value) => setNewMedication({ ...newMedication, frequency: value })}>
-                  <SelectTrigger className="dark:[background-color:var(--custom-dark)] dark:text-white">
+                  <SelectTrigger className="dark:bg-[#17111d] dark:text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -308,7 +308,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
 
       {/* Today's Health Tracking */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent dark:text-white">
               <Activity className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -386,7 +386,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
         </Card>
 
         {/* Symptom Tracking */}
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent dark:text-white">
               <Thermometer className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -407,7 +407,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
                       className={`p-3 rounded-lg text-center transition-all duration-200 text-sm ${
                         todaysHealth.symptoms.includes(symptom.value)
                           ? 'bg-gradient-to-r from-red-400 to-pink-400 text-white shadow-lg'
-                          : 'bg-white/60 dark:[background-color:var(--custom-dark)]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)]'
+                          : 'bg-white/60 dark:bg-[#17111d]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)]'
                       }`}
                     >
                       <div className="text-lg mb-1">{symptom.icon}</div>
@@ -422,7 +422,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
       </div>
 
       {/* Period Tracking */}
-      <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
             <Droplets className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -443,7 +443,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
                     className={`p-3 rounded-lg text-center transition-all duration-200 capitalize ${
                       todaysHealth.periodFlow === flow
                         ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-lg'
-                        : 'bg-white/60 dark:[background-color:var(--custom-dark)]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)]'
+                        : 'bg-white/60 dark:bg-[#17111d]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)]'
                     }`}
                   >
                     {flow}
@@ -464,7 +464,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
                     className={`p-2 rounded-lg text-center transition-all duration-200 text-xs ${
                       todaysHealth.periodSymptoms.includes(symptom.value)
                         ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-lg'
-                        : 'bg-white/60 dark:[background-color:var(--custom-dark)]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)]'
+                        : 'bg-white/60 dark:bg-[#17111d]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)]'
                     }`}
                   >
                     <div className="text-sm mb-1">{symptom.icon}</div>
@@ -479,7 +479,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
 
       {/* Medication Management */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Bell className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -494,7 +494,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
             ) : (
               <div className="space-y-3">
                 {upcomingReminders.map(med => (
-                  <div key={med.id} className="bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-lg p-3 backdrop-blur-sm">
+                  <div key={med.id} className="bg-white/60 dark:bg-[#17111d]/60 rounded-lg p-3 backdrop-blur-sm">
                     <div className="flex items-center justify-between">
                       <div>
                         <h5 className="font-medium text-gray-900 dark:text-white">{med.name}</h5>
@@ -518,7 +518,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
           </CardContent>
         </Card>
 
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent dark:text-white">
               <Pill className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -533,7 +533,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
             ) : (
               <div className="space-y-3">
                 {medications.filter(m => m.isActive).map(med => (
-                  <div key={med.id} className="bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-lg p-3 backdrop-blur-sm">
+                  <div key={med.id} className="bg-white/60 dark:bg-[#17111d]/60 rounded-lg p-3 backdrop-blur-sm">
                     <div className="flex items-start justify-between">
                       <div>
                         <h5 className="font-medium text-gray-900 dark:text-white">{med.name}</h5>

@@ -216,7 +216,7 @@ function MonthlyStats({ monthDays }: MonthlyStatsProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
         <CardContent className="p-4 text-center">
           <div className="text-2xl font-heading font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-1">
             {averageWater}
@@ -226,7 +226,7 @@ function MonthlyStats({ monthDays }: MonthlyStatsProps) {
         </CardContent>
       </Card>
 
-      <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
         <CardContent className="p-4 text-center">
           <div className="text-2xl font-heading font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1">
             {exercisePercentage}%
@@ -236,7 +236,7 @@ function MonthlyStats({ monthDays }: MonthlyStatsProps) {
         </CardContent>
       </Card>
 
-      <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
         <CardContent className="p-4 text-center">
           <div className="text-2xl font-heading font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-1">
             {averageMeals}
@@ -246,7 +246,7 @@ function MonthlyStats({ monthDays }: MonthlyStatsProps) {
         </CardContent>
       </Card>
 
-      <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
         <CardContent className="p-4 text-center">
           <div className="text-2xl font-heading font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-1">
             {totalWorkHours.toFixed(0)}h

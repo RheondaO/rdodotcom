@@ -7,7 +7,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
       {/* Header */}
-      <header className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
+      <header className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/">
             <div className="flex items-center space-x-3 cursor-pointer">
@@ -41,7 +41,7 @@ export default function NotFound() {
             </div>
             
             {/* Main 404 Display */}
-            <Card className="relative bg-white/60 dark:[background-color:var(--custom-dark)]/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
+            <Card className="relative bg-white/60 dark:bg-[#17111d]/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
               <CardContent className="p-12">
                 <div className="mb-6">
                   <div className="text-8xl md:text-9xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
@@ -86,7 +86,7 @@ export default function NotFound() {
 
           {/* Inspirational Quote */}
           <div className="mt-12">
-            <div className="bg-white/40 dark:[background-color:var(--custom-dark)]/40 backdrop-blur-sm rounded-lg p-6 border border-purple-200/30 dark:border-purple-800/30">
+            <div className="bg-white/40 dark:bg-[#17111d]/40 backdrop-blur-sm rounded-lg p-6 border border-purple-200/30 dark:border-purple-800/30">
               <blockquote className="text-lg font-light text-gray-700 dark:text-gray-200 italic">
                 "Not all who wander are lost... but this page definitely is."
               </blockquote>
@@ -101,7 +101,7 @@ export default function NotFound() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800">
+      <footer className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-md border-t border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Built with transparency and accountability in mind. 

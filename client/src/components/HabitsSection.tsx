@@ -272,7 +272,7 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
               New Habit
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-white dark:[background-color:var(--custom-dark)] border-0 rounded-2xl">
+          <DialogContent className="bg-white dark:bg-[#17111d] border-0 rounded-2xl">
             <DialogHeader>
               <DialogTitle className="text-gray-900 dark:text-white">Create New Habit</DialogTitle>
             </DialogHeader>
@@ -284,7 +284,7 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                   value={newHabit.name}
                   onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
                   placeholder="e.g., Morning walk"
-                  className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                  className="dark:bg-[#17111d] dark:text-white"
                 />
               </div>
               
@@ -295,7 +295,7 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                   value={newHabit.description}
                   onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
                   placeholder="Brief description of the habit"
-                  className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                  className="dark:bg-[#17111d] dark:text-white"
                 />
               </div>
               
@@ -303,7 +303,7 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                 <div>
                   <Label htmlFor="habitCategory" className="text-gray-700 dark:text-gray-300">Category</Label>
                   <Select value={newHabit.category} onValueChange={(value) => setNewHabit({ ...newHabit, category: value })}>
-                    <SelectTrigger className="dark:[background-color:var(--custom-dark)] dark:text-white">
+                    <SelectTrigger className="dark:bg-[#17111d] dark:text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -324,7 +324,7 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                     value={newHabit.targetFrequency}
                     onChange={(e) => setNewHabit({ ...newHabit, targetFrequency: Number(e.target.value) })}
                     min="1"
-                    className="dark:[background-color:var(--custom-dark)] dark:text-white"
+                    className="dark:bg-[#17111d] dark:text-white"
                   />
                 </div>
               </div>
@@ -415,10 +415,10 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
                     disabled={isReadOnly || !isEditable}
                     className={`p-3 rounded-xl text-center transition-all duration-200 ${
                       isReadOnly || !isEditable
-                        ? 'bg-gray-200 dark:[background-color:var(--custom-dark)] text-gray-400 cursor-not-allowed opacity-50'
+                        ? 'bg-gray-200 dark:bg-[#17111d] text-gray-400 cursor-not-allowed opacity-50'
                         : dailyMood.mood === mood.value
                         ? 'bg-gradient-to-r from-pink-400 to-purple-500 text-white shadow-lg scale-105'
-                        : 'bg-white/60 dark:[background-color:var(--custom-dark)]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)]'
+                        : 'bg-white/60 dark:bg-[#17111d]/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)]'
                     }`}
                   >
                     <div className="text-2xl mb-1">{mood.icon}</div>
@@ -536,7 +536,7 @@ function HabitCard({ habit, onToggle, isEditable }: HabitCardProps) {
   const category = categoryInfo[habit.category as keyof typeof categoryInfo] || categoryInfo.health;
 
   return (
-    <div className={`bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-xl p-4 backdrop-blur-sm border-l-4 ${
+    <div className={`bg-white/60 dark:bg-[#17111d]/60 rounded-xl p-4 backdrop-blur-sm border-l-4 ${
       habit.completedToday ? 'border-green-400' : 'border-gray-300 dark:border-gray-600'
     }`}>
       <div className="flex items-center justify-between">
@@ -581,7 +581,7 @@ function HabitCard({ habit, onToggle, isEditable }: HabitCardProps) {
           disabled={!isEditable}
           className={`w-12 h-12 rounded-xl ${
             !isEditable
-              ? 'bg-gray-200 dark:[background-color:var(--custom-dark)] text-gray-400 cursor-not-allowed opacity-50'
+              ? 'bg-gray-200 dark:bg-[#17111d] text-gray-400 cursor-not-allowed opacity-50'
               : habit.completedToday
               ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-white'
               : 'border-gray-300 dark:border-gray-600 hover:bg-green-50 dark:hover:bg-green-900'

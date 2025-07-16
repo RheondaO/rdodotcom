@@ -166,7 +166,7 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
                     {item.name}
                   </span>
                   {item.estimatedPrice && (
-                    <span className="text-sm text-muted-foreground bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-lg px-2 py-1">
+                    <span className="text-sm text-muted-foreground bg-white/60 dark:bg-[#17111d]/60 rounded-lg px-2 py-1">
                       ${parseFloat(item.estimatedPrice).toFixed(2)}
                     </span>
                   )}

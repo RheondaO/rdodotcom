@@ -43,7 +43,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
         <WaterIntakeCard selectedDate={selectedDate} isEditable={isEditable} />
 
         {/* Exercise Card */}
-        <Card className={`bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
+        <Card className={`bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
           !isEditable ? 'opacity-60' : ''
         }`}>
           <CardContent className="p-6">
@@ -76,7 +76,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
             </div>
             
             {dailyEntry?.exerciseNotes && (
-              <div className="text-xs text-gray-600 dark:text-gray-300 bg-pink-50 dark:[background-color:var(--custom-dark)] rounded-xl p-3 border border-pink-100 dark:border-gray-600">
+              <div className="text-xs text-gray-600 dark:text-gray-300 bg-pink-50 dark:bg-[#17111d] rounded-xl p-3 border border-pink-100 dark:border-gray-600">
                 {dailyEntry.exerciseNotes}
               </div>
             )}
@@ -84,7 +84,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
         </Card>
 
         {/* Sleep Card */}
-        <Card className={`bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
+        <Card className={`bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
           !isEditable ? 'opacity-60' : ''
         }`}>
           <CardContent className="p-6">
@@ -111,7 +111,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
               </div>
               {dailyEntry?.wakeUpTime && (
                 <>
-                  <div className="text-sm text-muted-foreground mb-3 bg-purple-50 dark:[background-color:var(--custom-dark)]/30 rounded-lg px-3 py-1">
+                  <div className="text-sm text-muted-foreground mb-3 bg-purple-50 dark:bg-[#17111d]/30 rounded-lg px-3 py-1">
                     Wake: {dailyEntry.wakeUpTime}
                   </div>
                 </>
@@ -126,7 +126,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
         </Card>
 
         {/* Meals Card */}
-        <Card className={`bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
+        <Card className={`bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
           !isEditable ? 'opacity-60' : ''
         }`}>
           <CardContent className="p-6">
@@ -151,7 +151,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
               <div className="flex items-center justify-between py-3 px-3 bg-gradient-to-r from-orange-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 rounded-xl">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Breakfast</span>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
-                  dailyEntry?.breakfastCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'border-2 border-gray-300 dark:border-gray-600 bg-white dark:[background-color:var(--custom-dark)]'
+                  dailyEntry?.breakfastCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-[#17111d]'
                 }`}>
                   {dailyEntry?.breakfastCompleted && (
                     <div className="w-3 h-3 bg-white rounded-full"></div>
@@ -161,7 +161,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
               <div className="flex items-center justify-between py-3 px-3 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-gray-800 dark:to-gray-700 rounded-xl">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Lunch</span>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
-                  dailyEntry?.lunchCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'border-2 border-gray-300 dark:border-gray-600 bg-white dark:[background-color:var(--custom-dark)]'
+                  dailyEntry?.lunchCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-[#17111d]'
                 }`}>
                   {dailyEntry?.lunchCompleted && (
                     <div className="w-3 h-3 bg-white rounded-full"></div>
@@ -171,7 +171,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
               <div className="flex items-center justify-between py-3 px-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-xl">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Dinner</span>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm ${
-                  dailyEntry?.dinnerCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'border-2 border-gray-300 dark:border-gray-600 bg-white dark:[background-color:var(--custom-dark)]'
+                  dailyEntry?.dinnerCompleted ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-[#17111d]'
                 }`}>
                   {dailyEntry?.dinnerCompleted && (
                     <div className="w-3 h-3 bg-white rounded-full"></div>
