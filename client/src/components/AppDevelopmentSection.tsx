@@ -250,7 +250,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
       {/* Navigation Tabs */}
       <div className="flex justify-center">
-        <div className="flex items-center space-x-2 bg-white/60 dark:[background-color:var(--custom-dark)]/60 rounded-2xl p-1 shadow-sm backdrop-blur-sm">
+        <div className="flex items-center space-x-2 bg-white/60 dark:[background-color:#0c0910] rounded-2xl p-1 shadow-sm backdrop-blur-sm border border-pink-200/50 dark:border-pink-800/50">
           {[
             { key: "overview", label: "Overview", icon: BarChart3 },
             { key: "projects", label: "Projects", icon: Code2 },
