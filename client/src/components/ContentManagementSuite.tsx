@@ -321,7 +321,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 key={tag}
                 className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-all duration-200 ${
                   selectedFilter === tag 
-                    ? `${getTagColor(tag)} shadow-md transform scale-105` 
+                    ? `bg-white dark:bg-white text-gray-800 dark:text-gray-800 border border-gray-300 dark:border-gray-400 shadow-md transform scale-105` 
                     : `${getTagColor(tag)} opacity-75 hover:opacity-100 hover:shadow-sm hover:transform hover:scale-102`
                 }`}
                 onClick={() => setSelectedFilter(tag)}
