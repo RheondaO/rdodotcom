@@ -104,7 +104,7 @@ export default function PublicView() {
       {/* Inspirational Quote - Hero */}
       <section className="py-8">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <div className="relative bg-white/60 dark:[background-color:var(--custom-dark)]/40 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-pink-200/50 dark:border-pink-800/50">
+          <div className="relative bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-pink-200/50 dark:border-pink-800/50">
             <div className="absolute top-4 left-6 text-pink-300 dark:text-pink-400">
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
