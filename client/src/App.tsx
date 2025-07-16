@@ -62,7 +62,7 @@ function App() {
           <Route path="/about">
             <About />
           </Route>
-          <Route path="/rheonda-ogletree-blog">
+          <Route path="/blog">
             <RheondaOgletreeBlog />
           </Route>
           <Route path="/">

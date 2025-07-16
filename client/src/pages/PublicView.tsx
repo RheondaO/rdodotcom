@@ -258,7 +258,7 @@ export default function PublicView() {
               Meet the Admin
             </Button>
             <Button 
-              onClick={() => window.location.href = '/rheonda-ogletree-blog'}
+              onClick={() => window.location.href = '/blog'}
               variant="outline"
               className="border-purple-200 text-purple-600 hover:bg-purple-50"
             >

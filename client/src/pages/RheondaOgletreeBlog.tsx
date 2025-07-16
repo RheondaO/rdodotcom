@@ -14,7 +14,7 @@ export default function RheondaOgletreeBlog() {
     datePublished: "2025-01-16T00:00:00Z",
     dateModified: "2025-01-16T00:00:00Z",
     image: "https://belle-journal.replit.app/rheonda-blog-image.jpg",
-    url: "https://belle-journal.replit.app/rheonda-ogletree-blog",
+    url: "https://belle-journal.replit.app/blog",
     keywords: ["Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda", "digital wellness", "productivity expert", "Belle Journal", "personal development", "habit tracking", "life optimization"],
     wordCount: 1200,
     articleBody: `Rheonda Ogletree stands as a beacon of innovation in the digital wellness and productivity space. Known also as Rheonda D Ogletree, she has dedicated her career to helping individuals and organizations optimize their daily routines, build sustainable habits, and achieve meaningful personal growth through cutting-edge technology solutions.
@@ -40,7 +40,7 @@ export default function RheondaOgletreeBlog() {
         keywords={["Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda", "digital wellness", "productivity expert", "Belle Journal", "personal development", "habit tracking", "life optimization", "wellness technology", "Entrepreneurship", "Vibe Coding", "Replit", "Web App", "Prompt Engineer", "Prompt Engineering", "AI", "Artificial Intelligence", "Blogging", "Journal", "habit trackers", "girl boss", "business", "really obvious media lab", "really obvi media lab", "rotationonly", "rotationonly.mag", "rotationonly magazine", "rotationonly digital magazine", "really obvi media", "@rotationonly on apple music", "RODML"]}
         structuredData={generateBlogPostStructuredData(blogPost)}
         ogType="article"
-        canonicalUrl="https://belle-journal.replit.app/rheonda-ogletree-blog"
+        canonicalUrl="https://belle-journal.replit.app/blog"
       />
       
       {/* Header */}

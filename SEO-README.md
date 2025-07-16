@@ -58,7 +58,7 @@ Additional: "Entrepreneurship", "Vibe Coding", "Replit", "Web App", "Prompt Engi
 #### Content Pages
 1. **Home Page** (`/`) - Primary landing page with comprehensive SEO
 2. **About Page** (`/about`) - Dedicated biography and expertise page
-3. **Blog Article** (`/rheonda-ogletree-blog`) - SEO-optimized content piece
+3. **Blog Article** (`/blog`) - SEO-optimized content piece
 4. **Dashboard** (`/dashboard`) - Product demonstration page
 
 ### 4. Technical SEO
