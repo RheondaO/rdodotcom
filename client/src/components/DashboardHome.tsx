@@ -503,7 +503,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                 variant="outline"
                 size="sm"
                 disabled={isReadOnly}
-                className={`bg-white/60 dark:bg-gray-900/60 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white dark:hover:[background-color:var(--custom-dark)]'}`}
+                className={`bg-white/60 dark:bg-gray-900/60 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white dark:hover:bg-gray-800'}`}
               >
                 Open Content Studio →
               </Button>
@@ -812,7 +812,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               onClick={() => !isReadOnly && onNavigate('reports')}
               disabled={isReadOnly}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <span className="text-xs">Progress Reports</span>
@@ -822,7 +822,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               onClick={() => !isReadOnly && onNavigate('finances')}
               disabled={isReadOnly}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
               <span className="text-xs">Finances</span>
@@ -832,7 +832,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               onClick={() => !isReadOnly && onNavigate('groceries')}
               disabled={isReadOnly}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <CheckSquare className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               <span className="text-xs">Shopping</span>
@@ -842,7 +842,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               onClick={() => !isReadOnly && onNavigate('goals')}
               disabled={isReadOnly}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:[background-color:var(--custom-dark)] ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Award className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               <span className="text-xs">Achievements</span>
