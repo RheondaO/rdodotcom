@@ -191,10 +191,10 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="w-20 h-20 bg-gradient-to-r from-pink-400 to-purple-500 rounded-3xl flex items-center justify-center mx-auto shadow-lg">
-          <Home className="h-10 w-10 text-white" />
+          <Sparkles className="h-10 w-10 text-white" />
         </div>
         <div>
-          <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-heading font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
             Site Map
           </h1>
           <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
