@@ -289,7 +289,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
       </div>
 
       {/* Active Goals */}
-      <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+      <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
             <Target className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -324,7 +324,7 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
 
       {/* Completed Goals */}
       {completedGoals.length > 0 && (
-        <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Trophy className="h-5 w-5 text-yellow-500" />
