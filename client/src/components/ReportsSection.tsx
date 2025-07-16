@@ -171,8 +171,15 @@ const COLORS = ['#8B5CF6', '#06D6A0', '#FFD23F', '#EE6C4D'];
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">Reports & Analytics Dashboard</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
+              Reports & Analytics Dashboard
+            </h3>
+            <p className="text-muted-foreground dark:text-gray-300 mt-1">
+              Comprehensive insights and progress tracking across all metrics
+            </p>
+          </div>
           <div className="h-10 w-32 bg-gray-200 animate-pulse rounded"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

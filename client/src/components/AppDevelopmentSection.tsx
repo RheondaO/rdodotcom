@@ -237,16 +237,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="w-20 h-20 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-3xl flex items-center justify-center mx-auto shadow-lg">
-          <Code2 className="h-10 w-10 text-white" />
-        </div>
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
+          <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
             AI App Development & Coding
-          </h1>
-          <p className="text-lg text-muted-foreground dark:text-gray-300 max-w-2xl mx-auto">
-            Manage your development projects with professional project management tools similar to Asana and Jira.
+          </h3>
+          <p className="text-muted-foreground dark:text-gray-300 mt-1">
+            Manage your development projects with professional project management tools
           </p>
         </div>
       </div>
