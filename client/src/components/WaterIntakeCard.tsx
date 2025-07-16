@@ -37,7 +37,7 @@ export default function WaterIntakeCard({ selectedDate, isEditable = true }: Wat
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full shadow-sm"></div>
-            <h4 className="font-heading font-semibold text-gray-800 dark:text-white">Water Intake</h4>
+            <h4 className="font-heading font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent dark:text-white">Water Intake</h4>
           </div>
           <Button 
             variant="ghost" 

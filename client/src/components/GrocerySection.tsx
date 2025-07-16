@@ -111,7 +111,7 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
       <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl overflow-hidden">
         <div className="p-6 border-b border-pink-100 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="font-heading font-semibold text-gray-800 dark:text-white">Shopping List</h4>
+            <h4 className="font-heading font-semibold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:text-white">Shopping List</h4>
           </div>
           
           <form onSubmit={!isReadOnly ? handleAddItem : (e) => e.preventDefault()} className="flex gap-3">

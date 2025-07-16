@@ -38,7 +38,7 @@ export default function WorkTimeSection({ selectedDate }: WorkTimeSectionProps) 
         <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-heading font-semibold text-gray-800">Work Hours</h4>
+              <h4 className="font-heading font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Work Hours</h4>
               <Button variant="ghost" size="sm" className="hover:bg-purple-50 rounded-xl">
                 <Edit className="h-4 w-4 text-purple-500" />
               </Button>
@@ -58,7 +58,7 @@ export default function WorkTimeSection({ selectedDate }: WorkTimeSectionProps) 
         <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-heading font-semibold text-gray-800">TV Time</h4>
+              <h4 className="font-heading font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">TV Time</h4>
               <Button variant="ghost" size="sm" className="hover:bg-blue-50 rounded-xl">
                 <Plus className="h-4 w-4 text-blue-500" />
               </Button>
@@ -77,7 +77,7 @@ export default function WorkTimeSection({ selectedDate }: WorkTimeSectionProps) 
         <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="font-heading font-semibold text-gray-800">Phone Time</h4>
+              <h4 className="font-heading font-semibold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">Phone Time</h4>
               <Button variant="ghost" size="sm" className="hover:bg-pink-50 rounded-xl">
                 <Smartphone className="h-4 w-4 text-pink-500" />
               </Button>

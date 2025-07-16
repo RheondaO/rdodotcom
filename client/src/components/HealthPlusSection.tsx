@@ -310,7 +310,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
+            <CardTitle className="flex items-center space-x-2 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent dark:text-white">
               <Activity className="h-5 w-5 text-pink-600 dark:text-pink-400" />
               <span>Today's Health Metrics</span>
             </CardTitle>
@@ -388,7 +388,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
         {/* Symptom Tracking */}
         <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
+            <CardTitle className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent dark:text-white">
               <Thermometer className="h-5 w-5 text-pink-600 dark:text-pink-400" />
               <span>Symptom Tracking</span>
             </CardTitle>
@@ -520,7 +520,7 @@ export default function HealthPlusSection({ selectedDate, isReadOnly = false }: 
 
         <Card className="bg-white/80 dark:[background-color:var(--custom-dark)]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
+            <CardTitle className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent dark:text-white">
               <Pill className="h-5 w-5 text-pink-600 dark:text-pink-400" />
               <span>All Medications ({medications.filter(m => m.isActive).length})</span>
             </CardTitle>
