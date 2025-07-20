@@ -9,7 +9,8 @@ import {
   createNotionTask, 
   updateNotionTask, 
   deleteNotionTask,
-  NOTION_TASKS_DATABASE_ID
+  NOTION_TASKS_DATABASE_ID,
+  NOTION_TIMEBLOCKS_DATABASE_ID
 } from "./notion";
 import { 
   insertDailyEntrySchema, 
@@ -1617,7 +1618,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasTasksUrl: !!process.env.NOTION_TASKS_URL,
         hasTimeBlocksUrl: !!process.env.NOTION_TIMEBLOCKS_URL,
         tasksDbId: NOTION_TASKS_DATABASE_ID ? `${NOTION_TASKS_DATABASE_ID.substring(0, 8)}...` : null,
-        timeBlocksDbId: NOTION_TIMEBLOCKS_DATABASE_ID ? `${NOTION_TIMEBLOCKS_DATABASE_ID.substring(0, 8)}...` : null
+        timeBlocksDbId: NOTION_TIMEBLOCKS_DATABASE_ID ? `${NOTION_TIMEBLOCKS_DATABASE_ID.substring(0, 8)}...` : null,
+        tasksDbIdFull: NOTION_TASKS_DATABASE_ID,
+        timeBlocksDbIdFull: NOTION_TIMEBLOCKS_DATABASE_ID
       };
       
       res.json({
