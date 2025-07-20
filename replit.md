@@ -147,6 +147,17 @@ Preferred communication style: Simple, everyday language.
   - Time Blocks Fix: ✅ Schema mapping resolved - UI date/time fields now convert to Notion datetime format  
   - Complete Success: Both tasks and time blocks now fully integrated with Notion databases
 
+#### **Notion Integration Naming Conventions & Standards**
+- **Environment Variables**: Use `NOTION_[FEATURE]_URL` format (e.g., `NOTION_TASKS_URL`, `NOTION_TIMEBLOCKS_URL`)
+- **Database Names**: Use `PRODUCTIVITY[FEATURE]` format (e.g., `PRODUCTIVITYTASKS`, `PRODUCTIVITYTIMEBLOCKS`)  
+- **API Routes**: Primary routes use `/api/[feature]` with Notion fallback logic built-in
+- **Schema Mapping**: UI date/time separation converts to Notion datetime format (`YYYY-MM-DDTHH:mm:ss`)
+- **Property Names**: Notion uses "Start Time" and "End Time" as **date** properties, not text
+- **Date Filtering**: Use `on_or_after` and `before` with datetime ranges for date-specific queries
+- **Duplicate Route Prevention**: Only one route per endpoint - enhanced version with Notion integration
+- **Error Handling**: Graceful fallback to local storage when Notion integration fails
+- **ID Handling**: String IDs indicate Notion records, numeric IDs indicate local storage records
+
 ### System-Wide Dark Mode CSS Fix (July 20, 2025)
 - **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax
 - **Systematic Search & Replace**: Updated all components to use proper `dark:bg-[#17111d]` syntax
@@ -215,7 +226,7 @@ Preferred communication style: Simple, everyday language.
 - **CVE-2025-30208 Fix (July 13, 2025)**: Updated Vite from 5.4.14 to 5.4.15 to resolve security vulnerability
 - **Impact**: Minimal patch with no breaking changes, application functionality preserved
 
-### Notion Integration Implementation (July 13, 2025)
+### Notion Integration Implementation & Standards (July 13-20, 2025)
 - **Complete Notion Integration**: Built full-featured Notion API integration with existing PRODUCTIVITYTASKS database
 - **Core Features**: 
   - Read/write access to existing Notion database entries
