@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Sidebar from "../components/Sidebar";
 import HealthSection from "../components/HealthSection";
@@ -36,10 +36,20 @@ function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [timeView, setTimeView] = useState<TimeViewType>("day");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, isAdmin } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // Logout mutation
   const logoutMutation = useMutation({
@@ -191,7 +201,7 @@ function Dashboard() {
             <div className="flex items-center space-x-3">
               <div className="text-sm text-muted-foreground dark:text-white">
                 <span className="font-medium text-pink-700 dark:text-white">
-                  {format(new Date(), 'MMM d, yyyy')} • {format(new Date(), 'HH:mm:ss')} UTC
+                  {format(currentTime, 'MMM d, yyyy')} • {format(currentTime, 'HH:mm:ss')} UTC
                 </span>
               </div>
               
