@@ -14,6 +14,15 @@ Preferred communication style: Simple, everyday language.
 - **ContentManagementSuite**: Simplified neutral gray design, handles mini-game blocks and @rotationonly content
 - **Rule**: When editing one content studio, the other must remain unchanged
 
+## Data Integrity Priority
+
+**Critical Requirement**: All Notion database integrations must be dependable and integral to support:
+- Accurate AI responses and recommendations
+- Reliable analytics and insights
+- Comprehensive data tracking across all categories
+
+**Systematic Widget Implementation**: Every widget in every category/section requires the same debugging and authentication patterns to prevent data integrity issues.
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -147,28 +156,71 @@ Preferred communication style: Simple, everyday language.
   - Time Blocks Fix: ✅ Schema mapping resolved - UI date/time fields now convert to Notion datetime format  
   - Complete Success: Both tasks and time blocks now fully integrated with Notion databases
 
-#### **Notion Integration Naming Conventions & Standards**
-- **Environment Variables**: Use `NOTION_[FEATURE]_URL` format (e.g., `NOTION_TASKS_URL`, `NOTION_TIMEBLOCKS_URL`)
-- **Database Names**: Use `PRODUCTIVITY[FEATURE]` format (e.g., `PRODUCTIVITYTASKS`, `PRODUCTIVITYTIMEBLOCKS`)  
-- **API Routes**: Primary routes use `/api/[feature]` with Notion fallback logic built-in
-- **Schema Mapping**: UI date/time separation converts to Notion datetime format (`YYYY-MM-DDTHH:mm:ss`)
-- **Property Names**: Notion uses "Start Time" and "End Time" as **date** properties, not text
-- **Date Filtering**: Use `on_or_after` and `before` with datetime ranges for date-specific queries
-- **Duplicate Route Prevention**: Only one route per endpoint - enhanced version with Notion integration
-- **Error Handling**: Graceful fallback to local storage when Notion integration fails
-- **ID Handling**: String IDs indicate Notion records, numeric IDs indicate local storage records
-- **Duration Calculation**: UI calculates duration, stored as minutes in Notion `Duration` number property
-- **Duration Display**: Backend calculates and returns duration for both creation and retrieval operations
-- **Timezone Handling**: Fixed timezone conversion issue - times now stored with EDT offset (-04:00) and correctly converted back on retrieval
-- **Timezone Resolution**: New time blocks maintain correct user input times (e.g., 4:00pm stays 4:00pm), older entries may show offset until recreated
-- **Chronological Display**: Time blocks now display in chronological order by start time for better daily schedule visualization
-- **Task Creation Fix**: Enhanced task creation API with proper database ID handling, detailed error logging, and authentication debugging
-- **Production Debugging**: Added `/api/notion/debug` endpoint to diagnose authentication and configuration issues in production
-- **Task Creation Resolution**: Fixed critical bugs preventing task creation from web interface:
+#### **Notion Integration Standards & Error Prevention Patterns**
+
+**CRITICAL PATTERNS FOR ALL WIDGETS** (Apply to every database integration):
+
+**Date Handling Pattern** (Prevents .toISOString() errors):
+```typescript
+// In notion.ts functions - ALWAYS handle both Date objects and ISO strings
+if (data.dateField) {
+    const dateStr = data.dateField instanceof Date 
+        ? data.dateField.toISOString().split('T')[0]
+        : new Date(data.dateField).toISOString().split('T')[0];
+    
+    properties["Date Field"] = {
+        date: { start: dateStr }
+    };
+}
+```
+
+**Authentication Pattern** (Ensures consistent session-based auth):
+```typescript
+// In auth.ts - Check session directly, not user object
+export const requireAuth = (req, res, next) => {
+  const session = req.session;
+  if (!session?.isAuthenticated || !session?.isAdmin) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  req.user = { id: 'admin', name: 'Admin User', username: 'admin', profileImage: '' };
+  next();
+};
+```
+
+**Environment Variables**: Use `NOTION_[FEATURE]_URL` format (e.g., `NOTION_TASKS_URL`, `NOTION_TIMEBLOCKS_URL`)
+**Database Names**: Use `PRODUCTIVITY[FEATURE]` format (e.g., `PRODUCTIVITYTASKS`, `PRODUCTIVITYTIMEBLOCKS`)  
+**API Routes**: Primary routes use `/api/[feature]` with Notion fallback logic built-in
+**Schema Mapping**: UI date/time separation converts to Notion datetime format (`YYYY-MM-DDTHH:mm:ss`)
+**Property Names**: Notion uses "Start Time" and "End Time" as **date** properties, not text
+**Date Filtering**: Use `on_or_after` and `before` with datetime ranges for date-specific queries
+**Duplicate Route Prevention**: Only one route per endpoint - enhanced version with Notion integration
+**Error Handling**: Graceful fallback to local storage when Notion integration fails
+**ID Handling**: String IDs indicate Notion records, numeric IDs indicate local storage records
+**Duration Calculation**: UI calculates duration, stored as minutes in Notion `Duration` number property
+**Duration Display**: Backend calculates and returns duration for both creation and retrieval operations
+**Timezone Handling**: Fixed timezone conversion issue - times now stored with EDT offset (-04:00) and correctly converted back on retrieval
+**Timezone Resolution**: New time blocks maintain correct user input times (e.g., 4:00pm stays 4:00pm), older entries may show offset until recreated
+**Chronological Display**: Time blocks now display in chronological order by start time for better daily schedule visualization
+**Task Creation Fix**: Enhanced task creation API with proper database ID handling, detailed error logging, and authentication debugging
+**Production Debugging**: Added `/api/notion/debug` endpoint to diagnose authentication and configuration issues in production
+**Task Creation Resolution**: Fixed critical bugs preventing task creation from web interface:
   - **Date Parsing Issue**: Fixed `task.dueDate.toISOString is not a function` error by handling both Date objects and ISO strings
   - **Authentication Flow**: Enhanced session-based authentication for consistent login state across UI and API
   - **Error Handling**: Improved error logging and debugging for production troubleshooting
   - **Verification**: Task creation confirmed working via API - tasks successfully created in Notion database
+
+### Error Prevention Guidelines for Future Database Setups (July 20, 2025)
+
+**Apply These Patterns to EVERY Widget Integration**:
+
+1. **Date Field Handling**: Always check `instanceof Date` before calling `.toISOString()` - handle both Date objects and ISO strings
+2. **Authentication Check**: Use `session?.isAuthenticated && session?.isAdmin` directly, not user object dependencies
+3. **Error Logging**: Include detailed console logging with database IDs, user auth status, and request bodies
+4. **Production Debugging**: Add debug endpoints for troubleshooting authentication and configuration issues
+5. **Graceful Fallbacks**: Implement fallback to local storage when Notion integration fails
+6. **Type Safety**: Handle both string and Date object formats in all date-related properties
+
+**Data Integrity Focus**: Every database setup must prioritize authentic data storage to ensure AI recommendations and analytics accuracy across the entire application.
 
 ### System-Wide Dark Mode CSS Fix (July 20, 2025)
 - **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax
