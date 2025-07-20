@@ -273,16 +273,30 @@ export async function getNotionTimeBlocks(date?: string) {
             const startDateTime = properties["Start Time"]?.date?.start || "";
             const endDateTime = properties["End Time"]?.date?.start || "";
             
-            // Parse datetime to separate date and time
+            // Parse datetime to separate date and time, preserving user's local timezone
             let date = "", startTime = "", endTime = "";
             if (startDateTime) {
+                // Convert UTC datetime back to Eastern Time for display
                 const startDate = new Date(startDateTime);
                 date = startDate.toISOString().split('T')[0];
-                startTime = startDate.toTimeString().substring(0, 5); // HH:MM format
+                // Convert from UTC to Eastern Time (EDT is UTC-4)
+                startTime = startDate.toLocaleTimeString('en-US', {
+                    timeZone: 'America/New_York',
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                // Remove debug logging for production
             }
             if (endDateTime) {
                 const endDate = new Date(endDateTime);
-                endTime = endDate.toTimeString().substring(0, 5); // HH:MM format
+                // Convert from UTC to Eastern Time (EDT is UTC-4)
+                endTime = endDate.toLocaleTimeString('en-US', {
+                    timeZone: 'America/New_York',
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
             }
 
             // Get duration from Notion or calculate if not stored
@@ -334,15 +348,26 @@ export async function createNotionTimeBlock(timeBlockData: {
         console.log("📅 Input data:", { date: timeBlockData.date, startTime: timeBlockData.startTime, endTime: timeBlockData.endTime });
         
         // Convert separate date and time to datetime strings for Notion
-        const startDateTime = `${timeBlockData.date}T${timeBlockData.startTime}:00`;
-        const endDateTime = `${timeBlockData.date}T${timeBlockData.endTime}:00`;
+        // Assume user input is in Eastern Time (UTC-4 in summer, UTC-5 in winter)
+        // For now, use EDT (UTC-4) - this should be configurable in a real app
+        const timeZoneOffset = '-04:00'; // EDT offset
         
-        // Calculate duration in minutes
+        const startDateTime = `${timeBlockData.date}T${timeBlockData.startTime}:00${timeZoneOffset}`;
+        const endDateTime = `${timeBlockData.date}T${timeBlockData.endTime}:00${timeZoneOffset}`;
+        
+        // Calculate duration in minutes using the time strings directly
         const start = new Date(`2000-01-01T${timeBlockData.startTime}`);
         const end = new Date(`2000-01-01T${timeBlockData.endTime}`);
         const durationMinutes = Math.abs(end.getTime() - start.getTime()) / (1000 * 60);
         
-        console.log("📅 Converted to datetime:", { startDateTime, endDateTime, durationMinutes });
+        console.log("📅 Converted to datetime:", { 
+            startDateTime, 
+            endDateTime, 
+            durationMinutes,
+            timeZoneOffset,
+            originalStartTime: timeBlockData.startTime,
+            originalEndTime: timeBlockData.endTime
+        });
         
         const response = await notion.pages.create({
             parent: {

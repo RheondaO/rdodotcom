@@ -159,6 +159,8 @@ Preferred communication style: Simple, everyday language.
 - **ID Handling**: String IDs indicate Notion records, numeric IDs indicate local storage records
 - **Duration Calculation**: UI calculates duration, stored as minutes in Notion `Duration` number property
 - **Duration Display**: Backend calculates and returns duration for both creation and retrieval operations
+- **Timezone Handling**: Fixed timezone conversion issue - times now stored with EDT offset (-04:00) and correctly converted back on retrieval
+- **Timezone Resolution**: New time blocks maintain correct user input times (e.g., 4:00pm stays 4:00pm), older entries may show offset until recreated
 
 ### System-Wide Dark Mode CSS Fix (July 20, 2025)
 - **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax

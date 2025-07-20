@@ -93,6 +93,8 @@ const startTime = startDate.toTimeString().substring(0, 5);
 - **Category**: Use `Category` for select dropdown
 - **Dates**: Use descriptive names like `Start Time`, `End Time` (date properties)
 - **Duration**: Use `Duration` for calculated time duration (number property, minutes)
+- **Timezone Handling**: Store datetime with explicit timezone offset (e.g., `-04:00` for EDT)
+- **Retrieval Conversion**: Convert UTC times back to user timezone using `toLocaleTimeString` with specific timezone
 - **Status**: Use `Status` for workflow states
 - **Priority**: Use `Priority` for importance levels
 
