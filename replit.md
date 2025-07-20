@@ -125,6 +125,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (2025)
 
+### Time Block Scheduling Feature & Header Improvements (July 20, 2025)
+- **Complete Time Block UI**: Built comprehensive Time Block scheduling feature in ProductivitySection
+  - Modal form with title, description, start/end time, category selection, and validation
+  - Smart suggested time slots that avoid conflicts with existing blocks
+  - Enhanced visual display with status indicators (Active, Done, Upcoming)
+  - Real-time status detection based on current time and selected date
+  - Duration calculations and category icons for better UX
+- **Header Date & Time Enhancement**: Improved header display functionality
+  - Right-side date now always shows today's actual date regardless of Yesterday/Tomorrow selection
+  - Added live Universal Time with seconds precision (e.g., "Jul 20, 2025 • 15:52:30 UTC")
+  - Implemented real-time clock that updates every second without page refresh
+  - Left-side contextual date format remains unchanged and functional
+- **Dark Mode Consistency**: All new components use custom dark color #17111d for proper styling
+
+### System-Wide Dark Mode CSS Fix (July 20, 2025)
+- **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax
+- **Systematic Search & Replace**: Updated all components to use proper `dark:bg-[#17111d]` syntax
+- **Comprehensive Coverage**: Fixed white background issues across all pages and components
+- **Components Updated**: ProductivitySection, HealthSection, AppDevelopmentSection, BlogContentStudio, ContentManagementSuite, and all page components
+
 ### ContentManagementSuite Dark Mode Enhancement (July 16, 2025)
 - **Complete Dark Mode Styling**: Applied consistent `#0c0910` darker background to all containers in Mini-Game Block Studio
 - **Visual Depth Enhancement**: Used darker shade `#0c0910` for cards to create layered depth effect against `#17111d` main background
