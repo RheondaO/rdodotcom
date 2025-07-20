@@ -59,8 +59,27 @@ function extractPageIdFromUrl(pageUrl: string): string {
     throw Error("Failed to extract page ID");
 }
 
-export const NOTION_DATABASE_ID = process.env.NOTION_TASKS_URL ? extractPageIdFromUrl(process.env.NOTION_TASKS_URL) : null;
-export const NOTION_TIMEBLOCKS_DATABASE_ID = process.env.NOTION_TIMEBLOCKS_URL ? extractPageIdFromUrl(process.env.NOTION_TIMEBLOCKS_URL) : null;
+// Extract database IDs with error handling
+let NOTION_DATABASE_ID: string | null = null;
+let NOTION_TIMEBLOCKS_DATABASE_ID: string | null = null;
+
+try {
+    NOTION_DATABASE_ID = process.env.NOTION_TASKS_URL ? extractPageIdFromUrl(process.env.NOTION_TASKS_URL) : null;
+    console.log("📋 Tasks database ID extracted:", NOTION_DATABASE_ID ? `${NOTION_DATABASE_ID.substring(0, 8)}...` : "null");
+} catch (error: any) {
+    console.error("❌ Failed to extract Tasks database ID:", error.message);
+    console.error("📋 Tasks URL:", process.env.NOTION_TASKS_URL);
+}
+
+try {
+    NOTION_TIMEBLOCKS_DATABASE_ID = process.env.NOTION_TIMEBLOCKS_URL ? extractPageIdFromUrl(process.env.NOTION_TIMEBLOCKS_URL) : null;
+    console.log("📅 Time Blocks database ID extracted:", NOTION_TIMEBLOCKS_DATABASE_ID ? `${NOTION_TIMEBLOCKS_DATABASE_ID.substring(0, 8)}...` : "null");
+} catch (error: any) {
+    console.error("❌ Failed to extract Time Blocks database ID:", error.message);
+    console.error("📅 Time Blocks URL:", process.env.NOTION_TIMEBLOCKS_URL);
+}
+
+export { NOTION_DATABASE_ID, NOTION_TIMEBLOCKS_DATABASE_ID };
 
 // Log database configuration
 console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);

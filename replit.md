@@ -138,6 +138,12 @@ Preferred communication style: Simple, everyday language.
   - Implemented real-time clock that updates every second without page refresh
   - Left-side contextual date format remains unchanged and functional
 - **Dark Mode Consistency**: All new components use custom dark color #17111d for proper styling
+- **Notion Integration Update**: Updated to use new secret names NOTION_TASKS_URL and NOTION_TIMEBLOCKS_URL with proper database ID extraction
+  - Tasks database: PRODUCTIVITYTASKS (ID: 22ef3f41...)
+  - Time Blocks database: PRODUCTIVITYTIMEBLOCKS (ID: 236f3f41...)
+  - Environment variables properly configured and detected by server
+  - Issue: Both Tasks and Time Blocks integration showing "Failed to create task" and returning empty arrays
+  - Debugging: Database IDs extracted successfully, investigating Notion API call failures
 
 ### System-Wide Dark Mode CSS Fix (July 20, 2025)
 - **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax
