@@ -191,7 +191,7 @@ function Dashboard() {
             <div className="flex items-center space-x-3">
               <div className="text-sm text-muted-foreground dark:text-white">
                 <span className="font-medium text-pink-700 dark:text-white">
-                  {format(selectedDate, 'MMM d, yyyy')}
+                  {format(new Date(), 'MMM d, yyyy')} • {format(new Date(), 'HH:mm')} UTC
                 </span>
               </div>
               
