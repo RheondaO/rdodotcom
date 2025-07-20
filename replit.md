@@ -162,6 +162,8 @@ Preferred communication style: Simple, everyday language.
 - **Timezone Handling**: Fixed timezone conversion issue - times now stored with EDT offset (-04:00) and correctly converted back on retrieval
 - **Timezone Resolution**: New time blocks maintain correct user input times (e.g., 4:00pm stays 4:00pm), older entries may show offset until recreated
 - **Chronological Display**: Time blocks now display in chronological order by start time for better daily schedule visualization
+- **Task Creation Fix**: Enhanced task creation API with proper database ID handling, detailed error logging, and authentication debugging
+- **Production Debugging**: Added `/api/notion/debug` endpoint to diagnose authentication and configuration issues in production
 
 ### System-Wide Dark Mode CSS Fix (July 20, 2025)
 - **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax

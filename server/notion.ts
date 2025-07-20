@@ -527,6 +527,14 @@ export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE
     status?: string;
 }) {
     try {
+        console.log("📋 createNotionTask called with:");
+        console.log("  Database ID:", tasksDatabaseId);
+        console.log("  Task data:", JSON.stringify(task, null, 2));
+        
+        if (!tasksDatabaseId) {
+            throw new Error("Database ID is required but was null or undefined");
+        }
+        
         const properties: any = {
             Name: {
                 title: [
@@ -593,9 +601,7 @@ export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE
             checkbox: task.status === "Done"
         };
 
-        if (!tasksDatabaseId) {
-            throw new Error("Database ID is required");
-        }
+        console.log("📋 Creating Notion page with properties:", JSON.stringify(properties, null, 2));
         
         const response = await notion.pages.create({
             parent: {
@@ -604,10 +610,14 @@ export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE
             properties
         });
 
+        console.log("📋 Successfully created Notion page with ID:", response.id);
         return response;
-    } catch (error) {
-        console.error("Error creating entry in Notion:", error);
-        throw new Error("Failed to create entry in Notion");
+    } catch (error: any) {
+        console.error("❌ Error creating entry in Notion:", error.message);
+        console.error("❌ Error code:", error.code);
+        console.error("❌ Error status:", error.status);
+        console.error("❌ Database ID used:", tasksDatabaseId);
+        throw new Error(`Failed to create entry in Notion: ${error.message} (code: ${error.code})`);
     }
 }
 

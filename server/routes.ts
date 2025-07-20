@@ -1552,18 +1552,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/notion/tasks", requireAuth, async (req, res) => {
     try {
-      console.log("📋 Creating new task:", req.body);
-      // Use the tasks database ID from environment
+      console.log("📋 POST /api/notion/tasks - Starting task creation");
+      console.log("📋 User authenticated:", (req as any).session?.userId ? "YES" : "NO");
+      console.log("📋 Database ID available:", NOTION_TASKS_DATABASE_ID ? "YES" : "NO");
+      console.log("📋 Request body:", JSON.stringify(req.body, null, 2));
+      
+      if (!NOTION_TASKS_DATABASE_ID) {
+        console.error("❌ NOTION_TASKS_DATABASE_ID is null - environment variables not configured");
+        return res.status(500).json({ 
+          error: "Database ID not configured",
+          details: "NOTION_TASKS_DATABASE_ID is null"
+        });
+      }
+      
       const task = await createNotionTask(NOTION_TASKS_DATABASE_ID, req.body);
       console.log("📋 Successfully created task:", task.id);
       res.json(task);
     } catch (error: any) {
       console.error("❌ Error creating Notion task:", error.message);
       console.error("❌ Error code:", error.code);
+      console.error("❌ Error status:", error.status);
       console.error("❌ Full error:", error);
       res.status(500).json({ 
         error: `Failed to create Notion task: ${error.message}`,
-        code: error.code 
+        code: error.code,
+        status: error.status
       });
     }
   });
@@ -1587,6 +1600,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting Notion task:", error);
       res.status(500).json({ error: "Failed to delete Notion task" });
+    }
+  });
+
+  // Debug endpoint for production testing
+  app.get("/api/notion/debug", async (req, res) => {
+    try {
+      const authStatus = {
+        authenticated: !!(req as any).session?.userId,
+        isAdmin: !!(req as any).session?.isAdmin,
+        sessionData: (req as any).session
+      };
+      
+      const configStatus = {
+        hasSecret: !!process.env.NOTION_INTEGRATION_SECRET,
+        hasTasksUrl: !!process.env.NOTION_TASKS_URL,
+        hasTimeBlocksUrl: !!process.env.NOTION_TIMEBLOCKS_URL,
+        tasksDbId: NOTION_TASKS_DATABASE_ID ? `${NOTION_TASKS_DATABASE_ID.substring(0, 8)}...` : null,
+        timeBlocksDbId: NOTION_TIMEBLOCKS_DATABASE_ID ? `${NOTION_TIMEBLOCKS_DATABASE_ID.substring(0, 8)}...` : null
+      };
+      
+      res.json({
+        auth: authStatus,
+        config: configStatus,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 
