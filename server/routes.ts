@@ -116,15 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/time-blocks/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const timeBlocks = await storage.getTimeBlocksByDate(date);
-      res.json(timeBlocks);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch time blocks" });
-    }
-  });
+
 
   app.get("/api/grocery-items", async (req, res) => {
     try {
