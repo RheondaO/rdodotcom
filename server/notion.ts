@@ -63,8 +63,11 @@ function extractPageIdFromUrl(pageUrl: string): string {
 let NOTION_DATABASE_ID: string | null = null;
 let NOTION_TIMEBLOCKS_DATABASE_ID: string | null = null;
 
+export let NOTION_TASKS_DATABASE_ID: string | null = null;
+
 try {
     NOTION_DATABASE_ID = process.env.NOTION_TASKS_URL ? extractPageIdFromUrl(process.env.NOTION_TASKS_URL) : null;
+    NOTION_TASKS_DATABASE_ID = NOTION_DATABASE_ID; // Assign the same value for export
     console.log("📋 Tasks database ID extracted:", NOTION_DATABASE_ID ? `${NOTION_DATABASE_ID.substring(0, 8)}...` : "null");
 } catch (error: any) {
     console.error("❌ Failed to extract Tasks database ID:", error.message);

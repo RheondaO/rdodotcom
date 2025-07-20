@@ -8,7 +8,8 @@ import {
   getNotionTasks, 
   createNotionTask, 
   updateNotionTask, 
-  deleteNotionTask 
+  deleteNotionTask,
+  NOTION_TASKS_DATABASE_ID
 } from "./notion";
 import { 
   insertDailyEntrySchema, 
@@ -1551,11 +1552,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/notion/tasks", requireAuth, async (req, res) => {
     try {
-      const task = await createNotionTask(undefined, req.body);
+      console.log("📋 Creating new task:", req.body);
+      // Use the tasks database ID from environment
+      const task = await createNotionTask(NOTION_TASKS_DATABASE_ID, req.body);
+      console.log("📋 Successfully created task:", task.id);
       res.json(task);
-    } catch (error) {
-      console.error("Error creating Notion entry:", error);
-      res.status(500).json({ error: "Failed to create Notion entry" });
+    } catch (error: any) {
+      console.error("❌ Error creating Notion task:", error.message);
+      console.error("❌ Error code:", error.code);
+      console.error("❌ Full error:", error);
+      res.status(500).json({ 
+        error: `Failed to create Notion task: ${error.message}`,
+        code: error.code 
+      });
     }
   });
 
