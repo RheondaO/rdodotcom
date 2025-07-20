@@ -481,11 +481,21 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
         </CardHeader>
         <CardContent className="space-y-3 p-6">
           {Array.isArray(timeBlocks) && timeBlocks.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p>No scheduled blocks for {getDateLabel().toLowerCase()}</p>
-              <p className="text-sm">Plan your day with time blocks!</p>
-            </div>
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No scheduled blocks for {getDateLabel().toLowerCase()}</h3>
+                <p className="text-muted-foreground mb-4">
+                  {isReadOnly ? "No time blocks are scheduled for this date" : "Plan your day with time blocks!"}
+                </p>
+                {!isReadOnly && (
+                  <Button onClick={() => setShowTimeBlockDialog(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Time Block
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
           ) : (
             Array.isArray(timeBlocks) && timeBlocks.map((block: any) => {
               const categoryInfo = categories.find(cat => cat.value === block.category) || categories[0];
