@@ -3,20 +3,25 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 
 export interface TimeBlock {
-  id: number;
+  id?: number; // For legacy local storage
+  notionId?: string; // For Notion integration
   title: string;
+  description?: string;
   startTime: string;
   endTime: string;
   date: string;
-  status: string;
+  category?: string;
+  status?: string;
   createdAt: Date;
 }
 
 export interface InsertTimeBlock {
   title: string;
+  description?: string;
   startTime: string;
   endTime: string;
   date: string;
+  category?: string;
   status?: string;
 }
 

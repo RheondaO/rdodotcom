@@ -530,7 +530,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
 
               return (
                 <div 
-                  key={block.id} 
+                  key={block.notionId || block.id} 
                   className={`group relative p-4 rounded-xl border transition-all duration-200 hover:shadow-md ${
                     status === 'active' 
                       ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800' 

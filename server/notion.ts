@@ -66,7 +66,7 @@ export async function getNotionDatabase() {
             database_id: NOTION_DATABASE_ID,
         });
         
-        console.log("✅ Successfully retrieved database:", database.title?.[0]?.plain_text || "Unknown");
+        console.log("✅ Successfully retrieved database:", (database as any).title?.[0]?.plain_text || "Unknown");
         return database;
     } catch (error: any) {
         console.error("❌ Error retrieving database:", error.message);
@@ -105,11 +105,9 @@ export async function getNotionDatabases() {
 export async function findDatabaseByTitle(title: string) {
     const database = await getNotionDatabase();
     
-    if (database.title && Array.isArray(database.title) && database.title.length > 0) {
-        const dbTitle = database.title[0]?.plain_text?.toLowerCase() || "";
-        if (dbTitle === title.toLowerCase()) {
-            return database;
-        }
+    const dbTitle = (database as any).title?.[0]?.plain_text?.toLowerCase() || "";
+    if (dbTitle === title.toLowerCase()) {
+        return database;
     }
 
     return null;
@@ -124,7 +122,7 @@ export async function createDatabaseIfNotExists(title: string, properties: any) 
     return await notion.databases.create({
         parent: {
             type: "page_id",
-            page_id: NOTION_PAGE_ID
+            page_id: NOTION_DATABASE_ID!
         },
         title: [
             {
@@ -170,6 +168,229 @@ export async function getNotionTasks(tasksDatabaseId: string = NOTION_DATABASE_I
     } catch (error) {
         console.error("Error fetching entries from Notion:", error);
         throw new Error("Failed to fetch entries from Notion");
+    }
+}
+
+// Find the PRODUCTIVITYTIMEBLOCKS database by title
+export async function findTimeBlocksDatabase() {
+    try {
+        // Since we're using the database ID directly, we can assume it's the PRODUCTIVITYTIMEBLOCKS database
+        const database = await getNotionDatabase();
+        console.log("📅 Found Time Blocks database:", (database as any).title?.[0]?.plain_text || "Unknown");
+        return database;
+    } catch (error) {
+        console.error("Error finding Time Blocks database:", error);
+        throw error;
+    }
+}
+
+// Get all time blocks from the PRODUCTIVITYTIMEBLOCKS database
+export async function getNotionTimeBlocks(date?: string) {
+    try {
+        const database = await findTimeBlocksDatabase();
+        
+        console.log("📅 Fetching time blocks from Notion database");
+        
+        const response = await notion.databases.query({
+            database_id: database.id,
+            filter: date ? {
+                property: "Date",
+                date: {
+                    equals: date
+                }
+            } : undefined
+        });
+
+        const timeBlocks = response.results.map((page: any) => {
+            const properties = page.properties;
+
+            return {
+                notionId: page.id,
+                title: properties.Title?.title?.[0]?.plain_text || "Untitled Time Block",
+                description: properties.Description?.rich_text?.[0]?.plain_text || "",
+                date: properties.Date?.date?.start || "",
+                startTime: properties["Start Time"]?.rich_text?.[0]?.plain_text || "",
+                endTime: properties["End Time"]?.rich_text?.[0]?.plain_text || "",
+                category: properties.Category?.select?.name || "Work",
+                createdAt: properties["Created At"]?.created_time ? new Date(properties["Created At"].created_time) : new Date(),
+            };
+        });
+
+        console.log(`📅 Retrieved ${timeBlocks.length} time blocks from Notion`);
+        if (date) {
+            console.log(`📅 Filtered for date: ${date}`);
+        }
+        
+        return timeBlocks;
+    } catch (error) {
+        console.error("Error fetching time blocks from Notion:", error);
+        throw new Error("Failed to fetch time blocks from Notion");
+    }
+}
+
+// Create a new time block in the PRODUCTIVITYTIMEBLOCKS database
+export async function createNotionTimeBlock(timeBlockData: {
+    title: string;
+    description?: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    category?: string;
+}) {
+    try {
+        const database = await findTimeBlocksDatabase();
+        
+        console.log("📅 Creating time block in Notion:", timeBlockData.title);
+        
+        const response = await notion.pages.create({
+            parent: {
+                database_id: database.id
+            },
+            properties: {
+                Title: {
+                    title: [
+                        {
+                            text: {
+                                content: timeBlockData.title
+                            }
+                        }
+                    ]
+                },
+                Description: {
+                    rich_text: [
+                        {
+                            text: {
+                                content: timeBlockData.description || ""
+                            }
+                        }
+                    ]
+                },
+                Date: {
+                    date: {
+                        start: timeBlockData.date
+                    }
+                },
+                "Start Time": {
+                    rich_text: [
+                        {
+                            text: {
+                                content: timeBlockData.startTime
+                            }
+                        }
+                    ]
+                },
+                "End Time": {
+                    rich_text: [
+                        {
+                            text: {
+                                content: timeBlockData.endTime
+                            }
+                        }
+                    ]
+                },
+                Category: {
+                    select: {
+                        name: timeBlockData.category || "Work"
+                    }
+                }
+            }
+        });
+
+        console.log("✅ Successfully created time block in Notion");
+        return {
+            notionId: response.id,
+            title: timeBlockData.title,
+            description: timeBlockData.description || "",
+            date: timeBlockData.date,
+            startTime: timeBlockData.startTime,
+            endTime: timeBlockData.endTime,
+            category: timeBlockData.category || "Work",
+            createdAt: new Date()
+        };
+    } catch (error) {
+        console.error("Error creating time block in Notion:", error);
+        throw new Error("Failed to create time block in Notion");
+    }
+}
+
+// Update a time block in the PRODUCTIVITYTIMEBLOCKS database
+export async function updateNotionTimeBlock(notionId: string, updates: {
+    title?: string;
+    description?: string;
+    date?: string;
+    startTime?: string;
+    endTime?: string;
+    category?: string;
+}) {
+    try {
+        console.log("📅 Updating time block in Notion:", notionId);
+        
+        const properties: any = {};
+        
+        if (updates.title !== undefined) {
+            properties.Title = {
+                title: [{ text: { content: updates.title } }]
+            };
+        }
+        
+        if (updates.description !== undefined) {
+            properties.Description = {
+                rich_text: [{ text: { content: updates.description } }]
+            };
+        }
+        
+        if (updates.date !== undefined) {
+            properties.Date = {
+                date: { start: updates.date }
+            };
+        }
+        
+        if (updates.startTime !== undefined) {
+            properties["Start Time"] = {
+                rich_text: [{ text: { content: updates.startTime } }]
+            };
+        }
+        
+        if (updates.endTime !== undefined) {
+            properties["End Time"] = {
+                rich_text: [{ text: { content: updates.endTime } }]
+            };
+        }
+        
+        if (updates.category !== undefined) {
+            properties.Category = {
+                select: { name: updates.category }
+            };
+        }
+
+        await notion.pages.update({
+            page_id: notionId,
+            properties
+        });
+
+        console.log("✅ Successfully updated time block in Notion");
+        return true;
+    } catch (error) {
+        console.error("Error updating time block in Notion:", error);
+        throw new Error("Failed to update time block in Notion");
+    }
+}
+
+// Delete a time block from the PRODUCTIVITYTIMEBLOCKS database
+export async function deleteNotionTimeBlock(notionId: string) {
+    try {
+        console.log("📅 Deleting time block from Notion:", notionId);
+        
+        await notion.pages.update({
+            page_id: notionId,
+            archived: true
+        });
+
+        console.log("✅ Successfully deleted time block from Notion");
+        return true;
+    } catch (error) {
+        console.error("Error deleting time block from Notion:", error);
+        throw new Error("Failed to delete time block from Notion");
     }
 }
 

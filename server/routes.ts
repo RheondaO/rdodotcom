@@ -480,24 +480,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Time Blocks (date-specific)
+  // Time Blocks (date-specific) - now using Notion integration
   app.get("/api/time-blocks/:date", async (req, res) => {
     try {
       const date = req.params.date;
-      const timeBlocks = await storage.getTimeBlocksByDate(date);
-      res.json(timeBlocks);
+      
+      // Try to get from Notion first
+      try {
+        const { getNotionTimeBlocks } = await import('./notion');
+        const notionTimeBlocks = await getNotionTimeBlocks(date);
+        console.log(`📅 Fetched ${notionTimeBlocks.length} time blocks from Notion for ${date}`);
+        res.json(notionTimeBlocks);
+      } catch (notionError) {
+        console.log("📅 Notion error, falling back to local storage:", notionError);
+        // Fallback to local storage if Notion fails
+        const timeBlocks = await storage.getTimeBlocksByDate(date);
+        res.json(timeBlocks);
+      }
     } catch (error) {
+      console.error("Error fetching time blocks:", error);
       res.status(500).json({ error: "Failed to fetch time blocks" });
     }
   });
 
   app.post("/api/time-blocks", async (req, res) => {
     try {
-      const data = req.body; // Will need proper schema validation
-      const timeBlock = await storage.createTimeBlock(data);
-      res.json(timeBlock);
+      const data = req.body;
+      
+      // Try to create in Notion first
+      try {
+        const { createNotionTimeBlock } = await import('./notion');
+        const notionTimeBlock = await createNotionTimeBlock({
+          title: data.title,
+          description: data.description,
+          date: data.date,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          category: data.category
+        });
+        console.log("📅 Successfully created time block in Notion");
+        res.json(notionTimeBlock);
+      } catch (notionError) {
+        console.log("📅 Notion error, falling back to local storage:", notionError);
+        // Fallback to local storage if Notion fails
+        const timeBlock = await storage.createTimeBlock(data);
+        res.json(timeBlock);
+      }
     } catch (error) {
+      console.error("Error creating time block:", error);
       res.status(400).json({ error: "Invalid time block data" });
+    }
+  });
+
+  // Update time block route
+  app.patch("/api/time-blocks/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const updates = req.body;
+      
+      // Try to update in Notion if it's a Notion ID (string)
+      if (isNaN(Number(id))) {
+        try {
+          const { updateNotionTimeBlock } = await import('./notion');
+          await updateNotionTimeBlock(id, updates);
+          console.log("📅 Successfully updated time block in Notion");
+          res.json({ success: true });
+        } catch (notionError) {
+          console.log("📅 Notion update error:", notionError);
+          res.status(500).json({ error: "Failed to update time block in Notion" });
+        }
+      } else {
+        // Local storage update for numeric IDs
+        const timeBlock = await storage.updateTimeBlock(Number(id), updates);
+        res.json(timeBlock);
+      }
+    } catch (error) {
+      console.error("Error updating time block:", error);
+      res.status(500).json({ error: "Failed to update time block" });
+    }
+  });
+
+  // Delete time block route
+  app.delete("/api/time-blocks/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      
+      // Try to delete in Notion if it's a Notion ID (string)
+      if (isNaN(Number(id))) {
+        try {
+          const { deleteNotionTimeBlock } = await import('./notion');
+          await deleteNotionTimeBlock(id);
+          console.log("📅 Successfully deleted time block from Notion");
+          res.json({ success: true });
+        } catch (notionError) {
+          console.log("📅 Notion delete error:", notionError);
+          res.status(500).json({ error: "Failed to delete time block from Notion" });
+        }
+      } else {
+        // Local storage delete for numeric IDs
+        await storage.deleteTimeBlock(Number(id));
+        res.json({ success: true });
+      }
+    } catch (error) {
+      console.error("Error deleting time block:", error);
+      res.status(500).json({ error: "Failed to delete time block" });
     }
   });
 
