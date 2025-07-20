@@ -161,6 +161,7 @@ Preferred communication style: Simple, everyday language.
 - **Duration Display**: Backend calculates and returns duration for both creation and retrieval operations
 - **Timezone Handling**: Fixed timezone conversion issue - times now stored with EDT offset (-04:00) and correctly converted back on retrieval
 - **Timezone Resolution**: New time blocks maintain correct user input times (e.g., 4:00pm stays 4:00pm), older entries may show offset until recreated
+- **Chronological Display**: Time blocks now display in chronological order by start time for better daily schedule visualization
 
 ### System-Wide Dark Mode CSS Fix (July 20, 2025)
 - **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax
