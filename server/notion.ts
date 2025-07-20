@@ -258,23 +258,40 @@ export async function getNotionTimeBlocks(date?: string) {
         const response = await notion.databases.query({
             database_id: database.id,
             filter: date ? {
-                property: "Date",
+                property: "Start Time",
                 date: {
-                    equals: date
+                    on_or_after: `${date}T00:00:00`,
+                    before: `${date}T23:59:59`
                 }
             } : undefined
         });
 
         const timeBlocks = response.results.map((page: any) => {
             const properties = page.properties;
+            
+            // Extract date and time from datetime fields
+            const startDateTime = properties["Start Time"]?.date?.start || "";
+            const endDateTime = properties["End Time"]?.date?.start || "";
+            
+            // Parse datetime to separate date and time
+            let date = "", startTime = "", endTime = "";
+            if (startDateTime) {
+                const startDate = new Date(startDateTime);
+                date = startDate.toISOString().split('T')[0];
+                startTime = startDate.toTimeString().substring(0, 5); // HH:MM format
+            }
+            if (endDateTime) {
+                const endDate = new Date(endDateTime);
+                endTime = endDate.toTimeString().substring(0, 5); // HH:MM format
+            }
 
             return {
                 notionId: page.id,
                 title: properties.Title?.title?.[0]?.plain_text || "Untitled Time Block",
                 description: properties.Description?.rich_text?.[0]?.plain_text || "",
-                date: properties.Date?.date?.start || "",
-                startTime: properties["Start Time"]?.rich_text?.[0]?.plain_text || "",
-                endTime: properties["End Time"]?.rich_text?.[0]?.plain_text || "",
+                date: date,
+                startTime: startTime,
+                endTime: endTime,
                 category: properties.Category?.select?.name || "Work",
                 createdAt: properties["Created At"]?.created_time ? new Date(properties["Created At"].created_time) : new Date(),
             };
@@ -305,6 +322,13 @@ export async function createNotionTimeBlock(timeBlockData: {
         const database = await findTimeBlocksDatabase();
         
         console.log("📅 Creating time block in Notion:", timeBlockData.title);
+        console.log("📅 Input data:", { date: timeBlockData.date, startTime: timeBlockData.startTime, endTime: timeBlockData.endTime });
+        
+        // Convert separate date and time to datetime strings for Notion
+        const startDateTime = `${timeBlockData.date}T${timeBlockData.startTime}:00`;
+        const endDateTime = `${timeBlockData.date}T${timeBlockData.endTime}:00`;
+        
+        console.log("📅 Converted to datetime:", { startDateTime, endDateTime });
         
         const response = await notion.pages.create({
             parent: {
@@ -329,28 +353,15 @@ export async function createNotionTimeBlock(timeBlockData: {
                         }
                     ]
                 },
-                Date: {
+                "Start Time": {
                     date: {
-                        start: timeBlockData.date
+                        start: startDateTime
                     }
                 },
-                "Start Time": {
-                    rich_text: [
-                        {
-                            text: {
-                                content: timeBlockData.startTime
-                            }
-                        }
-                    ]
-                },
                 "End Time": {
-                    rich_text: [
-                        {
-                            text: {
-                                content: timeBlockData.endTime
-                            }
-                        }
-                    ]
+                    date: {
+                        start: endDateTime
+                    }
                 },
                 Category: {
                     select: {
