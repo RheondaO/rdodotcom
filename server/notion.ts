@@ -49,6 +49,13 @@ function extractPageIdFromUrl(pageUrl: string): string {
 }
 
 export const NOTION_DATABASE_ID = process.env.NOTION_PAGE_URL ? extractPageIdFromUrl(process.env.NOTION_PAGE_URL) : null;
+export const NOTION_TIMEBLOCKS_DATABASE_ID = process.env.NOTION_TIMEBLOCKS_DATABASE_ID || null;
+
+// Log Time Blocks database configuration
+console.log("📅 NOTION_TIMEBLOCKS_DATABASE_ID configured:", !!process.env.NOTION_TIMEBLOCKS_DATABASE_ID);
+if (process.env.NOTION_TIMEBLOCKS_DATABASE_ID) {
+    console.log("📅 Time Blocks DB length:", process.env.NOTION_TIMEBLOCKS_DATABASE_ID.length);
+}
 
 /**
  * Get the main database info
@@ -171,16 +178,37 @@ export async function getNotionTasks(tasksDatabaseId: string = NOTION_DATABASE_I
     }
 }
 
-// Find the PRODUCTIVITYTIMEBLOCKS database by title
+// Find the PRODUCTIVITYTIMEBLOCKS database using dedicated database ID
 export async function findTimeBlocksDatabase() {
     try {
-        // Since we're using the database ID directly, we can assume it's the PRODUCTIVITYTIMEBLOCKS database
-        const database = await getNotionDatabase();
+        if (!NOTION_TIMEBLOCKS_DATABASE_ID) {
+            throw new Error("NOTION_TIMEBLOCKS_DATABASE_ID is not configured");
+        }
+        
+        console.log("📅 Retrieving Time Blocks database with ID:", NOTION_TIMEBLOCKS_DATABASE_ID);
+        
+        const database = await notion.databases.retrieve({
+            database_id: NOTION_TIMEBLOCKS_DATABASE_ID,
+        });
+        
         console.log("📅 Found Time Blocks database:", (database as any).title?.[0]?.plain_text || "Unknown");
         return database;
-    } catch (error) {
-        console.error("Error finding Time Blocks database:", error);
-        throw error;
+    } catch (error: any) {
+        console.error("Error finding Time Blocks database:", error.message);
+        console.error("Database ID:", NOTION_TIMEBLOCKS_DATABASE_ID);
+        console.error("Error code:", error.code);
+        console.error("Error status:", error.status);
+        
+        // Provide more specific error messages
+        if (error.code === 'unauthorized') {
+            throw new Error("Notion integration secret is invalid or expired for Time Blocks database.");
+        } else if (error.code === 'object_not_found') {
+            throw new Error("Time Blocks database not found. Please check your NOTION_TIMEBLOCKS_DATABASE_ID.");
+        } else if (error.code === 'forbidden') {
+            throw new Error("Notion integration doesn't have permission to access the Time Blocks database. Please share the database with your integration.");
+        } else {
+            throw new Error(`Notion API error for Time Blocks: ${error.message}`);
+        }
     }
 }
 

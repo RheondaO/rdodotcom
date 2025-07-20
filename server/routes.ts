@@ -488,13 +488,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Try to get from Notion first
       try {
         const { getNotionTimeBlocks } = await import('./notion');
+        console.log(`📅 Attempting to fetch time blocks from Notion for ${date}`);
         const notionTimeBlocks = await getNotionTimeBlocks(date);
         console.log(`📅 Fetched ${notionTimeBlocks.length} time blocks from Notion for ${date}`);
         res.json(notionTimeBlocks);
       } catch (notionError) {
         console.log("📅 Notion error, falling back to local storage:", notionError);
+        console.error("📅 Detailed Notion error:", notionError);
         // Fallback to local storage if Notion fails
         const timeBlocks = await storage.getTimeBlocksByDate(date);
+        console.log(`📅 Fallback: returning ${timeBlocks.length} time blocks from local storage`);
         res.json(timeBlocks);
       }
     } catch (error) {
@@ -507,9 +510,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = req.body;
       
+      console.log("📅 Attempting to create time block:", data);
+      
       // Try to create in Notion first
       try {
         const { createNotionTimeBlock } = await import('./notion');
+        console.log("📅 Imported Notion functions, creating time block...");
         const notionTimeBlock = await createNotionTimeBlock({
           title: data.title,
           description: data.description,
@@ -518,12 +524,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           endTime: data.endTime,
           category: data.category
         });
-        console.log("📅 Successfully created time block in Notion");
+        console.log("📅 Successfully created time block in Notion:", notionTimeBlock);
         res.json(notionTimeBlock);
       } catch (notionError) {
         console.log("📅 Notion error, falling back to local storage:", notionError);
+        console.error("📅 Detailed Notion creation error:", notionError);
         // Fallback to local storage if Notion fails
         const timeBlock = await storage.createTimeBlock(data);
+        console.log("📅 Fallback: created time block in local storage:", timeBlock);
         res.json(timeBlock);
       }
     } catch (error) {
