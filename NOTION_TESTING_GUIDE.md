@@ -3,21 +3,27 @@
 ## Current Status
 - **Tasks Database**: PRODUCTIVITYTASKS (ID: 22ef3f41...)
 - **Time Blocks Database**: PRODUCTIVITYTIMEBLOCKS (ID: 236f3f41...)
-- **Environment Variables**: All properly configured
-- **Issue**: Both integrations returning empty arrays and "Failed to create" errors
+- **Secret Names**: NOTION_TASKS_URL, NOTION_TIMEBLOCKS_URL, NOTION_INTEGRATION_SECRET
+- **Issue**: Production deployment using old secret names, causing integration failures
 
-## Step 1: Verify Database Access
-Test if the integration can connect to each database:
+## Step 1: Verify Environment Configuration
+First, test the basic environment setup:
 
 ```bash
-# Test Tasks database connection
-curl -X GET "http://localhost:5000/api/tasks/notion-debug"
+# Check environment variables manually
+echo "NOTION_INTEGRATION_SECRET: $(printenv NOTION_INTEGRATION_SECRET | cut -c1-10)..."
+echo "NOTION_TASKS_URL: $(printenv NOTION_TASKS_URL | wc -c) characters"  
+echo "NOTION_TIMEBLOCKS_URL: $(printenv NOTION_TIMEBLOCKS_URL | wc -c) characters"
 
-# Test Time Blocks database connection  
-curl -X GET "http://localhost:5000/api/debug/notion"
+# Run the test script
+node test_notion.js
 ```
 
-**Expected Response**: Should show connection status and any error details.
+**Expected Results**:
+- Integration secret: 50 characters, starts with `ntn_`
+- URLs: ~90 characters each
+- Database IDs: Successfully extracted (22ef3f41..., 236f3f41...)
+- Notion client: Initializes successfully
 
 ## Step 2: Test Basic Read Operations
 Verify we can read existing data from databases:
@@ -33,20 +39,24 @@ curl -X GET "http://localhost:5000/api/time-blocks/2025-07-20"
 **Expected Response**: Should return existing data or specific error messages.
 
 ## Step 3: Test Authentication (Required for Create Operations)
-Log in as admin first:
+**Note**: Authentication credentials may vary between development and production.
 
 ```bash
-# Login as admin
+# For production, check what admin password is configured
+echo "Admin password configured: $(printenv ADMIN_PASSWORD | wc -c) characters"
+
+# Try login (password may need to be different in production)
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "admin"}' \
-  -c cookies.txt
+  -c cookies.txt -s
 
 # Verify login
-curl -X GET http://localhost:5000/api/auth/status -b cookies.txt
+curl -X GET http://localhost:5000/api/auth/status -b cookies.txt -s
 ```
 
-**Expected Response**: Should confirm authentication success.
+**Expected Response**: `{"authenticated":true,"isAdmin":true}`
+**If fails**: Check production admin password configuration.
 
 ## Step 4: Test Task Creation
 Create a test task:
