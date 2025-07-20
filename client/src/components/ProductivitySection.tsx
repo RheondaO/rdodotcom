@@ -194,11 +194,12 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
     }
   };
 
-  // Generate suggested time slots based on existing blocks
+  // Generate suggested time slots based on existing blocks (EST/EDT timezone)
   const getSuggestedTimeSlots = () => {
     if (!Array.isArray(timeBlocks)) return [];
     
     const slots = [];
+    // Working hours in EST/EDT (9 AM - 5 PM)
     const workingHours = [
       '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
     ];
@@ -209,6 +210,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
       const conflicts = timeBlocks.some((block: any) => {
         const blockStart = block.startTime;
         const blockEnd = block.endTime;
+        // Compare times as strings in HH:MM format (all should be in EST/EDT)
         return (hour >= blockStart && hour < blockEnd) || (endHour > blockStart && endHour <= blockEnd);
       });
       
