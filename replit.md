@@ -208,7 +208,7 @@ Preferred communication style: Simple, everyday language.
 - **Impact**: Minimal patch with no breaking changes, application functionality preserved
 
 ### Notion Integration Implementation (July 13, 2025)
-- **Complete Notion Integration**: Built full-featured Notion API integration with existing TABLEMAKER database
+- **Complete Notion Integration**: Built full-featured Notion API integration with existing PRODUCTIVITYTASKS database
 - **Core Features**: 
   - Read/write access to existing Notion database entries
   - Real-time synchronization between Belle Journal and Notion
@@ -225,7 +225,7 @@ Preferred communication style: Simple, everyday language.
   - Real-time task list showing existing Notion entries
   - Create/edit forms with proper validation
   - Connection status indicators and setup verification
-- **Database Integration**: Successfully connected to user's existing TABLEMAKER database (ID: 22ef3f41-49ed-801e-9545-f63f8e6303d4)
+- **Database Integration**: Successfully connected to user's existing PRODUCTIVITYTASKS database
 - **Enhanced Database Schema**: Added complete productivity task properties including:
   - Task title, description, and category fields
   - Priority levels (High, Medium, Low) and status tracking
