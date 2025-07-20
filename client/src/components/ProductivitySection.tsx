@@ -483,8 +483,8 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
           {Array.isArray(timeBlocks) && timeBlocks.length === 0 ? (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p className="text-lg font-medium mb-1">No scheduled blocks for {getDateLabel().toLowerCase()}</p>
-              <p className="text-sm mb-4">
+              <p className="text-lg font-medium mb-1 font-serif">No scheduled blocks for {getDateLabel().toLowerCase()}</p>
+              <p className="text-sm mb-4 font-serif">
                 {isReadOnly ? "No time blocks are scheduled for this date" : "Plan your day with time blocks!"}
               </p>
               {!isReadOnly && (
