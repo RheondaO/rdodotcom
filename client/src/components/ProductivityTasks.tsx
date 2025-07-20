@@ -343,21 +343,19 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
       {/* Tasks List */}
       <div className="space-y-4">
         {filteredTasks.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">No tasks for {getDateLabel(selectedDate)}</h3>
-              <p className="text-muted-foreground mb-4">
-                {isReadOnly ? "No tasks are scheduled for this date" : "Start by adding your first task"}
-              </p>
-              {!isReadOnly && (
-                <Button onClick={() => setIsAddingTask(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Task
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
+            <p className="text-lg font-medium mb-1">No tasks for {getDateLabel(selectedDate)}</p>
+            <p className="text-sm mb-4">
+              {isReadOnly ? "No tasks are scheduled for this date" : "Start by adding your first task"}
+            </p>
+            {!isReadOnly && (
+              <Button onClick={() => setIsAddingTask(true)} className="bg-pink-500 hover:bg-pink-600">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Task
+              </Button>
+            )}
+          </div>
         ) : (
           filteredTasks.map((task) => (
             <Card key={task.notionId} className={`transition-all ${task.isCompleted ? 'opacity-75' : ''}`}>
