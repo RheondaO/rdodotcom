@@ -484,24 +484,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/time-blocks/:date", async (req, res) => {
     try {
       const date = req.params.date;
+      console.log(`📅 GET /api/time-blocks/${date} - Starting request`);
+      
+      // Check if we have the required environment variables
+      if (!process.env.NOTION_TIMEBLOCKS_URL) {
+        console.log("📅 NOTION_TIMEBLOCKS_URL not configured, using local storage");
+        const timeBlocks = await storage.getTimeBlocksByDate(date);
+        console.log(`📅 Local storage: returning ${timeBlocks.length} time blocks`);
+        res.json(timeBlocks);
+        return;
+      }
       
       // Try to get from Notion first
       try {
-        const { getNotionTimeBlocks } = await import('./notion');
         console.log(`📅 Attempting to fetch time blocks from Notion for ${date}`);
+        const { getNotionTimeBlocks } = await import('./notion');
         const notionTimeBlocks = await getNotionTimeBlocks(date);
-        console.log(`📅 Fetched ${notionTimeBlocks.length} time blocks from Notion for ${date}`);
+        console.log(`📅 SUCCESS: Fetched ${notionTimeBlocks.length} time blocks from Notion for ${date}`);
         res.json(notionTimeBlocks);
-      } catch (notionError) {
-        console.log("📅 Notion error, falling back to local storage:", notionError);
-        console.error("📅 Detailed Notion error:", notionError);
+      } catch (notionError: any) {
+        console.log("📅 NOTION ERROR: Falling back to local storage");
+        console.error("📅 Error details:", notionError.message);
+        console.error("📅 Error stack:", notionError.stack);
         // Fallback to local storage if Notion fails
         const timeBlocks = await storage.getTimeBlocksByDate(date);
         console.log(`📅 Fallback: returning ${timeBlocks.length} time blocks from local storage`);
         res.json(timeBlocks);
       }
-    } catch (error) {
-      console.error("Error fetching time blocks:", error);
+    } catch (error: any) {
+      console.error("📅 CRITICAL ERROR fetching time blocks:", error.message);
       res.status(500).json({ error: "Failed to fetch time blocks" });
     }
   });

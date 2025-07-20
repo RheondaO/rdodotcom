@@ -6,14 +6,20 @@ if (!process.env.NOTION_INTEGRATION_SECRET) {
     console.error("Please add your Notion integration secret to environment variables");
 }
 
-if (!process.env.NOTION_PAGE_URL) {
-    console.error("❌ NOTION_PAGE_URL is not configured");
-    console.error("Please add your Notion database URL to environment variables");
+if (!process.env.NOTION_TASKS_URL) {
+    console.error("❌ NOTION_TASKS_URL is not configured");
+    console.error("Please add your Notion tasks database URL to environment variables");
+}
+
+if (!process.env.NOTION_TIMEBLOCKS_URL) {
+    console.error("❌ NOTION_TIMEBLOCKS_URL is not configured"); 
+    console.error("Please add your Notion time blocks database URL to environment variables");
 }
 
 // Log environment variable status (without exposing actual values)
 console.log("🔑 NOTION_INTEGRATION_SECRET configured:", !!process.env.NOTION_INTEGRATION_SECRET);
-console.log("🔗 NOTION_PAGE_URL configured:", !!process.env.NOTION_PAGE_URL);
+console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);
+console.log("📅 NOTION_TIMEBLOCKS_URL configured:", !!process.env.NOTION_TIMEBLOCKS_URL);
 
 if (process.env.NOTION_INTEGRATION_SECRET) {
     console.log("🔑 Secret length:", process.env.NOTION_INTEGRATION_SECRET.length);
@@ -29,9 +35,14 @@ if (process.env.NOTION_INTEGRATION_SECRET) {
     }
 }
 
-if (process.env.NOTION_PAGE_URL) {
-    console.log("🔗 Page URL length:", process.env.NOTION_PAGE_URL.length);
-    console.log("🔗 Page URL domain:", process.env.NOTION_PAGE_URL.includes('notion.so') ? 'notion.so' : 'other');
+if (process.env.NOTION_TASKS_URL) {
+    console.log("📋 Tasks URL length:", process.env.NOTION_TASKS_URL.length);
+    console.log("📋 Tasks URL domain:", process.env.NOTION_TASKS_URL.includes('notion.so') ? 'notion.so' : 'other');
+}
+
+if (process.env.NOTION_TIMEBLOCKS_URL) {
+    console.log("📅 Time Blocks URL length:", process.env.NOTION_TIMEBLOCKS_URL.length);
+    console.log("📅 Time Blocks URL domain:", process.env.NOTION_TIMEBLOCKS_URL.includes('notion.so') ? 'notion.so' : 'other');
 }
 
 export const notion = new Client({
@@ -48,13 +59,19 @@ function extractPageIdFromUrl(pageUrl: string): string {
     throw Error("Failed to extract page ID");
 }
 
-export const NOTION_DATABASE_ID = process.env.NOTION_PAGE_URL ? extractPageIdFromUrl(process.env.NOTION_PAGE_URL) : null;
-export const NOTION_TIMEBLOCKS_DATABASE_ID = process.env.NOTION_TIMEBLOCKS_DATABASE_ID || null;
+export const NOTION_DATABASE_ID = process.env.NOTION_TASKS_URL ? extractPageIdFromUrl(process.env.NOTION_TASKS_URL) : null;
+export const NOTION_TIMEBLOCKS_DATABASE_ID = process.env.NOTION_TIMEBLOCKS_URL ? extractPageIdFromUrl(process.env.NOTION_TIMEBLOCKS_URL) : null;
 
-// Log Time Blocks database configuration
-console.log("📅 NOTION_TIMEBLOCKS_DATABASE_ID configured:", !!process.env.NOTION_TIMEBLOCKS_DATABASE_ID);
-if (process.env.NOTION_TIMEBLOCKS_DATABASE_ID) {
-    console.log("📅 Time Blocks DB length:", process.env.NOTION_TIMEBLOCKS_DATABASE_ID.length);
+// Log database configuration
+console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);
+console.log("📅 NOTION_TIMEBLOCKS_URL configured:", !!process.env.NOTION_TIMEBLOCKS_URL);
+
+if (process.env.NOTION_TASKS_URL) {
+    console.log("📋 Tasks URL length:", process.env.NOTION_TASKS_URL.length);
+}
+
+if (process.env.NOTION_TIMEBLOCKS_URL) {
+    console.log("📅 Time Blocks URL length:", process.env.NOTION_TIMEBLOCKS_URL.length);
 }
 
 /**
