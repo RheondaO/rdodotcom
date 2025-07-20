@@ -164,6 +164,11 @@ Preferred communication style: Simple, everyday language.
 - **Chronological Display**: Time blocks now display in chronological order by start time for better daily schedule visualization
 - **Task Creation Fix**: Enhanced task creation API with proper database ID handling, detailed error logging, and authentication debugging
 - **Production Debugging**: Added `/api/notion/debug` endpoint to diagnose authentication and configuration issues in production
+- **Task Creation Resolution**: Fixed critical bugs preventing task creation from web interface:
+  - **Date Parsing Issue**: Fixed `task.dueDate.toISOString is not a function` error by handling both Date objects and ISO strings
+  - **Authentication Flow**: Enhanced session-based authentication for consistent login state across UI and API
+  - **Error Handling**: Improved error logging and debugging for production troubleshooting
+  - **Verification**: Task creation confirmed working via API - tasks successfully created in Notion database
 
 ### System-Wide Dark Mode CSS Fix (July 20, 2025)
 - **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax

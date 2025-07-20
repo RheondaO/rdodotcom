@@ -1566,7 +1566,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const task = await createNotionTask(NOTION_TASKS_DATABASE_ID, req.body);
+      // Convert dueDate string to Date object if needed
+      const taskData = { ...req.body };
+      if (taskData.dueDate && typeof taskData.dueDate === 'string') {
+        taskData.dueDate = new Date(taskData.dueDate);
+      }
+      
+      const task = await createNotionTask(NOTION_TASKS_DATABASE_ID, taskData);
       console.log("📋 Successfully created task:", task.id);
       res.json(task);
     } catch (error: any) {

@@ -590,9 +590,14 @@ export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE
         }
 
         if (task.dueDate) {
+            // Handle both Date objects and ISO strings
+            const dueDateStr = task.dueDate instanceof Date 
+                ? task.dueDate.toISOString().split('T')[0]
+                : new Date(task.dueDate).toISOString().split('T')[0];
+            
             properties["Due DateTime"] = {
                 date: {
-                    start: task.dueDate.toISOString().split('T')[0]
+                    start: dueDateStr
                 }
             };
         }
