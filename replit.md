@@ -157,6 +157,8 @@ Preferred communication style: Simple, everyday language.
 - **Duplicate Route Prevention**: Only one route per endpoint - enhanced version with Notion integration
 - **Error Handling**: Graceful fallback to local storage when Notion integration fails
 - **ID Handling**: String IDs indicate Notion records, numeric IDs indicate local storage records
+- **Duration Calculation**: UI calculates duration, stored as minutes in Notion `Duration` number property
+- **Duration Display**: Backend calculates and returns duration for both creation and retrieval operations
 
 ### System-Wide Dark Mode CSS Fix (July 20, 2025)
 - **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax

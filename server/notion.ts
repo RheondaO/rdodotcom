@@ -285,6 +285,14 @@ export async function getNotionTimeBlocks(date?: string) {
                 endTime = endDate.toTimeString().substring(0, 5); // HH:MM format
             }
 
+            // Get duration from Notion or calculate if not stored
+            let duration = properties.Duration?.number || 0;
+            if (!duration && startTime && endTime) {
+                const start = new Date(`2000-01-01T${startTime}`);
+                const end = new Date(`2000-01-01T${endTime}`);
+                duration = Math.abs(end.getTime() - start.getTime()) / (1000 * 60);
+            }
+
             return {
                 notionId: page.id,
                 title: properties.Title?.title?.[0]?.plain_text || "Untitled Time Block",
@@ -293,6 +301,7 @@ export async function getNotionTimeBlocks(date?: string) {
                 startTime: startTime,
                 endTime: endTime,
                 category: properties.Category?.select?.name || "Work",
+                duration: duration,
                 createdAt: properties["Created At"]?.created_time ? new Date(properties["Created At"].created_time) : new Date(),
             };
         });
@@ -328,7 +337,12 @@ export async function createNotionTimeBlock(timeBlockData: {
         const startDateTime = `${timeBlockData.date}T${timeBlockData.startTime}:00`;
         const endDateTime = `${timeBlockData.date}T${timeBlockData.endTime}:00`;
         
-        console.log("📅 Converted to datetime:", { startDateTime, endDateTime });
+        // Calculate duration in minutes
+        const start = new Date(`2000-01-01T${timeBlockData.startTime}`);
+        const end = new Date(`2000-01-01T${timeBlockData.endTime}`);
+        const durationMinutes = Math.abs(end.getTime() - start.getTime()) / (1000 * 60);
+        
+        console.log("📅 Converted to datetime:", { startDateTime, endDateTime, durationMinutes });
         
         const response = await notion.pages.create({
             parent: {
@@ -367,6 +381,9 @@ export async function createNotionTimeBlock(timeBlockData: {
                     select: {
                         name: timeBlockData.category || "Work"
                     }
+                },
+                Duration: {
+                    number: durationMinutes
                 }
             }
         });
@@ -380,6 +397,7 @@ export async function createNotionTimeBlock(timeBlockData: {
             startTime: timeBlockData.startTime,
             endTime: timeBlockData.endTime,
             category: timeBlockData.category || "Work",
+            duration: durationMinutes,
             createdAt: new Date()
         };
     } catch (error) {

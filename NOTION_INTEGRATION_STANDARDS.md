@@ -91,7 +91,8 @@ const startTime = startDate.toTimeString().substring(0, 5);
 - **Title**: Use `Title` for main text field
 - **Description**: Use `Description` for rich text content
 - **Category**: Use `Category` for select dropdown
-- **Dates**: Use descriptive names like `Start Time`, `End Time`
+- **Dates**: Use descriptive names like `Start Time`, `End Time` (date properties)
+- **Duration**: Use `Duration` for calculated time duration (number property, minutes)
 - **Status**: Use `Status` for workflow states
 - **Priority**: Use `Priority` for importance levels
 
