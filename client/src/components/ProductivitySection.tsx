@@ -83,6 +83,17 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
     }
   });
 
+  // Time block mutations
+  const timeBlockMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/time-blocks', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/time-blocks', dateString] });
+    }
+  });
+
   // State for UI
   const [showTodoDialog, setShowTodoDialog] = useState(false);
   const [showTimeBlockDialog, setShowTimeBlockDialog] = useState(false);
@@ -97,6 +108,15 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
     description: "",
     category: "work",
     estimatedDuration: 60
+  });
+
+  // State for new time block form
+  const [newTimeBlock, setNewTimeBlock] = useState({
+    title: "",
+    description: "",
+    startTime: "",
+    endTime: "",
+    category: "work"
   });
 
   // Categories for tasks
@@ -140,6 +160,64 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
       });
       setShowTodoDialog(false);
     }
+  };
+
+  // Handle new time block creation
+  const handleCreateTimeBlock = () => {
+    if (newTimeBlock.title.trim() && newTimeBlock.startTime && newTimeBlock.endTime) {
+      // Validate that end time is after start time
+      const start = new Date(`2000-01-01T${newTimeBlock.startTime}`);
+      const end = new Date(`2000-01-01T${newTimeBlock.endTime}`);
+      
+      if (end <= start) {
+        alert('End time must be after start time');
+        return;
+      }
+
+      timeBlockMutation.mutate({
+        title: newTimeBlock.title,
+        description: newTimeBlock.description,
+        startTime: newTimeBlock.startTime,
+        endTime: newTimeBlock.endTime,
+        category: newTimeBlock.category,
+        date: dateString
+      });
+      
+      setNewTimeBlock({
+        title: "",
+        description: "",
+        startTime: "",
+        endTime: "",
+        category: "work"
+      });
+      setShowTimeBlockDialog(false);
+    }
+  };
+
+  // Generate suggested time slots based on existing blocks
+  const getSuggestedTimeSlots = () => {
+    if (!Array.isArray(timeBlocks)) return [];
+    
+    const slots = [];
+    const workingHours = [
+      '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
+    ];
+    
+    // Filter available slots that don't conflict with existing blocks
+    for (const hour of workingHours) {
+      const endHour = String(parseInt(hour.split(':')[0]) + 1).padStart(2, '0') + ':00';
+      const conflicts = timeBlocks.some((block: any) => {
+        const blockStart = block.startTime;
+        const blockEnd = block.endTime;
+        return (hour >= blockStart && hour < blockEnd) || (endHour > blockStart && endHour <= blockEnd);
+      });
+      
+      if (!conflicts) {
+        slots.push({ start: hour, end: endHour });
+      }
+    }
+    
+    return slots.slice(0, 3); // Show top 3 suggestions
   };
 
   // Timer functionality
@@ -233,14 +311,172 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
               <Calendar className="h-5 w-5 text-blue-600" />
               <span>{getDateLabel()}'s Schedule</span>
             </CardTitle>
-            <Button 
-              variant="outline" 
-              disabled={isReadOnly}
-              className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Time Block
-            </Button>
+            <Dialog open={showTimeBlockDialog} onOpenChange={setShowTimeBlockDialog}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  disabled={isReadOnly}
+                  className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Time Block
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center space-x-2">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <span>Create New Time Block</span>
+                  </DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-6 py-4">
+                  {/* Quick Date Selection */}
+                  <div className="flex items-center space-x-2">
+                    <Label className="text-sm font-medium">Schedule for:</Label>
+                    <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20">
+                      {getDateLabel()} ({format(selectedDate, 'MMM dd')})
+                    </Badge>
+                  </div>
+
+                  {/* Suggested Time Slots */}
+                  {getSuggestedTimeSlots().length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Suggested Available Slots:</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {getSuggestedTimeSlots().map((slot, index) => (
+                          <Button
+                            key={index}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setNewTimeBlock(prev => ({
+                                ...prev,
+                                startTime: slot.start,
+                                endTime: slot.end
+                              }));
+                            }}
+                            className="text-xs h-8 px-3"
+                          >
+                            {slot.start} - {slot.end}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Title */}
+                  <div className="space-y-2">
+                    <Label htmlFor="timeblock-title">Title *</Label>
+                    <Input
+                      id="timeblock-title"
+                      placeholder="e.g., Team Meeting, Deep Work, Client Call"
+                      value={newTimeBlock.title}
+                      onChange={(e) => setNewTimeBlock(prev => ({ ...prev, title: e.target.value }))}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <Label htmlFor="timeblock-description">Description</Label>
+                    <Textarea
+                      id="timeblock-description"
+                      placeholder="Optional details about this time block..."
+                      value={newTimeBlock.description}
+                      onChange={(e) => setNewTimeBlock(prev => ({ ...prev, description: e.target.value }))}
+                      rows={2}
+                    />
+                  </div>
+
+                  {/* Time Selection */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="timeblock-start">Start Time *</Label>
+                      <Input
+                        id="timeblock-start"
+                        type="time"
+                        value={newTimeBlock.startTime}
+                        onChange={(e) => setNewTimeBlock(prev => ({ ...prev, startTime: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="timeblock-end">End Time *</Label>
+                      <Input
+                        id="timeblock-end"
+                        type="time"
+                        value={newTimeBlock.endTime}
+                        onChange={(e) => setNewTimeBlock(prev => ({ ...prev, endTime: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Duration Display */}
+                  {newTimeBlock.startTime && newTimeBlock.endTime && (
+                    <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-[#17111d] p-3 rounded-lg">
+                      <Clock className="inline h-4 w-4 mr-1" />
+                      Duration: {(() => {
+                        const start = new Date(`2000-01-01T${newTimeBlock.startTime}`);
+                        const end = new Date(`2000-01-01T${newTimeBlock.endTime}`);
+                        const diffMinutes = Math.abs(end.getTime() - start.getTime()) / (1000 * 60);
+                        const hours = Math.floor(diffMinutes / 60);
+                        const minutes = diffMinutes % 60;
+                        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Category Selection */}
+                  <div className="space-y-2">
+                    <Label htmlFor="timeblock-category">Category</Label>
+                    <Select 
+                      value={newTimeBlock.category} 
+                      onValueChange={(value) => setNewTimeBlock(prev => ({ ...prev, category: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.value} value={category.value}>
+                            <span className="flex items-center">
+                              <span className="mr-2">{category.icon}</span>
+                              {category.label}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowTimeBlockDialog(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleCreateTimeBlock}
+                      disabled={!newTimeBlock.title.trim() || !newTimeBlock.startTime || !newTimeBlock.endTime || timeBlockMutation.isPending}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {timeBlockMutation.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Create Time Block
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent className="space-y-3 p-6">
@@ -251,25 +487,107 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
               <p className="text-sm">Plan your day with time blocks!</p>
             </div>
           ) : (
-            Array.isArray(timeBlocks) && timeBlocks.map((block: any) => (
-              <div key={block.id} className="flex items-center space-x-3 p-3 bg-white dark:bg-[#17111d] rounded-xl border border-gray-100 dark:border-gray-700">
-                <div className="flex-shrink-0 text-center">
-                  <div className="text-sm font-medium text-blue-600">{block.startTime}</div>
-                  <div className="text-xs text-gray-500">{block.endTime}</div>
-                </div>
-                
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900 dark:text-white">{block.title}</h4>
-                  {block.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{block.description}</p>
+            Array.isArray(timeBlocks) && timeBlocks.map((block: any) => {
+              const categoryInfo = categories.find(cat => cat.value === block.category) || categories[0];
+              const startTime = new Date(`2000-01-01T${block.startTime}`);
+              const endTime = new Date(`2000-01-01T${block.endTime}`);
+              const durationMinutes = Math.abs(endTime.getTime() - startTime.getTime()) / (1000 * 60);
+              const hours = Math.floor(durationMinutes / 60);
+              const minutes = durationMinutes % 60;
+              const duration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+              
+              // Determine status based on current time and date
+              const now = new Date();
+              const isCurrentDate = format(selectedDate, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+              const currentTime = format(now, 'HH:mm');
+              let status = 'upcoming';
+              
+              if (isCurrentDate) {
+                if (currentTime >= block.startTime && currentTime <= block.endTime) {
+                  status = 'active';
+                } else if (currentTime > block.endTime) {
+                  status = 'completed';
+                }
+              } else if (selectedDate < now) {
+                status = 'completed';
+              }
+
+              const getStatusColor = (status: string) => {
+                switch (status) {
+                  case 'active': return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+                  case 'completed': return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
+                  default: return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800';
+                }
+              };
+
+              return (
+                <div 
+                  key={block.id} 
+                  className={`group relative p-4 rounded-xl border transition-all duration-200 hover:shadow-md ${
+                    status === 'active' 
+                      ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800' 
+                      : 'bg-white dark:bg-[#17111d] border-gray-100 dark:border-gray-700'
+                  }`}
+                >
+                  {/* Status indicator */}
+                  <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+                    {status === 'active' ? '🟢 Active' : status === 'completed' ? '✅ Done' : '⏳ Upcoming'}
+                  </div>
+
+                  <div className="flex items-start space-x-4 pr-20">
+                    {/* Time and Duration */}
+                    <div className="flex-shrink-0 text-center min-w-[80px]">
+                      <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                        {format(new Date(`2000-01-01T${block.startTime}`), 'h:mm')}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {format(new Date(`2000-01-01T${block.startTime}`), 'a')}
+                      </div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        {duration}
+                      </div>
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="text-lg">{categoryInfo.icon}</span>
+                        <h4 className="font-semibold text-gray-900 dark:text-white text-base truncate">
+                          {block.title}
+                        </h4>
+                      </div>
+                      
+                      {block.description && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                          {block.description}
+                        </p>
+                      )}
+                      
+                      <div className="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {block.startTime} - {block.endTime}
+                        </div>
+                        <Badge variant="outline" className="text-xs px-2 py-0.5">
+                          {categoryInfo.label}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions (visible on hover) */}
+                  {!isReadOnly && (
+                    <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="flex space-x-1">
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600">
+                          <Focus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
                   )}
                 </div>
-                
-                <Badge variant="outline" className="text-xs">
-                  {block.category}
-                </Badge>
-              </div>
-            ))
+              );
+            })
           )}
         </CardContent>
       </Card>
