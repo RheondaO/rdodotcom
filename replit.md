@@ -208,6 +208,10 @@ export const requireAuth = (req, res, next) => {
   - **Authentication Flow**: Enhanced session-based authentication for consistent login state across UI and API
   - **Error Handling**: Improved error logging and debugging for production troubleshooting
   - **Verification**: Task creation confirmed working via API - tasks successfully created in Notion database
+- **Time Block Category Display Fix**: Fixed issue where all time blocks displayed "Work" category regardless of selection:
+  - **Root Cause**: Case mismatch between frontend category values and Notion database storage
+  - **Solution**: Updated category lookup to use case-insensitive matching: `cat.value.toLowerCase() === block.category.toLowerCase()`
+  - **Result**: Categories now display correctly as selected (Personal, Health, Learning, Creative)
 
 ### Error Prevention Guidelines for Future Database Setups (July 20, 2025)
 

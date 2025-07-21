@@ -502,7 +502,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
             [...timeBlocks].sort((a: any, b: any) => {
               return a.startTime.localeCompare(b.startTime);
             }).map((block: any) => {
-              const categoryInfo = categories.find(cat => cat.value === block.category) || categories[0];
+              const categoryInfo = categories.find(cat => cat.value.toLowerCase() === block.category.toLowerCase()) || categories[0];
               const startTime = new Date(`2000-01-01T${block.startTime}`);
               const endTime = new Date(`2000-01-01T${block.endTime}`);
               const durationMinutes = Math.abs(endTime.getTime() - startTime.getTime()) / (1000 * 60);
