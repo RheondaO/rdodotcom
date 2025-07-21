@@ -158,6 +158,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public can only VIEW active timers, not create them
+
   // Public routes (no auth required)
   app.get("/api/public/stats", async (req, res) => {
     try {

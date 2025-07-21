@@ -110,48 +110,57 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const currentModeInfo = modeInfo[mode];
   const Icon = currentModeInfo.icon;
 
-  // Get active timer session from server
+  // Get active timer session from server (public endpoint for viewing)
   const { data: activeSession, refetch: refetchActiveSession } = useQuery<TimerSession | null>({
-    queryKey: ["/api/timer/active"],
+    queryKey: ["/api/public/active-timer"],
     enabled: isOpen,
     refetchInterval: 1000, // Sync every second when modal is open
     staleTime: 0 // Always fetch fresh data
   });
 
-  // Start new timer session
+  // Start new timer session (admin-only, use authenticated endpoint)
   const startTimerMutation = useMutation({
     mutationFn: async (timerData: any) => {
       const response = await apiRequest("POST", "/api/timer/start", timerData);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (newSession) => {
+      console.log("✅ Admin timer started successfully:", newSession);
       refetchActiveSession();
+      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
+    },
+    onError: (error: any) => {
+      console.error("❌ Admin timer start failed:", error);
     }
   });
 
-  // Update timer session (pause/resume)
+  // Update timer session (pause/resume) (admin-only, use authenticated endpoint)
   const updateTimerMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string | number; updates: any }) => {
       const response = await apiRequest("PATCH", `/api/timer/${id}`, updates);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log("✅ Admin timer updated successfully:", result);
       refetchActiveSession();
+      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
     }
   });
 
-  // Stop timer session
+  // Stop timer session (admin-only, use authenticated endpoint)
   const stopTimerMutation = useMutation({
     mutationFn: async (id: string | number) => {
       const response = await apiRequest("DELETE", `/api/timer/${id}`);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      console.log("✅ Admin timer stopped successfully:", result);
       refetchActiveSession();
+      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
     }
   });
 
-  // Complete timer session
+  // Complete timer session (admin-only, use authenticated endpoint)
   const completeTimerMutation = useMutation({
     mutationFn: async (id: string | number) => {
       const response = await apiRequest("POST", `/api/timer/${id}/complete`);
@@ -159,6 +168,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     },
     onSuccess: () => {
       refetchActiveSession();
+      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
       playNotificationSound();
     }
   });

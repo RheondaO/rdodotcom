@@ -906,18 +906,7 @@ export async function updateNotionTimerSession(pageId: string, updates: {
 
         console.log("⏱️ Updating timer session in Notion:", pageId);
 
-        const properties: any = {
-            "Last Sync": {
-                date: {
-                    start: new Date().toISOString()
-                }
-            },
-            "Updated At": {
-                date: {
-                    start: new Date().toISOString()
-                }
-            }
-        };
+        const properties: any = {};
 
         if (updates.remainingTime !== undefined) {
             properties["Remaining Time"] = {
