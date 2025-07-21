@@ -167,6 +167,13 @@ Preferred communication style: Simple, everyday language.
   - Audio feedback using HTML5 Audio API
   - Responsive design with dark mode support
   - Custom progress calculations and time formatting
+- **Notion Persistence Integration**:
+  - Migrated from PostgreSQL to Notion PRODUCTIVITYTIMERSESSIONS database for cross-device sync
+  - Added comprehensive Notion API integration functions in server/notion.ts
+  - Updated timer-routes.ts with Notion integration and local storage fallback
+  - Fixed TypeScript interfaces to support both string (Notion) and number (local) IDs
+  - Database schema supports: Mode, Total Duration, Remaining Time, Is Active, Is Paused, Started At
+  - Real-time timer synchronization across browser sessions and devices
 
 ### Universal Real-Time Update Implementation (July 21, 2025)
 - **CRITICAL ACHIEVEMENT**: Implemented comprehensive real-time update system across ALL Belle Journal widgets

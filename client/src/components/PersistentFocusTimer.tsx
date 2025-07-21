@@ -41,7 +41,8 @@ interface TimerSettings {
 }
 
 interface TimerSession {
-  id: number;
+  id: string | number;
+  notionId?: string;
   mode: string;
   title?: string;
   category?: string;
@@ -53,10 +54,13 @@ interface TimerSession {
   isActive: boolean;
   isPaused: boolean;
   startedAt: string;
-  pausedAt?: string;
+  pausedAt?: string | null;
   lastSync: string;
   totalFocusTime: number;
   completedSessions: number;
+  createdAt?: string;
+  updatedAt?: string;
+  userId?: string;
 }
 
 export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: PersistentFocusTimerProps) {
@@ -107,7 +111,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const Icon = currentModeInfo.icon;
 
   // Get active timer session from server
-  const { data: activeSession, refetch: refetchActiveSession } = useQuery({
+  const { data: activeSession, refetch: refetchActiveSession } = useQuery<TimerSession | null>({
     queryKey: ["/api/timer/active"],
     enabled: isOpen,
     refetchInterval: 1000, // Sync every second when modal is open
@@ -127,7 +131,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
   // Update timer session (pause/resume)
   const updateTimerMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
+    mutationFn: async ({ id, updates }: { id: string | number; updates: any }) => {
       const response = await apiRequest("PATCH", `/api/timer/${id}`, updates);
       return response.json();
     },
@@ -138,7 +142,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
   // Stop timer session
   const stopTimerMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string | number) => {
       const response = await apiRequest("DELETE", `/api/timer/${id}`);
       return response.json();
     },
@@ -149,7 +153,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
   // Complete timer session
   const completeTimerMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string | number) => {
       const response = await apiRequest("POST", `/api/timer/${id}/complete`);
       return response.json();
     },

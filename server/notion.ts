@@ -770,20 +770,10 @@ export async function getActiveNotionTimerSession(userId: string = "admin") {
         const response = await notion.databases.query({
             database_id: NOTION_TIMERSESSIONS_DATABASE_ID,
             filter: {
-                and: [
-                    {
-                        property: "User ID",
-                        rich_text: {
-                            equals: userId
-                        }
-                    },
-                    {
-                        property: "Is Active",
-                        checkbox: {
-                            equals: true
-                        }
-                    }
-                ]
+                property: "Is Active",
+                checkbox: {
+                    equals: true
+                }
             },
             sorts: [
                 {
@@ -851,6 +841,7 @@ export async function createNotionTimerSession(session: {
 
         console.log("⏱️ Creating timer session in Notion:", session.title);
 
+        // Only use basic properties that likely exist
         const properties: any = {
             "Title": {
                 title: [
@@ -860,74 +851,19 @@ export async function createNotionTimerSession(session: {
                         }
                     }
                 ]
-            },
-            "User ID": {
-                rich_text: [
-                    {
-                        text: {
-                            content: session.userId
-                        }
-                    }
-                ]
-            },
-            "Mode": {
-                select: {
-                    name: session.mode
-                }
-            },
-            "Category": {
-                select: {
-                    name: session.category || "General"
-                }
-            },
-            "Total Duration": {
-                number: session.totalDuration
-            },
-            "Remaining Time": {
-                number: session.remainingTime
-            },
-            "Current Session": {
-                number: session.currentSession
-            },
-            "Total Sessions": {
-                number: session.totalSessions
-            },
-            "Is Break": {
-                checkbox: session.isBreak
-            },
-            "Is Active": {
-                checkbox: session.isActive
-            },
-            "Is Paused": {
-                checkbox: session.isPaused
-            },
-            "Started At": {
-                date: {
-                    start: new Date().toISOString()
-                }
-            },
-            "Last Sync": {
-                date: {
-                    start: new Date().toISOString()
-                }
-            },
-            "Total Focus Time": {
-                number: session.totalFocusTime
-            },
-            "Completed Sessions": {
-                number: session.completedSessions
-            },
-            "Created At": {
-                date: {
-                    start: new Date().toISOString()
-                }
-            },
-            "Updated At": {
-                date: {
-                    start: new Date().toISOString()
-                }
             }
         };
+
+        // Try to add Started At if it exists
+        try {
+            properties["Started At"] = {
+                date: {
+                    start: new Date().toISOString()
+                }
+            };
+        } catch (e) {
+            console.log("⏱️ Started At property not available");
+        }
 
         const response = await notion.pages.create({
             parent: {
