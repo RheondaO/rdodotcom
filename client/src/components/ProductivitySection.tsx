@@ -78,6 +78,39 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
     fetchTimeBlocks();
   }, [dateString]);
 
+  // Real-time status updates - check every 30 seconds for active time blocks
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Only update status for today's time blocks to detect active/completed changes
+      if (isToday(selectedDate)) {
+        const now = new Date();
+        const currentTime = format(now, 'HH:mm');
+        
+        // Check if any time block just became active
+        const currentlyActive = timeBlocks.find((block: any) => 
+          currentTime >= block.startTime && currentTime <= block.endTime && !block.isTemporary
+        );
+        
+        if (currentlyActive) {
+          console.log(`Time block "${currentlyActive.title}" is now active!`);
+        }
+        
+        setTimeBlocks(prev => [...prev]); // Force re-render to update status calculations
+      }
+    }, 30000); // Check every 30 seconds for more responsive updates
+
+    return () => clearInterval(interval);
+  }, [selectedDate, timeBlocks]);
+
+  // Auto-refresh data every 5 minutes to catch external changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchTimeBlocks();
+    }, 300000); // Refresh every 5 minutes
+
+    return () => clearInterval(interval);
+  }, [dateString]);
+
   // Mutations for data updates
   const todoMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -106,12 +139,17 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
       return response.json();
     },
     onSuccess: async (newTimeBlock) => {
-      // Immediately update local state for instant UI feedback
-      setTimeBlocks(prev => [...prev, newTimeBlock]);
+      // Replace the temporary optimistic item with the real one from server
+      setTimeBlocks(prev => {
+        // Remove any temporary items and add the real one
+        const withoutTemp = prev.filter(block => !block.isTemporary);
+        return [...withoutTemp, newTimeBlock];
+      });
     },
     onError: (error) => {
       console.error('Error creating time block:', error);
-      // Optionally refetch to restore correct state on error
+      // Remove optimistic updates and restore correct state
+      setTimeBlocks(prev => prev.filter(block => !block.isTemporary));
       fetchTimeBlocks();
     }
   });
@@ -576,14 +614,27 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
                 <div 
                   key={block.notionId || block.id} 
                   className={`group relative p-4 rounded-xl border transition-all duration-200 hover:shadow-md ${
-                    status === 'active' 
-                      ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800' 
-                      : 'bg-white dark:bg-[#17111d] border-gray-100 dark:border-gray-700'
+                    block.isTemporary 
+                      ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 opacity-70' 
+                      : status === 'active' 
+                        ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800' 
+                        : 'bg-white dark:bg-[#17111d] border-gray-100 dark:border-gray-700'
                   }`}
                 >
                   {/* Status indicator */}
-                  <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-                    {status === 'active' ? '🟢 Active' : status === 'completed' ? '✅ Done' : '⏳ Upcoming'}
+                  <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${
+                    block.isTemporary 
+                      ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800'
+                      : getStatusColor(status)
+                  }`}>
+                    {block.isTemporary 
+                      ? '💾 Saving...' 
+                      : status === 'active' 
+                        ? '🟢 Active' 
+                        : status === 'completed' 
+                          ? '✅ Done' 
+                          : '⏳ Upcoming'
+                    }
                   </div>
 
                   <div className="flex items-start space-x-4 pr-20">

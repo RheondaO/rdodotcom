@@ -212,6 +212,13 @@ export const requireAuth = (req, res, next) => {
   - **Root Cause**: Case mismatch between frontend category values and Notion database storage
   - **Solution**: Updated category lookup to use case-insensitive matching: `cat.value.toLowerCase() === block.category.toLowerCase()`
   - **Result**: Categories now display correctly as selected (Personal, Health, Learning, Creative)
+- **Real-Time Update System Implementation**: Built comprehensive auto-refresh system for time blocks without page refresh:
+  - **Direct State Management**: Replaced React Query cache with useState for immediate UI control
+  - **Optimistic Updates**: New time blocks appear instantly with "Saving..." indicator before server confirmation
+  - **Auto Status Detection**: Time blocks automatically update to "Active" when their scheduled time arrives (30-second intervals)
+  - **Background Data Refresh**: Automatic data sync every 5 minutes to catch external changes
+  - **Error Recovery**: Failed operations remove optimistic updates and restore correct state
+  - **Visual Feedback**: Temporary items show with blue styling and saving indicator until confirmed
 
 ### Error Prevention Guidelines for Future Database Setups (July 20, 2025)
 
