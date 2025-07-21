@@ -106,7 +106,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
   const [newTodo, setNewTodo] = useState({
     title: "",
     description: "",
-    category: "work",
+    category: "Work",
     estimatedDuration: 60
   });
 
@@ -116,16 +116,16 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
     description: "",
     startTime: "",
     endTime: "",
-    category: "work"
+    category: "Work"
   });
 
-  // Categories for tasks
+  // Categories for tasks - using proper case to match Notion's capitalization
   const categories = [
-    { value: "work", label: "Work", icon: "💼" },
-    { value: "personal", label: "Personal", icon: "🏠" },
-    { value: "health", label: "Health", icon: "💪" },
-    { value: "learning", label: "Learning", icon: "📚" },
-    { value: "creative", label: "Creative", icon: "🎨" }
+    { value: "Work", label: "Work", icon: "💼" },
+    { value: "Personal", label: "Personal", icon: "🏠" },
+    { value: "Health", label: "Health", icon: "💪" },
+    { value: "Learning", label: "Learning", icon: "📚" },
+    { value: "Creative", label: "Creative", icon: "🎨" }
   ];
 
   // Handle todo completion toggle with strikethrough styling
@@ -155,7 +155,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
       setNewTodo({
         title: "",
         description: "",
-        category: "work",
+        category: "Work",
         estimatedDuration: 60
       });
       setShowTodoDialog(false);
@@ -188,7 +188,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
         description: "",
         startTime: "",
         endTime: "",
-        category: "work"
+        category: "Work"
       });
       setShowTimeBlockDialog(false);
     }
