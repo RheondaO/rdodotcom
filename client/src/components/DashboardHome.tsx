@@ -35,6 +35,7 @@ import { useHabits } from "../hooks/use-habits";
 import { useTodos } from "../hooks/use-todos";
 import { useTimeBlocks } from "../hooks/use-time-blocks";
 import { useQuery } from "@tanstack/react-query";
+import { ActiveTimerDisplay } from "./ActiveTimerDisplay";
 import type { Goal, Medication } from "@shared/schema";
 
 interface DashboardHomeProps {
@@ -384,6 +385,9 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           {getMotivationalText()}
         </p>
       </div>
+
+      {/* Active Timer Display - Shows for all users if timer is running */}
+      <ActiveTimerDisplay />
 
       {/* Daily Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

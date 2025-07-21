@@ -73,6 +73,7 @@ import {
   type InsertPriceHistory,
   type InvestmentTransaction,
   type InsertInvestmentTransaction,
+  type TimerSession,
   blogPosts,
   blogIdeas,
   blogCalendar,
@@ -403,6 +404,9 @@ export interface IStorage {
   getProductivityAnalytics(startDate: string, endDate: string): Promise<any>;
   getPublicStats(): Promise<any>;
   getPublicRecentContent(): Promise<any>;
+  
+  // Timer Sessions
+  getActiveTimerSession(): Promise<TimerSession | null>;
 }
 
 export class MemStorage implements IStorage {
@@ -2742,6 +2746,11 @@ class CombinedStorage extends MemStorage {
 
   async deleteBlogCalendarEvent(id: number): Promise<void> {
     return this.blogStorage.deleteBlogCalendarEvent(id);
+  }
+
+  // Timer Sessions - Local storage fallback (returns null since timers are in Notion)
+  async getActiveTimerSession(): Promise<TimerSession | null> {
+    return null;
   }
 }
 

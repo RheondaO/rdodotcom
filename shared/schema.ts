@@ -1028,6 +1028,29 @@ export type InsertPortfolioHolding = z.infer<typeof insertPortfolioHoldingSchema
 export type InsertPriceHistory = z.infer<typeof insertPriceHistorySchema>;
 export type InsertInvestmentTransaction = z.infer<typeof insertInvestmentTransactionSchema>;
 
+// Timer Session interface for local storage fallback
+export interface TimerSession {
+  id: string | number;
+  notionId?: string;
+  mode: string;
+  title: string;
+  category: string;
+  totalDuration: number;
+  remainingTime: number;
+  currentSession: number;
+  totalSessions: number;
+  isBreak: boolean;
+  isActive: boolean;
+  isPaused: boolean;
+  totalFocusTime: number;
+  completedSessions: number;
+  userId: string;
+  startedAt: string;
+  lastSync: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Timer Sessions Table for persistent timer state across devices/sessions
 export const timerSessions = pgTable("timer_sessions", {
   id: serial("id").primaryKey(),

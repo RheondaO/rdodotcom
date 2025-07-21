@@ -10,7 +10,8 @@ import {
   updateNotionTask, 
   deleteNotionTask,
   NOTION_TASKS_DATABASE_ID,
-  NOTION_TIMEBLOCKS_DATABASE_ID
+  NOTION_TIMEBLOCKS_DATABASE_ID,
+  getActiveNotionTimerSession
 } from "./notion";
 import timerRoutes from "./timer-routes";
 import { 
@@ -73,6 +74,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(content);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch recent content" });
+    }
+  });
+
+  app.get("/api/public/active-timer", async (req, res) => {
+    try {
+      // Check for active timer from Notion first
+      const notionTimer = await getActiveTimerSessionFromNotion();
+      if (notionTimer) {
+        res.json(notionTimer);
+        return;
+      }
+
+      // Fallback to local storage for any active timers
+      const localTimer = await storage.getActiveTimerSession();
+      res.json(localTimer);
+    } catch (error) {
+      console.error("Error fetching active timer:", error);
+      res.json(null);
     }
   });
 
