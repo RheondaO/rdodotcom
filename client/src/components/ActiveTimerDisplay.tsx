@@ -16,10 +16,17 @@ interface TimerSession {
 }
 
 export function ActiveTimerDisplay() {
-  const { data: activeTimer, isLoading, isFetched } = useQuery<TimerSession | null>({
+  const { data: activeTimer, isLoading, isFetched, error } = useQuery<TimerSession | null>({
     queryKey: ["/api/public/active-timer"],
     refetchInterval: 1000, // Update every second for countdown
     refetchOnWindowFocus: true,
+  });
+
+  // Debug info for production troubleshooting (only when no timer found)
+  const { data: debugInfo } = useQuery({
+    queryKey: ["/api/notion/debug"],
+    refetchInterval: 10000, // Check every 10 seconds
+    enabled: !activeTimer && isFetched, // Only when no active timer and initial fetch completed
   });
 
   // Only show loading state on initial load, not on refetches
@@ -35,6 +42,25 @@ export function ActiveTimerDisplay() {
   }
 
   if (!activeTimer) {
+    // Enhanced production debugging: Show config status when no timer found
+    if (isFetched && debugInfo?.config && !debugInfo.config.hasTimerSessionsUrl) {
+      return (
+        <Card className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+          <div className="flex items-center gap-3">
+            <Timer className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+            <div className="flex-1">
+              <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                Timer system not configured
+              </span>
+              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                Missing NOTION_TIMERSESSIONS_URL environment variable
+              </p>
+            </div>
+          </div>
+        </Card>
+      );
+    }
+    
     return null; // Don't show anything if no active timer
   }
 
@@ -134,6 +160,13 @@ export function ActiveTimerDisplay() {
               {activeTimer.totalSessions && activeTimer.totalSessions > 1 && (
                 <span>Session {activeTimer.currentSession}/{activeTimer.totalSessions}</span>
               )}
+              {/* Cross-device sync indicator */}
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${typeof activeTimer.id === 'string' && activeTimer.id.length > 10 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                <span className="text-xs">
+                  {typeof activeTimer.id === 'string' && activeTimer.id.length > 10 ? 'Synced' : 'Local'}
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -11,6 +11,7 @@ import {
   deleteNotionTask,
   NOTION_TASKS_DATABASE_ID,
   NOTION_TIMEBLOCKS_DATABASE_ID,
+  NOTION_TIMERSESSIONS_DATABASE_ID,
   getActiveNotionTimerSession
 } from "./notion";
 import timerRoutes from "./timer-routes";
@@ -57,6 +58,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Apply authentication middleware to all routes
   app.use(authenticateUser);
+
+  // Timer debug routes for cross-device troubleshooting
+  app.get("/api/timer/debug", async (req, res) => {
+    try {
+      const timerDebugInfo = {
+        environment: {
+          hasNotionSecret: !!process.env.NOTION_INTEGRATION_SECRET,
+          hasTimerSessionsUrl: !!process.env.NOTION_TIMERSESSIONS_URL,
+          timerSessionsDbId: NOTION_TIMERSESSIONS_DATABASE_ID,
+          nodeEnv: process.env.NODE_ENV
+        },
+        
+        notionStatus: {
+          databaseConfigured: !!NOTION_TIMERSESSIONS_DATABASE_ID,
+          databaseIdLength: NOTION_TIMERSESSIONS_DATABASE_ID?.length || 0
+        },
+        
+        activeTimer: null as any,
+        errors: [] as string[]
+      };
+
+      // Test Notion connection and active timer retrieval
+      try {
+        const activeTimer = await getActiveNotionTimerSession();
+        timerDebugInfo.activeTimer = activeTimer ? {
+          id: activeTimer.id,
+          mode: activeTimer.mode,
+          title: activeTimer.title,
+          isActive: activeTimer.isActive,
+          source: activeTimer.id.length > 10 ? "notion" : "local"
+        } : null;
+      } catch (error: any) {
+        timerDebugInfo.errors.push(`Active timer fetch error: ${error.message}`);
+      }
+
+      res.json({
+        success: true,
+        data: timerDebugInfo,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Enhanced public active timer with debug info
+  app.get("/api/timer/active-enhanced", async (req, res) => {
+    try {
+      console.log("🔍 Enhanced active timer request - checking Notion first");
+      
+      // Primary: Check Notion for active timer
+      let activeTimer = null;
+      let source = "none";
+      let errors: string[] = [];
+
+      if (NOTION_TIMERSESSIONS_DATABASE_ID) {
+        try {
+          activeTimer = await getActiveNotionTimerSession();
+          if (activeTimer) {
+            source = "notion";
+            console.log("✅ Found active timer in Notion:", activeTimer.id);
+          }
+        } catch (error: any) {
+          errors.push(`Notion error: ${error.message}`);
+          console.log("❌ Notion timer fetch failed:", error.message);
+        }
+      } else {
+        errors.push("NOTION_TIMERSESSIONS_DATABASE_ID not configured");
+        console.log("⚠️ Timer Sessions database not configured");
+      }
+
+      // Response with debug information
+      res.json({
+        timer: activeTimer,
+        debug: {
+          source,
+          notionConfigured: !!NOTION_TIMERSESSIONS_DATABASE_ID,
+          errors: errors.length > 0 ? errors : null,
+          timestamp: new Date().toISOString()
+        }
+      });
+
+    } catch (error: any) {
+      console.error("💥 Enhanced active timer error:", error);
+      res.status(500).json({
+        timer: null,
+        debug: {
+          source: "error",
+          error: error.message,
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+  });
 
   // Public routes (no auth required)
   app.get("/api/public/stats", async (req, res) => {
@@ -1643,10 +1743,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasSecret: !!process.env.NOTION_INTEGRATION_SECRET,
         hasTasksUrl: !!process.env.NOTION_TASKS_URL,
         hasTimeBlocksUrl: !!process.env.NOTION_TIMEBLOCKS_URL,
+        hasTimerSessionsUrl: !!process.env.NOTION_TIMERSESSIONS_URL,
         tasksDbId: NOTION_TASKS_DATABASE_ID ? `${NOTION_TASKS_DATABASE_ID.substring(0, 8)}...` : null,
         timeBlocksDbId: NOTION_TIMEBLOCKS_DATABASE_ID ? `${NOTION_TIMEBLOCKS_DATABASE_ID.substring(0, 8)}...` : null,
+        timerSessionsDbId: NOTION_TIMERSESSIONS_DATABASE_ID ? `${NOTION_TIMERSESSIONS_DATABASE_ID.substring(0, 8)}...` : null,
         tasksDbIdFull: NOTION_TASKS_DATABASE_ID,
-        timeBlocksDbIdFull: NOTION_TIMEBLOCKS_DATABASE_ID
+        timeBlocksDbIdFull: NOTION_TIMEBLOCKS_DATABASE_ID,
+        timerSessionsDbIdFull: NOTION_TIMERSESSIONS_DATABASE_ID
       };
       
       res.json({
