@@ -856,11 +856,28 @@ export async function createNotionTimerSession(session: {
                     name: session.mode
                 }
             },
+            "Category": {
+                select: {
+                    name: session.category || "general"
+                }
+            },
             "Total Duration": {
                 number: session.totalDuration
             },
             "Remaining Time": {
                 number: session.remainingTime
+            },
+            "Current Session": {
+                number: session.currentSession
+            },
+            "Total Sessions": {
+                number: session.totalSessions
+            },
+            "Completed Sessions": {
+                number: session.completedSessions
+            },
+            "Is Break": {
+                checkbox: session.isBreak
             },
             "Is Active": {
                 checkbox: session.isActive
@@ -868,7 +885,15 @@ export async function createNotionTimerSession(session: {
             "Is Paused": {
                 checkbox: session.isPaused
             },
+            "Total Focus Time": {
+                number: session.totalFocusTime
+            },
             "Started At": {
+                date: {
+                    start: new Date().toISOString()
+                }
+            },
+            "Last Sync": {
                 date: {
                     start: new Date().toISOString()
                 }
@@ -906,7 +931,13 @@ export async function updateNotionTimerSession(pageId: string, updates: {
 
         console.log("⏱️ Updating timer session in Notion:", pageId);
 
-        const properties: any = {};
+        const properties: any = {
+            "Last Sync": {
+                date: {
+                    start: new Date().toISOString()
+                }
+            }
+        };
 
         if (updates.remainingTime !== undefined) {
             properties["Remaining Time"] = {
