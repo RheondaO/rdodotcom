@@ -1691,6 +1691,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Timer Routes - Simple in-memory implementation for now
+  app.get("/api/timer/active", requireAuth, async (req, res) => {
+    try {
+      // For now, return null (no active session) until database is set up
+      res.json(null);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get active timer session" });
+    }
+  });
+
+  app.post("/api/timer/start", requireAuth, async (req, res) => {
+    try {
+      // For now, return a mock response until database is set up
+      const mockSession = {
+        id: Date.now(),
+        ...req.body,
+        userId: req.user!.id,
+        isActive: true,
+        startedAt: new Date().toISOString(),
+        lastSync: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      res.json(mockSession);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to start timer session" });
+    }
+  });
+
+  app.patch("/api/timer/:id", requireAuth, async (req, res) => {
+    try {
+      // Mock update response
+      res.json({ id: parseInt(req.params.id), ...req.body, updatedAt: new Date().toISOString() });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update timer session" });
+    }
+  });
+
+  app.delete("/api/timer/:id", requireAuth, async (req, res) => {
+    try {
+      // Mock stop response
+      res.json({ id: parseInt(req.params.id), isActive: false, updatedAt: new Date().toISOString() });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to stop timer session" });
+    }
+  });
+
+  app.post("/api/timer/:id/complete", requireAuth, async (req, res) => {
+    try {
+      // Mock completion response
+      res.json({ 
+        id: parseInt(req.params.id), 
+        isActive: false, 
+        remainingTime: 0,
+        completedSessions: 1,
+        updatedAt: new Date().toISOString() 
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to complete timer session" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

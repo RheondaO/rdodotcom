@@ -29,7 +29,7 @@ import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorr
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import ProductivityTasks from "./ProductivityTasks";
-import FocusTimer from "./FocusTimer";
+import PersistentFocusTimer from "./PersistentFocusTimer";
 
 interface ProductivitySectionProps {
   selectedDate: Date;
@@ -710,8 +710,8 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
         </CardContent>
       </Card>
 
-      {/* Focus Timer Modal */}
-      <FocusTimer
+      {/* Persistent Focus Timer Modal */}
+      <PersistentFocusTimer
         isOpen={showFocusTimer}
         onClose={() => {
           setShowFocusTimer(false);

@@ -1027,3 +1027,42 @@ export type InsertPortfolio = z.infer<typeof insertPortfolioSchema>;
 export type InsertPortfolioHolding = z.infer<typeof insertPortfolioHoldingSchema>;
 export type InsertPriceHistory = z.infer<typeof insertPriceHistorySchema>;
 export type InsertInvestmentTransaction = z.infer<typeof insertInvestmentTransactionSchema>;
+
+// Timer Sessions Table for persistent timer state across devices/sessions
+export const timerSessions = pgTable("timer_sessions", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().default("admin"), // For user sessions
+  mode: text("mode").notNull(), // 'focus', 'pomodoro', 'deepwork', 'flowstate'
+  title: text("title"), // Optional task/timeblock title
+  category: text("category"), // Task category
+  
+  // Timer configuration
+  totalDuration: integer("total_duration").notNull(), // Total session duration in seconds
+  remainingTime: integer("remaining_time").notNull(), // Remaining time in seconds
+  currentSession: integer("current_session").notNull().default(1), // Current session number
+  totalSessions: integer("total_sessions").notNull().default(1), // Total sessions for this mode
+  isBreak: boolean("is_break").notNull().default(false), // Whether currently on break
+  
+  // State management
+  isActive: boolean("is_active").notNull().default(false), // Timer running/paused
+  isPaused: boolean("is_paused").notNull().default(false), // Paused state
+  startedAt: timestamp("started_at").defaultNow(), // When timer was started
+  pausedAt: timestamp("paused_at"), // When timer was paused
+  lastSync: timestamp("last_sync").defaultNow(), // Last synchronization time
+  
+  // Progress tracking
+  totalFocusTime: integer("total_focus_time").notNull().default(0), // Total minutes of focus time completed
+  completedSessions: integer("completed_sessions").notNull().default(0), // Number of completed sessions
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+export const insertTimerSessionSchema = createInsertSchema(timerSessions).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  lastSync: true
+});
+export type InsertTimerSession = z.infer<typeof insertTimerSessionSchema>;
+export type TimerSession = typeof timerSessions.$inferSelect;
