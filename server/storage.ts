@@ -149,6 +149,9 @@ export interface IStorage {
   updateFocusSession(id: number, updates: Partial<FocusSession>): Promise<FocusSession>;
   deleteFocusSession(id: number): Promise<void>;
 
+  // Timer Sessions
+  getActiveTimerSession(): Promise<TimerSession | null>;
+
   // Budgets
   getAllBudgets(): Promise<Budget[]>;
   getBudgetsByMonth(month: string): Promise<Budget[]>;
@@ -422,6 +425,7 @@ export class MemStorage implements IStorage {
   private todos: Map<number, Todo> = new Map();
   private timeBlocks: Map<number, TimeBlock> = new Map();
   private focusSessions: Map<number, FocusSession> = new Map();
+  private timerSessions: Map<number, TimerSession> = new Map();
   private budgets: Map<number, Budget> = new Map();
   private incomeEntries: Map<number, IncomeEntry> = new Map();
   private challenges: Map<number, Challenge> = new Map();
@@ -979,6 +983,12 @@ export class MemStorage implements IStorage {
 
   async deleteFocusSession(id: number): Promise<void> {
     this.focusSessions.delete(id);
+  }
+
+  // Timer Sessions - in-memory fallback
+  async getActiveTimerSession(): Promise<TimerSession | null> {
+    const activeSessions = Array.from(this.timerSessions.values()).filter(session => session.isActive);
+    return activeSessions.length > 0 ? activeSessions[0] : null;
   }
 
   // Budgets

@@ -7,6 +7,7 @@ import { Target, TrendingUp, BookOpen, Calendar, ExternalLink, LogIn, Sparkles, 
 import { useAuth } from "../hooks/useAuth";
 import AdminLoginForm from "../components/AdminLoginForm";
 import SEOHead from "../components/SEOHead";
+import { ActiveTimerDisplay } from "../components/ActiveTimerDisplay";
 import { generateWebsiteStructuredData, generateOrganizationStructuredData, BELLE_JOURNAL_WEBSITE_DATA } from "../utils/structuredData";
 
 interface PublicStats {
@@ -157,6 +158,11 @@ export default function PublicView() {
               {isAuthenticated && isAdmin ? 'Go to Dashboard' : 'Follow My Journey'}
             </Button>
           </div>
+        </div>
+
+        {/* Active Timer Display - Show current focus session */}
+        <div className="mb-12">
+          <ActiveTimerDisplay />
         </div>
 
         {/* Stats Grid */}

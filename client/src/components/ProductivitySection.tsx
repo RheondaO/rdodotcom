@@ -30,6 +30,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import ProductivityTasks from "./ProductivityTasks";
 import PersistentFocusTimer from "./PersistentFocusTimer";
+import { ActiveTimerDisplay } from "./ActiveTimerDisplay";
 
 interface ProductivitySectionProps {
   selectedDate: Date;
@@ -336,6 +337,9 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
           </p>
         </div>
       </div>
+
+      {/* Active Timer Display - Shows current running timer */}
+      <ActiveTimerDisplay />
 
       {/* Advanced Focus Timer */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-0 shadow-lg">
