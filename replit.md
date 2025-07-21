@@ -43,14 +43,16 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js server
 - **Language**: TypeScript with TSX for compilation
-- **Storage**: In-memory storage for data persistence
+- **Primary Storage**: Notion databases for persistent cross-device data storage
+- **Fallback Storage**: In-memory MemStorage system for reliability when Notion is unavailable
 - **Session Management**: Express sessions with in-memory store
 - **Authentication**: Simple admin-based authentication system
 
 ### Data Storage Solutions
-- **Primary Storage**: In-memory storage for data persistence with sample data initialization
-- **Session Storage**: In-memory session store
-- **Data Models**: TypeScript interfaces for type safety
+- **Primary Storage**: Notion databases (PRODUCTIVITYTASKS, PRODUCTIVITYTIMEBLOCKS, PRODUCTIVITYTIMERSESSIONS) for persistent data
+- **Local Fallback**: MemStorage for temporary data when Notion integration fails
+- **Session Storage**: In-memory session store for authentication
+- **Data Models**: TypeScript interfaces for type safety with Drizzle ORM schemas
 - **Blogging Content Studio**: Complete blogging workflow with posts, ideas, and calendar management
 
 ## Key Components

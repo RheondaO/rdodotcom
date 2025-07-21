@@ -79,14 +79,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/public/active-timer", async (req, res) => {
     try {
-      // Check for active timer from Notion first
-      const notionTimer = await getActiveTimerSessionFromNotion();
-      if (notionTimer) {
-        res.json(notionTimer);
+      // Use Notion integration directly for active timer (primary storage)
+      const activeTimer = await getActiveNotionTimerSession();
+      if (activeTimer) {
+        res.json(activeTimer);
         return;
       }
 
-      // Fallback to local storage for any active timers
+      // Fallback to local storage if no Notion timer found
       const localTimer = await storage.getActiveTimerSession();
       res.json(localTimer);
     } catch (error) {
