@@ -1,33 +1,48 @@
 import { Router } from "express";
 import { requireAuth } from "./auth";
-import { timerSessions, insertTimerSessionSchema } from "../shared/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { insertTimerSessionSchema } from "../shared/schema";
 import { z } from "zod";
 
-// We'll use storage interface for now since db is not set up yet
-import { storage } from "./storage";
+// Simple in-memory storage for timer sessions until database is set up
+interface TimerSession {
+  id: number;
+  userId: string;
+  mode: string;
+  title?: string;
+  category?: string;
+  totalDuration: number;
+  remainingTime: number;
+  currentSession: number;
+  totalSessions: number;
+  isBreak: boolean;
+  isActive: boolean;
+  isPaused: boolean;
+  startedAt: string;
+  pausedAt?: string;
+  lastSync: string;
+  totalFocusTime: number;
+  completedSessions: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// In-memory storage
+let timerSessions: TimerSession[] = [];
+let nextId = 1;
 
 const router = Router();
 
 // Get active timer session for current user
 router.get("/active", requireAuth, async (req, res) => {
   try {
-    const [activeSession] = await db
-      .select()
-      .from(timerSessions)
-      .where(
-        and(
-          eq(timerSessions.userId, req.user!.id),
-          eq(timerSessions.isActive, true)
-        )
-      )
-      .orderBy(desc(timerSessions.startedAt))
-      .limit(1);
+    const activeSession = timerSessions.find(
+      session => session.userId === req.user!.id && session.isActive
+    );
 
     if (activeSession) {
       // Calculate actual remaining time based on elapsed time
       const now = new Date();
-      const lastSync = new Date(activeSession.lastSync!);
+      const lastSync = new Date(activeSession.lastSync);
       const elapsedSinceSync = Math.floor((now.getTime() - lastSync.getTime()) / 1000);
       
       let updatedRemainingTime = activeSession.remainingTime;
@@ -36,19 +51,14 @@ router.get("/active", requireAuth, async (req, res) => {
       }
 
       // Update the session with current time
-      await db
-        .update(timerSessions)
-        .set({
-          remainingTime: updatedRemainingTime,
-          lastSync: now,
-          updatedAt: now
-        })
-        .where(eq(timerSessions.id, activeSession.id));
+      activeSession.remainingTime = updatedRemainingTime;
+      activeSession.lastSync = now.toISOString();
+      activeSession.updatedAt = now.toISOString();
 
       res.json({
         ...activeSession,
         remainingTime: updatedRemainingTime,
-        lastSync: now
+        lastSync: now.toISOString()
       });
     } else {
       res.json(null);
@@ -65,31 +75,26 @@ router.post("/start", requireAuth, async (req, res) => {
     const validatedData = insertTimerSessionSchema.parse(req.body);
     
     // End any existing active sessions first
-    await db
-      .update(timerSessions)
-      .set({
-        isActive: false,
-        updatedAt: new Date()
-      })
-      .where(
-        and(
-          eq(timerSessions.userId, req.user!.id),
-          eq(timerSessions.isActive, true)
-        )
-      );
+    timerSessions.forEach(session => {
+      if (session.userId === req.user!.id && session.isActive) {
+        session.isActive = false;
+        session.updatedAt = new Date().toISOString();
+      }
+    });
 
     // Create new session
-    const [newSession] = await db
-      .insert(timerSessions)
-      .values({
-        ...validatedData,
-        userId: req.user!.id,
-        isActive: true,
-        startedAt: new Date(),
-        lastSync: new Date()
-      })
-      .returning();
+    const newSession: TimerSession = {
+      id: nextId++,
+      ...validatedData,
+      userId: req.user!.id,
+      isActive: true,
+      startedAt: new Date().toISOString(),
+      lastSync: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
+    timerSessions.push(newSession);
     res.json(newSession);
   } catch (error) {
     console.error("Error starting timer session:", error);
@@ -103,26 +108,22 @@ router.patch("/:id", requireAuth, async (req, res) => {
     const sessionId = parseInt(req.params.id);
     const updates = req.body;
     
-    const [updatedSession] = await db
-      .update(timerSessions)
-      .set({
-        ...updates,
-        lastSync: new Date(),
-        updatedAt: new Date()
-      })
-      .where(
-        and(
-          eq(timerSessions.id, sessionId),
-          eq(timerSessions.userId, req.user!.id)
-        )
-      )
-      .returning();
+    const sessionIndex = timerSessions.findIndex(
+      session => session.id === sessionId && session.userId === req.user!.id
+    );
 
-    if (!updatedSession) {
+    if (sessionIndex === -1) {
       return res.status(404).json({ error: "Timer session not found" });
     }
 
-    res.json(updatedSession);
+    // Update the session
+    const session = timerSessions[sessionIndex];
+    Object.assign(session, updates, {
+      lastSync: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
+    res.json(session);
   } catch (error) {
     console.error("Error updating timer session:", error);
     res.status(500).json({ error: "Failed to update timer session" });
@@ -134,28 +135,22 @@ router.post("/:id/complete", requireAuth, async (req, res) => {
   try {
     const sessionId = parseInt(req.params.id);
     
-    const [completedSession] = await db
-      .update(timerSessions)
-      .set({
-        isActive: false,
-        remainingTime: 0,
-        completedSessions: db.$count(timerSessions.completedSessions) + 1,
-        lastSync: new Date(),
-        updatedAt: new Date()
-      })
-      .where(
-        and(
-          eq(timerSessions.id, sessionId),
-          eq(timerSessions.userId, req.user!.id)
-        )
-      )
-      .returning();
+    const sessionIndex = timerSessions.findIndex(
+      session => session.id === sessionId && session.userId === req.user!.id
+    );
 
-    if (!completedSession) {
+    if (sessionIndex === -1) {
       return res.status(404).json({ error: "Timer session not found" });
     }
 
-    res.json(completedSession);
+    const session = timerSessions[sessionIndex];
+    session.isActive = false;
+    session.remainingTime = 0;
+    session.completedSessions = session.completedSessions + 1;
+    session.lastSync = new Date().toISOString();
+    session.updatedAt = new Date().toISOString();
+
+    res.json(session);
   } catch (error) {
     console.error("Error completing timer session:", error);
     res.status(500).json({ error: "Failed to complete timer session" });
@@ -167,26 +162,20 @@ router.delete("/:id", requireAuth, async (req, res) => {
   try {
     const sessionId = parseInt(req.params.id);
     
-    const [stoppedSession] = await db
-      .update(timerSessions)
-      .set({
-        isActive: false,
-        lastSync: new Date(),
-        updatedAt: new Date()
-      })
-      .where(
-        and(
-          eq(timerSessions.id, sessionId),
-          eq(timerSessions.userId, req.user!.id)
-        )
-      )
-      .returning();
+    const sessionIndex = timerSessions.findIndex(
+      session => session.id === sessionId && session.userId === req.user!.id
+    );
 
-    if (!stoppedSession) {
+    if (sessionIndex === -1) {
       return res.status(404).json({ error: "Timer session not found" });
     }
 
-    res.json(stoppedSession);
+    const session = timerSessions[sessionIndex];
+    session.isActive = false;
+    session.lastSync = new Date().toISOString();
+    session.updatedAt = new Date().toISOString();
+
+    res.json(session);
   } catch (error) {
     console.error("Error stopping timer session:", error);
     res.status(500).json({ error: "Failed to stop timer session" });
@@ -196,14 +185,12 @@ router.delete("/:id", requireAuth, async (req, res) => {
 // Get timer session history
 router.get("/history", requireAuth, async (req, res) => {
   try {
-    const sessions = await db
-      .select()
-      .from(timerSessions)
-      .where(eq(timerSessions.userId, req.user!.id))
-      .orderBy(desc(timerSessions.createdAt))
-      .limit(50);
+    const userSessions = timerSessions
+      .filter(session => session.userId === req.user!.id)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 50);
 
-    res.json(sessions);
+    res.json(userSessions);
   } catch (error) {
     console.error("Error getting timer history:", error);
     res.status(500).json({ error: "Failed to get timer history" });
