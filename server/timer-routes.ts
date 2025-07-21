@@ -3,7 +3,14 @@ import { requireAuth } from "./auth";
 import { insertTimerSessionSchema } from "../shared/schema";
 import { z } from "zod";
 
-// Simple in-memory storage for timer sessions until database is set up
+import { 
+  getActiveNotionTimerSession, 
+  createNotionTimerSession, 
+  updateNotionTimerSession,
+  NOTION_TIMERSESSIONS_DATABASE_ID 
+} from "./notion";
+
+// Simple in-memory storage as fallback
 interface TimerSession {
   id: number;
   userId: string;
@@ -26,7 +33,7 @@ interface TimerSession {
   updatedAt: string;
 }
 
-// In-memory storage
+// In-memory storage as fallback
 let timerSessions: TimerSession[] = [];
 let nextId = 1;
 
@@ -35,6 +42,42 @@ const router = Router();
 // Get active timer session for current user
 router.get("/active", requireAuth, async (req, res) => {
   try {
+    console.log("⏱️ Getting active timer session for user:", req.user!.id);
+
+    // Try Notion first if configured
+    if (NOTION_TIMERSESSIONS_DATABASE_ID) {
+      try {
+        const activeSession = await getActiveNotionTimerSession(req.user!.id);
+        
+        if (activeSession) {
+          // Calculate actual remaining time based on elapsed time
+          const now = new Date();
+          const lastSync = new Date(activeSession.lastSync);
+          const elapsedSinceSync = Math.floor((now.getTime() - lastSync.getTime()) / 1000);
+          
+          let updatedRemainingTime = activeSession.remainingTime;
+          if (!activeSession.isPaused) {
+            updatedRemainingTime = Math.max(0, activeSession.remainingTime - elapsedSinceSync);
+          }
+
+          // Update the session in Notion with current time
+          await updateNotionTimerSession(activeSession.id, {
+            remainingTime: updatedRemainingTime
+          });
+
+          res.json({
+            ...activeSession,
+            remainingTime: updatedRemainingTime,
+            lastSync: now.toISOString()
+          });
+          return;
+        }
+      } catch (notionError) {
+        console.log("⏱️ Notion fallback error:", notionError.message);
+      }
+    }
+
+    // Fallback to in-memory storage
     const activeSession = timerSessions.find(
       session => session.userId === req.user!.id && session.isActive
     );
@@ -73,7 +116,46 @@ router.get("/active", requireAuth, async (req, res) => {
 router.post("/start", requireAuth, async (req, res) => {
   try {
     const validatedData = insertTimerSessionSchema.parse(req.body);
+    console.log("⏱️ Starting new timer session:", validatedData.title);
     
+    // Try Notion first if configured
+    if (NOTION_TIMERSESSIONS_DATABASE_ID) {
+      try {
+        // End any existing active sessions in Notion first
+        const activeSession = await getActiveNotionTimerSession(req.user!.id);
+        if (activeSession) {
+          await updateNotionTimerSession(activeSession.id, { isActive: false });
+        }
+
+        // Create new session in Notion
+        const notionResponse = await createNotionTimerSession({
+          ...validatedData,
+          userId: req.user!.id
+        });
+
+        console.log("⏱️ Successfully created timer session in Notion:", notionResponse.id);
+        
+        // Return the Notion session formatted for the frontend
+        const newSession = {
+          id: notionResponse.id,
+          notionId: notionResponse.id,
+          ...validatedData,
+          userId: req.user!.id,
+          isActive: true,
+          startedAt: new Date().toISOString(),
+          lastSync: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        res.json(newSession);
+        return;
+      } catch (notionError) {
+        console.log("⏱️ Notion fallback error:", notionError.message);
+      }
+    }
+
+    // Fallback to in-memory storage
     // End any existing active sessions first
     timerSessions.forEach(session => {
       if (session.userId === req.user!.id && session.isActive) {
@@ -105,11 +187,29 @@ router.post("/start", requireAuth, async (req, res) => {
 // Update timer session (pause, resume, sync)
 router.patch("/:id", requireAuth, async (req, res) => {
   try {
-    const sessionId = parseInt(req.params.id);
+    const sessionId = req.params.id;
     const updates = req.body;
+    console.log("⏱️ Updating timer session:", sessionId, updates);
     
+    // Try Notion first if session ID looks like a Notion ID (string format)
+    if (NOTION_TIMERSESSIONS_DATABASE_ID && typeof sessionId === 'string' && sessionId.length > 10) {
+      try {
+        await updateNotionTimerSession(sessionId, updates);
+        
+        // Get updated session from Notion
+        const updatedSession = await getActiveNotionTimerSession(req.user!.id);
+        if (updatedSession) {
+          res.json(updatedSession);
+          return;
+        }
+      } catch (notionError) {
+        console.log("⏱️ Notion update fallback error:", notionError.message);
+      }
+    }
+
+    // Fallback to in-memory storage
     const sessionIndex = timerSessions.findIndex(
-      session => session.id === sessionId && session.userId === req.user!.id
+      session => session.id === parseInt(sessionId) && session.userId === req.user!.id
     );
 
     if (sessionIndex === -1) {

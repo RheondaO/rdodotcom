@@ -82,7 +82,18 @@ try {
     console.error("📅 Time Blocks URL:", process.env.NOTION_TIMEBLOCKS_URL);
 }
 
-export { NOTION_DATABASE_ID, NOTION_TIMEBLOCKS_DATABASE_ID };
+// Timer Sessions Database ID
+export let NOTION_TIMERSESSIONS_DATABASE_ID: string | null = null;
+
+try {
+    NOTION_TIMERSESSIONS_DATABASE_ID = process.env.NOTION_TIMERSESSIONS_URL ? extractPageIdFromUrl(process.env.NOTION_TIMERSESSIONS_URL) : null;
+    console.log("⏱️ Timer Sessions database ID extracted:", NOTION_TIMERSESSIONS_DATABASE_ID ? `${NOTION_TIMERSESSIONS_DATABASE_ID.substring(0, 8)}...` : "null");
+} catch (error: any) {
+    console.error("❌ Failed to extract Timer Sessions database ID:", error.message);
+    console.error("⏱️ Timer Sessions URL:", process.env.NOTION_TIMERSESSIONS_URL);
+}
+
+export { NOTION_DATABASE_ID, NOTION_TIMEBLOCKS_DATABASE_ID, NOTION_TIMERSESSIONS_DATABASE_ID };
 
 // Log database configuration
 console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);
@@ -741,5 +752,281 @@ export async function deleteNotionTask(pageId: string) {
     } catch (error) {
         console.error("Error deleting entry from Notion:", error);
         throw new Error("Failed to delete entry from Notion");
+    }
+}
+
+// Timer Sessions Database Integration
+export async function getActiveNotionTimerSession(userId: string = "admin") {
+    try {
+        if (!NOTION_TIMERSESSIONS_DATABASE_ID) {
+            return null;
+        }
+
+        const response = await notion.databases.query({
+            database_id: NOTION_TIMERSESSIONS_DATABASE_ID,
+            filter: {
+                and: [
+                    {
+                        property: "User ID",
+                        rich_text: {
+                            equals: userId
+                        }
+                    },
+                    {
+                        property: "Is Active",
+                        checkbox: {
+                            equals: true
+                        }
+                    }
+                ]
+            },
+            sorts: [
+                {
+                    property: "Started At",
+                    direction: "descending"
+                }
+            ],
+            page_size: 1
+        });
+
+        if (response.results.length === 0) {
+            return null;
+        }
+
+        const page = response.results[0] as any;
+        const properties = page.properties;
+
+        return {
+            id: page.id,
+            notionId: page.id,
+            mode: properties.Mode?.select?.name || "focus",
+            title: properties.Title?.title?.[0]?.plain_text || "Untitled Session",
+            category: properties.Category?.select?.name || "General",
+            totalDuration: properties["Total Duration"]?.number || 0,
+            remainingTime: properties["Remaining Time"]?.number || 0,
+            currentSession: properties["Current Session"]?.number || 1,
+            totalSessions: properties["Total Sessions"]?.number || 1,
+            isBreak: properties["Is Break"]?.checkbox || false,
+            isActive: properties["Is Active"]?.checkbox || false,
+            isPaused: properties["Is Paused"]?.checkbox || false,
+            startedAt: properties["Started At"]?.date?.start || new Date().toISOString(),
+            pausedAt: properties["Paused At"]?.date?.start || null,
+            lastSync: properties["Last Sync"]?.date?.start || new Date().toISOString(),
+            totalFocusTime: properties["Total Focus Time"]?.number || 0,
+            completedSessions: properties["Completed Sessions"]?.number || 0,
+            createdAt: properties["Created At"]?.date?.start || new Date().toISOString(),
+            updatedAt: properties["Updated At"]?.date?.start || new Date().toISOString(),
+            userId: properties["User ID"]?.rich_text?.[0]?.plain_text || userId
+        };
+    } catch (error: any) {
+        console.error("❌ Error getting active timer session from Notion:", error.message);
+        return null;
+    }
+}
+
+export async function createNotionTimerSession(session: {
+    userId: string;
+    mode: string;
+    title?: string;
+    category?: string;
+    totalDuration: number;
+    remainingTime: number;
+    currentSession: number;
+    totalSessions: number;
+    isBreak: boolean;
+    isActive: boolean;
+    isPaused: boolean;
+    totalFocusTime: number;
+    completedSessions: number;
+}) {
+    try {
+        if (!NOTION_TIMERSESSIONS_DATABASE_ID) {
+            throw new Error("Timer Sessions database not configured");
+        }
+
+        console.log("⏱️ Creating timer session in Notion:", session.title);
+
+        const properties: any = {
+            "Title": {
+                title: [
+                    {
+                        text: {
+                            content: session.title || `${session.mode} Session`
+                        }
+                    }
+                ]
+            },
+            "User ID": {
+                rich_text: [
+                    {
+                        text: {
+                            content: session.userId
+                        }
+                    }
+                ]
+            },
+            "Mode": {
+                select: {
+                    name: session.mode
+                }
+            },
+            "Category": {
+                select: {
+                    name: session.category || "General"
+                }
+            },
+            "Total Duration": {
+                number: session.totalDuration
+            },
+            "Remaining Time": {
+                number: session.remainingTime
+            },
+            "Current Session": {
+                number: session.currentSession
+            },
+            "Total Sessions": {
+                number: session.totalSessions
+            },
+            "Is Break": {
+                checkbox: session.isBreak
+            },
+            "Is Active": {
+                checkbox: session.isActive
+            },
+            "Is Paused": {
+                checkbox: session.isPaused
+            },
+            "Started At": {
+                date: {
+                    start: new Date().toISOString()
+                }
+            },
+            "Last Sync": {
+                date: {
+                    start: new Date().toISOString()
+                }
+            },
+            "Total Focus Time": {
+                number: session.totalFocusTime
+            },
+            "Completed Sessions": {
+                number: session.completedSessions
+            },
+            "Created At": {
+                date: {
+                    start: new Date().toISOString()
+                }
+            },
+            "Updated At": {
+                date: {
+                    start: new Date().toISOString()
+                }
+            }
+        };
+
+        const response = await notion.pages.create({
+            parent: {
+                database_id: NOTION_TIMERSESSIONS_DATABASE_ID
+            },
+            properties
+        });
+
+        console.log("⏱️ Successfully created timer session in Notion:", response.id);
+        return response;
+    } catch (error: any) {
+        console.error("❌ Error creating timer session in Notion:", error.message);
+        throw new Error(`Failed to create timer session in Notion: ${error.message}`);
+    }
+}
+
+export async function updateNotionTimerSession(pageId: string, updates: {
+    remainingTime?: number;
+    isActive?: boolean;
+    isPaused?: boolean;
+    pausedAt?: Date | null;
+    totalFocusTime?: number;
+    completedSessions?: number;
+    currentSession?: number;
+}) {
+    try {
+        if (!NOTION_TIMERSESSIONS_DATABASE_ID) {
+            throw new Error("Timer Sessions database not configured");
+        }
+
+        console.log("⏱️ Updating timer session in Notion:", pageId);
+
+        const properties: any = {
+            "Last Sync": {
+                date: {
+                    start: new Date().toISOString()
+                }
+            },
+            "Updated At": {
+                date: {
+                    start: new Date().toISOString()
+                }
+            }
+        };
+
+        if (updates.remainingTime !== undefined) {
+            properties["Remaining Time"] = {
+                number: updates.remainingTime
+            };
+        }
+
+        if (updates.isActive !== undefined) {
+            properties["Is Active"] = {
+                checkbox: updates.isActive
+            };
+        }
+
+        if (updates.isPaused !== undefined) {
+            properties["Is Paused"] = {
+                checkbox: updates.isPaused
+            };
+        }
+
+        if (updates.pausedAt !== undefined) {
+            if (updates.pausedAt) {
+                properties["Paused At"] = {
+                    date: {
+                        start: updates.pausedAt.toISOString()
+                    }
+                };
+            } else {
+                properties["Paused At"] = {
+                    date: null
+                };
+            }
+        }
+
+        if (updates.totalFocusTime !== undefined) {
+            properties["Total Focus Time"] = {
+                number: updates.totalFocusTime
+            };
+        }
+
+        if (updates.completedSessions !== undefined) {
+            properties["Completed Sessions"] = {
+                number: updates.completedSessions
+            };
+        }
+
+        if (updates.currentSession !== undefined) {
+            properties["Current Session"] = {
+                number: updates.currentSession
+            };
+        }
+
+        const response = await notion.pages.update({
+            page_id: pageId,
+            properties
+        });
+
+        console.log("⏱️ Successfully updated timer session in Notion");
+        return response;
+    } catch (error: any) {
+        console.error("❌ Error updating timer session in Notion:", error.message);
+        throw new Error(`Failed to update timer session in Notion: ${error.message}`);
     }
 }
