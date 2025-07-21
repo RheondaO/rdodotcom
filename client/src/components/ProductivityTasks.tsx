@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, isToday, isYesterday, isTomorrow, parseISO } from "date-fns";
 import { apiRequest } from "../lib/queryClient";
@@ -37,6 +37,7 @@ interface ProductivityTask {
   priority: string | null;
   status: string | null;
   estimatedDuration: number | null;
+  isTemporary?: boolean; // For optimistic updates
 }
 
 interface ProductivityTasksProps {
@@ -59,33 +60,80 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
 
   const queryClient = useQueryClient();
 
-  // Fetch tasks filtered by the selected date
-  const { data: tasks = [], isLoading, error } = useQuery({
-    queryKey: ['/api/notion/tasks', selectedDate.toISOString().split('T')[0]],
-    queryFn: async () => {
-      try {
-        const response = await apiRequest('GET', `/api/notion/tasks?date=${selectedDate.toISOString().split('T')[0]}&view=day`);
-        const data = await response.json();
-        console.log('Fetched tasks data:', data);
-        return Array.isArray(data) ? data : [];
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-        return [];
-      }
-    },
-    retry: 3,
-    retryDelay: 1000,
-  });
+  // Direct state management for real-time updates
+  const [tasks, setTasks] = useState<ProductivityTask[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<any>(null);
 
-  // Create task mutation
+  // Fetch tasks function
+  const fetchTasks = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await apiRequest('GET', `/api/notion/tasks?date=${selectedDate.toISOString().split('T')[0]}&view=day`);
+      const data = await response.json();
+      console.log('Fetched tasks data:', data);
+      setTasks(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      setError(error);
+      setTasks([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch data when date changes
+  useEffect(() => {
+    fetchTasks();
+  }, [selectedDate]);
+
+  // Auto-refresh data every 5 minutes to catch external changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchTasks();
+    }, 300000); // Refresh every 5 minutes
+
+    return () => clearInterval(interval);
+  }, [selectedDate]);
+
+  // Create task mutation with optimistic updates
   const createTask = useMutation({
-    mutationFn: (task: typeof newTask) => 
-      apiRequest('POST', '/api/notion/tasks', {
+    mutationFn: async (task: typeof newTask) => {
+      const response = await apiRequest('POST', '/api/notion/tasks', {
         ...task,
         dueDate: new Date(task.dueDate)
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notion/tasks'] });
+      });
+      return response.json();
+    },
+    onMutate: async (newTaskData) => {
+      // Add optimistic task to state immediately
+      const optimisticTask: ProductivityTask = {
+        notionId: `temp-${Date.now()}`,
+        title: newTaskData.title,
+        description: newTaskData.description,
+        category: newTaskData.category,
+        section: newTaskData.category,
+        isCompleted: false,
+        dueDate: new Date(newTaskData.dueDate),
+        createdDate: new Date(),
+        completedAt: null,
+        priority: newTaskData.priority,
+        status: "To Do",
+        estimatedDuration: newTaskData.estimatedDuration,
+        isTemporary: true // Mark as temporary
+      };
+      
+      setTasks(prev => [...prev, optimisticTask]);
+      return { optimisticTask };
+    },
+    onSuccess: (newTask, variables, context) => {
+      // Replace optimistic task with real task from server
+      setTasks(prev => {
+        const withoutTemp = prev.filter(task => !task.isTemporary);
+        return [...withoutTemp, newTask];
+      });
+      
       setIsAddingTask(false);
       setNewTask({
         title: "",
@@ -97,34 +145,68 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
       });
       toast({ title: "Task created successfully" });
     },
-    onError: () => {
+    onError: (error, variables, context) => {
+      // Remove optimistic task on error
+      setTasks(prev => prev.filter(task => !task.isTemporary));
       toast({ title: "Failed to create task", variant: "destructive" });
     }
   });
 
-  // Update task mutation
+  // Update task mutation with optimistic updates
   const updateTask = useMutation({
-    mutationFn: ({ taskId, updates }: { taskId: string; updates: Partial<ProductivityTask> }) =>
-      apiRequest('PATCH', `/api/notion/tasks/${taskId}`, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notion/tasks'] });
+    mutationFn: async ({ taskId, updates }: { taskId: string; updates: Partial<ProductivityTask> }) => {
+      const response = await apiRequest('PATCH', `/api/notion/tasks/${taskId}`, updates);
+      return response.json();
+    },
+    onMutate: async ({ taskId, updates }) => {
+      // Optimistically update task
+      const previousTasks = tasks;
+      setTasks(prev => 
+        prev.map(task => 
+          task.notionId === taskId 
+            ? { ...task, ...updates, completedAt: updates.isCompleted ? new Date() : null }
+            : task
+        )
+      );
+      return { previousTasks };
+    },
+    onSuccess: (updatedTask) => {
+      // Replace with real updated task from server
+      setTasks(prev => 
+        prev.map(task => 
+          task.notionId === updatedTask.notionId ? updatedTask : task
+        )
+      );
       setEditingTask(null);
       toast({ title: "Task updated successfully" });
     },
-    onError: () => {
+    onError: (error, variables, context) => {
+      // Revert to previous state on error
+      if (context?.previousTasks) {
+        setTasks(context.previousTasks);
+      }
       toast({ title: "Failed to update task", variant: "destructive" });
     }
   });
 
-  // Delete task mutation
+  // Delete task mutation with optimistic updates
   const deleteTask = useMutation({
     mutationFn: (taskId: string) =>
       apiRequest('DELETE', `/api/notion/tasks/${taskId}`),
+    onMutate: async (taskId) => {
+      // Optimistically remove task
+      const previousTasks = tasks;
+      setTasks(prev => prev.filter(task => task.notionId !== taskId));
+      return { previousTasks };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notion/tasks'] });
       toast({ title: "Task deleted successfully" });
     },
-    onError: () => {
+    onError: (error, taskId, context) => {
+      // Restore task on error
+      if (context?.previousTasks) {
+        setTasks(context.previousTasks);
+      }
       toast({ title: "Failed to delete task", variant: "destructive" });
     }
   });
@@ -358,13 +440,17 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
           </div>
         ) : (
           filteredTasks.map((task) => (
-            <Card key={task.notionId} className={`transition-all ${task.isCompleted ? 'opacity-75' : ''}`}>
+            <Card key={task.notionId} className={`transition-all ${
+              task.isTemporary 
+                ? 'bg-blue-50/90 dark:bg-blue-900/20 border-l-4 border-l-blue-400 opacity-70' 
+                : task.isCompleted ? 'opacity-75' : ''
+            }`}>
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <Checkbox
                     checked={task.isCompleted}
-                    onCheckedChange={() => !isReadOnly && toggleTaskCompletion(task)}
-                    disabled={isReadOnly}
+                    onCheckedChange={() => !isReadOnly && !task.isTemporary && toggleTaskCompletion(task)}
+                    disabled={isReadOnly || task.isTemporary}
                     className="mt-1"
                   />
                   <div className="flex-1 min-w-0">
@@ -378,6 +464,11 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
                       <Badge variant="outline" className={getStatusColor(task.status)}>
                         {task.status}
                       </Badge>
+                      {task.isTemporary && (
+                        <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
+                          💾 Saving...
+                        </Badge>
+                      )}
                     </div>
                     
                     {task.description && (
@@ -403,7 +494,7 @@ export default function ProductivityTasks({ selectedDate, isReadOnly = false }: 
                     </div>
                   </div>
                   
-                  {!isReadOnly && (
+                  {!isReadOnly && !task.isTemporary && (
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"

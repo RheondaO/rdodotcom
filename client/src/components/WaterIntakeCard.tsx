@@ -22,6 +22,7 @@ export default function WaterIntakeCard({ selectedDate, isEditable = true }: Wat
 
   const handleAddWater = () => {
     if (waterIntake < waterGoal) {
+      // Show immediate visual feedback with optimistic update
       updateDailyEntry.mutate({
         date: dateString,
         waterIntake: waterIntake + 1,

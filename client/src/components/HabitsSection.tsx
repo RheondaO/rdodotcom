@@ -41,6 +41,7 @@ interface Habit {
   isActive: boolean;
   createdAt: string;
   completedToday: boolean;
+  isTemporary?: boolean; // For optimistic updates
 }
 
 interface DailyMood {
