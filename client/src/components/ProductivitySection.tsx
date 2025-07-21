@@ -90,7 +90,12 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate time blocks for the specific date
       queryClient.invalidateQueries({ queryKey: ['/api/time-blocks', dateString] });
+      // Also invalidate any other time block queries that might be cached
+      queryClient.invalidateQueries({ queryKey: ['/api/time-blocks'] });
+      // Force refetch to ensure immediate update
+      queryClient.refetchQueries({ queryKey: ['/api/time-blocks', dateString] });
     }
   });
 
