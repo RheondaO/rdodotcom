@@ -841,7 +841,6 @@ export async function createNotionTimerSession(session: {
 
         console.log("⏱️ Creating timer session in Notion:", session.title);
 
-        // Only use basic properties that likely exist
         const properties: any = {
             "Title": {
                 title: [
@@ -851,19 +850,30 @@ export async function createNotionTimerSession(session: {
                         }
                     }
                 ]
-            }
-        };
-
-        // Try to add Started At if it exists
-        try {
-            properties["Started At"] = {
+            },
+            "Mode": {
+                select: {
+                    name: session.mode
+                }
+            },
+            "Total Duration": {
+                number: session.totalDuration
+            },
+            "Remaining Time": {
+                number: session.remainingTime
+            },
+            "Is Active": {
+                checkbox: session.isActive
+            },
+            "Is Paused": {
+                checkbox: session.isPaused
+            },
+            "Started At": {
                 date: {
                     start: new Date().toISOString()
                 }
-            };
-        } catch (e) {
-            console.log("⏱️ Started At property not available");
-        }
+            }
+        };
 
         const response = await notion.pages.create({
             parent: {
