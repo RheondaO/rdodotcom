@@ -93,11 +93,12 @@ try {
     console.error("⏱️ Timer Sessions URL:", process.env.NOTION_TIMERSESSIONS_URL);
 }
 
-export { NOTION_DATABASE_ID, NOTION_TIMEBLOCKS_DATABASE_ID, NOTION_TIMERSESSIONS_DATABASE_ID };
+export { NOTION_DATABASE_ID, NOTION_TIMEBLOCKS_DATABASE_ID };
 
 // Log database configuration
 console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);
 console.log("📅 NOTION_TIMEBLOCKS_URL configured:", !!process.env.NOTION_TIMEBLOCKS_URL);
+console.log("⏱️ NOTION_TIMERSESSIONS_URL configured:", !!process.env.NOTION_TIMERSESSIONS_URL);
 
 if (process.env.NOTION_TASKS_URL) {
     console.log("📋 Tasks URL length:", process.env.NOTION_TASKS_URL.length);
@@ -105,6 +106,10 @@ if (process.env.NOTION_TASKS_URL) {
 
 if (process.env.NOTION_TIMEBLOCKS_URL) {
     console.log("📅 Time Blocks URL length:", process.env.NOTION_TIMEBLOCKS_URL.length);
+}
+
+if (process.env.NOTION_TIMERSESSIONS_URL) {
+    console.log("⏱️ Timer Sessions URL length:", process.env.NOTION_TIMERSESSIONS_URL.length);
 }
 
 /**
