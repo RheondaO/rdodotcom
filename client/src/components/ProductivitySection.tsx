@@ -54,17 +54,29 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
     },
   });
 
-  const { data: timeBlocks = [] } = useQuery({
-    queryKey: ['/api/time-blocks', dateString],
-    queryFn: async () => {
+  // Use useState for immediate updates instead of relying on React Query cache
+  const [timeBlocks, setTimeBlocks] = useState<any[]>([]);
+  const [timeBlocksLoading, setTimeBlocksLoading] = useState(true);
+
+  // Fetch time blocks data
+  const fetchTimeBlocks = async () => {
+    try {
+      setTimeBlocksLoading(true);
       const response = await apiRequest('GET', `/api/time-blocks/${dateString}`);
-      return response.json();
-    },
-    // Override global settings for time blocks to ensure fresh data
-    staleTime: 0,
-    refetchOnWindowFocus: true,
-    refetchInterval: false,
-  });
+      const data = await response.json();
+      setTimeBlocks(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching time blocks:', error);
+      setTimeBlocks([]);
+    } finally {
+      setTimeBlocksLoading(false);
+    }
+  };
+
+  // Fetch data when date changes
+  useEffect(() => {
+    fetchTimeBlocks();
+  }, [dateString]);
 
   // Mutations for data updates
   const todoMutation = useMutation({
@@ -87,30 +99,20 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
     }
   });
 
-  // Time block mutations
+  // Time block mutations with direct state updates
   const timeBlockMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest('POST', '/api/time-blocks', data);
       return response.json();
     },
     onSuccess: async (newTimeBlock) => {
-      // Multiple strategies to ensure immediate UI update
-      
-      // 1. Remove existing cache entries completely
-      queryClient.removeQueries({ queryKey: ['/api/time-blocks', dateString] });
-      queryClient.removeQueries({ queryKey: ['/api/time-blocks'] });
-      
-      // 2. Manually update the cache with the new time block
-      queryClient.setQueryData(['/api/time-blocks', dateString], (oldData: any) => {
-        if (Array.isArray(oldData)) {
-          return [...oldData, newTimeBlock];
-        }
-        return [newTimeBlock];
-      });
-      
-      // 3. Force invalidation and refetch
-      await queryClient.invalidateQueries({ queryKey: ['/api/time-blocks', dateString] });
-      await queryClient.refetchQueries({ queryKey: ['/api/time-blocks', dateString] });
+      // Immediately update local state for instant UI feedback
+      setTimeBlocks(prev => [...prev, newTimeBlock]);
+    },
+    onError: (error) => {
+      console.error('Error creating time block:', error);
+      // Optionally refetch to restore correct state on error
+      fetchTimeBlocks();
     }
   });
 
@@ -208,12 +210,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
       };
 
       // Optimistically update the UI immediately
-      queryClient.setQueryData(['/api/time-blocks', dateString], (oldData: any) => {
-        if (Array.isArray(oldData)) {
-          return [...oldData, tempTimeBlock];
-        }
-        return [tempTimeBlock];
-      });
+      setTimeBlocks(prev => [...prev, tempTimeBlock]);
 
       timeBlockMutation.mutate({
         title: newTimeBlock.title,
