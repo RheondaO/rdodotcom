@@ -16,13 +16,14 @@ interface TimerSession {
 }
 
 export function ActiveTimerDisplay() {
-  const { data: activeTimer, isLoading } = useQuery<TimerSession | null>({
+  const { data: activeTimer, isLoading, isFetched } = useQuery<TimerSession | null>({
     queryKey: ["/api/public/active-timer"],
     refetchInterval: 1000, // Update every second for countdown
     refetchOnWindowFocus: true,
   });
 
-  if (isLoading) {
+  // Only show loading state on initial load, not on refetches
+  if (isLoading && !isFetched) {
     return (
       <Card className="p-4 bg-white dark:bg-[#17111d] border border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-3">

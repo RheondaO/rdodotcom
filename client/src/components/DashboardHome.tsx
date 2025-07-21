@@ -86,7 +86,7 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
   };
 
   // Transform database data for Content Studio metrics
-  const displayBlocks = miniGameBlocks.length > 0 ? miniGameBlocks.map((block: any) => {
+  const displayBlocks = miniGameBlocks.length > 0 ? miniGameBlocks.map((block: any, index: number) => {
     const blockInsights = performanceInsights.filter(p => p.miniGameBlockId === block.id);
     const totalPosts = blockInsights.reduce((sum, p) => sum + p.totalPosts, 0);
     const avgEngagement = blockInsights.length > 0 
@@ -684,8 +684,8 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
               <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">{getDateLabel()}'s Schedule</h4>
                 {timeBlocks.length > 0 ? (
-                  timeBlocks.map(block => (
-                    <div key={block.id} className="flex items-center justify-between text-xs mb-1">
+                  timeBlocks.map((block, index) => (
+                    <div key={`timeblock-${block.id || index}`} className="flex items-center justify-between text-xs mb-1">
                       <span className="text-gray-600 dark:text-gray-400">{block.time}</span>
                       <span className={`px-2 py-1 rounded ${
                         block.status === 'completed' ? 'bg-green-100 text-green-700' :
@@ -716,8 +716,8 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {upcomingGoals.map(goal => (
-                <div key={goal.id} className="p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg">
+              {upcomingGoals.map((goal, index) => (
+                <div key={`goal-${goal.id || index}`} className="p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-gray-900 dark:text-white">{goal.title}</h4>
                     <Badge variant="outline" className="text-xs">
@@ -754,8 +754,8 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {aiInsights.map(insight => (
-                <div key={insight.id} className="p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg border-l-4 border-purple-400">
+              {aiInsights.map((insight, index) => (
+                <div key={`insight-${insight.id || index}`} className="p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg border-l-4 border-purple-400">
                   <div className="flex items-start space-x-3">
                     <span className="text-lg">{insight.icon}</span>
                     <div className="flex-1">
