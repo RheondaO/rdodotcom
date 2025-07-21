@@ -29,6 +29,7 @@ import { format, addMinutes, differenceInMinutes, isToday, isYesterday, isTomorr
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import ProductivityTasks from "./ProductivityTasks";
+import FocusTimer from "./FocusTimer";
 
 interface ProductivitySectionProps {
   selectedDate: Date;
@@ -157,6 +158,8 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
   // State for UI
   const [showTodoDialog, setShowTodoDialog] = useState(false);
   const [showTimeBlockDialog, setShowTimeBlockDialog] = useState(false);
+  const [showFocusTimer, setShowFocusTimer] = useState(false);
+  const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -334,34 +337,33 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
         </div>
       </div>
 
-      {/* Quick Timer */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Timer className="h-5 w-5 text-blue-600" />
-            <span>Focus Timer</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <Input
-              placeholder="What are you working on?"
-              value={activeTask}
-              onChange={(e) => !isReadOnly && setActiveTask(e.target.value)}
-              disabled={isReadOnly}
-              className={`flex-1 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
-            />
-            <div className="text-2xl font-mono font-bold text-blue-600">
-              {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
+      {/* Advanced Focus Timer */}
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-0 shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                <Focus className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-heading font-bold text-gray-900 dark:text-white">Advanced Focus Timer</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Focus, Pomodoro, Deep Work & Flow State modes
+                </p>
+              </div>
             </div>
-            <Button
-              onClick={!isReadOnly ? (isTimerRunning ? stopTimer : startTimer) : undefined}
-              variant={isTimerRunning ? "destructive" : "default"}
-              disabled={isReadOnly}
-              className={`rounded-xl ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isTimerRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
+            <div className="flex space-x-2">
+              <Button
+                onClick={() => setShowFocusTimer(true)}
+                disabled={isReadOnly}
+                className={`bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 ${
+                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <Timer className="h-4 w-4 mr-2" />
+                Start Timer
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -682,7 +684,20 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
                   {!isReadOnly && (
                     <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <div className="flex space-x-1">
-                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600">
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-6 w-6 p-0 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                          onClick={() => {
+                            setSelectedTimeBlock({
+                              title: block.title,
+                              duration: block.duration || durationMinutes,
+                              category: categoryInfo.label
+                            });
+                            setShowFocusTimer(true);
+                          }}
+                          title="Start Focus Timer"
+                        >
                           <Focus className="h-3 w-3" />
                         </Button>
                       </div>
@@ -695,7 +710,15 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
         </CardContent>
       </Card>
 
-
+      {/* Focus Timer Modal */}
+      <FocusTimer
+        isOpen={showFocusTimer}
+        onClose={() => {
+          setShowFocusTimer(false);
+          setSelectedTimeBlock(null);
+        }}
+        timeBlock={selectedTimeBlock}
+      />
     </div>
   );
 }
