@@ -123,7 +123,9 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   // Start new timer session (admin-only, use authenticated endpoint)
   const startTimerMutation = useMutation({
     mutationFn: async (timerData: any) => {
+      console.log("🔥 Making API request to start timer:", timerData);
       const response = await apiRequest("POST", "/api/timer", timerData);
+      console.log("🔥 API response received:", response);
       return response.json();
     },
     onSuccess: (newSession) => {
@@ -203,8 +205,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   };
 
   const startTimer = () => {
+    console.log("🟢 Start button clicked, activeSession:", activeSession);
     if (activeSession) {
       // Resume existing timer
+      console.log("🟢 Resuming existing timer with id:", activeSession.id);
       updateTimerMutation.mutate({
         id: activeSession.id,
         updates: { isPaused: false, pausedAt: null }
@@ -226,6 +230,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         completedSessions: 0
       };
       
+      console.log("🟢 Starting new timer with data:", sessionData);
       startTimerMutation.mutate(sessionData);
     }
   };
@@ -399,7 +404,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
           <div className="flex justify-center space-x-3">
             {!isRunning ? (
               <Button
-                onClick={startTimer}
+                onClick={() => {
+                  console.log("🟢 Start/Resume button clicked");
+                  startTimer();
+                }}
                 disabled={startTimerMutation.isPending || updateTimerMutation.isPending}
                 className={`bg-gradient-to-r ${currentModeInfo.color} text-white hover:opacity-90`}
               >
