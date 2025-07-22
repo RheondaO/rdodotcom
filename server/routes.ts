@@ -187,23 +187,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const dbActiveSession = await storage.getActiveTimerSession();
         if (dbActiveSession) {
-          // Calculate actual remaining time based on elapsed time
+          // For Belle Journal count-up timers, calculate elapsed time
           const now = new Date();
-          const lastSync = new Date(dbActiveSession.lastSync!);
-          const elapsedSeconds = Math.floor((now.getTime() - lastSync.getTime()) / 1000);
-          const adjustedRemainingTime = Math.max(0, dbActiveSession.remainingTime - elapsedSeconds);
+          const startedAt = new Date(dbActiveSession.startedAt!);
+          const elapsedSeconds = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
           
-          // If timer has run out, mark as inactive
-          if (adjustedRemainingTime <= 0 && dbActiveSession.isActive) {
+          // Check if timer has exceeded total duration (for count-up timers)
+          const totalDurationSeconds = dbActiveSession.totalDuration * 60;
+          if (elapsedSeconds >= totalDurationSeconds && dbActiveSession.isActive) {
             await storage.stopTimerSession(dbActiveSession.id);
-            console.log("⏰ Database timer expired, marked as inactive");
+            console.log("⏰ Timer completed full duration, marked as inactive");
             res.json(null);
             return;
           }
           
           const sessionWithUpdatedTime = {
             ...dbActiveSession,
-            remainingTime: adjustedRemainingTime
+            remainingTime: Math.max(0, totalDurationSeconds - elapsedSeconds),
+            elapsedTime: elapsedSeconds
           };
           
           console.log("✅ Found active database timer session for public view:", sessionWithUpdatedTime.id);
@@ -243,8 +244,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 lastSync: now.toISOString()
               });
               return;
-            } else {
-              console.log("⏰ Timer expired, should be marked inactive");
             }
           }
         } catch (notionError) {

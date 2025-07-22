@@ -112,13 +112,23 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const currentModeInfo = modeInfo[mode];
   const Icon = currentModeInfo.icon;
 
+  // Local state for immediate UI updates
+  const [activeSession, setActiveSession] = useState<any>(null);
+  
   // Get active timer session from server (public endpoint for viewing)
-  const { data: activeSession, refetch: refetchActiveSession } = useQuery<TimerSession | null>({
+  const { data: serverActiveSession, refetch: refetchActiveSession } = useQuery<TimerSession | null>({
     queryKey: ["/api/public/active-timer"],
     enabled: isOpen,
     refetchInterval: 1000, // Sync every second when modal is open
     staleTime: 0 // Always fetch fresh data
   });
+  
+  // Sync server state with local state
+  useEffect(() => {
+    if (serverActiveSession && !activeSession) {
+      setActiveSession(serverActiveSession);
+    }
+  }, [serverActiveSession, activeSession]);
 
   // Start new timer session (admin-only, use authenticated endpoint)
   const startTimerMutation = useMutation({
@@ -139,6 +149,17 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     },
     onSuccess: (newSession) => {
       console.log("✅ Admin timer started successfully:", newSession);
+      
+      // Force immediate UI update by setting local state
+      setActiveSession({
+        ...newSession,
+        isActive: true,
+        isPaused: false,
+        startedAt: new Date().toISOString(),
+        lastSync: new Date().toISOString()
+      });
+      
+      // Then invalidate queries to sync with server
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
       queryClient.invalidateQueries({ queryKey: ["/api/timer/active"] });
