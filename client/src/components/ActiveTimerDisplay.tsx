@@ -22,11 +22,13 @@ export function ActiveTimerDisplay() {
     refetchOnWindowFocus: true,
   });
 
-  // Debug info for production troubleshooting (only when no timer found)
-  const { data: debugInfo } = useQuery({
-    queryKey: ["/api/notion/debug"],
-    refetchInterval: 10000, // Check every 10 seconds
-    enabled: !activeTimer && isFetched, // Only when no active timer and initial fetch completed
+  // Debug logging to see what's happening
+  console.log("🔄 ActiveTimerDisplay render:", { 
+    activeTimer, 
+    isLoading, 
+    isFetched, 
+    error: error?.message,
+    hasData: !!activeTimer 
   });
 
   // Only show loading state on initial load, not on refetches
@@ -41,26 +43,12 @@ export function ActiveTimerDisplay() {
     );
   }
 
+  // Debug logging for production troubleshooting
+  if (isFetched && !activeTimer) {
+    console.log("🔍 ActiveTimerDisplay: No active timer found", { error, debugInfo: { queryKey: "/api/public/active-timer" } });
+  }
+
   if (!activeTimer) {
-    // Enhanced production debugging: Show config status when no timer found
-    if (isFetched && debugInfo?.config && !debugInfo.config.hasTimerSessionsUrl) {
-      return (
-        <Card className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-          <div className="flex items-center gap-3">
-            <Timer className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-            <div className="flex-1">
-              <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                Timer system not configured
-              </span>
-              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                Missing NOTION_TIMERSESSIONS_URL environment variable
-              </p>
-            </div>
-          </div>
-        </Card>
-      );
-    }
-    
     return null; // Don't show anything if no active timer
   }
 
