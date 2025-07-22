@@ -181,25 +181,21 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     }
   }, [activeSession]);
 
-  // Local countdown for smooth UI updates
+  // Local timer for smooth UI updates (count up)
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (activeSession?.isActive && !activeSession?.isPaused && localTimeLeft > 0) {
+    if (activeSession?.isActive && !activeSession?.isPaused) {
       interval = setInterval(() => {
-        setLocalTimeLeft((prev) => {
-          const newTime = Math.max(0, prev - 1);
-          if (newTime === 0 && activeSession) {
-            // Timer completed
-            completeTimerMutation.mutate(activeSession.id);
-          }
-          return newTime;
-        });
+        // Force refresh from server every 5 seconds to stay in sync
+        if (Date.now() % 5000 < 1000) {
+          refetchActiveSession();
+        }
       }, 1000);
     }
 
     return () => clearInterval(interval);
-  }, [activeSession?.isActive, activeSession?.isPaused, localTimeLeft, activeSession?.id]);
+  }, [activeSession?.isActive, activeSession?.isPaused, activeSession?.id]);
 
   const playNotificationSound = () => {
     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAaBC2Q2e/OfiwCJHfJ7+CTQQ0XZcn0v2AfAy+i5fepWxMGP5zR77RLEwczndTr0YggBlGh3u/UYRID');
@@ -235,17 +231,28 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   };
 
   const pauseTimer = () => {
+    console.log("🟡 pauseTimer called, activeSession:", activeSession);
     if (activeSession) {
+      console.log("🟡 Calling updateTimerMutation.mutate with:", {
+        id: activeSession.id,
+        updates: { isPaused: true, pausedAt: new Date().toISOString() }
+      });
       updateTimerMutation.mutate({
         id: activeSession.id,
         updates: { isPaused: true, pausedAt: new Date().toISOString() }
       });
+    } else {
+      console.log("🟡 No activeSession found for pause");
     }
   };
 
   const stopTimer = () => {
+    console.log("🔴 stopTimer called, activeSession:", activeSession);
     if (activeSession) {
+      console.log("🔴 Calling stopTimerMutation.mutate with id:", activeSession.id);
       stopTimerMutation.mutate(activeSession.id);
+    } else {
+      console.log("🔴 No activeSession found for stop");
     }
   };
 
@@ -257,10 +264,16 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
   const getProgress = () => {
     if (!activeSession) return 0;
-    return ((activeSession.totalDuration - localTimeLeft) / activeSession.totalDuration) * 100;
+    return ((activeSession.totalDuration - activeSession.remainingTime) / activeSession.totalDuration) * 100;
   };
 
-  const displayTime = activeSession ? localTimeLeft : currentSettings.duration * 60;
+  // Calculate elapsed time (count up from start)
+  const getElapsedTime = () => {
+    if (!activeSession) return 0;
+    return activeSession.totalDuration - activeSession.remainingTime;
+  };
+
+  const displayTime = activeSession ? getElapsedTime() : 0;
   const isRunning = activeSession?.isActive && !activeSession?.isPaused;
 
   if (!isOpen) return null;
@@ -395,7 +408,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
               </Button>
             ) : (
               <Button
-                onClick={pauseTimer}
+                onClick={() => {
+                  console.log("🔵 Pause button clicked, activeSession:", activeSession);
+                  pauseTimer();
+                }}
                 disabled={updateTimerMutation.isPending}
                 variant="outline"
               >
@@ -406,7 +422,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
             
             {activeSession && (
               <Button 
-                onClick={stopTimer} 
+                onClick={() => {
+                  console.log("🔴 Stop button clicked, activeSession:", activeSession);
+                  stopTimer();
+                }} 
                 disabled={stopTimerMutation.isPending}
                 variant="outline"
               >
