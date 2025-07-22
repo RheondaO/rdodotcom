@@ -5,6 +5,7 @@ import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Input } from "./ui/input";
 import { 
   Play, 
   Pause, 
@@ -66,6 +67,7 @@ interface TimerSession {
 export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: PersistentFocusTimerProps) {
   const [mode, setMode] = useState<TimerMode>('focus');
   const [localTimeLeft, setLocalTimeLeft] = useState(0);
+  const [sessionTitle, setSessionTitle] = useState(timeBlock?.title || "");
   const queryClient = useQueryClient();
 
   const timerSettings: TimerSettings = {
@@ -270,7 +272,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       <DialogContent className="max-w-md bg-white dark:bg-[#17111d] border-0 rounded-3xl shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-            Persistent Focus Timer
+            Setup Focus Timer
           </DialogTitle>
         </DialogHeader>
 
@@ -420,15 +422,16 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
             </Button>
           </div>
 
-          {/* Persistence Notice */}
-          <Card className="bg-gray-50 dark:bg-gray-900/50 border-0">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                <Clock className="h-4 w-4" />
-                <span>Timer persists across devices and browser sessions</span>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Title Input */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Focus Session Title</label>
+            <Input
+              value={sessionTitle}
+              onChange={(e) => setSessionTitle(e.target.value)}
+              placeholder="What is being worked on?"
+              className="w-full"
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>
