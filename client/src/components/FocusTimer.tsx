@@ -5,6 +5,9 @@ import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Input } from "./ui/input";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Play, 
   Pause, 
@@ -46,6 +49,8 @@ export default function FocusTimer({ isOpen, onClose, timeBlock }: FocusTimerPro
   const [isBreak, setIsBreak] = useState(false);
   const [totalFocusTime, setTotalFocusTime] = useState(0);
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [title, setTitle] = useState(timeBlock?.title || "");
+  const [activeTimerId, setActiveTimerId] = useState<number | null>(null);
 
   const timerSettings: TimerSettings = {
     focus: { duration: timeBlock?.duration || 25, shortBreak: 5, longBreak: 15, sessions: 4 },
@@ -154,24 +159,96 @@ export default function FocusTimer({ isOpen, onClose, timeBlock }: FocusTimerPro
     audio.play().catch(() => {}); // Ignore errors if sound fails
   };
 
+  const queryClient = useQueryClient();
+
+  // Create timer session mutation
+  const createTimerMutation = useMutation({
+    mutationFn: async (timerData: any) => {
+      return apiRequest("/api/timer", "POST", timerData);
+    },
+    onSuccess: (data) => {
+      setActiveTimerId(data.id);
+      queryClient.invalidateQueries({ queryKey: ["/api/timer/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
+    },
+  });
+
+  // Update timer session mutation (pause/resume)
+  const updateTimerMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
+      return apiRequest(`/api/timer/${id}`, "PATCH", updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/timer/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
+    },
+  });
+
+  // Stop timer session mutation
+  const stopTimerMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/timer/${id}`, "DELETE");
+    },
+    onSuccess: () => {
+      setActiveTimerId(null);
+      setIsRunning(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/timer/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
+    },
+  });
+
   const startTimer = () => {
     setIsRunning(true);
     if (!startTime) {
       setStartTime(new Date());
     }
+
+    // Create persistent timer session
+    if (!activeTimerId) {
+      const timerData = {
+        mode,
+        title: title || "Focus Session",
+        totalDuration: currentSettings.duration,
+        remainingTime: timeLeft,
+        currentSession: 1,
+        totalSessions: currentSettings.sessions,
+        isBreak: false,
+        isActive: true,
+        isPaused: false,
+        startedAt: new Date().toISOString(),
+        lastSync: new Date().toISOString(),
+        totalFocusTime: 0,
+        completedSessions: 0,
+      };
+      createTimerMutation.mutate(timerData);
+    }
   };
 
   const pauseTimer = () => {
     setIsRunning(false);
+    if (activeTimerId) {
+      updateTimerMutation.mutate({
+        id: activeTimerId,
+        updates: {
+          isPaused: true,
+          remainingTime: timeLeft,
+          lastSync: new Date().toISOString(),
+        },
+      });
+    }
   };
 
   const resetTimer = () => {
+    if (activeTimerId) {
+      stopTimerMutation.mutate(activeTimerId);
+    }
     setIsRunning(false);
     setTimeLeft(currentSettings.duration * 60);
     setCurrentSession(1);
     setIsBreak(false);
     setTotalFocusTime(0);
     setStartTime(null);
+    setActiveTimerId(null);
   };
 
   const formatTime = (seconds: number) => {
@@ -194,11 +271,22 @@ export default function FocusTimer({ isOpen, onClose, timeBlock }: FocusTimerPro
       <DialogContent className="max-w-md bg-white dark:bg-[#17111d] border-0 rounded-3xl shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-            Focus Timer
+            Setup Focus Timer
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 p-6">
+          {/* Title Input */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Focus Session Title</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="What is being worked on?"
+              className="w-full"
+            />
+          </div>
+
           {/* Timer Mode Selection */}
           <div className="space-y-3">
             <label className="text-sm font-medium">Timer Mode</label>
@@ -308,12 +396,11 @@ export default function FocusTimer({ isOpen, onClose, timeBlock }: FocusTimerPro
             )}
             
             <Button onClick={resetTimer} variant="outline">
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Reset
+              <Square className="h-4 w-4 mr-2" />
+              Stop
             </Button>
             
             <Button onClick={onClose} variant="ghost">
-              <Square className="h-4 w-4 mr-2" />
               Close
             </Button>
           </div>
