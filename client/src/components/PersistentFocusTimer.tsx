@@ -384,9 +384,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     return Math.min(100, (elapsedTime / totalTime) * 100);
   };
 
-  // Calculate elapsed time (count up from start, freeze when paused)
+  // Calculate elapsed time (count up from start, freeze when paused, stop when session ends)
   const getElapsedTime = () => {
-    if (!activeSession) return 0;
+    // If no active session, return 0 (timer is stopped)
+    if (!activeSession?.startedAt || !activeSession.isActive) return 0;
     
     const startTime = new Date(activeSession.startedAt).getTime();
     
@@ -397,13 +398,12 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     }
     
     // If running, calculate current elapsed time
-    if (activeSession.isActive && !activeSession.isPaused) {
+    if (!activeSession.isPaused) {
       const now = Date.now();
       return Math.max(0, Math.floor((now - startTime) / 1000));
     }
     
-    // If stopped, return final elapsed time
-    return Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+    return 0;
   };
 
   const displayTime = activeSession ? getElapsedTime() : 0;
