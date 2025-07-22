@@ -126,6 +126,11 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       console.log("🔥 Making API request to start timer:", timerData);
       const response = await apiRequest("POST", "/api/timer", timerData);
       console.log("🔥 API response received:", response);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("🔥 API error:", errorData);
+        throw new Error(errorData.error || 'Timer start failed');
+      }
       return response.json();
     },
     onSuccess: (newSession) => {
