@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth } from "./auth";
 import { insertTimerSessionSchema } from "../shared/schema";
 import { z } from "zod";
+import { storage } from "./storage";
 
 import { 
   getActiveNotionTimerSession, 
@@ -44,7 +45,35 @@ router.get("/active", requireAuth, async (req, res) => {
   try {
     console.log("⏱️ Getting active timer session for user:", req.user!.id);
 
-    // Try Notion first if configured
+    // Try database first
+    try {
+      const dbActiveSession = await storage.getActiveTimerSession();
+      if (dbActiveSession) {
+        // Calculate actual remaining time based on elapsed time
+        const now = new Date();
+        const lastSync = new Date(dbActiveSession.lastSync!);
+        const elapsedSeconds = Math.floor((now.getTime() - lastSync.getTime()) / 1000);
+        const adjustedRemainingTime = Math.max(0, dbActiveSession.remainingTime - elapsedSeconds);
+        
+        // If timer has run out, mark as inactive
+        if (adjustedRemainingTime <= 0 && dbActiveSession.isActive) {
+          await storage.stopTimerSession(dbActiveSession.id);
+          return res.json(null);
+        }
+        
+        const sessionWithUpdatedTime = {
+          ...dbActiveSession,
+          remainingTime: adjustedRemainingTime
+        };
+        
+        console.log("✅ Found active database timer session:", sessionWithUpdatedTime.id);
+        return res.json(sessionWithUpdatedTime);
+      }
+    } catch (dbError) {
+      console.log("⚠️ Database error, falling back to Notion:", dbError);
+    }
+
+    // Fallback to Notion if configured
     if (NOTION_TIMERSESSIONS_DATABASE_ID) {
       try {
         const activeSession = await getActiveNotionTimerSession(req.user!.id);

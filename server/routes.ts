@@ -14,7 +14,7 @@ import {
   NOTION_TIMERSESSIONS_DATABASE_ID,
   getActiveNotionTimerSession
 } from "./notion";
-import timerRoutes from "./timer-routes";
+import timerRoutes from "./timer-routes-new";
 import { 
   insertDailyEntrySchema, 
   insertBillSchema, 

@@ -74,6 +74,8 @@ import {
   type InvestmentTransaction,
   type InsertInvestmentTransaction,
   type TimerSession,
+  type InsertTimerSession,
+  timerSessions,
   blogPosts,
   blogIdeas,
   blogCalendar,
@@ -81,6 +83,8 @@ import {
   type BlogIdeaType,
   type BlogCalendarType
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc } from "drizzle-orm";
 // Note: Database imports will be replaced with Notion integration later
 
 export interface IStorage {
@@ -151,6 +155,13 @@ export interface IStorage {
 
   // Timer Sessions
   getActiveTimerSession(): Promise<TimerSession | null>;
+  getAllTimerSessions(): Promise<TimerSession[]>;
+  createTimerSession(session: InsertTimerSession): Promise<TimerSession>;
+  updateTimerSession(id: number, updates: Partial<TimerSession>): Promise<TimerSession>;
+  deleteTimerSession(id: number): Promise<void>;
+  pauseTimerSession(id: number): Promise<TimerSession>;
+  resumeTimerSession(id: number): Promise<TimerSession>;
+  stopTimerSession(id: number): Promise<TimerSession>;
 
   // Budgets
   getAllBudgets(): Promise<Budget[]>;
@@ -2764,4 +2775,301 @@ class CombinedStorage extends MemStorage {
   }
 }
 
-export const storage = new MemStorage();
+// DatabaseStorage class for PostgreSQL-based persistence
+export class DatabaseStorage implements IStorage {
+  private memStorage = new MemStorage(); // Fallback for non-timer operations
+  
+  // Timer Sessions - PostgreSQL implementation
+  async getActiveTimerSession(): Promise<TimerSession | null> {
+    try {
+      const [activeSession] = await db
+        .select()
+        .from(timerSessions)
+        .where(and(eq(timerSessions.isActive, true), eq(timerSessions.userId, "admin")))
+        .orderBy(desc(timerSessions.createdAt))
+        .limit(1);
+      
+      return activeSession || null;
+    } catch (error) {
+      console.error("Database error, falling back to Notion:", error);
+      return null; // Falls back to Notion API in timer routes
+    }
+  }
+
+  async getAllTimerSessions(): Promise<TimerSession[]> {
+    try {
+      return await db.select().from(timerSessions).orderBy(desc(timerSessions.createdAt));
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async createTimerSession(session: InsertTimerSession): Promise<TimerSession> {
+    try {
+      const [newSession] = await db.insert(timerSessions).values(session).returning();
+      return newSession;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw error;
+    }
+  }
+
+  async updateTimerSession(id: number, updates: Partial<TimerSession>): Promise<TimerSession> {
+    try {
+      const [updatedSession] = await db
+        .update(timerSessions)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(timerSessions.id, id))
+        .returning();
+      return updatedSession;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw error;
+    }
+  }
+
+  async deleteTimerSession(id: number): Promise<void> {
+    try {
+      await db.delete(timerSessions).where(eq(timerSessions.id, id));
+    } catch (error) {
+      console.error("Database error:", error);
+      throw error;
+    }
+  }
+
+  async pauseTimerSession(id: number): Promise<TimerSession> {
+    return this.updateTimerSession(id, { isPaused: true, pausedAt: new Date() });
+  }
+
+  async resumeTimerSession(id: number): Promise<TimerSession> {
+    return this.updateTimerSession(id, { isPaused: false, pausedAt: null });
+  }
+
+  async stopTimerSession(id: number): Promise<TimerSession> {
+    return this.updateTimerSession(id, { isActive: false, isPaused: false });
+  }
+
+  // Delegate all other methods to MemStorage
+  async getDailyEntry(date: string) { return this.memStorage.getDailyEntry(date); }
+  async createOrUpdateDailyEntry(entry: any) { return this.memStorage.createOrUpdateDailyEntry(entry); }
+  async getAllBills() { return this.memStorage.getAllBills(); }
+  async createBill(bill: any) { return this.memStorage.createBill(bill); }
+  async deleteBill(id: number) { return this.memStorage.deleteBill(id); }
+  async getBillPaymentsForDate(date: string) { return this.memStorage.getBillPaymentsForDate(date); }
+  async createBillPayment(payment: any) { return this.memStorage.createBillPayment(payment); }
+  async updateBillPayment(id: number, isPaid: boolean) { return this.memStorage.updateBillPayment(id, isPaid); }
+  async getAllGroceryItems() { return this.memStorage.getAllGroceryItems(); }
+  async createGroceryItem(item: any) { return this.memStorage.createGroceryItem(item); }
+  async updateGroceryItem(id: number, updates: any) { return this.memStorage.updateGroceryItem(id, updates); }
+  async deleteGroceryItem(id: number) { return this.memStorage.deleteGroceryItem(id); }
+  async getAllGroceryLists() { return this.memStorage.getAllGroceryLists(); }
+  async createGroceryList(list: any) { return this.memStorage.createGroceryList(list); }
+  async deleteGroceryList(id: number) { return this.memStorage.deleteGroceryList(id); }
+  async getAllGoals() { return this.memStorage.getAllGoals(); }
+  async createGoal(goal: any) { return this.memStorage.createGoal(goal); }
+  async updateGoal(id: number, updates: any) { return this.memStorage.updateGoal(id, updates); }
+  async deleteGoal(id: number) { return this.memStorage.deleteGoal(id); }
+  async getAllHabits() { return this.memStorage.getAllHabits(); }
+  async createHabit(habit: any) { return this.memStorage.createHabit(habit); }
+  async updateHabit(id: number, updates: any) { return this.memStorage.updateHabit(id, updates); }
+  async deleteHabit(id: number) { return this.memStorage.deleteHabit(id); }
+  async getHabitLogs(habitId: number, startDate?: string, endDate?: string) { return this.memStorage.getHabitLogs(habitId, startDate, endDate); }
+  async createHabitLog(log: any) { return this.memStorage.createHabitLog(log); }
+  async updateHabitLog(id: number, updates: any) { return this.memStorage.updateHabitLog(id, updates); }
+  async getAllMedications() { return this.memStorage.getAllMedications(); }
+  async createMedication(medication: any) { return this.memStorage.createMedication(medication); }
+  async updateMedication(id: number, updates: any) { return this.memStorage.updateMedication(id, updates); }
+  async deleteMedication(id: number) { return this.memStorage.deleteMedication(id); }
+  async getAllTodos() { return this.memStorage.getAllTodos(); }
+  async getTodosByDate(date: string) { return this.memStorage.getTodosByDate(date); }
+  async createTodo(todo: any) { return this.memStorage.createTodo(todo); }
+  async updateTodo(id: number, updates: any) { return this.memStorage.updateTodo(id, updates); }
+  async deleteTodo(id: number) { return this.memStorage.deleteTodo(id); }
+  async getAllTimeBlocks() { return this.memStorage.getAllTimeBlocks(); }
+  async getTimeBlocksByDate(date: string) { return this.memStorage.getTimeBlocksByDate(date); }
+  async createTimeBlock(timeBlock: any) { return this.memStorage.createTimeBlock(timeBlock); }
+  async updateTimeBlock(id: number, updates: any) { return this.memStorage.updateTimeBlock(id, updates); }
+  async deleteTimeBlock(id: number) { return this.memStorage.deleteTimeBlock(id); }
+  async getAllFocusSessions() { return this.memStorage.getAllFocusSessions(); }
+  async getFocusSessionsByDate(date: string) { return this.memStorage.getFocusSessionsByDate(date); }
+  async createFocusSession(session: any) { return this.memStorage.createFocusSession(session); }
+  async updateFocusSession(id: number, updates: any) { return this.memStorage.updateFocusSession(id, updates); }
+  async deleteFocusSession(id: number) { return this.memStorage.deleteFocusSession(id); }
+  async getAllBudgets() { return this.memStorage.getAllBudgets(); }
+  async getBudgetsByMonth(month: string) { return this.memStorage.getBudgetsByMonth(month); }
+  async createBudget(budget: any) { return this.memStorage.createBudget(budget); }
+  async updateBudget(id: number, updates: any) { return this.memStorage.updateBudget(id, updates); }
+  async deleteBudget(id: number) { return this.memStorage.deleteBudget(id); }
+  async getAllIncomeEntries() { return this.memStorage.getAllIncomeEntries(); }
+  async getIncomeEntriesByDateRange(startDate: string, endDate: string) { return this.memStorage.getIncomeEntriesByDateRange(startDate, endDate); }
+  async createIncomeEntry(entry: any) { return this.memStorage.createIncomeEntry(entry); }
+  async deleteIncomeEntry(id: number) { return this.memStorage.deleteIncomeEntry(id); }
+  async getAllChallenges() { return this.memStorage.getAllChallenges(); }
+  async getActiveChallenges() { return this.memStorage.getActiveChallenges(); }
+  async createChallenge(challenge: any) { return this.memStorage.createChallenge(challenge); }
+  async updateChallenge(id: number, updates: any) { return this.memStorage.updateChallenge(id, updates); }
+  async deleteChallenge(id: number) { return this.memStorage.deleteChallenge(id); }
+  async getAllContentCategories() { return this.memStorage.getAllContentCategories(); }
+  async createContentCategory(category: any) { return this.memStorage.createContentCategory(category); }
+  async getAllContentTypes() { return this.memStorage.getAllContentTypes(); }
+  async createContentType(type: any) { return this.memStorage.createContentType(type); }
+  async getAllContentPieces() { return this.memStorage.getAllContentPieces(); }
+  async createContentPiece(piece: any) { return this.memStorage.createContentPiece(piece); }
+  async updateContentPiece(id: number, updates: any) { return this.memStorage.updateContentPiece(id, updates); }
+  async getAllContentProgress() { return this.memStorage.getAllContentProgress(); }
+  async createContentProgress(progress: any) { return this.memStorage.createContentProgress(progress); }
+  async getAllAppProjects() { return this.memStorage.getAllAppProjects(); }
+  async getAppProject(id: number) { return this.memStorage.getAppProject(id); }
+  async createAppProject(project: any) { return this.memStorage.createAppProject(project); }
+  async updateAppProject(id: number, updates: any) { return this.memStorage.updateAppProject(id, updates); }
+  async deleteAppProject(id: number) { return this.memStorage.deleteAppProject(id); }
+  async getAppTasksByProject(projectId: number) { return this.memStorage.getAppTasksByProject(projectId); }
+  async getAllAppTasks() { return this.memStorage.getAllAppTasks(); }
+  async createAppTask(task: any) { return this.memStorage.createAppTask(task); }
+  async updateAppTask(id: number, updates: any) { return this.memStorage.updateAppTask(id, updates); }
+  async deleteAppTask(id: number) { return this.memStorage.deleteAppTask(id); }
+  async getAppSprintsByProject(projectId: number) { return this.memStorage.getAppSprintsByProject(projectId); }
+  async createAppSprint(sprint: any) { return this.memStorage.createAppSprint(sprint); }
+  async updateAppSprint(id: number, updates: any) { return this.memStorage.updateAppSprint(id, updates); }
+  async deleteAppSprint(id: number) { return this.memStorage.deleteAppSprint(id); }
+  async getAppTimeEntriesByProject(projectId: number, startDate?: string, endDate?: string) { return this.memStorage.getAppTimeEntriesByProject(projectId, startDate, endDate); }
+  async createAppTimeEntry(entry: any) { return this.memStorage.createAppTimeEntry(entry); }
+  async updateAppTimeEntry(id: number, updates: any) { return this.memStorage.updateAppTimeEntry(id, updates); }
+  async deleteAppTimeEntry(id: number) { return this.memStorage.deleteAppTimeEntry(id); }
+  async getAllMiniGameBlocks() { return this.memStorage.getAllMiniGameBlocks(); }
+  async createMiniGameBlock(block: any) { return this.memStorage.createMiniGameBlock(block); }
+  async updateMiniGameBlock(id: number, updates: any) { return this.memStorage.updateMiniGameBlock(id, updates); }
+  async deleteMiniGameBlock(id: number) { return this.memStorage.deleteMiniGameBlock(id); }
+  async getAllMiniGameDesigns() { return this.memStorage.getAllMiniGameDesigns(); }
+  async getMiniGameDesignsByBlock(blockId: number) { return this.memStorage.getMiniGameDesignsByBlock(blockId); }
+  async createMiniGameDesign(design: any) { return this.memStorage.createMiniGameDesign(design); }
+  async updateMiniGameDesign(id: number, updates: any) { return this.memStorage.updateMiniGameDesign(id, updates); }
+  async deleteMiniGameDesign(id: number) { return this.memStorage.deleteMiniGameDesign(id); }
+  async getAllSocialMediaPosts() { return this.memStorage.getAllSocialMediaPosts(); }
+  async getSocialMediaPostsByDesign(designId: number) { return this.memStorage.getSocialMediaPostsByDesign(designId); }
+  async getSocialMediaPostsByDateRange(startDate: string, endDate: string) { return this.memStorage.getSocialMediaPostsByDateRange(startDate, endDate); }
+  async createSocialMediaPost(post: any) { return this.memStorage.createSocialMediaPost(post); }
+  async updateSocialMediaPost(id: number, updates: any) { return this.memStorage.updateSocialMediaPost(id, updates); }
+  async deleteSocialMediaPost(id: number) { return this.memStorage.deleteSocialMediaPost(id); }
+  async getAllSocialMediaAnalytics() { return this.memStorage.getAllSocialMediaAnalytics(); }
+  async getSocialMediaAnalyticsByPost(postId: number) { return this.memStorage.getSocialMediaAnalyticsByPost(postId); }
+  async getLatestAnalyticsForPost(postId: number) { return this.memStorage.getLatestAnalyticsForPost(postId); }
+  async createSocialMediaAnalytics(analytics: any) { return this.memStorage.createSocialMediaAnalytics(analytics); }
+  async updateSocialMediaAnalytics(id: number, updates: any) { return this.memStorage.updateSocialMediaAnalytics(id, updates); }
+  async getAllPerformanceInsights() { return this.memStorage.getAllPerformanceInsights(); }
+  async getPerformanceInsightsByMiniGame(miniGameBlockId: number) { return this.memStorage.getPerformanceInsightsByMiniGame(miniGameBlockId); }
+  async getPerformanceInsightsByPlatform(platform: string) { return this.memStorage.getPerformanceInsightsByPlatform(platform); }
+  async getPerformanceInsightsByDayOfWeek(dayOfWeek: string) { return this.memStorage.getPerformanceInsightsByDayOfWeek(dayOfWeek); }
+  async createPerformanceInsights(insights: any) { return this.memStorage.createPerformanceInsights(insights); }
+  async updatePerformanceInsights(id: number, updates: any) { return this.memStorage.updatePerformanceInsights(id, updates); }
+  async deletePerformanceInsights(id: number) { return this.memStorage.deletePerformanceInsights(id); }
+  async scheduleContentForMoonPhases(year: number, month: number) { return this.memStorage.scheduleContentForMoonPhases(year, month); }
+  async aggregatePerformanceData() { return this.memStorage.aggregatePerformanceData(); }
+  async getAllBlogPosts() { return this.memStorage.getAllBlogPosts(); }
+  async getBlogPostsByStatus(status: string) { return this.memStorage.getBlogPostsByStatus(status); }
+  async getBlogPostsByPlatform(platform: string) { return this.memStorage.getBlogPostsByPlatform(platform); }
+  async getBlogPost(id: number) { return this.memStorage.getBlogPost(id); }
+  async createBlogPost(post: any) { return this.memStorage.createBlogPost(post); }
+  async updateBlogPost(id: number, updates: any) { return this.memStorage.updateBlogPost(id, updates); }
+  async deleteBlogPost(id: number) { return this.memStorage.deleteBlogPost(id); }
+  async getAllBlogIdeas() { return this.memStorage.getAllBlogIdeas(); }
+  async getBlogIdeasByStatus(status: string) { return this.memStorage.getBlogIdeasByStatus(status); }
+  async getBlogIdeasByPlatform(platform: string) { return this.memStorage.getBlogIdeasByPlatform(platform); }
+  async createBlogIdea(idea: any) { return this.memStorage.createBlogIdea(idea); }
+  async updateBlogIdea(id: number, updates: any) { return this.memStorage.updateBlogIdea(id, updates); }
+  async deleteBlogIdea(id: number) { return this.memStorage.deleteBlogIdea(id); }
+  async generateAIContent(ideaId: number) { return this.memStorage.generateAIContent(ideaId); }
+  async getAllBlogCalendarEvents() { return this.memStorage.getAllBlogCalendarEvents(); }
+  async getBlogCalendarEventsByDate(date: string) { return this.memStorage.getBlogCalendarEventsByDate(date); }
+  async getBlogCalendarEventsByDateRange(startDate: string, endDate: string) { return this.memStorage.getBlogCalendarEventsByDateRange(startDate, endDate); }
+  async createBlogCalendarEvent(event: any) { return this.memStorage.createBlogCalendarEvent(event); }
+  async updateBlogCalendarEvent(id: number, updates: any) { return this.memStorage.updateBlogCalendarEvent(id, updates); }
+  async deleteBlogCalendarEvent(id: number) { return this.memStorage.deleteBlogCalendarEvent(id); }
+  async getAllBudgetCategories() { return this.memStorage.getAllBudgetCategories(); }
+  async createBudgetCategory(category: any) { return this.memStorage.createBudgetCategory(category); }
+  async updateBudgetCategory(id: number, updates: any) { return this.memStorage.updateBudgetCategory(id, updates); }
+  async deleteBudgetCategory(id: number) { return this.memStorage.deleteBudgetCategory(id); }
+  async getAllExpenses() { return this.memStorage.getAllExpenses(); }
+  async getExpensesByDateRange(startDate: string, endDate: string) { return this.memStorage.getExpensesByDateRange(startDate, endDate); }
+  async getExpensesByCategory(categoryId: number) { return this.memStorage.getExpensesByCategory(categoryId); }
+  async createExpense(expense: any) { return this.memStorage.createExpense(expense); }
+  async updateExpense(id: number, updates: any) { return this.memStorage.updateExpense(id, updates); }
+  async deleteExpense(id: number) { return this.memStorage.deleteExpense(id); }
+  async getAllDebts() { return this.memStorage.getAllDebts(); }
+  async getActiveDebts() { return this.memStorage.getActiveDebts(); }
+  async createDebt(debt: any) { return this.memStorage.createDebt(debt); }
+  async updateDebt(id: number, updates: any) { return this.memStorage.updateDebt(id, updates); }
+  async deleteDebt(id: number) { return this.memStorage.deleteDebt(id); }
+  async getAllDebtPayments() { return this.memStorage.getAllDebtPayments(); }
+  async getDebtPaymentsByDebt(debtId: number) { return this.memStorage.getDebtPaymentsByDebt(debtId); }
+  async createDebtPayment(payment: any) { return this.memStorage.createDebtPayment(payment); }
+  async updateDebtPayment(id: number, updates: any) { return this.memStorage.updateDebtPayment(id, updates); }
+  async deleteDebtPayment(id: number) { return this.memStorage.deleteDebtPayment(id); }
+  async getAllInvestments() { return this.memStorage.getAllInvestments(); }
+  async getInvestmentsByPlatform(platformId: number) { return this.memStorage.getInvestmentsByPlatform(platformId); }
+  async createInvestment(investment: any) { return this.memStorage.createInvestment(investment); }
+  async updateInvestment(id: number, updates: any) { return this.memStorage.updateInvestment(id, updates); }
+  async deleteInvestment(id: number) { return this.memStorage.deleteInvestment(id); }
+  async getAllInvestmentPlatforms() { return this.memStorage.getAllInvestmentPlatforms(); }
+  async createInvestmentPlatform(platform: any) { return this.memStorage.createInvestmentPlatform(platform); }
+  async updateInvestmentPlatform(id: number, updates: any) { return this.memStorage.updateInvestmentPlatform(id, updates); }
+  async deleteInvestmentPlatform(id: number) { return this.memStorage.deleteInvestmentPlatform(id); }
+  async getAllAccounts() { return this.memStorage.getAllAccounts(); }
+  async getActiveAccounts() { return this.memStorage.getActiveAccounts(); }
+  async createAccount(account: any) { return this.memStorage.createAccount(account); }
+  async updateAccount(id: number, updates: any) { return this.memStorage.updateAccount(id, updates); }
+  async deleteAccount(id: number) { return this.memStorage.deleteAccount(id); }
+  async getAllNetWorthSnapshots() { return this.memStorage.getAllNetWorthSnapshots(); }
+  async getNetWorthSnapshotsByDateRange(startDate: string, endDate: string) { return this.memStorage.getNetWorthSnapshotsByDateRange(startDate, endDate); }
+  async createNetWorthSnapshot(snapshot: any) { return this.memStorage.createNetWorthSnapshot(snapshot); }
+  async updateNetWorthSnapshot(id: number, updates: any) { return this.memStorage.updateNetWorthSnapshot(id, updates); }
+  async deleteNetWorthSnapshot(id: number) { return this.memStorage.deleteNetWorthSnapshot(id); }
+  async getAllFinancialGoals() { return this.memStorage.getAllFinancialGoals(); }
+  async getActiveFinancialGoals() { return this.memStorage.getActiveFinancialGoals(); }
+  async createFinancialGoal(goal: any) { return this.memStorage.createFinancialGoal(goal); }
+  async updateFinancialGoal(id: number, updates: any) { return this.memStorage.updateFinancialGoal(id, updates); }
+  async deleteFinancialGoal(id: number) { return this.memStorage.deleteFinancialGoal(id); }
+  async getAllBudgetPeriods() { return this.memStorage.getAllBudgetPeriods(); }
+  async getActiveBudgetPeriod() { return this.memStorage.getActiveBudgetPeriod(); }
+  async createBudgetPeriod(period: any) { return this.memStorage.createBudgetPeriod(period); }
+  async updateBudgetPeriod(id: number, updates: any) { return this.memStorage.updateBudgetPeriod(id, updates); }
+  async deleteBudgetPeriod(id: number) { return this.memStorage.deleteBudgetPeriod(id); }
+  async getAllBudgetAlerts() { return this.memStorage.getAllBudgetAlerts(); }
+  async getActiveBudgetAlerts() { return this.memStorage.getActiveBudgetAlerts(); }
+  async createBudgetAlert(alert: any) { return this.memStorage.createBudgetAlert(alert); }
+  async updateBudgetAlert(id: number, updates: any) { return this.memStorage.updateBudgetAlert(id, updates); }
+  async deleteBudgetAlert(id: number) { return this.memStorage.deleteBudgetAlert(id); }
+  async getAllSpendingTrends() { return this.memStorage.getAllSpendingTrends(); }
+  async getSpendingTrendsByCategory(categoryId: number) { return this.memStorage.getSpendingTrendsByCategory(categoryId); }
+  async createSpendingTrend(trend: any) { return this.memStorage.createSpendingTrend(trend); }
+  async updateSpendingTrend(id: number, updates: any) { return this.memStorage.updateSpendingTrend(id, updates); }
+  async deleteSpendingTrend(id: number) { return this.memStorage.deleteSpendingTrend(id); }
+  async getAllPortfolios() { return this.memStorage.getAllPortfolios(); }
+  async getPortfolio(id: number) { return this.memStorage.getPortfolio(id); }
+  async createPortfolio(portfolio: any) { return this.memStorage.createPortfolio(portfolio); }
+  async updatePortfolio(id: number, updates: any) { return this.memStorage.updatePortfolio(id, updates); }
+  async deletePortfolio(id: number) { return this.memStorage.deletePortfolio(id); }
+  async getAllPortfolioHoldings() { return this.memStorage.getAllPortfolioHoldings(); }
+  async getPortfolioHoldingsByPortfolio(portfolioId: number) { return this.memStorage.getPortfolioHoldingsByPortfolio(portfolioId); }
+  async createPortfolioHolding(holding: any) { return this.memStorage.createPortfolioHolding(holding); }
+  async updatePortfolioHolding(id: number, updates: any) { return this.memStorage.updatePortfolioHolding(id, updates); }
+  async deletePortfolioHolding(id: number) { return this.memStorage.deletePortfolioHolding(id); }
+  async getAllPriceHistory() { return this.memStorage.getAllPriceHistory(); }
+  async getPriceHistoryBySymbol(symbol: string) { return this.memStorage.getPriceHistoryBySymbol(symbol); }
+  async getPriceHistoryByDateRange(startDate: string, endDate: string) { return this.memStorage.getPriceHistoryByDateRange(startDate, endDate); }
+  async createPriceHistory(price: any) { return this.memStorage.createPriceHistory(price); }
+  async updatePriceHistory(id: number, updates: any) { return this.memStorage.updatePriceHistory(id, updates); }
+  async deletePriceHistory(id: number) { return this.memStorage.deletePriceHistory(id); }
+  async getAllInvestmentTransactions() { return this.memStorage.getAllInvestmentTransactions(); }
+  async getInvestmentTransactionsByInvestment(investmentId: number) { return this.memStorage.getInvestmentTransactionsByInvestment(investmentId); }
+  async createInvestmentTransaction(transaction: any) { return this.memStorage.createInvestmentTransaction(transaction); }
+  async updateInvestmentTransaction(id: number, updates: any) { return this.memStorage.updateInvestmentTransaction(id, updates); }
+  async deleteInvestmentTransaction(id: number) { return this.memStorage.deleteInvestmentTransaction(id); }
+  async getFinancialAnalytics(startDate: string, endDate: string) { return this.memStorage.getFinancialAnalytics(startDate, endDate); }
+  async getProductivityAnalytics(startDate: string, endDate: string) { return this.memStorage.getProductivityAnalytics(startDate, endDate); }
+  async getPublicStats() { return this.memStorage.getPublicStats(); }
+  async getPublicRecentContent() { return this.memStorage.getPublicRecentContent(); }
+}
+
+export const storage = new DatabaseStorage();
