@@ -228,22 +228,27 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     }
   });
 
-  // Sync local time with server data
+  // Sync local time with server data and handle session removal
   useEffect(() => {
     if (activeSession) {
       setLocalTimeLeft(activeSession.remainingTime);
       setMode(activeSession.mode as TimerMode);
+    } else {
+      // Clear local state when session is removed (stopped from anywhere)
+      setLocalTimeLeft(0);
+      setSessionTitle(timeBlock?.title || "");
     }
-  }, [activeSession]);
+  }, [activeSession, timeBlock?.title]);
 
-  // Local timer for smooth UI updates - only runs when not paused
+  // Local timer for smooth UI updates and cross-component synchronization
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    // Only run the timer if session is active AND not paused
-    if (activeSession?.isActive && !activeSession?.isPaused) {
+    // Always check for session updates while modal is open
+    if (isOpen) {
       interval = setInterval(() => {
-        // Force a re-render by updating a dummy state or refetching
+        // Force a re-render by refetching session data
+        // This catches stops from public view or other sources
         refetchActiveSession();
       }, 1000);
     }
@@ -253,7 +258,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         clearInterval(interval);
       }
     };
-  }, [activeSession?.isActive, activeSession?.isPaused, activeSession?.id, refetchActiveSession]);
+  }, [isOpen, refetchActiveSession]);
 
   const playNotificationSound = () => {
     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAaBC2Q2e/OfiwCJHfJ7+CTQQ0XZcn0v2AfAy+i5fepWxMGP5zR77RLEwczndTr0YggBlGh3u/UYRID');
@@ -403,7 +408,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   };
 
   const displayTime = activeSession ? getElapsedTime() : 0;
-  const isRunning = activeSession?.isActive && !activeSession?.isPaused;
+  const isRunning = Boolean(activeSession?.isActive && !activeSession?.isPaused);
   
   console.log("🔍 Timer state check:", {
     activeSession: activeSession ? {
