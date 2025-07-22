@@ -172,24 +172,37 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   // Update timer session (pause/resume) (admin-only, use authenticated endpoint)
   const updateTimerMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string | number; updates: any }) => {
-      return apiRequest("PATCH", `/api/timer/${id}`, updates);
+      console.log("🔧 updateTimerMutation called with:", { id, updates });
+      const response = await apiRequest("PATCH", `/api/timer/${id}`, updates);
+      console.log("🔧 updateTimerMutation response:", response.status);
+      return response;
     },
     onSuccess: (result) => {
       console.log("✅ Admin timer updated successfully:", result);
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
+    },
+    onError: (error) => {
+      console.error("❌ updateTimerMutation failed:", error);
     }
   });
 
   // Stop timer session (admin-only, use authenticated endpoint)
   const stopTimerMutation = useMutation({
     mutationFn: async (id: string | number) => {
-      return apiRequest("DELETE", `/api/timer/${id}`);
+      console.log("🔴 stopTimerMutation called with id:", id);
+      const response = await apiRequest("DELETE", `/api/timer/${id}`);
+      console.log("🔴 stopTimerMutation response:", response.status);
+      return response;
     },
     onSuccess: (result) => {
       console.log("✅ Admin timer stopped successfully:", result);
+      setActiveSession(null); // Clear local state immediately
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
+    },
+    onError: (error) => {
+      console.error("❌ stopTimerMutation failed:", error);
     }
   });
 
@@ -266,8 +279,18 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     }
   };
 
-  const pauseTimer = () => {
+  const pauseTimer = async () => {
     console.log("🟡 pauseTimer called, activeSession:", activeSession);
+    
+    // Check auth status first
+    try {
+      const authResponse = await fetch('/api/auth/status', { credentials: 'include' });
+      const authData = await authResponse.json();
+      console.log("🔐 Current auth status for pause:", authData);
+    } catch (e) {
+      console.error("🔐 Auth check failed:", e);
+    }
+    
     if (activeSession) {
       console.log("🟡 Calling updateTimerMutation.mutate with:", {
         id: activeSession.id,
@@ -282,8 +305,18 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     }
   };
 
-  const stopTimer = () => {
+  const stopTimer = async () => {
     console.log("🔴 stopTimer called, activeSession:", activeSession);
+    
+    // Check auth status first
+    try {
+      const authResponse = await fetch('/api/auth/status', { credentials: 'include' });
+      const authData = await authResponse.json();
+      console.log("🔐 Current auth status for stop:", authData);
+    } catch (e) {
+      console.error("🔐 Auth check failed:", e);
+    }
+    
     if (activeSession) {
       console.log("🔴 Calling stopTimerMutation.mutate with id:", activeSession.id);
       stopTimerMutation.mutate(activeSession.id);
