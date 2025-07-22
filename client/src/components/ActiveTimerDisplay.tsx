@@ -59,15 +59,18 @@ export function ActiveTimerDisplay() {
     return null; // Don't show anything if no active timer
   }
 
-  // Format remaining time
+  // Format elapsed time (count up instead of countdown)
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Calculate elapsed time (count up)
+  const elapsedTime = activeTimer.totalDuration - activeTimer.remainingTime;
+  
   // Calculate progress percentage
-  const progress = ((activeTimer.totalDuration - activeTimer.remainingTime) / activeTimer.totalDuration) * 100;
+  const progress = (elapsedTime / activeTimer.totalDuration) * 100;
 
   // Get mode specific styling
   const getModeStyles = (mode: string) => {
@@ -151,24 +154,26 @@ export function ActiveTimerDisplay() {
               )}
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+              {/* Active status with green dot */}
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Active</span>
+              </div>
+              <span>•</span>
               <span className="capitalize font-medium">{activeTimer.mode}</span>
               {activeTimer.totalSessions && activeTimer.totalSessions > 1 && (
-                <span>Session {activeTimer.currentSession}/{activeTimer.totalSessions}</span>
+                <>
+                  <span>•</span>
+                  <span>Session {activeTimer.currentSession}/{activeTimer.totalSessions}</span>
+                </>
               )}
-              {/* Cross-device sync indicator */}
-              <div className="flex items-center gap-1">
-                <div className={`w-2 h-2 rounded-full ${typeof activeTimer.id === 'string' && activeTimer.id.length > 10 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                <span className="text-xs">
-                  {typeof activeTimer.id === 'string' && activeTimer.id.length > 10 ? 'Synced' : 'Local'}
-                </span>
-              </div>
             </div>
           </div>
         </div>
 
         <div className="text-right">
           <div className={`text-2xl font-mono font-bold ${styles.text}`}>
-            {formatTime(activeTimer.remainingTime)}
+            {formatTime(elapsedTime)}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
             of {formatTime(activeTimer.totalDuration)}

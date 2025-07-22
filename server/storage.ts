@@ -421,6 +421,7 @@ export interface IStorage {
   
   // Timer Sessions
   getActiveTimerSession(): Promise<TimerSession | null>;
+  completeTimerSession(id: number, tasksCompleted: string[], habitsCompleted: string[], sessionContext: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -2848,6 +2849,90 @@ export class DatabaseStorage implements IStorage {
 
   async stopTimerSession(id: number): Promise<TimerSession> {
     return this.updateTimerSession(id, { isActive: false, isPaused: false });
+  }
+
+  async completeTimerSession(id: number, tasksCompleted: string[], habitsCompleted: string[], sessionContext: string): Promise<void> {
+    try {
+      // Get the session first to extract data for analytics
+      const session = await this.getTimerSession(id);
+      if (!session) {
+        throw new Error("Timer session not found");
+      }
+
+      // Mark session as completed and update context
+      await this.updateTimerSession(id, { 
+        isActive: false, 
+        isPaused: false,
+        tasks_completed: JSON.stringify(tasksCompleted),
+        habits_completed: JSON.stringify(habitsCompleted),
+        session_context: sessionContext,
+        productivity_insights: this.generateProductivityInsights(session, tasksCompleted, habitsCompleted)
+      });
+
+      // Store in Notion for AI analytics (async without blocking)
+      this.storeSessionInNotionAnalytics(session, tasksCompleted, habitsCompleted, sessionContext);
+      
+      console.log("✅ Timer session completed and queued for Notion analytics storage");
+    } catch (error) {
+      console.error("❌ Error completing timer session:", error);
+      throw error;
+    }
+  }
+
+  private async storeSessionInNotionAnalytics(session: TimerSession, tasksCompleted: string[], habitsCompleted: string[], sessionContext: string) {
+    try {
+      const { storeCompletedTimerSession } = await import('./notion');
+      
+      const duration = session.totalDuration - session.remainingTime;
+      const sessionData = {
+        title: session.title || `${session.mode} Session`,
+        mode: session.mode,
+        duration: duration,
+        tasksCompleted: tasksCompleted,
+        habitsCompleted: habitsCompleted,
+        sessionContext: sessionContext,
+        startedAt: session.startedAt || new Date(),
+        completedAt: new Date()
+      };
+
+      await storeCompletedTimerSession(sessionData);
+    } catch (error) {
+      console.log("⚠️ Failed to store timer session in Notion analytics (non-blocking):", error);
+    }
+  }
+
+  private generateProductivityInsights(session: TimerSession, tasksCompleted: string[], habitsCompleted: string[]): string {
+    const insights = [];
+    const duration = Math.round((session.totalDuration - session.remainingTime) / 60);
+    
+    // Duration insights
+    if (duration >= 90) {
+      insights.push("Deep focus achieved");
+    } else if (duration >= 25) {
+      insights.push("Good focus session");
+    }
+    
+    // Task completion insights
+    if (tasksCompleted.length > 0) {
+      insights.push(`Completed ${tasksCompleted.length} task${tasksCompleted.length > 1 ? 's' : ''}`);
+    }
+    
+    // Habit insights
+    if (habitsCompleted.length > 0) {
+      insights.push(`Built ${habitsCompleted.length} habit${habitsCompleted.length > 1 ? 's' : ''}`);
+    }
+    
+    // Mode-specific insights
+    const modeInsights = {
+      pomodoro: "Structured productivity approach",
+      deepwork: "Extended concentration period",
+      flowstate: "Creative flow achieved",
+      focus: "Dedicated focus time"
+    };
+    
+    insights.push(modeInsights[session.mode as keyof typeof modeInsights] || "Productive session");
+    
+    return insights.join("; ");
   }
 
   // Delegate all other methods to MemStorage

@@ -1001,3 +1001,168 @@ export async function updateNotionTimerSession(pageId: string, updates: {
         throw new Error(`Failed to update timer session in Notion: ${error.message}`);
     }
 }
+
+// Store completed timer session in Notion for AI analytics
+export async function storeCompletedTimerSession(sessionData: {
+    title: string;
+    mode: string;
+    duration: number; // in seconds
+    tasksCompleted: string[];
+    habitsCompleted: string[];
+    sessionContext: string;
+    startedAt: Date;
+    completedAt: Date;
+}) {
+    try {
+        if (!NOTION_TIMERSESSIONS_DATABASE_ID) {
+            console.log("⚠️ No Notion Timer Sessions database configured - skipping analytics storage");
+            return null;
+        }
+
+        // Generate intelligent session title based on context
+        const intelligentTitle = generateSessionTitle(sessionData);
+        
+        // Calculate productivity metrics
+        const productivityScore = calculateProductivityScore(sessionData);
+        
+        console.log("📊 Storing completed timer session in Notion for AI analytics:", intelligentTitle);
+
+        const notionPage = await notion.pages.create({
+            parent: {
+                database_id: NOTION_TIMERSESSIONS_DATABASE_ID,
+            },
+            properties: {
+                "Title": {
+                    title: [{
+                        text: { content: intelligentTitle }
+                    }]
+                },
+                "Mode": {
+                    select: { name: sessionData.mode }
+                },
+                "Total Duration": {
+                    number: Math.round(sessionData.duration / 60) // Convert to minutes
+                },
+                "Tasks Completed": {
+                    number: sessionData.tasksCompleted.length
+                },
+                "Habits Completed": {
+                    number: sessionData.habitsCompleted.length
+                },
+                "Session Context": {
+                    rich_text: [{
+                        text: { content: sessionData.sessionContext || "General focus session" }
+                    }]
+                },
+                "Productivity Score": {
+                    number: productivityScore
+                },
+                "Started At": {
+                    date: { start: sessionData.startedAt.toISOString() }
+                },
+                "Completed At": {
+                    date: { start: sessionData.completedAt.toISOString() }
+                },
+                "Is Active": {
+                    checkbox: false // Always false for completed sessions
+                },
+                "Category": {
+                    select: { name: inferCategoryFromContext(sessionData) }
+                }
+            }
+        });
+
+        console.log("✅ Timer session stored in Notion for AI analytics:", notionPage.id);
+        return notionPage.id;
+    } catch (error) {
+        console.error("❌ Failed to store timer session in Notion:", error);
+        return null;
+    }
+}
+
+// Generate intelligent session titles based on completed tasks/habits
+function generateSessionTitle(sessionData: any): string {
+    const { mode, tasksCompleted, habitsCompleted, duration } = sessionData;
+    const durationMins = Math.round(duration / 60);
+    
+    // If tasks or habits were completed, use them for context
+    if (tasksCompleted.length > 0) {
+        const taskContext = tasksCompleted.length === 1 
+            ? `${tasksCompleted[0]} Task`
+            : `${tasksCompleted.length} Tasks`;
+        return `${mode} Session: ${taskContext} (${durationMins}min)`;
+    }
+    
+    if (habitsCompleted.length > 0) {
+        const habitContext = habitsCompleted.length === 1
+            ? `${habitsCompleted[0]} Habit`
+            : `${habitsCompleted.length} Habits`;
+        return `${mode} Session: ${habitContext} (${durationMins}min)`;
+    }
+    
+    // Default naming based on mode and duration
+    const modeLabels = {
+        focus: "Focus Session",
+        pomodoro: "Pomodoro Session", 
+        deepwork: "Deep Work Session",
+        flowstate: "Flow State Session"
+    };
+    
+    return `${modeLabels[mode as keyof typeof modeLabels] || "Focus Session"} (${durationMins}min)`;
+}
+
+// Calculate productivity score for AI insights
+function calculateProductivityScore(sessionData: any): number {
+    const { duration, tasksCompleted, habitsCompleted, mode } = sessionData;
+    const durationMins = duration / 60;
+    
+    let score = 0;
+    
+    // Base score from duration (longer sessions = higher base score)
+    if (durationMins >= 90) score += 40; // Deep work territory
+    else if (durationMins >= 60) score += 30; 
+    else if (durationMins >= 25) score += 20; // Pomodoro territory
+    else score += 10;
+    
+    // Bonus points for task completion
+    score += tasksCompleted.length * 15;
+    
+    // Bonus points for habit completion  
+    score += habitsCompleted.length * 10;
+    
+    // Mode multipliers
+    const modeMultipliers = {
+        flowstate: 1.2, // Flow state sessions get highest multiplier
+        deepwork: 1.1,
+        focus: 1.0,
+        pomodoro: 0.9
+    };
+    
+    score *= modeMultipliers[mode as keyof typeof modeMultipliers] || 1.0;
+    
+    return Math.min(Math.round(score), 100); // Cap at 100
+}
+
+// Infer category from session context
+function inferCategoryFromContext(sessionData: any): string {
+    const { tasksCompleted, habitsCompleted, mode } = sessionData;
+    
+    // Analyze task titles for keywords
+    const allText = [...tasksCompleted, ...habitsCompleted].join(' ').toLowerCase();
+    
+    if (allText.includes('workout') || allText.includes('exercise') || allText.includes('fitness')) return 'Health';
+    if (allText.includes('code') || allText.includes('dev') || allText.includes('program')) return 'Development';
+    if (allText.includes('write') || allText.includes('blog') || allText.includes('content')) return 'Creative';
+    if (allText.includes('learn') || allText.includes('study') || allText.includes('research')) return 'Learning';
+    if (allText.includes('meeting') || allText.includes('call') || allText.includes('business')) return 'Work';
+    
+    // Default categories by mode
+    const modeCategories = {
+        deepwork: 'Work',
+        flowstate: 'Creative', 
+        pomodoro: 'Productivity',
+        focus: 'General'
+    };
+    
+    return modeCategories[mode as keyof typeof modeCategories] || 'General';
+}
