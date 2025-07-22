@@ -125,18 +125,23 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     mutationFn: async (timerData: any) => {
       console.log("🔥 Making API request to start timer:", timerData);
       const response = await apiRequest("POST", "/api/timer", timerData);
-      console.log("🔥 API response received:", response);
+      console.log("🔥 API response received:", response.status, response.statusText);
+      
       if (!response.ok) {
         const errorData = await response.json();
         console.error("🔥 API error:", errorData);
         throw new Error(errorData.error || 'Timer start failed');
       }
-      return response.json();
+      
+      const responseData = await response.json();
+      console.log("🔥 Response data:", responseData);
+      return responseData;
     },
     onSuccess: (newSession) => {
       console.log("✅ Admin timer started successfully:", newSession);
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/timer/active"] });
     },
     onError: (error: any) => {
       console.error("❌ Admin timer start failed:", error);
@@ -285,6 +290,16 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
   const displayTime = activeSession ? getElapsedTime() : 0;
   const isRunning = activeSession?.isActive && !activeSession?.isPaused;
+  
+  console.log("🔍 Timer state check:", {
+    activeSession: activeSession ? {
+      id: activeSession.id,
+      isActive: activeSession.isActive,
+      isPaused: activeSession.isPaused
+    } : null,
+    isRunning,
+    hasActiveSession: !!activeSession
+  });
 
   if (!isOpen) return null;
 
@@ -420,31 +435,32 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
                 {activeSession ? 'Resume' : 'Start'}
               </Button>
             ) : (
-              <Button
-                onClick={() => {
-                  console.log("🔵 Pause button clicked, activeSession:", activeSession);
-                  pauseTimer();
-                }}
-                disabled={updateTimerMutation.isPending}
-                variant="outline"
-              >
-                <Pause className="h-4 w-4 mr-2" />
-                Pause
-              </Button>
-            )}
-            
-            {activeSession && (
-              <Button 
-                onClick={() => {
-                  console.log("🔴 Stop button clicked, activeSession:", activeSession);
-                  stopTimer();
-                }} 
-                disabled={stopTimerMutation.isPending}
-                variant="outline"
-              >
-                <Square className="h-4 w-4 mr-2" />
-                Stop
-              </Button>
+              <>
+                <Button
+                  onClick={() => {
+                    console.log("🟡 Pause button clicked, activeSession:", activeSession);
+                    pauseTimer();
+                  }}
+                  disabled={updateTimerMutation.isPending}
+                  variant="outline"
+                  className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                >
+                  <Pause className="h-4 w-4 mr-2" />
+                  Pause
+                </Button>
+                <Button
+                  onClick={() => {
+                    console.log("🔴 Stop button clicked, activeSession:", activeSession);
+                    stopTimer();
+                  }}
+                  disabled={stopTimerMutation.isPending}
+                  variant="outline"
+                  className="border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <Square className="h-4 w-4 mr-2" />
+                  Stop
+                </Button>
+              </>
             )}
             
             <Button onClick={onClose} variant="ghost">
