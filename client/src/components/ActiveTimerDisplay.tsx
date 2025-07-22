@@ -66,11 +66,28 @@ export function ActiveTimerDisplay() {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Calculate elapsed time (count up)
-  const elapsedTime = activeTimer.totalDuration - activeTimer.remainingTime;
+  // Calculate elapsed time (count up from start time)
+  const calculateElapsedTime = () => {
+    if (!activeTimer.startedAt) return 0;
+    
+    const startTime = new Date(activeTimer.startedAt).getTime();
+    const now = Date.now();
+    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+    
+    // For paused timers, use the stored elapsed time
+    if (activeTimer.isPaused && activeTimer.pausedAt) {
+      const pauseTime = new Date(activeTimer.pausedAt).getTime();
+      return Math.floor((pauseTime - startTime) / 1000);
+    }
+    
+    return Math.max(0, elapsedSeconds);
+  };
+  
+  const elapsedTime = calculateElapsedTime();
   
   // Calculate progress percentage
-  const progress = (elapsedTime / activeTimer.totalDuration) * 100;
+  const totalTimeInSeconds = activeTimer.totalDuration * 60; // Convert minutes to seconds
+  const progress = Math.min(100, (elapsedTime / totalTimeInSeconds) * 100);
 
   // Get mode specific styling
   const getModeStyles = (mode: string) => {
