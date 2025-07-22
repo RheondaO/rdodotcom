@@ -191,7 +191,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const stopTimerMutation = useMutation({
     mutationFn: async (id: string | number) => {
       console.log("🔴 stopTimerMutation called with id:", id);
-      const response = await apiRequest("DELETE", `/api/timer/${id}`);
+      const response = await apiRequest("PATCH", `/api/timer/${id}/stop`);
       console.log("🔴 stopTimerMutation response:", response.status);
       return response;
     },
