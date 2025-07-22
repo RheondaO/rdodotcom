@@ -66,21 +66,26 @@ export function ActiveTimerDisplay() {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Calculate elapsed time (count up from start time)
+  // Calculate elapsed time (count up from start time, freeze when paused)
   const calculateElapsedTime = () => {
     if (!activeTimer.startedAt) return 0;
     
     const startTime = new Date(activeTimer.startedAt).getTime();
-    const now = Date.now();
-    const elapsedSeconds = Math.floor((now - startTime) / 1000);
     
-    // For paused timers, use the stored elapsed time
+    // If paused, return the elapsed time at pause moment (frozen display)
     if (activeTimer.isPaused && activeTimer.pausedAt) {
       const pauseTime = new Date(activeTimer.pausedAt).getTime();
-      return Math.floor((pauseTime - startTime) / 1000);
+      return Math.max(0, Math.floor((pauseTime - startTime) / 1000));
     }
     
-    return Math.max(0, elapsedSeconds);
+    // If running, calculate current elapsed time
+    if (activeTimer.isActive && !activeTimer.isPaused) {
+      const now = Date.now();
+      return Math.max(0, Math.floor((now - startTime) / 1000));
+    }
+    
+    // If stopped, return final elapsed time
+    return Math.max(0, Math.floor((Date.now() - startTime) / 1000));
   };
   
   const elapsedTime = calculateElapsedTime();

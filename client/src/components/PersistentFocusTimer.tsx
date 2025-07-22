@@ -236,21 +236,24 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     }
   }, [activeSession]);
 
-  // Local timer for smooth UI updates (count up)
+  // Local timer for smooth UI updates - only runs when not paused
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
+    // Only run the timer if session is active AND not paused
     if (activeSession?.isActive && !activeSession?.isPaused) {
       interval = setInterval(() => {
-        // Force refresh from server every 5 seconds to stay in sync
-        if (Date.now() % 5000 < 1000) {
-          refetchActiveSession();
-        }
+        // Force a re-render by updating a dummy state or refetching
+        refetchActiveSession();
       }, 1000);
     }
 
-    return () => clearInterval(interval);
-  }, [activeSession?.isActive, activeSession?.isPaused, activeSession?.id]);
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [activeSession?.isActive, activeSession?.isPaused, activeSession?.id, refetchActiveSession]);
 
   const playNotificationSound = () => {
     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAaBC2Q2e/OfiwCJHfJ7+CTQQ0XZcn0v2AfAy+i5fepWxMGP5zR77RLEwczndTr0YggBlGh3u/UYRID');
@@ -377,22 +380,26 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     return Math.min(100, (elapsedTime / totalTime) * 100);
   };
 
-  // Calculate elapsed time (count up from start)
+  // Calculate elapsed time (count up from start, freeze when paused)
   const getElapsedTime = () => {
     if (!activeSession) return 0;
     
-    // Calculate elapsed time based on when the timer started
     const startTime = new Date(activeSession.startedAt).getTime();
-    const now = Date.now();
-    const elapsedSeconds = Math.floor((now - startTime) / 1000);
     
-    // For paused timers, use the stored elapsed time
+    // If paused, return the elapsed time at pause moment (frozen display)
     if (activeSession.isPaused && activeSession.pausedAt) {
       const pauseTime = new Date(activeSession.pausedAt).getTime();
-      return Math.floor((pauseTime - startTime) / 1000);
+      return Math.max(0, Math.floor((pauseTime - startTime) / 1000));
     }
     
-    return Math.max(0, elapsedSeconds);
+    // If running, calculate current elapsed time
+    if (activeSession.isActive && !activeSession.isPaused) {
+      const now = Date.now();
+      return Math.max(0, Math.floor((now - startTime) / 1000));
+    }
+    
+    // If stopped, return final elapsed time
+    return Math.max(0, Math.floor((Date.now() - startTime) / 1000));
   };
 
   const displayTime = activeSession ? getElapsedTime() : 0;
