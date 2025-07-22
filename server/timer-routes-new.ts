@@ -160,6 +160,43 @@ router.post("/start", requireAuth, async (req, res) => {
   }
 });
 
+// Update timer session (title, general updates) (Admin authenticated)
+router.patch("/:id", requireAuth, async (req, res) => {
+  try {
+    const sessionId = parseInt(req.params.id);
+    console.log("⏱️ Updating timer session:", sessionId, "with data:", req.body);
+    
+    // Try database first
+    if (!isNaN(sessionId)) {
+      try {
+        const updatedSession = await storage.updateTimerSession(sessionId, req.body);
+        console.log("⏱️ Updated database timer session:", sessionId, "new title:", updatedSession.title);
+        res.json(updatedSession);
+        return;
+      } catch (dbError) {
+        console.log("⚠️ Database error, trying Notion:", dbError);
+      }
+    }
+    
+    // Fallback to Notion
+    if (NOTION_TIMERSESSIONS_DATABASE_ID) {
+      try {
+        const updatedSession = await updateNotionTimerSession(req.params.id, req.body);
+        console.log("⏱️ Updated Notion timer session:", req.params.id, "new title:", updatedSession.title);
+        res.json(updatedSession);
+        return;
+      } catch (notionError: any) {
+        console.log("⏱️ Notion update error:", notionError?.message || notionError);
+      }
+    }
+
+    res.status(404).json({ error: "Timer session not found" });
+  } catch (error) {
+    console.error("Error updating timer session:", error);
+    res.status(500).json({ error: "Failed to update timer session" });
+  }
+});
+
 // Pause timer session (Admin authenticated)
 router.patch("/:id/pause", requireAuth, async (req, res) => {
   try {

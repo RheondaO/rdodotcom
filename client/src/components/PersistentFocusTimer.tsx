@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -68,6 +68,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const [mode, setMode] = useState<TimerMode>('focus');
   const [localTimeLeft, setLocalTimeLeft] = useState(0);
   const [sessionTitle, setSessionTitle] = useState(timeBlock?.title || "");
+  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
   const queryClient = useQueryClient();
 
   const timerSettings: TimerSettings = {
@@ -134,7 +135,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const startTimerMutation = useMutation({
     mutationFn: async (timerData: any) => {
       console.log("🔥 Making API request to start timer:", timerData);
-      const response = await apiRequest("POST", "/api/timer", timerData);
+      const response = await apiRequest("POST", "/api/timer/start", timerData);
       console.log("🔥 API response received:", response.status, response.statusText);
       
       if (!response.ok) {
@@ -169,16 +170,22 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     }
   });
 
-  // Update timer session (pause/resume) (admin-only, use authenticated endpoint)
+  // Update timer session (pause/resume/title update) (admin-only, use authenticated endpoint)
   const updateTimerMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string | number; updates: any }) => {
       console.log("🔧 updateTimerMutation called with:", { id, updates });
       const response = await apiRequest("PATCH", `/api/timer/${id}`, updates);
       console.log("🔧 updateTimerMutation response:", response.status);
-      return response;
+      const result = await response.json();
+      console.log("🔧 updateTimerMutation result:", result);
+      return result;
     },
     onSuccess: (result) => {
       console.log("✅ Admin timer updated successfully:", result);
+      // Update local state immediately if this is the current active session
+      if (activeSession && result.id === activeSession.id) {
+        setActiveSession({ ...activeSession, ...result });
+      }
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
     },
@@ -248,8 +255,18 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     audio.play().catch(() => {}); // Ignore errors if sound fails
   };
 
-  const startTimer = () => {
+  const startTimer = async () => {
     console.log("🟢 Start button clicked, activeSession:", activeSession);
+    
+    // Check auth status first
+    try {
+      const authResponse = await fetch('/api/auth/status', { credentials: 'include' });
+      const authData = await authResponse.json();
+      console.log("🔐 Current auth status for start:", authData);
+    } catch (e) {
+      console.error("🔐 Auth check failed:", e);
+    }
+    
     if (activeSession) {
       // Resume existing timer
       console.log("🟢 Resuming existing timer with id:", activeSession.id);
@@ -258,10 +275,11 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         updates: { isPaused: false, pausedAt: null }
       });
     } else {
-      // Start new timer
+      // Start new timer with focus session title
+      const finalTitle = sessionTitle.trim() || timeBlock?.title || `${currentModeInfo.name} Session`;
       const sessionData = {
         mode,
-        title: sessionTitle || timeBlock?.title || `${currentModeInfo.name} Session`,
+        title: finalTitle,
         category: timeBlock?.category || "General",
         totalDuration: currentSettings.duration,
         remainingTime: currentSettings.duration * 60,
@@ -274,7 +292,8 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         completedSessions: 0
       };
       
-      console.log("🟢 Starting new timer with data:", sessionData);
+      console.log("🟢 Starting new timer with focus session title:", finalTitle);
+      console.log("🟢 Complete session data:", sessionData);
       startTimerMutation.mutate(sessionData);
     }
   };
@@ -322,6 +341,22 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       stopTimerMutation.mutate(activeSession.id);
     } else {
       console.log("🔴 No activeSession found for stop");
+    }
+  };
+
+  // Update focus session title when input changes
+  const updateSessionTitle = async (newTitle: string) => {
+    if (activeSession && newTitle.trim() !== activeSession.title) {
+      console.log("📝 Updating session title from:", activeSession.title, "to:", newTitle);
+      
+      try {
+        updateTimerMutation.mutate({
+          id: activeSession.id,
+          updates: { title: newTitle.trim() }
+        });
+      } catch (error) {
+        console.error("❌ Failed to update session title:", error);
+      }
     }
   };
 
@@ -527,7 +562,20 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
             <label className="text-sm font-medium">Focus Session Title</label>
             <Input
               value={sessionTitle}
-              onChange={(e) => setSessionTitle(e.target.value)}
+              onChange={(e) => {
+                const newTitle = e.target.value;
+                setSessionTitle(newTitle);
+                // Update active session title in real-time
+                if (activeSession && newTitle.trim() !== activeSession.title) {
+                  // Debounce the update to avoid too many API calls
+                  if (updateTimerRef.current) {
+                    clearTimeout(updateTimerRef.current);
+                  }
+                  updateTimerRef.current = setTimeout(() => {
+                    updateSessionTitle(newTitle);
+                  }, 1000); // Wait 1 second after user stops typing
+                }
+              }}
               placeholder="What is being worked on?"
               className="w-full"
             />
