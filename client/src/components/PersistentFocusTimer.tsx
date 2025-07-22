@@ -205,6 +205,8 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     onSuccess: (result) => {
       console.log("✅ Admin timer stopped successfully:", result);
       setActiveSession(null); // Clear local state immediately
+      setLocalTimeLeft(0); // Reset timer display
+      setSessionTitle(timeBlock?.title || ""); // Reset session title
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
     },
@@ -368,13 +370,27 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
   const getProgress = () => {
     if (!activeSession) return 0;
-    return ((activeSession.totalDuration - activeSession.remainingTime) / activeSession.totalDuration) * 100;
+    const elapsedTime = getElapsedTime();
+    const totalTime = activeSession.totalDuration * 60; // Convert minutes to seconds
+    return Math.min(100, (elapsedTime / totalTime) * 100);
   };
 
   // Calculate elapsed time (count up from start)
   const getElapsedTime = () => {
     if (!activeSession) return 0;
-    return activeSession.totalDuration - activeSession.remainingTime;
+    
+    // Calculate elapsed time based on when the timer started
+    const startTime = new Date(activeSession.startedAt).getTime();
+    const now = Date.now();
+    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+    
+    // For paused timers, use the stored elapsed time
+    if (activeSession.isPaused && activeSession.pausedAt) {
+      const pauseTime = new Date(activeSession.pausedAt).getTime();
+      return Math.floor((pauseTime - startTime) / 1000);
+    }
+    
+    return Math.max(0, elapsedSeconds);
   };
 
   const displayTime = activeSession ? getElapsedTime() : 0;
