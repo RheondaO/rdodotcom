@@ -123,7 +123,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   // Start new timer session (admin-only, use authenticated endpoint)
   const startTimerMutation = useMutation({
     mutationFn: async (timerData: any) => {
-      const response = await apiRequest("POST", "/api/timer/start", timerData);
+      const response = await apiRequest("POST", "/api/timer", timerData);
       return response.json();
     },
     onSuccess: (newSession) => {
@@ -139,8 +139,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   // Update timer session (pause/resume) (admin-only, use authenticated endpoint)
   const updateTimerMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string | number; updates: any }) => {
-      const response = await apiRequest("PATCH", `/api/timer/${id}`, updates);
-      return response.json();
+      return apiRequest("PATCH", `/api/timer/${id}`, updates);
     },
     onSuccess: (result) => {
       console.log("✅ Admin timer updated successfully:", result);
@@ -152,8 +151,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   // Stop timer session (admin-only, use authenticated endpoint)
   const stopTimerMutation = useMutation({
     mutationFn: async (id: string | number) => {
-      const response = await apiRequest("DELETE", `/api/timer/${id}`);
-      return response.json();
+      return apiRequest("DELETE", `/api/timer/${id}`);
     },
     onSuccess: (result) => {
       console.log("✅ Admin timer stopped successfully:", result);
@@ -219,9 +217,9 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       // Start new timer
       const sessionData = {
         mode,
-        title: timeBlock?.title || `${currentModeInfo.name} Session`,
+        title: sessionTitle || timeBlock?.title || `${currentModeInfo.name} Session`,
         category: timeBlock?.category || "General",
-        totalDuration: currentSettings.duration * 60,
+        totalDuration: currentSettings.duration,
         remainingTime: currentSettings.duration * 60,
         currentSession: 1,
         totalSessions: currentSettings.sessions,
