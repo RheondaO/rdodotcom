@@ -210,13 +210,12 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       setActiveSession(null);
       setLocalTimeLeft(0);
       setSessionTitle(timeBlock?.title || "");
-      refetchActiveSession();
+      // Only invalidate public timer query, don't refetch active session as we already cleared it
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
     },
     onError: (error) => {
       console.error("❌ stopTimerMutation failed:", error);
-      // Refetch to restore correct state if API fails
-      refetchActiveSession();
+      // Keep current state if API fails, don't clear it
     }
   });
 
