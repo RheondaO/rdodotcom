@@ -18,13 +18,20 @@ interface TimerSession {
 export function ActiveTimerDisplay() {
   const { data: activeTimer, isLoading, isFetched, error } = useQuery<TimerSession | null>({
     queryKey: ["/api/public/active-timer"],
+    queryFn: async () => {
+      const response = await fetch("/api/public/active-timer");
+      if (!response.ok) {
+        throw new Error("Failed to fetch active timer");
+      }
+      return response.json();
+    },
     refetchInterval: 1000, // Update every second for countdown
     refetchOnWindowFocus: true,
   });
 
   // Debug logging to see what's happening
   console.log("🔄 ActiveTimerDisplay render:", { 
-    activeTimer, 
+    activeTimer: activeTimer ? { id: activeTimer.id, title: activeTimer.title, mode: activeTimer.mode, remainingTime: activeTimer.remainingTime } : null,
     isLoading, 
     isFetched, 
     error: error?.message,
