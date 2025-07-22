@@ -181,19 +181,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/public/active-timer", async (req, res) => {
     try {
-      // Use Notion integration directly for active timer (primary storage)
-      const activeTimer = await getActiveNotionTimerSession();
-      if (activeTimer) {
-        res.json(activeTimer);
-        return;
+      console.log("📱 Getting active timer for public view");
+
+      // Try database first for production reliability
+      try {
+        const dbActiveSession = await storage.getActiveTimerSession();
+        if (dbActiveSession) {
+          // Calculate actual remaining time based on elapsed time
+          const now = new Date();
+          const lastSync = new Date(dbActiveSession.lastSync!);
+          const elapsedSeconds = Math.floor((now.getTime() - lastSync.getTime()) / 1000);
+          const adjustedRemainingTime = Math.max(0, dbActiveSession.remainingTime - elapsedSeconds);
+          
+          // If timer has run out, mark as inactive
+          if (adjustedRemainingTime <= 0 && dbActiveSession.isActive) {
+            await storage.stopTimerSession(dbActiveSession.id);
+            console.log("⏰ Database timer expired, marked as inactive");
+            res.json(null);
+            return;
+          }
+          
+          const sessionWithUpdatedTime = {
+            ...dbActiveSession,
+            remainingTime: adjustedRemainingTime
+          };
+          
+          console.log("✅ Found active database timer session for public view:", sessionWithUpdatedTime.id);
+          res.json(sessionWithUpdatedTime);
+          return;
+        }
+      } catch (dbError) {
+        console.log("⚠️ Database error in public timer view, falling back to Notion:", dbError);
       }
 
-      // Fallback to local storage if no Notion timer found
-      const localTimer = await storage.getActiveTimerSession();
-      res.json(localTimer);
-    } catch (error) {
-      console.error("Error fetching active timer:", error);
+      // Fallback to Notion if configured
+      if (NOTION_TIMERSESSIONS_DATABASE_ID) {
+        try {
+          const activeSession = await getActiveNotionTimerSession("admin");
+          
+          if (activeSession) {
+            // Calculate actual remaining time based on elapsed time
+            const now = new Date();
+            const lastSync = new Date(activeSession.lastSync);
+            const elapsedSinceSync = Math.floor((now.getTime() - lastSync.getTime()) / 1000);
+            
+            let updatedRemainingTime = activeSession.remainingTime;
+            if (!activeSession.isPaused) {
+              updatedRemainingTime = Math.max(0, activeSession.remainingTime - elapsedSinceSync);
+            }
+
+            // Update the session with current time if it's still active
+            if (updatedRemainingTime > 0) {
+              activeSession.remainingTime = updatedRemainingTime;
+              activeSession.lastSync = now.toISOString();
+
+              console.log("✅ Found active Notion timer session for public view:", activeSession.id);
+              
+              res.json({
+                ...activeSession,
+                remainingTime: updatedRemainingTime,
+                lastSync: now.toISOString()
+              });
+              return;
+            } else {
+              console.log("⏰ Timer expired, should be marked inactive");
+            }
+          }
+        } catch (notionError) {
+          console.log("⚠️ Notion error in public timer view:", (notionError as Error).message);
+        }
+      }
+
+      // No active session found
+      console.log("📱 No active timer session found for public view");
       res.json(null);
+    } catch (error) {
+      console.error("Error getting public active timer:", error);
+      res.status(500).json({ error: "Failed to get active timer" });
     }
   });
 
