@@ -200,18 +200,23 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       console.log("🔴 stopTimerMutation called with id:", id);
       const response = await apiRequest("PATCH", `/api/timer/${id}/stop`);
       console.log("🔴 stopTimerMutation response:", response.status);
-      return response;
+      const result = await response.json();
+      console.log("🔴 stopTimerMutation result:", result);
+      return result;
     },
     onSuccess: (result) => {
       console.log("✅ Admin timer stopped successfully:", result);
-      setActiveSession(null); // Clear local state immediately
-      setLocalTimeLeft(0); // Reset timer display
-      setSessionTitle(timeBlock?.title || ""); // Reset session title
+      // Clear local state after successful API call
+      setActiveSession(null);
+      setLocalTimeLeft(0);
+      setSessionTitle(timeBlock?.title || "");
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
     },
     onError: (error) => {
       console.error("❌ stopTimerMutation failed:", error);
+      // Refetch to restore correct state if API fails
+      refetchActiveSession();
     }
   });
 
@@ -344,12 +349,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     if (activeSession) {
       console.log("🔴 Calling stopTimerMutation.mutate with id:", activeSession.id);
       
-      // Immediately clear local state before making the request
-      setActiveSession(null);
-      setLocalTimeLeft(0);
-      setSessionTitle(timeBlock?.title || "");
-      
-      // Then make the API call
+      // Make the API call first, then the mutation will handle clearing state
       stopTimerMutation.mutate(activeSession.id);
     } else {
       console.log("🔴 No activeSession found for stop");
