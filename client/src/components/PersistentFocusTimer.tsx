@@ -31,13 +31,14 @@ interface PersistentFocusTimerProps {
   };
 }
 
-type TimerMode = 'focus' | 'pomodoro' | 'deepwork' | 'flowstate';
+type TimerMode = 'focus' | 'pomodoro' | 'deepwork' | 'flowstate' | 'test';
 
 interface TimerSettings {
   focus: { duration: number; shortBreak: number; longBreak: number; sessions: number };
   pomodoro: { duration: number; shortBreak: number; longBreak: number; sessions: number };
   deepwork: { duration: number; shortBreak: number; longBreak: number; sessions: number };
   flowstate: { duration: number; shortBreak: number; longBreak: number; sessions: number };
+  test: { duration: number; shortBreak: number; longBreak: number; sessions: number };
 }
 
 interface TimerSession {
@@ -74,7 +75,8 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     focus: { duration: timeBlock?.duration || 25, shortBreak: 5, longBreak: 15, sessions: 4 },
     pomodoro: { duration: 25, shortBreak: 5, longBreak: 15, sessions: 4 },
     deepwork: { duration: 90, shortBreak: 20, longBreak: 30, sessions: 3 },
-    flowstate: { duration: 120, shortBreak: 30, longBreak: 60, sessions: 2 }
+    flowstate: { duration: 120, shortBreak: 30, longBreak: 60, sessions: 2 },
+    test: { duration: 0.25, shortBreak: 0.1, longBreak: 0.2, sessions: 3 }
   };
 
   const modeInfo = {
@@ -105,6 +107,13 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       description: "2 hour uninterrupted sessions",
       color: "from-green-500 to-emerald-500",
       bgColor: "bg-green-50 dark:bg-green-900/20"
+    },
+    test: {
+      name: "Test Mode",
+      icon: Target,         
+      description: "15 second work + 6 second break cycles (for testing)",
+      color: "from-yellow-500 to-orange-500",
+      bgColor: "bg-yellow-50 dark:bg-yellow-900/20"
     }
   };
 
