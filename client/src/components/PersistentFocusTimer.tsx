@@ -206,9 +206,12 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     },
     onSuccess: (result) => {
       console.log("✅ Admin timer stopped successfully:", result);
+      // Calculate final elapsed time before clearing session
+      const finalElapsedTime = activeSession ? getElapsedTime() : 0;
+      
       // Clear local state after successful API call
       setActiveSession(null);
-      setLocalTimeLeft(0);
+      setLocalTimeLeft(finalElapsedTime); // Show final elapsed time instead of 0
       setSessionTitle(timeBlock?.title || "");
       // Only invalidate public timer query, don't refetch active session as we already cleared it
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
@@ -345,11 +348,13 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const stopTimer = async () => {
     console.log("🔴 stopTimer called, activeSession:", activeSession);
     
-    if (activeSession) {
+    if (activeSession && !stopTimerMutation.isPending) {
       console.log("🔴 Calling stopTimerMutation.mutate with id:", activeSession.id);
       
       // Make the API call first, then the mutation will handle clearing state
       stopTimerMutation.mutate(activeSession.id);
+    } else if (stopTimerMutation.isPending) {
+      console.log("🔴 Stop mutation already in progress, ignoring");
     } else {
       console.log("🔴 No activeSession found for stop");
     }
@@ -406,7 +411,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     return 0;
   };
 
-  const displayTime = activeSession ? getElapsedTime() : 0;
+  const displayTime = activeSession ? getElapsedTime() : localTimeLeft;
   const isRunning = Boolean(activeSession?.isActive && !activeSession?.isPaused);
   
   console.log("🔍 Timer state check:", {
