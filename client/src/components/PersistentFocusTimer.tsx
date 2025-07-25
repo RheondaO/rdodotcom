@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
@@ -10,16 +10,13 @@ import {
   Play, 
   Square, 
   RotateCcw, 
-  Clock, 
   Focus, 
   Brain, 
   Zap, 
-  Coffee,
   Target,
   Timer
 } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "../lib/queryClient";
+import { useUniversalTimer, TimerMode } from "../hooks/useUniversalTimer";
 
 interface PersistentFocusTimerProps {
   isOpen: boolean;
@@ -31,437 +28,96 @@ interface PersistentFocusTimerProps {
   };
 }
 
-type TimerMode = 'focus' | 'pomodoro' | 'deepwork' | 'flowstate' | 'test';
-
-interface TimerSettings {
-  focus: { duration: number; shortBreak: number; longBreak: number; sessions: number };
-  pomodoro: { duration: number; shortBreak: number; longBreak: number; sessions: number };
-  deepwork: { duration: number; shortBreak: number; longBreak: number; sessions: number };
-  flowstate: { duration: number; shortBreak: number; longBreak: number; sessions: number };
-  test: { duration: number; shortBreak: number; longBreak: number; sessions: number };
-}
-
-interface TimerSession {
-  id: string | number;
-  notionId?: string;
-  mode: string;
-  title?: string;
-  category?: string;
-  totalDuration: number;
-  remainingTime: number;
-  currentSession: number;
-  totalSessions: number;
-  isBreak: boolean;
-  isActive: boolean;
-  isPaused: boolean;
-  startedAt: string;
-  pausedAt?: string | null;
-  lastSync: string;
-  totalFocusTime: number;
-  completedSessions: number;
-  createdAt?: string;
-  updatedAt?: string;
-  userId?: string;
-}
-
 export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: PersistentFocusTimerProps) {
-  const [mode, setMode] = useState<TimerMode>('focus');
-  const [localTimeLeft, setLocalTimeLeft] = useState(0);
-  const [sessionTitle, setSessionTitle] = useState(timeBlock?.title || "");
-  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const queryClient = useQueryClient();
-
-  const timerSettings: TimerSettings = {
-    focus: { duration: timeBlock?.duration || 25, shortBreak: 5, longBreak: 15, sessions: 4 },
-    pomodoro: { duration: 25, shortBreak: 5, longBreak: 15, sessions: 4 },
-    deepwork: { duration: 90, shortBreak: 20, longBreak: 30, sessions: 3 },
-    flowstate: { duration: 120, shortBreak: 30, longBreak: 60, sessions: 2 },
-    test: { duration: 0.25, shortBreak: 0.1, longBreak: 0.2, sessions: 3 }
-  };
-
-  const modeInfo = {
+  // Define timer modes configuration
+  const timerModes: Record<string, TimerMode> = {
     focus: {
+      id: "focus",
       name: "Focus Timer",
       icon: Focus,
-      description: "Custom duration based on your time block",
-      color: "from-blue-500 to-cyan-500",
-      bgColor: "bg-blue-50 dark:bg-blue-900/20"
+      description: timeBlock?.duration ? `${timeBlock.duration} min focused work session` : "25 min focused work session",
+      color: "from-blue-600 to-purple-600",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20",
+      duration: timeBlock?.duration || 25,
+      shortBreak: 5,
+      longBreak: 15,
+      sessions: 4
     },
     pomodoro: {
+      id: "pomodoro",
       name: "Pomodoro",
       icon: Timer,
-      description: "25min work + 5min break cycles",
-      color: "from-red-500 to-pink-500",
-      bgColor: "bg-red-50 dark:bg-red-900/20"
+      description: "25 min work + 5 min break cycles",
+      color: "from-red-600 to-orange-600",
+      bgColor: "bg-red-50 dark:bg-red-900/20",
+      duration: 25,
+      shortBreak: 5,
+      longBreak: 15,
+      sessions: 4
     },
     deepwork: {
+      id: "deepwork",
       name: "Deep Work",
       icon: Brain,
-      description: "90min focused sessions + longer breaks",
-      color: "from-purple-500 to-indigo-500",
-      bgColor: "bg-purple-50 dark:bg-purple-900/20"
+      description: "90 min deep focus + 20 min break",
+      color: "from-green-600 to-teal-600",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
+      duration: 90,
+      shortBreak: 20,
+      longBreak: 30,
+      sessions: 3
     },
     flowstate: {
+      id: "flowstate",
       name: "Flow State",
       icon: Zap,
-      description: "2 hour uninterrupted sessions",
-      color: "from-green-500 to-emerald-500",
-      bgColor: "bg-green-50 dark:bg-green-900/20"
+      description: "2 hour uninterrupted + 30 min break",
+      color: "from-purple-600 to-pink-600",
+      bgColor: "bg-purple-50 dark:bg-purple-900/20",
+      duration: 120,
+      shortBreak: 30,
+      longBreak: 60,
+      sessions: 2
     },
     test: {
+      id: "test",
       name: "Test Mode",
-      icon: Target,         
-      description: "15 second work + 6 second break cycles (for testing)",
-      color: "from-yellow-500 to-orange-500",
-      bgColor: "bg-yellow-50 dark:bg-yellow-900/20"
+      icon: Target,
+      description: "15 second sessions for quick testing",
+      color: "from-gray-600 to-gray-800",
+      bgColor: "bg-gray-50 dark:bg-gray-900/20",
+      duration: 0.25, // 15 seconds
+      shortBreak: 0.1, // 6 seconds
+      longBreak: 0.2, // 12 seconds
+      sessions: 3
     }
   };
 
-  const currentSettings = timerSettings[mode];
-  const currentModeInfo = modeInfo[mode];
-  const Icon = currentModeInfo.icon;
+  // Use universal timer hook
+  const {
+    selectedMode,
+    setSelectedMode,
+    sessionTitle,
+    setSessionTitle,
+    activeSession,
+    displayTime,
+    startTimer,
+    stopTimer,
+    updateSessionTitle,
+    formatTime,
+    getProgress,
+    isStarting,
+    isStopping
+  } = useUniversalTimer(timerModes, isOpen);
 
-  // Local state for immediate UI updates
-  const [activeSession, setActiveSession] = useState<any>(null);
-  
-  // Get active timer session from server (public endpoint for viewing)
-  const { data: serverActiveSession, refetch: refetchActiveSession } = useQuery<TimerSession | null>({
-    queryKey: ["/api/public/active-timer"],
-    enabled: isOpen,
-    refetchInterval: 1000, // Sync every second when modal is open
-    staleTime: 0 // Always fetch fresh data
-  });
-  
-  // Sync server state with local state
+  // Set initial session title from time block
   useEffect(() => {
-    if (serverActiveSession && !activeSession) {
-      setActiveSession(serverActiveSession);
+    if (timeBlock?.title && !sessionTitle) {
+      setSessionTitle(timeBlock.title);
     }
-    // If server shows no session but we have local session, clear it
-    if (!serverActiveSession && activeSession) {
-      console.log("🗑️ Server shows no active session, clearing local state");
-      setActiveSession(null);
-      setLocalTimeLeft(0);
-    }
-  }, [serverActiveSession, activeSession]);
+  }, [timeBlock?.title, sessionTitle, setSessionTitle]);
 
-  // Start new timer session (admin-only, use authenticated endpoint)
-  const startTimerMutation = useMutation({
-    mutationFn: async (timerData: any) => {
-      console.log("🔥 Making API request to start timer:", timerData);
-      const response = await apiRequest("POST", "/api/timer", timerData);
-      console.log("🔥 API response received:", response.status, response.statusText);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("🔥 API error:", errorData);
-        throw new Error(errorData.error || 'Timer start failed');
-      }
-      
-      const responseData = await response.json();
-      console.log("🔥 Response data:", responseData);
-      return responseData;
-    },
-    onSuccess: (newSession) => {
-      console.log("✅ Admin timer started successfully:", newSession);
-      
-      // Force immediate UI update by setting local state
-      setActiveSession({
-        ...newSession,
-        isActive: true,
-        isPaused: false,
-        startedAt: new Date().toISOString(),
-        lastSync: new Date().toISOString()
-      });
-      
-      // Then invalidate queries to sync with server
-      refetchActiveSession();
-      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/timer/active"] });
-    },
-    onError: (error: any) => {
-      console.error("❌ Admin timer start failed:", error);
-    }
-  });
-
-  // Update timer session (pause/resume/title update) (admin-only, use authenticated endpoint)
-  const updateTimerMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string | number; updates: any }) => {
-      console.log("🔧 updateTimerMutation called with:", { id, updates });
-      const response = await apiRequest("PATCH", `/api/timer/${id}`, updates);
-      console.log("🔧 updateTimerMutation response:", response.status);
-      const result = await response.json();
-      console.log("🔧 updateTimerMutation result:", result);
-      return result;
-    },
-    onSuccess: (result) => {
-      console.log("✅ Admin timer updated successfully:", result);
-      // Update local state immediately if this is the current active session
-      if (activeSession && result.id === activeSession.id) {
-        setActiveSession({ ...activeSession, ...result });
-      }
-      refetchActiveSession();
-      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
-    },
-    onError: (error) => {
-      console.error("❌ updateTimerMutation failed:", error);
-    }
-  });
-
-  // Stop timer session (admin-only, use authenticated endpoint)
-  const stopTimerMutation = useMutation({
-    mutationFn: async (id: string | number) => {
-      console.log("🔴 stopTimerMutation called with id:", id);
-      const response = await apiRequest("DELETE", `/api/timer/${id}`);
-      console.log("🔴 stopTimerMutation response:", response.status);
-      const result = await response.json();
-      console.log("🔴 stopTimerMutation result:", result);
-      return result;
-    },
-    onSuccess: (result) => {
-      console.log("✅ Admin timer stopped successfully:", result);
-      // Calculate final elapsed time before clearing session
-      const finalElapsedTime = activeSession ? getElapsedTime() : 0;
-      
-      // Clear local state after successful API call
-      setActiveSession(null);
-      setLocalTimeLeft(finalElapsedTime); // Show final elapsed time instead of 0
-      setSessionTitle(timeBlock?.title || "");
-      // Force refetch of server state to ensure synchronization
-      refetchActiveSession();
-      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
-    },
-    onError: (error) => {
-      console.error("❌ stopTimerMutation failed:", error);
-      // Keep current state if API fails, don't clear it
-    }
-  });
-
-  // Complete timer session (admin-only, use authenticated endpoint)
-  const completeTimerMutation = useMutation({
-    mutationFn: async (id: string | number) => {
-      const response = await apiRequest("POST", `/api/timer/${id}/complete`);
-      return response.json();
-    },
-    onSuccess: () => {
-      refetchActiveSession();
-      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
-      playNotificationSound();
-    }
-  });
-
-  // Sync local time with server data and handle session removal
-  useEffect(() => {
-    if (activeSession) {
-      setLocalTimeLeft(activeSession.remainingTime);
-      setMode(activeSession.mode as TimerMode);
-    } else {
-      // Clear local state when session is removed (stopped from anywhere)
-      setLocalTimeLeft(0);
-      setSessionTitle(timeBlock?.title || "");
-    }
-  }, [activeSession, timeBlock?.title]);
-
-  // Local timer for smooth UI updates and session progression
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    // Only run interval when modal is open AND there's an active session
-    if (isOpen && activeSession?.isActive) {
-      interval = setInterval(() => {
-        // Check if current session is complete
-        const elapsedTime = getElapsedTime();
-        const sessionDurationSeconds = activeSession.isBreak 
-          ? getBreakDuration(activeSession.mode, activeSession.currentSession, activeSession.totalSessions) * 60
-          : currentSettings.duration * 60;
-
-        if (elapsedTime >= sessionDurationSeconds) {
-          // Session is complete, advance to next session or complete timer
-          advanceSession();
-        } else {
-          // Force a re-render by refetching session data
-          // This catches stops from public view or other sources
-          refetchActiveSession();
-        }
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isOpen, activeSession?.isActive, activeSession?.currentSession, activeSession?.isBreak, refetchActiveSession]);
-
-  const playNotificationSound = () => {
-    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAaBC2Q2e/OfiwCJHfJ7+CTQQ0XZcn0v2AfAy+i5fepWxMGP5zR77RLEwczndTr0YggBlGh3u/UYRID');
-    audio.play().catch(() => {}); // Ignore errors if sound fails
-  };
-
-  const startTimer = async () => {
-    console.log("🟢 Start button clicked, activeSession:", activeSession);
-    
-    // Check auth status first
-    try {
-      const authResponse = await fetch('/api/auth/status', { credentials: 'include' });
-      const authData = await authResponse.json();
-      console.log("🔐 Current auth status for start:", authData);
-    } catch (e) {
-      console.error("🔐 Auth check failed:", e);
-    }
-    
-    if (!activeSession) {
-      // Start new timer with focus session title
-      const finalTitle = sessionTitle.trim() || timeBlock?.title || `${currentModeInfo.name} Session`;
-      const sessionData = {
-        mode,
-        title: finalTitle,
-        category: timeBlock?.category || "General",
-        totalDuration: Math.floor(currentSettings.duration * 60), // Convert to seconds
-        remainingTime: Math.floor(currentSettings.duration * 60), // Convert to seconds
-        currentSession: 1,
-        totalSessions: currentSettings.sessions,
-        isBreak: false,
-        isActive: true,
-        isPaused: false,
-        totalFocusTime: 0,
-        completedSessions: 0
-      };
-      
-      console.log("🟢 Starting new timer with focus session title:", finalTitle);
-      console.log("🟢 Complete session data:", sessionData);
-      startTimerMutation.mutate(sessionData);
-    }
-  };
-
-  const stopTimer = async () => {
-    console.log("🔴 stopTimer called, activeSession:", activeSession);
-    
-    if (activeSession && !stopTimerMutation.isPending) {
-      console.log("🔴 Calling stopTimerMutation.mutate with id:", activeSession.id);
-      
-      // Make the API call first, then the mutation will handle clearing state
-      stopTimerMutation.mutate(activeSession.id);
-    } else if (stopTimerMutation.isPending) {
-      console.log("🔴 Stop mutation already in progress, ignoring");
-    } else {
-      console.log("🔴 No activeSession found for stop");
-    }
-  };
-
-  // Update focus session title when input changes
-  const updateSessionTitle = async (newTitle: string) => {
-    if (activeSession && newTitle.trim() !== activeSession.title) {
-      console.log("📝 Updating session title from:", activeSession.title, "to:", newTitle);
-      
-      try {
-        updateTimerMutation.mutate({
-          id: activeSession.id,
-          updates: { title: newTitle.trim() }
-        });
-      } catch (error) {
-        console.error("❌ Failed to update session title:", error);
-      }
-    }
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getProgress = () => {
-    if (!activeSession) return 0;
-    const elapsedTime = getElapsedTime();
-    
-    // Calculate session duration based on whether it's break or work
-    const sessionDurationSeconds = activeSession.isBreak 
-      ? getBreakDuration(activeSession.mode, activeSession.currentSession, activeSession.totalSessions) * 60
-      : currentSettings.duration * 60;
-    
-    return Math.min(100, (elapsedTime / sessionDurationSeconds) * 100);
-  };
-
-  // Calculate elapsed time for current session (resets on session advance)
-  const getElapsedTime = () => {
-    // If no active session, return 0 (timer is stopped)
-    if (!activeSession?.startedAt || !activeSession.isActive) return 0;
-    
-    const startTime = new Date(activeSession.startedAt).getTime();
-    const now = Date.now();
-    return Math.max(0, Math.floor((now - startTime) / 1000));
-  };
-
-  // Get break duration based on mode and session
-  const getBreakDuration = (mode: string, currentSession: number, totalSessions: number) => {
-    const settings = timerSettings[mode as TimerMode];
-    // Long break after completing all work sessions, short break between sessions
-    return (currentSession >= totalSessions) ? settings.longBreak : settings.shortBreak;
-  };
-
-  // Advance to next session or complete timer
-  const advanceSession = async () => {
-    if (!activeSession) return;
-
-    console.log("🔄 Advancing session from:", activeSession.currentSession, "break:", activeSession.isBreak);
-
-    if (activeSession.isBreak) {
-      // Break is complete, start next work session
-      const nextSession = activeSession.currentSession + 1;
-      if (nextSession <= activeSession.totalSessions) {
-        // Start next work session
-        const updates = {
-          currentSession: nextSession,
-          isBreak: false,
-          startedAt: new Date().toISOString(),
-          completedSessions: activeSession.completedSessions + (nextSession > activeSession.currentSession ? 1 : 0)
-        };
-        
-        updateTimerMutation.mutate({
-          id: activeSession.id,
-          updates
-        });
-        
-        setActiveSession((prev: TimerSession | null) => prev ? { ...prev, ...updates } : null);
-        playNotificationSound();
-      } else {
-        // All sessions complete
-        completeTimerMutation.mutate(activeSession.id);
-      }
-    } else {
-      // Work session complete, start break
-      if (activeSession.currentSession < activeSession.totalSessions) {
-        // Start break period
-        const updates = {
-          isBreak: true,
-          startedAt: new Date().toISOString(),
-          completedSessions: activeSession.completedSessions + 1
-        };
-        
-        updateTimerMutation.mutate({
-          id: activeSession.id,
-          updates
-        });
-        
-        setActiveSession((prev: TimerSession | null) => prev ? { ...prev, ...updates } : null);
-        playNotificationSound();
-      } else {
-        // Final session complete
-        completeTimerMutation.mutate(activeSession.id);
-      }
-    }
-  };
-
-  const displayTime = activeSession ? getElapsedTime() : localTimeLeft;
-  
-  console.log("🔍 Timer state check:", {
-    activeSession: activeSession ? {
-      id: activeSession.id,
-      isActive: activeSession.isActive
-    } : null,
-    hasActiveSession: !!activeSession
-  });
+  const currentModeInfo = timerModes[selectedMode];
 
   if (!isOpen) return null;
 
@@ -487,7 +143,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
                     activeSession.isBreak ? 'bg-orange-500' : 'bg-green-500'
                   }`}></div>
                   <span className="text-sm font-medium">
-                    {activeSession.isBreak ? 'Break Time' : `Active Session: ${activeSession.title}`}
+                    {activeSession.isBreak ? 'Break Time' : `Active Session: ${activeSession.title || activeSession.mode}`}
                   </span>
                   <Badge variant="outline" className="ml-auto">
                     {activeSession.isBreak 
@@ -504,12 +160,12 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
           {!activeSession && (
             <div className="space-y-3">
               <label className="text-sm font-medium">Timer Mode</label>
-              <Select value={mode} onValueChange={(value: TimerMode) => setMode(value)}>
+              <Select value={selectedMode} onValueChange={(value: string) => setSelectedMode(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(modeInfo).map(([key, info]) => {
+                  {Object.entries(timerModes).map(([key, info]) => {
                     const ModeIcon = info.icon;
                     return (
                       <SelectItem key={key} value={key}>
@@ -528,135 +184,100 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
             </div>
           )}
 
-          {/* Time Block Info */}
-          {timeBlock && (
-            <Card className={`${currentModeInfo.bgColor} border-0`}>
+          {/* Session Title Input */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Session Title</label>
+            <Input
+              type="text"
+              placeholder="What is being worked on?"
+              value={sessionTitle}
+              onChange={(e) => setSessionTitle(e.target.value)}
+              onBlur={() => {
+                if (activeSession) {
+                  updateSessionTitle(sessionTitle);
+                }
+              }}
+            />
+          </div>
+
+          {/* Timer Display */}
+          <div className="text-center space-y-4">
+            {/* Circular Progress */}
+            <div className="relative w-32 h-32 mx-auto">
+              <Progress 
+                value={getProgress()} 
+                className="w-full h-full rounded-full" 
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-2xl font-mono font-bold">
+                    {formatTime(displayTime)}
+                  </div>
+                  {activeSession && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {activeSession.isBreak ? 'Break' : 'Focus'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Session Progress */}
+            {activeSession && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Session {activeSession.currentSession} of {activeSession.totalSessions}
+              </div>
+            )}
+          </div>
+
+          {/* Control Buttons */}
+          <div className="flex justify-center space-x-3">
+            {!activeSession ? (
+              <Button 
+                onClick={startTimer}
+                disabled={isStarting || !sessionTitle.trim()}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-2 rounded-2xl font-medium shadow-lg"
+              >
+                <Play className="h-4 w-4 mr-2" />
+                {isStarting ? "Starting..." : "Start Timer"}
+              </Button>
+            ) : (
+              <Button 
+                onClick={stopTimer}
+                disabled={isStopping}
+                variant="destructive"
+                className="px-8 py-2 rounded-2xl font-medium shadow-lg"
+              >
+                <Square className="h-4 w-4 mr-2" />
+                {isStopping ? "Stopping..." : "Stop"}
+              </Button>
+            )}
+            
+            <Button 
+              onClick={onClose}
+              variant="outline"
+              className="px-8 py-2 rounded-2xl font-medium"
+            >
+              Close
+            </Button>
+          </div>
+
+          {/* Mode Info Display */}
+          {!activeSession && currentModeInfo && (
+            <Card className={currentModeInfo.bgColor}>
               <CardContent className="p-4">
-                <div className="flex items-center space-x-2">
-                  <Target className="h-4 w-4" />
+                <div className="flex items-center space-x-3">
+                  <currentModeInfo.icon className="h-5 w-5" />
                   <div>
-                    <h4 className="font-medium text-sm">{timeBlock.title}</h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {timeBlock.category} • {timeBlock.duration} minutes
+                    <p className="font-medium">{currentModeInfo.name}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {currentModeInfo.duration} min work • {currentModeInfo.sessions} sessions
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           )}
-
-          {/* Timer Display */}
-          <div className="text-center space-y-4">
-            <div className={`mx-auto w-48 h-48 rounded-full bg-gradient-to-r ${currentModeInfo.color} p-1`}>
-              <div className="w-full h-full rounded-full bg-white dark:bg-[#17111d] flex items-center justify-center">
-                <div className="text-center">
-                  <Icon className="h-8 w-8 mx-auto mb-2 text-gray-700 dark:text-gray-300" />
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {formatTime(displayTime)}
-                  </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {activeSession?.isBreak 
-                      ? `Break Time (${getBreakDuration(activeSession.mode, activeSession.currentSession, activeSession.totalSessions)}min)`
-                      : `${currentModeInfo.name} (${currentSettings.duration}min)`
-                    }
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <Progress value={getProgress()} className="w-full h-2" />
-          </div>
-
-          {/* Session Info */}
-          {activeSession && (
-            <div className="flex justify-between items-center text-sm">
-              <div className="text-center">
-                <div className="font-medium text-gray-900 dark:text-white">Session</div>
-                <div className="text-gray-500 dark:text-gray-400">
-                  {activeSession.currentSession} / {activeSession.totalSessions}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="font-medium text-gray-900 dark:text-white">
-                  {activeSession.isBreak ? 'Sessions Done' : 'Focus Time'}
-                </div>
-                <div className="text-gray-500 dark:text-gray-400">
-                  {activeSession.isBreak 
-                    ? `${activeSession.completedSessions}/${activeSession.totalSessions}`
-                    : `${Math.floor(activeSession.totalFocusTime / 60)}h ${activeSession.totalFocusTime % 60}m`
-                  }
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="font-medium text-gray-900 dark:text-white">Status</div>
-                <Badge variant="outline" className={
-                  activeSession.isBreak
-                    ? 'bg-orange-100 text-orange-700 border-orange-200'
-                    : 'bg-green-100 text-green-700 border-green-200'
-                }>
-                  {activeSession.isBreak ? 'Break' : 'Focus'}
-                </Badge>
-              </div>
-            </div>
-          )}
-
-          {/* Timer Controls */}
-          <div className="flex justify-center space-x-3">
-            {!activeSession ? (
-              <Button
-                onClick={() => {
-                  console.log("🟢 Start button clicked");
-                  startTimer();
-                }}
-                disabled={startTimerMutation.isPending || updateTimerMutation.isPending}
-                className={`bg-gradient-to-r ${currentModeInfo.color} text-white hover:opacity-90`}
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Start
-              </Button>
-            ) : (
-              <Button
-                onClick={() => {
-                  console.log("🔴 Stop button clicked, activeSession:", activeSession);
-                  stopTimer();
-                }}
-                disabled={stopTimerMutation.isPending}
-                variant="outline"
-                className="border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-              >
-                <Square className="h-4 w-4 mr-2" />
-                Stop
-              </Button>
-            )}
-            
-            <Button onClick={onClose} variant="ghost">
-              Close
-            </Button>
-          </div>
-
-          {/* Title Input */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium">Focus Session Title</label>
-            <Input
-              value={sessionTitle}
-              onChange={(e) => {
-                const newTitle = e.target.value;
-                setSessionTitle(newTitle);
-                // Update active session title in real-time
-                if (activeSession && newTitle.trim() !== activeSession.title) {
-                  // Debounce the update to avoid too many API calls
-                  if (updateTimerRef.current) {
-                    clearTimeout(updateTimerRef.current);
-                  }
-                  updateTimerRef.current = setTimeout(() => {
-                    updateSessionTitle(newTitle);
-                  }, 1000); // Wait 1 second after user stops typing
-                }
-              }}
-              placeholder="What is being worked on?"
-              className="w-full"
-            />
-          </div>
         </div>
       </DialogContent>
     </Dialog>
