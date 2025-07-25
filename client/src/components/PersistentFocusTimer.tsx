@@ -253,16 +253,27 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     }
   }, [activeSession, timeBlock?.title]);
 
-  // Local timer for smooth UI updates and cross-component synchronization
+  // Local timer for smooth UI updates and session progression
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
     // Only run interval when modal is open AND there's an active session
     if (isOpen && activeSession?.isActive) {
       interval = setInterval(() => {
-        // Force a re-render by refetching session data
-        // This catches stops from public view or other sources
-        refetchActiveSession();
+        // Check if current session is complete
+        const elapsedTime = getElapsedTime();
+        const sessionDurationSeconds = activeSession.isBreak 
+          ? getBreakDuration(activeSession.mode, activeSession.currentSession, activeSession.totalSessions) * 60
+          : currentSettings.duration * 60;
+
+        if (elapsedTime >= sessionDurationSeconds) {
+          // Session is complete, advance to next session or complete timer
+          advanceSession();
+        } else {
+          // Force a re-render by refetching session data
+          // This catches stops from public view or other sources
+          refetchActiveSession();
+        }
       }, 1000);
     }
 
@@ -271,7 +282,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         clearInterval(interval);
       }
     };
-  }, [isOpen, activeSession?.isActive, refetchActiveSession]);
+  }, [isOpen, activeSession?.isActive, activeSession?.currentSession, activeSession?.isBreak, refetchActiveSession]);
 
   const playNotificationSound = () => {
     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAaBC2Q2e/OfiwCJHfJ7+CTQQ0XZcn0v2AfAy+i5fepWxMGP5zR77RLEwczndTr0YggBlGh3u/UYRID');
@@ -354,11 +365,16 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const getProgress = () => {
     if (!activeSession) return 0;
     const elapsedTime = getElapsedTime();
-    const totalTime = activeSession.totalDuration * 60; // Convert minutes to seconds
-    return Math.min(100, (elapsedTime / totalTime) * 100);
+    
+    // Calculate session duration based on whether it's break or work
+    const sessionDurationSeconds = activeSession.isBreak 
+      ? getBreakDuration(activeSession.mode, activeSession.currentSession, activeSession.totalSessions) * 60
+      : currentSettings.duration * 60;
+    
+    return Math.min(100, (elapsedTime / sessionDurationSeconds) * 100);
   };
 
-  // Calculate elapsed time (count up from start, stop when session ends)
+  // Calculate elapsed time for current session (resets on session advance)
   const getElapsedTime = () => {
     // If no active session, return 0 (timer is stopped)
     if (!activeSession?.startedAt || !activeSession.isActive) return 0;
@@ -366,6 +382,66 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     const startTime = new Date(activeSession.startedAt).getTime();
     const now = Date.now();
     return Math.max(0, Math.floor((now - startTime) / 1000));
+  };
+
+  // Get break duration based on mode and session
+  const getBreakDuration = (mode: string, currentSession: number, totalSessions: number) => {
+    const settings = timerSettings[mode as TimerMode];
+    // Long break after completing all work sessions, short break between sessions
+    return (currentSession >= totalSessions) ? settings.longBreak : settings.shortBreak;
+  };
+
+  // Advance to next session or complete timer
+  const advanceSession = async () => {
+    if (!activeSession) return;
+
+    console.log("🔄 Advancing session from:", activeSession.currentSession, "break:", activeSession.isBreak);
+
+    if (activeSession.isBreak) {
+      // Break is complete, start next work session
+      const nextSession = activeSession.currentSession + 1;
+      if (nextSession <= activeSession.totalSessions) {
+        // Start next work session
+        const updates = {
+          currentSession: nextSession,
+          isBreak: false,
+          startedAt: new Date().toISOString(),
+          completedSessions: activeSession.completedSessions + (nextSession > activeSession.currentSession ? 1 : 0)
+        };
+        
+        updateTimerMutation.mutate({
+          id: activeSession.id,
+          updates
+        });
+        
+        setActiveSession((prev: TimerSession | null) => prev ? { ...prev, ...updates } : null);
+        playNotificationSound();
+      } else {
+        // All sessions complete
+        completeTimerMutation.mutate(activeSession.id);
+      }
+    } else {
+      // Work session complete, start break
+      if (activeSession.currentSession < activeSession.totalSessions) {
+        // Start break period
+        const updates = {
+          isBreak: true,
+          startedAt: new Date().toISOString(),
+          completedSessions: activeSession.completedSessions + 1
+        };
+        
+        updateTimerMutation.mutate({
+          id: activeSession.id,
+          updates
+        });
+        
+        setActiveSession((prev: TimerSession | null) => prev ? { ...prev, ...updates } : null);
+        playNotificationSound();
+      } else {
+        // Final session complete
+        completeTimerMutation.mutate(activeSession.id);
+      }
+    }
   };
 
   const displayTime = activeSession ? getElapsedTime() : localTimeLeft;
@@ -392,13 +468,23 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         <div className="space-y-6 p-6">
           {/* Active Session Indicator */}
           {activeSession && (
-            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+            <Card className={`${activeSession.isBreak 
+              ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' 
+              : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+            }`}>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">Active Session: {activeSession.title}</span>
+                  <div className={`w-3 h-3 rounded-full animate-pulse ${
+                    activeSession.isBreak ? 'bg-orange-500' : 'bg-green-500'
+                  }`}></div>
+                  <span className="text-sm font-medium">
+                    {activeSession.isBreak ? 'Break Time' : `Active Session: ${activeSession.title}`}
+                  </span>
                   <Badge variant="outline" className="ml-auto">
-                    Session {activeSession.currentSession}/{activeSession.totalSessions}
+                    {activeSession.isBreak 
+                      ? `Break ${activeSession.currentSession}/${activeSession.totalSessions}`
+                      : `Session ${activeSession.currentSession}/${activeSession.totalSessions}`
+                    }
                   </Badge>
                 </div>
               </CardContent>
@@ -460,7 +546,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
                     {formatTime(displayTime)}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {activeSession?.isBreak ? 'Break Time' : currentModeInfo.name}
+                    {activeSession?.isBreak 
+                      ? `Break Time (${getBreakDuration(activeSession.mode, activeSession.currentSession, activeSession.totalSessions)}min)`
+                      : `${currentModeInfo.name} (${currentSettings.duration}min)`
+                    }
                   </div>
                 </div>
               </div>
@@ -479,15 +568,24 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
                 </div>
               </div>
               <div className="text-center">
-                <div className="font-medium text-gray-900 dark:text-white">Focus Time</div>
+                <div className="font-medium text-gray-900 dark:text-white">
+                  {activeSession.isBreak ? 'Sessions Done' : 'Focus Time'}
+                </div>
                 <div className="text-gray-500 dark:text-gray-400">
-                  {Math.floor(activeSession.totalFocusTime / 60)}h {activeSession.totalFocusTime % 60}m
+                  {activeSession.isBreak 
+                    ? `${activeSession.completedSessions}/${activeSession.totalSessions}`
+                    : `${Math.floor(activeSession.totalFocusTime / 60)}h ${activeSession.totalFocusTime % 60}m`
+                  }
                 </div>
               </div>
               <div className="text-center">
                 <div className="font-medium text-gray-900 dark:text-white">Status</div>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
-                  Active
+                <Badge variant="outline" className={
+                  activeSession.isBreak
+                    ? 'bg-orange-100 text-orange-700 border-orange-200'
+                    : 'bg-green-100 text-green-700 border-green-200'
+                }>
+                  {activeSession.isBreak ? 'Break' : 'Focus'}
                 </Badge>
               </div>
             </div>
