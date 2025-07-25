@@ -248,8 +248,8 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    // Always check for session updates while modal is open
-    if (isOpen) {
+    // Only run interval when modal is open AND there's an active session
+    if (isOpen && activeSession?.isActive && !activeSession?.isPaused) {
       interval = setInterval(() => {
         // Force a re-render by refetching session data
         // This catches stops from public view or other sources
@@ -262,7 +262,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         clearInterval(interval);
       }
     };
-  }, [isOpen, refetchActiveSession]);
+  }, [isOpen, activeSession?.isActive, activeSession?.isPaused, refetchActiveSession]);
 
   const playNotificationSound = () => {
     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAaBC2Q2e/OfiwCJHfJ7+CTQQ0XZcn0v2AfAy+i5fepWxMGP5zR77RLEwczndTr0YggBlGh3u/UYRID');
