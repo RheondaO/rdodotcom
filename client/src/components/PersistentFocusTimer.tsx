@@ -129,6 +129,12 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     if (serverActiveSession && !activeSession) {
       setActiveSession(serverActiveSession);
     }
+    // If server shows no session but we have local session, clear it
+    if (!serverActiveSession && activeSession) {
+      console.log("🗑️ Server shows no active session, clearing local state");
+      setActiveSession(null);
+      setLocalTimeLeft(0);
+    }
   }, [serverActiveSession, activeSession]);
 
   // Start new timer session (admin-only, use authenticated endpoint)
@@ -213,7 +219,8 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       setActiveSession(null);
       setLocalTimeLeft(finalElapsedTime); // Show final elapsed time instead of 0
       setSessionTitle(timeBlock?.title || "");
-      // Only invalidate public timer query, don't refetch active session as we already cleared it
+      // Force refetch of server state to ensure synchronization
+      refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
     },
     onError: (error) => {
