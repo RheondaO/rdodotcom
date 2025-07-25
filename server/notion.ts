@@ -882,9 +882,7 @@ export async function createNotionTimerSession(session: {
             "Is Active": {
                 checkbox: session.isActive
             },
-            "Is Paused": {
-                checkbox: session.isPaused
-            },
+
             "Total Focus Time": {
                 number: session.totalFocusTime
             },

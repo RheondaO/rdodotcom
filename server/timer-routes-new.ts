@@ -107,6 +107,20 @@ router.post("/start", requireAuth, async (req, res) => {
       });
 
       console.log("⏱️ Successfully created timer session in database:", newSession.id);
+      
+      // Also create in Notion for user visibility and analytics
+      if (NOTION_TIMERSESSIONS_DATABASE_ID) {
+        try {
+          const notionSession = await createNotionTimerSession({
+            ...validatedData,
+            userId: "admin"
+          });
+          console.log("⏱️ Successfully synced timer session to Notion:", notionSession.id);
+        } catch (notionSyncError: any) {
+          console.log("⚠️ Notion sync failed (timer still working):", notionSyncError.message);
+        }
+      }
+      
       res.json(newSession);
       return;
     } catch (dbError) {
