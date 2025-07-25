@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { 
   Play, 
-  Pause, 
   Square, 
   RotateCcw, 
   Clock, 
@@ -259,7 +258,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     let interval: NodeJS.Timeout;
 
     // Only run interval when modal is open AND there's an active session
-    if (isOpen && activeSession?.isActive && !activeSession?.isPaused) {
+    if (isOpen && activeSession?.isActive) {
       interval = setInterval(() => {
         // Force a re-render by refetching session data
         // This catches stops from public view or other sources
@@ -272,7 +271,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         clearInterval(interval);
       }
     };
-  }, [isOpen, activeSession?.isActive, activeSession?.isPaused, refetchActiveSession]);
+  }, [isOpen, activeSession?.isActive, refetchActiveSession]);
 
   const playNotificationSound = () => {
     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmAaBC2Q2e/OfiwCJHfJ7+CTQQ0XZcn0v2AfAy+i5fepWxMGP5zR77RLEwczndTr0YggBlGh3u/UYRID');
@@ -291,22 +290,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       console.error("🔐 Auth check failed:", e);
     }
     
-    if (activeSession) {
-      // Resume existing timer
-      console.log("🟢 Resuming existing timer with id:", activeSession.id);
-      try {
-        const response = await apiRequest("PATCH", `/api/timer/${activeSession.id}/resume`);
-        const result = await response.json();
-        console.log("🟢 Resume response:", result);
-        
-        // Update local state immediately
-        setActiveSession({ ...activeSession, isPaused: false, pausedAt: null });
-        refetchActiveSession();
-        queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
-      } catch (error) {
-        console.error("❌ Resume failed:", error);
-      }
-    } else {
+    if (!activeSession) {
       // Start new timer with focus session title
       const finalTitle = sessionTitle.trim() || timeBlock?.title || `${currentModeInfo.name} Session`;
       const sessionData = {
@@ -327,28 +311,6 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
       console.log("🟢 Starting new timer with focus session title:", finalTitle);
       console.log("🟢 Complete session data:", sessionData);
       startTimerMutation.mutate(sessionData);
-    }
-  };
-
-  const pauseTimer = async () => {
-    console.log("🟡 pauseTimer called, activeSession:", activeSession);
-    
-    if (activeSession) {
-      console.log("🟡 Calling PATCH /api/timer/:id/pause with id:", activeSession.id);
-      try {
-        const response = await apiRequest("PATCH", `/api/timer/${activeSession.id}/pause`);
-        const result = await response.json();
-        console.log("🟡 Pause response:", result);
-        
-        // Update local state immediately
-        setActiveSession({ ...activeSession, isPaused: true, pausedAt: new Date().toISOString() });
-        refetchActiveSession();
-        queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
-      } catch (error) {
-        console.error("❌ Pause failed:", error);
-      }
-    } else {
-      console.log("🟡 No activeSession found for pause");
     }
   };
 
@@ -396,38 +358,23 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     return Math.min(100, (elapsedTime / totalTime) * 100);
   };
 
-  // Calculate elapsed time (count up from start, freeze when paused, stop when session ends)
+  // Calculate elapsed time (count up from start, stop when session ends)
   const getElapsedTime = () => {
     // If no active session, return 0 (timer is stopped)
     if (!activeSession?.startedAt || !activeSession.isActive) return 0;
     
     const startTime = new Date(activeSession.startedAt).getTime();
-    
-    // If paused, return the elapsed time at pause moment (frozen display)
-    if (activeSession.isPaused && activeSession.pausedAt) {
-      const pauseTime = new Date(activeSession.pausedAt).getTime();
-      return Math.max(0, Math.floor((pauseTime - startTime) / 1000));
-    }
-    
-    // If running, calculate current elapsed time
-    if (!activeSession.isPaused) {
-      const now = Date.now();
-      return Math.max(0, Math.floor((now - startTime) / 1000));
-    }
-    
-    return 0;
+    const now = Date.now();
+    return Math.max(0, Math.floor((now - startTime) / 1000));
   };
 
   const displayTime = activeSession ? getElapsedTime() : localTimeLeft;
-  const isRunning = Boolean(activeSession?.isActive && !activeSession?.isPaused);
   
   console.log("🔍 Timer state check:", {
     activeSession: activeSession ? {
       id: activeSession.id,
-      isActive: activeSession.isActive,
-      isPaused: activeSession.isPaused
+      isActive: activeSession.isActive
     } : null,
-    isRunning,
     hasActiveSession: !!activeSession
   });
 
@@ -539,12 +486,8 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
               </div>
               <div className="text-center">
                 <div className="font-medium text-gray-900 dark:text-white">Status</div>
-                <Badge variant="outline" className={
-                  isRunning 
-                    ? 'bg-green-100 text-green-700 border-green-200' 
-                    : 'bg-gray-100 text-gray-700 border-gray-200'
-                }>
-                  {isRunning ? 'Running' : 'Paused'}
+                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                  Active
                 </Badge>
               </div>
             </div>
@@ -552,45 +495,31 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
           {/* Timer Controls */}
           <div className="flex justify-center space-x-3">
-            {!isRunning ? (
+            {!activeSession ? (
               <Button
                 onClick={() => {
-                  console.log("🟢 Start/Resume button clicked");
+                  console.log("🟢 Start button clicked");
                   startTimer();
                 }}
                 disabled={startTimerMutation.isPending || updateTimerMutation.isPending}
                 className={`bg-gradient-to-r ${currentModeInfo.color} text-white hover:opacity-90`}
               >
                 <Play className="h-4 w-4 mr-2" />
-                {activeSession ? 'Resume' : 'Start'}
+                Start
               </Button>
             ) : (
-              <>
-                <Button
-                  onClick={() => {
-                    console.log("🟡 Pause button clicked, activeSession:", activeSession);
-                    pauseTimer();
-                  }}
-                  disabled={updateTimerMutation.isPending}
-                  variant="outline"
-                  className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                >
-                  <Pause className="h-4 w-4 mr-2" />
-                  Pause
-                </Button>
-                <Button
-                  onClick={() => {
-                    console.log("🔴 Stop button clicked, activeSession:", activeSession);
-                    stopTimer();
-                  }}
-                  disabled={stopTimerMutation.isPending}
-                  variant="outline"
-                  className="border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <Square className="h-4 w-4 mr-2" />
-                  Stop
-                </Button>
-              </>
+              <Button
+                onClick={() => {
+                  console.log("🔴 Stop button clicked, activeSession:", activeSession);
+                  stopTimer();
+                }}
+                disabled={stopTimerMutation.isPending}
+                variant="outline"
+                className="border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <Square className="h-4 w-4 mr-2" />
+                Stop
+              </Button>
             )}
             
             <Button onClick={onClose} variant="ghost">
