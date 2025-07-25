@@ -20,21 +20,22 @@ router.get("/active", requireAuth, async (req, res) => {
     try {
       const dbActiveSession = await storage.getActiveTimerSession();
       if (dbActiveSession) {
-        // Calculate actual remaining time based on elapsed time
+        // Calculate countdown timer (time remaining from start)
         const now = new Date();
-        const lastSync = new Date(dbActiveSession.lastSync!);
-        const elapsedSeconds = Math.floor((now.getTime() - lastSync.getTime()) / 1000);
-        const adjustedRemainingTime = Math.max(0, dbActiveSession.remainingTime - elapsedSeconds);
+        const startedAt = new Date(dbActiveSession.startedAt);
+        const elapsedSeconds = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
+        const remainingTime = Math.max(0, dbActiveSession.totalDuration * 60 - elapsedSeconds);
         
-        // If timer has run out, mark as inactive
-        if (adjustedRemainingTime <= 0 && dbActiveSession.isActive) {
+        // If timer has run out, mark as completed
+        if (remainingTime <= 0 && dbActiveSession.isActive) {
           await storage.stopTimerSession(dbActiveSession.id);
           return res.json(null);
         }
         
         const sessionWithUpdatedTime = {
           ...dbActiveSession,
-          remainingTime: adjustedRemainingTime
+          remainingTime,
+          elapsedTime: elapsedSeconds
         };
         
         console.log("✅ Found active database timer session:", sessionWithUpdatedTime.id);
