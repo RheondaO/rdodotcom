@@ -149,7 +149,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const startTimerMutation = useMutation({
     mutationFn: async (timerData: any) => {
       console.log("🔥 Making API request to start timer:", timerData);
-      const response = await apiRequest("POST", "/api/timer/start", timerData);
+      const response = await apiRequest("POST", "/api/timer", timerData);
       console.log("🔥 API response received:", response.status, response.statusText);
       
       if (!response.ok) {
@@ -212,7 +212,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
   const stopTimerMutation = useMutation({
     mutationFn: async (id: string | number) => {
       console.log("🔴 stopTimerMutation called with id:", id);
-      const response = await apiRequest("PATCH", `/api/timer/${id}/stop`);
+      const response = await apiRequest("DELETE", `/api/timer/${id}`);
       console.log("🔴 stopTimerMutation response:", response.status);
       const result = await response.json();
       console.log("🔴 stopTimerMutation result:", result);
@@ -317,8 +317,8 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         mode,
         title: finalTitle,
         category: timeBlock?.category || "General",
-        totalDuration: currentSettings.duration,
-        remainingTime: currentSettings.duration * 60,
+        totalDuration: Math.floor(currentSettings.duration * 60), // Convert to seconds
+        remainingTime: Math.floor(currentSettings.duration * 60), // Convert to seconds
         currentSession: 1,
         totalSessions: currentSettings.sessions,
         isBreak: false,
