@@ -171,7 +171,7 @@ export function useUniversalTimer(
   const startTimerMutation = useMutation({
     mutationFn: async (timerData: any) => {
       console.log("🔥 Starting timer:", timerData);
-      const response = await apiRequest("POST", "/api/timer", timerData);
+      const response = await apiRequest("POST", "/api/timer/start", timerData);
       
       if (!response.ok) {
         const errorData = await response.json();

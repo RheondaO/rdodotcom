@@ -87,8 +87,8 @@ router.get("/active", requireAuth, async (req, res) => {
   }
 });
 
-// Start new timer session (Admin authenticated)
-router.post("/start", requireAuth, async (req, res) => {
+// Start new timer session (Admin authenticated) - also handle /api/timer for compatibility
+router.post("/", requireAuth, async (req, res) => {
   try {
     const validatedData = insertTimerSessionSchema.parse(req.body);
     console.log("⏱️ Starting new timer session:", validatedData.title);
@@ -137,13 +137,21 @@ router.post("/start", requireAuth, async (req, res) => {
           await updateNotionTimerSession(activeSession.id, { isActive: false });
         }
 
-        // Create new session in Notion
-        const notionResponse = await createNotionTimerSession({
+        // Create new session in Notion  
+        const sessionData = {
           ...validatedData,
           userId: "admin",
-          title: validatedData.title || "",
-          category: validatedData.category || ""
-        });
+          title: validatedData.title || "Timer Session",
+          category: validatedData.category || "General",
+          currentSession: validatedData.currentSession || 1,
+          totalSessions: validatedData.totalSessions || 1,
+          isBreak: validatedData.isBreak || false,
+          isActive: validatedData.isActive !== false,
+          isPaused: validatedData.isPaused || false,
+          totalFocusTime: validatedData.totalFocusTime || 0,
+          completedSessions: validatedData.completedSessions || 0
+        };
+        const notionResponse = await createNotionTimerSession(sessionData);
 
         console.log("⏱️ Successfully created timer session in Notion:", notionResponse.id);
         
