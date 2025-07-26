@@ -108,7 +108,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     formatTime,
     getProgress,
     isStarting,
-    isStopping
+    isStopping,
+    isAuthenticated,
+    isAdmin,
+    authLoading
   } = useUniversalTimer(timerModes, isOpen);
 
   // Set initial session title from time block
