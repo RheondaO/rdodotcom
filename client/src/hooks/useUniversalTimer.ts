@@ -236,47 +236,7 @@ export function useUniversalTimer(
     }
   });
 
-  // Stop timer mutation
-  const stopTimerMutation = useMutation({
-    mutationFn: async (id: string | number) => {
-      // Check authentication before stopping timer
-      console.log("🔐 Mutation auth check:", { isAuthenticated, isAdmin, authLoading });
-      if (!isAuthenticated || !isAdmin) {
-        throw new Error("401: Authentication required to stop timers");
-      }
-      
-      console.log("🔴 Stopping timer:", id);
-      const response = await apiRequest("DELETE", `/api/timer/${id}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: (result) => {
-      console.log("✅ Timer stopped successfully:", result);
-      const finalElapsedTime = activeSession ? getElapsedTime() : 0;
-      
-      setActiveSession(null);
-      setLocalTimeLeft(finalElapsedTime);
-      setSessionTitle("");
-      
-      refetchActiveSession();
-      queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
-    },
-    onError: (error: any) => {
-      console.error("❌ Stop failed:", error);
-      
-      // Check if it's an authentication error
-      if (error.message && error.message.includes("401")) {
-        alert("⚠️ Authentication Required!\n\nTo stop timers, you need to be logged in as admin.\n\nPlease visit /admin and log in with your admin credentials, then try again.");
-      } else {
-        alert(`❌ Failed to stop timer: ${error.message}`);
-      }
-    }
-  });
+  // Stop functionality removed per user request
 
   // Complete timer mutation
   const completeTimerMutation = useMutation({
@@ -326,23 +286,7 @@ export function useUniversalTimer(
     }
   };
 
-  // Universal stop function - works for any mode
-  const stopTimer = async () => {
-    console.log("🔴 Stopping timer");
-    console.log("🔍 Auth state check:", { isAuthenticated, isAdmin, authLoading });
-    console.log("🔍 Active session:", activeSession);
-    console.log("🔍 Stop mutation pending:", stopTimerMutation.isPending);
-    
-    if (activeSession && !stopTimerMutation.isPending) {
-      console.log("✅ Proceeding with stop timer mutation for ID:", activeSession.id);
-      stopTimerMutation.mutate(activeSession.id);
-    } else {
-      console.log("❌ Cannot stop timer:", {
-        hasActiveSession: !!activeSession,
-        isPending: stopTimerMutation.isPending
-      });
-    }
-  };
+  // Stop functionality removed per user request
 
   // Universal progress calculation
   const getProgress = () => {
@@ -378,7 +322,6 @@ export function useUniversalTimer(
     
     // Actions
     startTimer,
-    stopTimer,
     updateSessionTitle: (newTitle: string) => {
       if (activeSession && newTitle.trim() !== activeSession.title) {
         updateTimerMutation.mutate({
@@ -394,7 +337,6 @@ export function useUniversalTimer(
     
     // Mutation states
     isStarting: startTimerMutation.isPending,
-    isStopping: stopTimerMutation.isPending,
     isUpdating: updateTimerMutation.isPending,
     
     // Authentication status

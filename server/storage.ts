@@ -161,7 +161,7 @@ export interface IStorage {
   deleteTimerSession(id: number): Promise<void>;
   pauseTimerSession(id: number): Promise<TimerSession>;
   resumeTimerSession(id: number): Promise<TimerSession>;
-  stopTimerSession(id: number): Promise<TimerSession>;
+  // Stop functionality removed per user request
 
   // Budgets
   getAllBudgets(): Promise<Budget[]>;
@@ -2847,9 +2847,7 @@ export class DatabaseStorage implements IStorage {
     return this.updateTimerSession(id, { isPaused: false, pausedAt: null });
   }
 
-  async stopTimerSession(id: number): Promise<TimerSession> {
-    return this.updateTimerSession(id, { isActive: false, isPaused: false });
-  }
+  // Stop functionality removed per user request
 
   async completeTimerSession(id: number, tasksCompleted: string[], habitsCompleted: string[], sessionContext: string): Promise<void> {
     try {

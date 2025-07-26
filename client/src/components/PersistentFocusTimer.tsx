@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { 
   Play, 
-  Square, 
   RotateCcw, 
   Focus, 
   Brain, 
@@ -103,12 +102,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
     activeSession,
     displayTime,
     startTimer,
-    stopTimer,
     updateSessionTitle,
     formatTime,
     getProgress,
     isStarting,
-    isStopping,
     isAuthenticated,
     isAdmin,
     authLoading
@@ -123,18 +120,7 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
   const currentModeInfo = timerModes[selectedMode];
 
-  // Debug logging
-  useEffect(() => {
-    console.log("🔍 PersistentFocusTimer state:", {
-      isOpen,
-      activeSession,
-      isAuthenticated,
-      isAdmin,
-      authLoading,
-      displayTime,
-      selectedMode
-    });
-  }, [isOpen, activeSession, isAuthenticated, isAdmin, authLoading, displayTime, selectedMode]);
+  // Stop functionality removed from this component
 
   if (!isOpen) return null;
 
@@ -254,9 +240,9 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
           </div>
 
           {/* Control Buttons */}
-          <AuthGuard action="start and stop timers">
+          <AuthGuard action="start timers">
             <div className="flex justify-center space-x-3">
-              {!activeSession ? (
+              {!activeSession && (
                 <Button 
                   onClick={startTimer}
                   disabled={isStarting || !sessionTitle.trim()}
@@ -264,19 +250,6 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
                 >
                   <Play className="h-4 w-4 mr-2" />
                   {isStarting ? "Starting..." : "Start Timer"}
-                </Button>
-              ) : (
-                <Button 
-                  onClick={() => {
-                    console.log("🟥 Stop button clicked!");
-                    stopTimer();
-                  }}
-                  disabled={isStopping}
-                  variant="destructive"
-                  className="px-8 py-2 rounded-2xl font-medium shadow-lg"
-                >
-                  <Square className="h-4 w-4 mr-2" />
-                  {isStopping ? "Stopping..." : "Stop"}
                 </Button>
               )}
               
