@@ -123,6 +123,19 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
 
   const currentModeInfo = timerModes[selectedMode];
 
+  // Debug logging
+  useEffect(() => {
+    console.log("🔍 PersistentFocusTimer state:", {
+      isOpen,
+      activeSession,
+      isAuthenticated,
+      isAdmin,
+      authLoading,
+      displayTime,
+      selectedMode
+    });
+  }, [isOpen, activeSession, isAuthenticated, isAdmin, authLoading, displayTime, selectedMode]);
+
   if (!isOpen) return null;
 
   return (
@@ -254,7 +267,10 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
                 </Button>
               ) : (
                 <Button 
-                  onClick={stopTimer}
+                  onClick={() => {
+                    console.log("🟥 Stop button clicked!");
+                    stopTimer();
+                  }}
                   disabled={isStopping}
                   variant="destructive"
                   className="px-8 py-2 rounded-2xl font-medium shadow-lg"
