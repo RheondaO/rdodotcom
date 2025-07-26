@@ -260,4 +260,44 @@ router.patch("/:id/stop", requireAuth, async (req, res) => {
   }
 });
 
+// Delete/Stop timer session (Admin authenticated) - Alternative endpoint for compatibility
+router.delete("/:id", requireAuth, async (req, res) => {
+  try {
+    const sessionId = parseInt(req.params.id);
+    console.log("🔴 Stopping timer via DELETE:", sessionId);
+    
+    // Try database first
+    if (!isNaN(sessionId)) {
+      try {
+        const updatedSession = await storage.stopTimerSession(sessionId);
+        console.log("⏱️ Stopped database timer session:", sessionId);
+        res.json(updatedSession);
+        return;
+      } catch (dbError) {
+        console.log("⚠️ Database error, trying Notion:", dbError);
+      }
+    }
+    
+    // Fallback to Notion
+    if (NOTION_TIMERSESSIONS_DATABASE_ID) {
+      try {
+        const updatedSession = await updateNotionTimerSession(req.params.id, { 
+          isActive: false,
+          isPaused: false
+        });
+        console.log("⏱️ Stopped Notion timer session:", req.params.id);
+        res.json(updatedSession);
+        return;
+      } catch (notionError: any) {
+        console.log("⏱️ Notion stop error:", notionError?.message || notionError);
+      }
+    }
+
+    res.status(404).json({ error: "Timer session not found" });
+  } catch (error) {
+    console.error("Error stopping timer session:", error);
+    res.status(500).json({ error: "Failed to stop timer session" });
+  }
+});
+
 export default router;
