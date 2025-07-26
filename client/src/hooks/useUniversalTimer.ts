@@ -197,6 +197,13 @@ export function useUniversalTimer(
     },
     onError: (error: any) => {
       console.error("❌ Timer start failed:", error);
+      
+      // Check if it's an authentication error
+      if (error.message && error.message.includes("401")) {
+        alert("⚠️ Authentication Required!\n\nTo start timers, you need to be logged in as admin.\n\nPlease visit /admin and log in with your admin credentials, then try again.");
+      } else {
+        alert(`❌ Failed to start timer: ${error.message}`);
+      }
     }
   });
 
@@ -238,8 +245,15 @@ export function useUniversalTimer(
       refetchActiveSession();
       queryClient.invalidateQueries({ queryKey: ["/api/public/active-timer"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("❌ Stop failed:", error);
+      
+      // Check if it's an authentication error
+      if (error.message && error.message.includes("401")) {
+        alert("⚠️ Authentication Required!\n\nTo stop timers, you need to be logged in as admin.\n\nPlease visit /admin and log in with your admin credentials, then try again.");
+      } else {
+        alert(`❌ Failed to stop timer: ${error.message}`);
+      }
     }
   });
 
