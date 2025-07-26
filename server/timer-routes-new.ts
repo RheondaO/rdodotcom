@@ -263,14 +263,18 @@ router.patch("/:id/stop", requireAuth, async (req, res) => {
 // Delete/Stop timer session (Admin authenticated) - Alternative endpoint for compatibility
 router.delete("/:id", requireAuth, async (req, res) => {
   try {
-    const sessionId = parseInt(req.params.id);
+    const sessionId = req.params.id;
     console.log("🔴 Stopping timer via DELETE:", sessionId);
     
-    // Try database first
-    if (!isNaN(sessionId)) {
+    // Check if it's a numeric ID (database) or UUID (Notion)
+    const numericId = parseInt(sessionId);
+    const isNumericId = !isNaN(numericId) && numericId.toString() === sessionId;
+    
+    // Try database first if it's a numeric ID
+    if (isNumericId) {
       try {
-        const updatedSession = await storage.stopTimerSession(sessionId);
-        console.log("⏱️ Stopped database timer session:", sessionId);
+        const updatedSession = await storage.stopTimerSession(numericId);
+        console.log("⏱️ Stopped database timer session:", numericId);
         res.json(updatedSession);
         return;
       } catch (dbError) {
@@ -278,18 +282,20 @@ router.delete("/:id", requireAuth, async (req, res) => {
       }
     }
     
-    // Fallback to Notion
+    // Try Notion (for UUID IDs or database fallback)
     if (NOTION_TIMERSESSIONS_DATABASE_ID) {
       try {
-        const updatedSession = await updateNotionTimerSession(req.params.id, { 
+        const updatedSession = await updateNotionTimerSession(sessionId, { 
           isActive: false,
-          isPaused: false
+          isPaused: false,
+          lastSync: new Date().toISOString()
         });
-        console.log("⏱️ Stopped Notion timer session:", req.params.id);
+        console.log("⏱️ Stopped Notion timer session:", sessionId);
         res.json(updatedSession);
         return;
       } catch (notionError: any) {
         console.log("⏱️ Notion stop error:", notionError?.message || notionError);
+        throw notionError;
       }
     }
 
