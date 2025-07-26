@@ -13,6 +13,8 @@ interface TimerSession {
   isPaused: boolean;
   currentSession?: number;
   totalSessions?: number;
+  startedAt?: string;
+  pausedAt?: string;
 }
 
 export function ActiveTimerDisplay() {
