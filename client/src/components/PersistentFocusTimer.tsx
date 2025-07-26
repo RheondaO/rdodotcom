@@ -17,6 +17,7 @@ import {
   Timer
 } from "lucide-react";
 import { useUniversalTimer, TimerMode } from "../hooks/useUniversalTimer";
+import { AuthGuard, AuthStatus } from "./AuthGuard";
 
 interface PersistentFocusTimerProps {
   isOpen: boolean;
@@ -131,6 +132,12 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
         </DialogHeader>
 
         <div className="space-y-6 p-6">
+          {/* Authentication Status */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Authentication Status</span>
+            <AuthStatus />
+          </div>
+
           {/* Active Session Indicator */}
           {activeSession && (
             <Card className={`${activeSession.isBreak 
@@ -231,36 +238,38 @@ export default function PersistentFocusTimer({ isOpen, onClose, timeBlock }: Per
           </div>
 
           {/* Control Buttons */}
-          <div className="flex justify-center space-x-3">
-            {!activeSession ? (
+          <AuthGuard action="start and stop timers">
+            <div className="flex justify-center space-x-3">
+              {!activeSession ? (
+                <Button 
+                  onClick={startTimer}
+                  disabled={isStarting || !sessionTitle.trim()}
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-2 rounded-2xl font-medium shadow-lg"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  {isStarting ? "Starting..." : "Start Timer"}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={stopTimer}
+                  disabled={isStopping}
+                  variant="destructive"
+                  className="px-8 py-2 rounded-2xl font-medium shadow-lg"
+                >
+                  <Square className="h-4 w-4 mr-2" />
+                  {isStopping ? "Stopping..." : "Stop"}
+                </Button>
+              )}
+              
               <Button 
-                onClick={startTimer}
-                disabled={isStarting || !sessionTitle.trim()}
-                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-2 rounded-2xl font-medium shadow-lg"
+                onClick={onClose}
+                variant="outline"
+                className="px-8 py-2 rounded-2xl font-medium"
               >
-                <Play className="h-4 w-4 mr-2" />
-                {isStarting ? "Starting..." : "Start Timer"}
+                Close
               </Button>
-            ) : (
-              <Button 
-                onClick={stopTimer}
-                disabled={isStopping}
-                variant="destructive"
-                className="px-8 py-2 rounded-2xl font-medium shadow-lg"
-              >
-                <Square className="h-4 w-4 mr-2" />
-                {isStopping ? "Stopping..." : "Stop"}
-              </Button>
-            )}
-            
-            <Button 
-              onClick={onClose}
-              variant="outline"
-              className="px-8 py-2 rounded-2xl font-medium"
-            >
-              Close
-            </Button>
-          </div>
+            </div>
+          </AuthGuard>
 
           {/* Mode Info Display */}
           {!activeSession && currentModeInfo && (

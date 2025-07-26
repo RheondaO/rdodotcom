@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
+import { useAuth } from "./useAuth";
 
 export interface TimerMode {
   id: string;
@@ -45,6 +46,9 @@ export function useUniversalTimer(
   
   const queryClient = useQueryClient();
   const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Get authentication status
+  const { isAuthenticated, isAdmin, isLoading: authLoading } = useAuth();
 
   // Get active timer session from server
   const { data: serverActiveSession, refetch: refetchActiveSession } = useQuery<TimerSession | null>({
@@ -170,6 +174,11 @@ export function useUniversalTimer(
   // Start timer mutation
   const startTimerMutation = useMutation({
     mutationFn: async (timerData: any) => {
+      // Check authentication before starting timer
+      if (!isAuthenticated || !isAdmin) {
+        throw new Error("401: Authentication required to start timers");
+      }
+      
       console.log("🔥 Starting timer:", timerData);
       const response = await apiRequest("POST", "/api/timer/start", timerData);
       
@@ -230,6 +239,11 @@ export function useUniversalTimer(
   // Stop timer mutation
   const stopTimerMutation = useMutation({
     mutationFn: async (id: string | number) => {
+      // Check authentication before stopping timer
+      if (!isAuthenticated || !isAdmin) {
+        throw new Error("401: Authentication required to stop timers");
+      }
+      
       console.log("🔴 Stopping timer:", id);
       const response = await apiRequest("DELETE", `/api/timer/${id}`);
       return response.json();
@@ -365,6 +379,11 @@ export function useUniversalTimer(
     // Mutation states
     isStarting: startTimerMutation.isPending,
     isStopping: stopTimerMutation.isPending,
-    isUpdating: updateTimerMutation.isPending
+    isUpdating: updateTimerMutation.isPending,
+    
+    // Authentication status
+    isAuthenticated,
+    isAdmin,
+    authLoading
   };
 }
