@@ -15,6 +15,7 @@ import {
   getActiveNotionTimerSession
 } from "./notion";
 import timerRoutes from "./timer-routes-new";
+import fitnessRoutes from "./fitness-routes";
 import { 
   insertDailyEntrySchema, 
   insertBillSchema, 
@@ -1883,6 +1884,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount Timer routes
   app.use("/api/timer", timerRoutes);
+
+  // Mount Fitness routes
+  app.use("/api", fitnessRoutes);
 
   const httpServer = createServer(app);
   return httpServer;

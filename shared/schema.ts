@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { pgTable, serial, text, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, boolean, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
 // Type definitions for data models (no database tables)
@@ -118,6 +118,111 @@ export interface Medication {
   frequency?: string; // daily, twice_daily, weekly, etc.
   reminderTimes?: string; // JSON array of times
   isActive?: boolean;
+  createdAt?: Date;
+}
+
+// Fitness & Exercise Tracking Interfaces
+export interface Exercise {
+  id: number;
+  name: string;
+  category: string; // cardio, strength, flexibility, sports
+  muscleGroups?: string; // JSON array of muscle groups
+  equipment?: string; // bodyweight, dumbbells, barbell, machine, etc.
+  instructions?: string;
+  createdAt?: Date;
+}
+
+export interface Workout {
+  id: number;
+  name: string;
+  date: string;
+  duration?: number; // minutes
+  notes?: string;
+  calories?: number;
+  difficulty?: number; // 1-5 rating
+  isCompleted?: boolean;
+  createdAt?: Date;
+}
+
+export interface WorkoutExercise {
+  id: number;
+  workoutId: number;
+  exerciseId: number;
+  sets?: number;
+  reps?: string; // JSON array of reps per set
+  weight?: string; // JSON array of weights per set
+  duration?: number; // for time-based exercises
+  distance?: number; // for cardio exercises
+  restTime?: number; // seconds
+  notes?: string;
+}
+
+export interface BodyWeight {
+  id: number;
+  date: string;
+  weight: number; // in pounds or kg
+  bodyFat?: number; // percentage
+  muscleMass?: number; // in pounds or kg
+  waterWeight?: number; // percentage
+  notes?: string;
+  createdAt?: Date;
+}
+
+export interface BodyMeasurement {
+  id: number;
+  date: string;
+  chest?: number;
+  waist?: number;
+  hips?: number;
+  biceps?: number;
+  thighs?: number;
+  neck?: number;
+  shoulders?: number;
+  forearms?: number;
+  calves?: number;
+  unit: string; // inches, cm
+  notes?: string;
+  createdAt?: Date;
+}
+
+export interface FitnessGoal {
+  id: number;
+  type: string; // weight_loss, muscle_gain, strength, endurance, flexibility
+  title: string;
+  description?: string;
+  targetValue: number;
+  currentValue?: number;
+  unit: string; // lbs, kg, reps, minutes, etc.
+  targetDate?: string;
+  isCompleted?: boolean;
+  priority?: string; // low, medium, high
+  createdAt?: Date;
+}
+
+export interface WorkoutProgram {
+  id: number;
+  name: string;
+  description?: string;
+  duration?: number; // weeks
+  difficulty?: string; // beginner, intermediate, advanced
+  goalType?: string; // strength, muscle_gain, weight_loss, endurance
+  isActive?: boolean;
+  createdAt?: Date;
+}
+
+export interface NutritionEntry {
+  id: number;
+  date: string;
+  mealType: string; // breakfast, lunch, dinner, snack
+  food: string;
+  calories?: number;
+  protein?: number; // grams
+  carbs?: number; // grams  
+  fat?: number; // grams
+  fiber?: number; // grams
+  sugar?: number; // grams
+  sodium?: number; // mg
+  notes?: string;
   createdAt?: Date;
 }
 
@@ -623,6 +728,111 @@ export const blogCalendar = pgTable('blog_calendar', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Fitness & Exercise Database Tables
+export const exercises = pgTable('exercises', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  category: text('category').notNull(),
+  muscleGroups: text('muscle_groups'), // JSON array
+  equipment: text('equipment'),
+  instructions: text('instructions'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const workouts = pgTable('workouts', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  date: text('date').notNull(),
+  duration: integer('duration'), // minutes
+  notes: text('notes'),
+  calories: integer('calories'),
+  difficulty: integer('difficulty'), // 1-5 rating
+  isCompleted: boolean('is_completed').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const workoutExercises = pgTable('workout_exercises', {
+  id: serial('id').primaryKey(),
+  workoutId: integer('workout_id').references(() => workouts.id),
+  exerciseId: integer('exercise_id').references(() => exercises.id),
+  sets: integer('sets'),
+  reps: text('reps'), // JSON array of reps per set
+  weight: text('weight'), // JSON array of weights per set
+  duration: integer('duration'), // for time-based exercises
+  distance: decimal('distance'), // for cardio exercises
+  restTime: integer('rest_time'), // seconds
+  notes: text('notes'),
+});
+
+export const bodyWeights = pgTable('body_weights', {
+  id: serial('id').primaryKey(),
+  date: text('date').notNull(),
+  weight: decimal('weight').notNull(), // in pounds or kg
+  bodyFat: decimal('body_fat'), // percentage
+  muscleMass: decimal('muscle_mass'), // in pounds or kg
+  waterWeight: decimal('water_weight'), // percentage
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const bodyMeasurements = pgTable('body_measurements', {
+  id: serial('id').primaryKey(),
+  date: text('date').notNull(),
+  chest: decimal('chest'),
+  waist: decimal('waist'),
+  hips: decimal('hips'),
+  biceps: decimal('biceps'),
+  thighs: decimal('thighs'),
+  neck: decimal('neck'),
+  shoulders: decimal('shoulders'),
+  forearms: decimal('forearms'),
+  calves: decimal('calves'),
+  unit: text('unit').notNull().default('inches'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const fitnessGoals = pgTable('fitness_goals', {
+  id: serial('id').primaryKey(),
+  type: text('type').notNull(), // weight_loss, muscle_gain, strength, endurance, flexibility
+  title: text('title').notNull(),
+  description: text('description'),
+  targetValue: decimal('target_value').notNull(),
+  currentValue: decimal('current_value'),
+  unit: text('unit').notNull(),
+  targetDate: text('target_date'),
+  isCompleted: boolean('is_completed').default(false),
+  priority: text('priority').default('medium'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const workoutPrograms = pgTable('workout_programs', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  duration: integer('duration'), // weeks
+  difficulty: text('difficulty'), // beginner, intermediate, advanced
+  goalType: text('goal_type'), // strength, muscle_gain, weight_loss, endurance
+  isActive: boolean('is_active').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const nutritionEntries = pgTable('nutrition_entries', {
+  id: serial('id').primaryKey(),
+  date: text('date').notNull(),
+  mealType: text('meal_type').notNull(), // breakfast, lunch, dinner, snack
+  food: text('food').notNull(),
+  calories: integer('calories'),
+  protein: decimal('protein'), // grams
+  carbs: decimal('carbs'), // grams
+  fat: decimal('fat'), // grams
+  fiber: decimal('fiber'), // grams
+  sugar: decimal('sugar'), // grams
+  sodium: decimal('sodium'), // mg
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // Insert schemas using Zod
 export const insertDailyEntrySchema = z.object({
   date: z.string(),
@@ -834,6 +1044,96 @@ export const insertBlogCalendarSchema = z.object({
   time: z.string().optional(),
   status: z.string().default("scheduled"),
   notes: z.string().optional()
+});
+
+// Fitness Insert Schemas
+export const insertExerciseSchema = z.object({
+  name: z.string().min(1, "Exercise name is required"),
+  category: z.string().min(1, "Category is required"),
+  muscleGroups: z.string().optional(),
+  equipment: z.string().optional(),
+  instructions: z.string().optional(),
+});
+
+export const insertWorkoutSchema = z.object({
+  name: z.string().min(1, "Workout name is required"),
+  date: z.string().min(1, "Date is required"),
+  duration: z.number().optional(),
+  notes: z.string().optional(),
+  calories: z.number().optional(),
+  difficulty: z.number().min(1).max(5).optional(),
+  isCompleted: z.boolean().default(false),
+});
+
+export const insertWorkoutExerciseSchema = z.object({
+  workoutId: z.number(),
+  exerciseId: z.number(),
+  sets: z.number().optional(),
+  reps: z.string().optional(),
+  weight: z.string().optional(),
+  duration: z.number().optional(),
+  distance: z.number().optional(),
+  restTime: z.number().optional(),
+  notes: z.string().optional(),
+});
+
+export const insertBodyWeightSchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  weight: z.number().min(0, "Weight must be positive"),
+  bodyFat: z.number().min(0).max(100).optional(),
+  muscleMass: z.number().min(0).optional(),
+  waterWeight: z.number().min(0).max(100).optional(),
+  notes: z.string().optional(),
+});
+
+export const insertBodyMeasurementSchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  chest: z.number().optional(),
+  waist: z.number().optional(),
+  hips: z.number().optional(),
+  biceps: z.number().optional(),
+  thighs: z.number().optional(),
+  neck: z.number().optional(),
+  shoulders: z.number().optional(),
+  forearms: z.number().optional(),
+  calves: z.number().optional(),
+  unit: z.string().default("inches"),
+  notes: z.string().optional(),
+});
+
+export const insertFitnessGoalSchema = z.object({
+  type: z.string().min(1, "Goal type is required"),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  targetValue: z.number().min(0, "Target value must be positive"),
+  currentValue: z.number().min(0).optional(),
+  unit: z.string().min(1, "Unit is required"),
+  targetDate: z.string().optional(),
+  isCompleted: z.boolean().default(false),
+  priority: z.string().default("medium"),
+});
+
+export const insertWorkoutProgramSchema = z.object({
+  name: z.string().min(1, "Program name is required"),
+  description: z.string().optional(),
+  duration: z.number().min(1).optional(),
+  difficulty: z.string().optional(),
+  goalType: z.string().optional(),
+  isActive: z.boolean().default(false),
+});
+
+export const insertNutritionEntrySchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  mealType: z.string().min(1, "Meal type is required"),
+  food: z.string().min(1, "Food is required"),
+  calories: z.number().min(0).optional(),
+  protein: z.number().min(0).optional(),
+  carbs: z.number().min(0).optional(),
+  fat: z.number().min(0).optional(),
+  fiber: z.number().min(0).optional(),
+  sugar: z.number().min(0).optional(),
+  sodium: z.number().min(0).optional(),
+  notes: z.string().optional(),
 });
 
 // Type exports for blog system
@@ -1089,3 +1389,13 @@ export const insertTimerSessionSchema = createInsertSchema(timerSessions).omit({
 });
 export type InsertTimerSession = z.infer<typeof insertTimerSessionSchema>;
 export type TimerSession = typeof timerSessions.$inferSelect;
+
+// Fitness Type Inference
+export type InsertExercise = z.infer<typeof insertExerciseSchema>;
+export type InsertWorkout = z.infer<typeof insertWorkoutSchema>;
+export type InsertWorkoutExercise = z.infer<typeof insertWorkoutExerciseSchema>;
+export type InsertBodyWeight = z.infer<typeof insertBodyWeightSchema>;
+export type InsertBodyMeasurement = z.infer<typeof insertBodyMeasurementSchema>;
+export type InsertFitnessGoal = z.infer<typeof insertFitnessGoalSchema>;
+export type InsertWorkoutProgram = z.infer<typeof insertWorkoutProgramSchema>;
+export type InsertNutritionEntry = z.infer<typeof insertNutritionEntrySchema>;

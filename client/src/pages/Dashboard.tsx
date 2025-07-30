@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Sidebar from "../components/Sidebar";
-import HealthSection from "../components/HealthSection";
+import HealthWellnessSection from "../components/HealthWellnessSection";
 import WorkTimeSection from "../components/WorkTimeSection";
 import FinanceSection from "../components/FinanceSection";
 import GrocerySection from "../components/GrocerySection";
@@ -275,7 +275,7 @@ function Dashboard() {
               isReadOnly={!isAuthenticated || !isAdmin}
             />
           )}
-          {activeView === "health" && <HealthSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "health" && <HealthWellnessSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "habits" && <HabitsSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "goals" && <GoalsSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
