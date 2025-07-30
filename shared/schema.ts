@@ -1136,6 +1136,90 @@ export const insertNutritionEntrySchema = z.object({
   notes: z.string().optional(),
 });
 
+// Diet Planning Interfaces
+export interface MealPlan {
+  id: number;
+  date: string;
+  mealType: string; // breakfast, lunch, dinner, snack
+  plannedFood: string;
+  plannedCalories?: number;
+  plannedProtein?: number;
+  plannedCarbs?: number;
+  plannedFat?: number;
+  notes?: string;
+  isCompleted?: boolean;
+  createdAt?: Date;
+}
+
+export interface DietGoal {
+  id: number;
+  name: string;
+  description?: string;
+  targetCalories?: number;
+  targetProtein?: number;
+  targetCarbs?: number;
+  targetFat?: number;
+  targetFiber?: number;
+  targetWater?: number; // glasses
+  isActive?: boolean;
+  startDate?: string;
+  endDate?: string;
+  createdAt?: Date;
+}
+
+export interface FoodDatabase {
+  id: number;
+  name: string;
+  category: string; // protein, vegetable, grain, fruit, dairy, etc.
+  caloriesPerServing: number;
+  proteinPerServing?: number;
+  carbsPerServing?: number;
+  fatPerServing?: number;
+  fiberPerServing?: number;
+  servingSize: string;
+  unit: string; // cup, oz, piece, etc.
+  createdAt?: Date;
+}
+
+// Diet Planning Insert Schemas
+export const insertMealPlanSchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  mealType: z.string().min(1, "Meal type is required"),
+  plannedFood: z.string().min(1, "Planned food is required"),
+  plannedCalories: z.number().min(0).optional(),
+  plannedProtein: z.number().min(0).optional(),
+  plannedCarbs: z.number().min(0).optional(),
+  plannedFat: z.number().min(0).optional(),
+  notes: z.string().optional(),
+  isCompleted: z.boolean().default(false),
+});
+
+export const insertDietGoalSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  targetCalories: z.number().min(0).optional(),
+  targetProtein: z.number().min(0).optional(),
+  targetCarbs: z.number().min(0).optional(),
+  targetFat: z.number().min(0).optional(),
+  targetFiber: z.number().min(0).optional(),
+  targetWater: z.number().min(0).optional(),
+  isActive: z.boolean().default(true),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
+export const insertFoodDatabaseSchema = z.object({
+  name: z.string().min(1, "Food name is required"),
+  category: z.string().min(1, "Category is required"),
+  caloriesPerServing: z.number().min(0, "Calories must be positive"),
+  proteinPerServing: z.number().min(0).optional(),
+  carbsPerServing: z.number().min(0).optional(),
+  fatPerServing: z.number().min(0).optional(),
+  fiberPerServing: z.number().min(0).optional(),
+  servingSize: z.string().min(1, "Serving size is required"),
+  unit: z.string().min(1, "Unit is required"),
+});
+
 // Type exports for blog system
 export type BlogPostType = typeof blogPosts.$inferSelect;
 export type BlogIdeaType = typeof blogIdeas.$inferSelect;

@@ -5,7 +5,10 @@ import {
   insertBodyWeightSchema, 
   insertFitnessGoalSchema,
   insertNutritionEntrySchema,
-  insertExerciseSchema
+  insertExerciseSchema,
+  insertMealPlanSchema,
+  insertDietGoalSchema,
+  insertFoodDatabaseSchema
 } from '@shared/schema';
 
 const router = Router();
@@ -16,6 +19,9 @@ let bodyWeights: any[] = [];
 let fitnessGoals: any[] = [];
 let nutritionEntries: any[] = [];
 let exercises: any[] = [];
+let mealPlans: any[] = [];
+let dietGoals: any[] = [];
+let foodDatabase: any[] = [];
 let currentId = 1;
 
 // Middleware to require authentication
@@ -278,6 +284,187 @@ router.post('/exercises', requireAuth, (req: Request, res: Response) => {
   }
 });
 
+// MEAL PLANNING
+
+// Get meal plans by date range
+router.get('/meal-plans', (req: Request, res: Response) => {
+  try {
+    const { startDate, endDate, date } = req.query;
+    
+    let filteredPlans = mealPlans;
+    
+    if (date) {
+      filteredPlans = mealPlans.filter(plan => plan.date === date);
+    } else if (startDate && endDate) {
+      filteredPlans = mealPlans.filter(plan => 
+        plan.date >= startDate && plan.date <= endDate
+      );
+    }
+    
+    // Sort by date and meal type
+    const mealOrder: { [key: string]: number } = { breakfast: 1, lunch: 2, dinner: 3, snack: 4 };
+    filteredPlans.sort((a, b) => {
+      if (a.date !== b.date) {
+        return a.date.localeCompare(b.date);
+      }
+      return (mealOrder[a.mealType] || 5) - (mealOrder[b.mealType] || 5);
+    });
+    
+    res.json(filteredPlans);
+  } catch (error) {
+    console.error('Error getting meal plans:', error);
+    res.status(500).json({ error: 'Failed to get meal plans' });
+  }
+});
+
+// Create meal plan
+router.post('/meal-plans', requireAuth, (req: Request, res: Response) => {
+  try {
+    const validatedData = insertMealPlanSchema.parse(req.body);
+    
+    const newMealPlan = {
+      id: currentId++,
+      ...validatedData,
+      createdAt: new Date().toISOString()
+    };
+    
+    mealPlans.push(newMealPlan);
+    res.status(201).json(newMealPlan);
+  } catch (error) {
+    console.error('Error creating meal plan:', error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Validation error', details: error.errors });
+    } else {
+      res.status(500).json({ error: 'Failed to create meal plan' });
+    }
+  }
+});
+
+// Update meal plan
+router.patch('/meal-plans/:id', requireAuth, (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const planIndex = mealPlans.findIndex(p => p.id === id);
+    
+    if (planIndex === -1) {
+      return res.status(404).json({ error: 'Meal plan not found' });
+    }
+    
+    const updatedPlan = { ...mealPlans[planIndex], ...req.body };
+    mealPlans[planIndex] = updatedPlan;
+    
+    res.json(updatedPlan);
+  } catch (error) {
+    console.error('Error updating meal plan:', error);
+    res.status(500).json({ error: 'Failed to update meal plan' });
+  }
+});
+
+// Delete meal plan
+router.delete('/meal-plans/:id', requireAuth, (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const planIndex = mealPlans.findIndex(p => p.id === id);
+    
+    if (planIndex === -1) {
+      return res.status(404).json({ error: 'Meal plan not found' });
+    }
+    
+    mealPlans.splice(planIndex, 1);
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting meal plan:', error);
+    res.status(500).json({ error: 'Failed to delete meal plan' });
+  }
+});
+
+// DIET GOALS
+
+// Get diet goals
+router.get('/diet-goals', (req: Request, res: Response) => {
+  try {
+    const activeDietGoals = dietGoals.filter(goal => goal.isActive);
+    res.json(activeDietGoals);
+  } catch (error) {
+    console.error('Error getting diet goals:', error);
+    res.status(500).json({ error: 'Failed to get diet goals' });
+  }
+});
+
+// Create diet goal
+router.post('/diet-goals', requireAuth, (req: Request, res: Response) => {
+  try {
+    const validatedData = insertDietGoalSchema.parse(req.body);
+    
+    const newDietGoal = {
+      id: currentId++,
+      ...validatedData,
+      createdAt: new Date().toISOString()
+    };
+    
+    dietGoals.push(newDietGoal);
+    res.status(201).json(newDietGoal);
+  } catch (error) {
+    console.error('Error creating diet goal:', error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Validation error', details: error.errors });
+    } else {
+      res.status(500).json({ error: 'Failed to create diet goal' });
+    }
+  }
+});
+
+// FOOD DATABASE
+
+// Get food database
+router.get('/food-database', (req: Request, res: Response) => {
+  try {
+    const { category, search } = req.query;
+    
+    let filteredFoods = foodDatabase;
+    
+    if (category) {
+      filteredFoods = foodDatabase.filter(food => 
+        food.category.toLowerCase() === category.toString().toLowerCase()
+      );
+    }
+    
+    if (search) {
+      filteredFoods = filteredFoods.filter(food =>
+        food.name.toLowerCase().includes(search.toString().toLowerCase())
+      );
+    }
+    
+    res.json(filteredFoods);
+  } catch (error) {
+    console.error('Error getting food database:', error);
+    res.status(500).json({ error: 'Failed to get food database' });
+  }
+});
+
+// Create food database entry
+router.post('/food-database', requireAuth, (req: Request, res: Response) => {
+  try {
+    const validatedData = insertFoodDatabaseSchema.parse(req.body);
+    
+    const newFood = {
+      id: currentId++,
+      ...validatedData,
+      createdAt: new Date().toISOString()
+    };
+    
+    foodDatabase.push(newFood);
+    res.status(201).json(newFood);
+  } catch (error) {
+    console.error('Error creating food database entry:', error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Validation error', details: error.errors });
+    } else {
+      res.status(500).json({ error: 'Failed to create food database entry' });
+    }
+  }
+});
+
 // AI FITNESS INSIGHTS (requires OpenAI API key)
 router.get('/fitness-insights', requireAuth, async (req: Request, res: Response) => {
   try {
@@ -294,27 +481,33 @@ router.get('/fitness-insights', requireAuth, async (req: Request, res: Response)
     const recentWeights = bodyWeights.slice(-5); // Last 5 weight entries
     const activeGoals = fitnessGoals.filter(goal => !goal.isCompleted);
     const recentNutrition = nutritionEntries.slice(-7); // Last 7 nutrition entries
+    const recentMealPlans = mealPlans.slice(-14); // Last 14 meal plans (2 weeks)
+    const activeDietGoals = dietGoals.filter(goal => goal.isActive);
 
     const fitnessData = {
       workouts: recentWorkouts,
       weights: recentWeights,
       goals: activeGoals,
-      nutrition: recentNutrition
+      nutrition: recentNutrition,
+      mealPlans: recentMealPlans,
+      dietGoals: activeDietGoals
     };
 
     // This would use OpenAI to analyze fitness data and provide insights
     // For now, return basic analysis
     const insights = {
-      summary: "Fitness tracking active",
+      summary: "Fitness and nutrition tracking active",
       recommendations: [
         "Continue logging workouts consistently",
         "Monitor weight trends weekly", 
-        "Track nutrition for better results"
+        "Track nutrition for better results",
+        "Plan meals in advance for better nutrition consistency"
       ],
       progress: {
         workoutsThisWeek: recentWorkouts.length,
         weightTrend: recentWeights.length > 1 ? "stable" : "insufficient data",
-        goalProgress: activeGoals.length > 0 ? "on track" : "no active goals"
+        goalProgress: activeGoals.length > 0 ? "on track" : "no active goals",
+        mealPlanAdherence: recentMealPlans.filter(p => p.isCompleted).length / Math.max(recentMealPlans.length, 1) * 100
       }
     };
 

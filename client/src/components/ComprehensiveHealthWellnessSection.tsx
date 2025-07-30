@@ -44,6 +44,7 @@ import {
   Trash2
 } from 'lucide-react';
 import WaterIntakeCard from './WaterIntakeCard';
+import DietJournalPlanner from './DietJournalPlanner';
 
 interface ComprehensiveHealthWellnessSectionProps {
   selectedDate: Date;
@@ -382,10 +383,11 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
 
         {/* Main Tabs Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="workouts">Workouts</TabsTrigger>
             <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
+            <TabsTrigger value="diet-planner">Diet Planner</TabsTrigger>
             <TabsTrigger value="body">Body Metrics</TabsTrigger>
             <TabsTrigger value="goals">Goals</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -689,6 +691,14 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Diet Planner Tab */}
+          <TabsContent value="diet-planner" className="space-y-6">
+            <DietJournalPlanner 
+              selectedDate={selectedDate}
+              isReadOnly={isReadOnly}
+            />
           </TabsContent>
 
           {/* Body Metrics Tab */}
