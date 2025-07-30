@@ -71,7 +71,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
     { key: "groceries" as ViewType, label: "Shopping", icon: ShoppingCart },
     { key: "finances" as ViewType, label: "Finances", icon: DollarSign },
     { key: "habits" as ViewType, label: "Habits", icon: Zap },
-    { key: "health" as ViewType, label: "Health", icon: Heart },
+    { key: "health" as ViewType, label: "Health & Wellness", icon: Heart },
     { key: "productivity" as ViewType, label: "Productivity", icon: Briefcase },
     { key: "reports" as ViewType, label: "Reports", icon: BarChart3 },
     { key: "sitemap" as ViewType, label: "Site Map", icon: Map },
