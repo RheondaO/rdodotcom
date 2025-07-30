@@ -493,8 +493,490 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             />
           </TabsContent>
 
-          {/* Additional tabs content would continue here... */}
-          {/* For brevity, I'm showing the structure. The full implementation would include all tabs */}
+          {/* Workouts Tab */}
+          <TabsContent value="workouts" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Workout Management</h2>
+              {isEditable && (
+                <Button onClick={() => setShowModal('workout')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Log Workout
+                </Button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Today's Workouts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {workouts.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>No workouts logged</p>
+                      </div>
+                    ) : (
+                      workouts.map((workout, index) => (
+                        <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-medium">{workout.name}</h4>
+                            <Badge>{workout.type}</Badge>
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                            <div>Duration: {workout.duration} minutes</div>
+                            <div>Calories: {workout.calories || 0}</div>
+                            <div>Difficulty: {workout.difficulty}/5</div>
+                          </div>
+                          {workout.notes && (
+                            <p className="text-sm text-gray-500 mt-2">{workout.notes}</p>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Workout Stats</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span>Total Workouts</span>
+                      <span className="font-bold">{workouts.length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total Minutes</span>
+                      <span className="font-bold">
+                        {workouts.reduce((sum, w) => sum + (w.duration || 0), 0)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Calories Burned</span>
+                      <span className="font-bold">
+                        {workouts.reduce((sum, w) => sum + (w.calories || 0), 0)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Avg Difficulty</span>
+                      <span className="font-bold">
+                        {workouts.length > 0 ? 
+                          (workouts.reduce((sum, w) => sum + w.difficulty, 0) / workouts.length).toFixed(1) : 
+                          '0'
+                        }/5
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Weekly Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <Progress value={performanceData.workoutConsistency} className="h-3" />
+                    <div className="text-center text-sm">
+                      <span className="font-bold">{performanceData.workoutConsistency.toFixed(0)}%</span> consistency this week
+                    </div>
+                    <div className="text-xs text-gray-500 text-center">
+                      Target: 5 workouts per week
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Nutrition Tab */}
+          <TabsContent value="nutrition" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Nutrition Tracking</h2>
+              {isEditable && (
+                <Button onClick={() => setShowModal('nutrition')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Log Meal
+                </Button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Today's Nutrition</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">{performanceData.dailyCalories}</div>
+                        <div className="text-sm text-gray-600">Calories</div>
+                        <div className="text-xs text-gray-500">Goal: {ageRecommendations.baseCalories}</div>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">{performanceData.dailyProtein}g</div>
+                        <div className="text-sm text-gray-600">Protein</div>
+                        <div className="text-xs text-gray-500">Goal: {ageRecommendations.protein}g</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Today's Meals</h4>
+                      {nutritionEntries.length === 0 ? (
+                        <p className="text-gray-500 text-center py-4">No meals logged today</p>
+                      ) : (
+                        nutritionEntries.map((entry, index) => (
+                          <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <div className="font-medium">{entry.food}</div>
+                              <div className="text-sm text-gray-500 capitalize">{entry.mealType}</div>
+                            </div>
+                            <div className="text-sm">
+                              <div>{entry.calories} cal</div>
+                              <div className="text-gray-500">{entry.protein}g protein</div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Age-Based Recommendations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-sm text-gray-600 mb-4">Based on average adult nutritional needs:</div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span>Daily Calories</span>
+                        <span className="font-bold">{ageRecommendations.baseCalories}</span>
+                      </div>
+                      <Progress 
+                        value={Math.min((performanceData.dailyCalories / ageRecommendations.baseCalories) * 100, 100)} 
+                        className="h-2"
+                      />
+                      
+                      <div className="flex justify-between items-center">
+                        <span>Protein (g)</span>
+                        <span className="font-bold">{ageRecommendations.protein}g</span>
+                      </div>
+                      <Progress 
+                        value={Math.min((performanceData.dailyProtein / ageRecommendations.protein) * 100, 100)} 
+                        className="h-2"
+                      />
+                      
+                      <div className="flex justify-between items-center">
+                        <span>Carbs (g)</span>
+                        <span className="font-bold">{ageRecommendations.carbs}g</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span>Fat (g)</span>
+                        <span className="font-bold">{ageRecommendations.fat}g</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Body Metrics Tab */}
+          <TabsContent value="body" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Body Metrics</h2>
+              <div className="flex gap-2">
+                {isEditable && (
+                  <>
+                    <Button variant="outline" onClick={() => setShowModal('weight')}>
+                      <Scale className="h-4 w-4 mr-2" />
+                      Record Weight
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowModal('measurement')}>
+                      <Ruler className="h-4 w-4 mr-2" />
+                      Body Measurements
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Weight History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {bodyWeights.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Weight className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>No weight entries recorded</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <div className="text-2xl font-bold">{performanceData.currentWeight} lbs</div>
+                            <div className="text-sm text-gray-600">Current Weight</div>
+                          </div>
+                          <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <div className="text-2xl font-bold">{performanceData.bodyFatPercentage.toFixed(1)}%</div>
+                            <div className="text-sm text-gray-600">Body Fat</div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <h4 className="font-medium">Recent Entries</h4>
+                          {bodyWeights.slice(-5).map((entry, index) => (
+                            <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                              <div>
+                                <div className="font-medium">{entry.weight} lbs</div>
+                                <div className="text-sm text-gray-500">{entry.date}</div>
+                              </div>
+                              <div className="text-sm">
+                                {entry.bodyFat && <div>{entry.bodyFat}% BF</div>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Body Measurements</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {bodyMeasurements.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Ruler className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>No measurements recorded</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {bodyMeasurements.slice(-1).map((measurement, index) => (
+                          <div key={index} className="space-y-2">
+                            <h4 className="font-medium">Latest Measurements ({measurement.date})</h4>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              {measurement.neck && <div>Neck: {measurement.neck}"</div>}
+                              {measurement.chest && <div>Chest: {measurement.chest}"</div>}
+                              {measurement.waist && <div>Waist: {measurement.waist}"</div>}
+                              {measurement.hips && <div>Hips: {measurement.hips}"</div>}
+                              {measurement.bicep && <div>Bicep: {measurement.bicep}"</div>}
+                              {measurement.thigh && <div>Thigh: {measurement.thigh}"</div>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Goals Tab */}
+          <TabsContent value="goals" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Fitness Goals</h2>
+              {isEditable && (
+                <Button onClick={() => setShowModal('goal')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Set Goal
+                </Button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Active Goals</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {fitnessGoals.filter(goal => goal.isActive).length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <Target className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>No active goals set</p>
+                      </div>
+                    ) : (
+                      fitnessGoals.filter(goal => goal.isActive).map((goal, index) => (
+                        <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-medium">{goal.title}</h4>
+                            <Badge variant={goal.priority === 'high' ? 'destructive' : goal.priority === 'medium' ? 'default' : 'secondary'}>
+                              {goal.priority}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                            <div>Type: {goal.type.replace('_', ' ')}</div>
+                            <div>Target: {goal.targetValue} {goal.unit}</div>
+                            <div>Due: {goal.targetDate}</div>
+                          </div>
+                          {goal.description && (
+                            <p className="text-sm text-gray-500 mt-2">{goal.description}</p>
+                          )}
+                          {goal.currentValue && (
+                            <div className="mt-3">
+                              <div className="flex justify-between text-sm mb-1">
+                                <span>Progress</span>
+                                <span>{goal.currentValue}/{goal.targetValue} {goal.unit}</span>
+                              </div>
+                              <Progress 
+                                value={Math.min((goal.currentValue / goal.targetValue) * 100, 100)} 
+                                className="h-2"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Goal Categories</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {['weight_loss', 'weight_gain', 'muscle_gain', 'strength', 'endurance'].map(type => {
+                      const count = fitnessGoals.filter(g => g.type === type && g.isActive).length;
+                      return (
+                        <div key={type} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <span className="capitalize">{type.replace('_', ' ')}</span>
+                          <Badge variant="outline">{count} active</Badge>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Fitness Analytics</h2>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>Performance Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="text-xl font-bold text-green-600">
+                          {performanceData.workoutConsistency.toFixed(0)}%
+                        </div>
+                        <div className="text-sm text-gray-600">Workout Consistency</div>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="text-xl font-bold text-blue-600">
+                          {performanceData.weightTrend > 0 ? '+' : ''}{performanceData.weightTrend.toFixed(1)}
+                        </div>
+                        <div className="text-sm text-gray-600">Weight Change (lbs)</div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Key Metrics</h4>
+                      <div className="grid grid-cols-1 gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Total Workouts</span>
+                          <span className="font-bold">{performanceData.totalWorkouts}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Current Weight</span>
+                          <span className="font-bold">{performanceData.currentWeight} lbs</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Body Fat %</span>
+                          <span className="font-bold">{performanceData.bodyFatPercentage.toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Daily Calories</span>
+                          <span className="font-bold">{performanceData.dailyCalories}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="dark:[background-color:var(--custom-dark)]">
+                <CardHeader>
+                  <CardTitle>AI Insights</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Brain className="h-5 w-5 text-blue-600" />
+                        <span className="font-medium">Workout Recommendation</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {performanceData.workoutConsistency < 50 
+                          ? "Consider starting with 3 shorter workouts per week to build consistency."
+                          : performanceData.workoutConsistency < 80
+                          ? "Great progress! Try adding one more workout day to reach optimal frequency."
+                          : "Excellent consistency! Focus on progressive overload and recovery."
+                        }
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Apple className="h-5 w-5 text-green-600" />
+                        <span className="font-medium">Nutrition Insight</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {performanceData.dailyCalories < ageRecommendations.baseCalories * 0.8
+                          ? "Your calorie intake seems low. Consider adding healthy snacks."
+                          : performanceData.dailyCalories > ageRecommendations.baseCalories * 1.2
+                          ? "Your calorie intake is high. Focus on nutrient-dense, lower-calorie foods."
+                          : "Your calorie intake looks balanced for your goals."
+                        }
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Target className="h-5 w-5 text-purple-600" />
+                        <span className="font-medium">Goal Progress</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {fitnessGoals.filter(g => g.isActive).length === 0
+                          ? "Set specific, measurable goals to track your fitness journey effectively."
+                          : `You have ${fitnessGoals.filter(g => g.isActive).length} active goals. Stay focused and track progress regularly.`
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
         </Tabs>
 
@@ -592,7 +1074,456 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
           </DialogContent>
         </Dialog>
 
-        {/* Additional modals would be implemented here for weight, measurements, goals, nutrition */}
+        {/* Weight Modal */}
+        <Dialog open={showModal === 'weight'} onOpenChange={() => setShowModal(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Record Weight & Body Composition</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="weight">Weight (lbs) *</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  step="0.1"
+                  value={weightForm.weight}
+                  onChange={(e) => setWeightForm({...weightForm, weight: e.target.value})}
+                  placeholder="e.g., 150.5"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="body-fat">Body Fat %</Label>
+                  <Input
+                    id="body-fat"
+                    type="number"
+                    step="0.1"
+                    value={weightForm.bodyFat}
+                    onChange={(e) => setWeightForm({...weightForm, bodyFat: e.target.value})}
+                    placeholder="e.g., 15.2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="muscle-mass">Muscle Mass (lbs)</Label>
+                  <Input
+                    id="muscle-mass"
+                    type="number"
+                    step="0.1"
+                    value={weightForm.muscleMass}
+                    onChange={(e) => setWeightForm({...weightForm, muscleMass: e.target.value})}
+                    placeholder="e.g., 120.0"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="water-weight">Water Weight %</Label>
+                <Input
+                  id="water-weight"
+                  type="number"
+                  step="0.1"
+                  value={weightForm.waterWeight}
+                  onChange={(e) => setWeightForm({...weightForm, waterWeight: e.target.value})}
+                  placeholder="e.g., 60.5"
+                />
+              </div>
+              <div>
+                <Label htmlFor="weight-notes">Notes</Label>
+                <Textarea
+                  id="weight-notes"
+                  value={weightForm.notes}
+                  onChange={(e) => setWeightForm({...weightForm, notes: e.target.value})}
+                  placeholder="Time of day, conditions, etc."
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => setShowModal(null)} variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => createWeightMutation.mutate({
+                    ...weightForm,
+                    date: dateString,
+                    weight: parseFloat(weightForm.weight),
+                    bodyFat: weightForm.bodyFat ? parseFloat(weightForm.bodyFat) : undefined,
+                    muscleMass: weightForm.muscleMass ? parseFloat(weightForm.muscleMass) : undefined,
+                    waterWeight: weightForm.waterWeight ? parseFloat(weightForm.waterWeight) : undefined
+                  })}
+                  className="flex-1"
+                  disabled={!weightForm.weight || createWeightMutation.isPending}
+                >
+                  {createWeightMutation.isPending ? 'Saving...' : 'Save Weight'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Body Measurements Modal */}
+        <Dialog open={showModal === 'measurement'} onOpenChange={() => setShowModal(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Record Body Measurements</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="neck">Neck (inches)</Label>
+                  <Input
+                    id="neck"
+                    type="number"
+                    step="0.1"
+                    value={measurementForm.neck}
+                    onChange={(e) => setMeasurementForm({...measurementForm, neck: e.target.value})}
+                    placeholder="e.g., 15.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="chest">Chest (inches)</Label>
+                  <Input
+                    id="chest"
+                    type="number"
+                    step="0.1"
+                    value={measurementForm.chest}
+                    onChange={(e) => setMeasurementForm({...measurementForm, chest: e.target.value})}
+                    placeholder="e.g., 40.0"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="waist">Waist (inches)</Label>
+                  <Input
+                    id="waist"
+                    type="number"
+                    step="0.1"
+                    value={measurementForm.waist}
+                    onChange={(e) => setMeasurementForm({...measurementForm, waist: e.target.value})}
+                    placeholder="e.g., 32.0"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="hips">Hips (inches)</Label>
+                  <Input
+                    id="hips"
+                    type="number"
+                    step="0.1"
+                    value={measurementForm.hips}
+                    onChange={(e) => setMeasurementForm({...measurementForm, hips: e.target.value})}
+                    placeholder="e.g., 38.0"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="bicep">Bicep (inches)</Label>
+                  <Input
+                    id="bicep"
+                    type="number"
+                    step="0.1"
+                    value={measurementForm.bicep}
+                    onChange={(e) => setMeasurementForm({...measurementForm, bicep: e.target.value})}
+                    placeholder="e.g., 14.0"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="thigh">Thigh (inches)</Label>
+                  <Input
+                    id="thigh"
+                    type="number"
+                    step="0.1"
+                    value={measurementForm.thigh}
+                    onChange={(e) => setMeasurementForm({...measurementForm, thigh: e.target.value})}
+                    placeholder="e.g., 22.0"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="measurement-notes">Notes</Label>
+                <Textarea
+                  id="measurement-notes"
+                  value={measurementForm.notes}
+                  onChange={(e) => setMeasurementForm({...measurementForm, notes: e.target.value})}
+                  placeholder="Any observations or conditions"
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => setShowModal(null)} variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => createMeasurementMutation.mutate({
+                    ...measurementForm,
+                    date: dateString,
+                    neck: measurementForm.neck ? parseFloat(measurementForm.neck) : undefined,
+                    chest: measurementForm.chest ? parseFloat(measurementForm.chest) : undefined,
+                    waist: measurementForm.waist ? parseFloat(measurementForm.waist) : undefined,
+                    hips: measurementForm.hips ? parseFloat(measurementForm.hips) : undefined,
+                    bicep: measurementForm.bicep ? parseFloat(measurementForm.bicep) : undefined,
+                    thigh: measurementForm.thigh ? parseFloat(measurementForm.thigh) : undefined
+                  })}
+                  className="flex-1"
+                  disabled={createMeasurementMutation.isPending}
+                >
+                  {createMeasurementMutation.isPending ? 'Saving...' : 'Save Measurements'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Fitness Goal Modal */}
+        <Dialog open={showModal === 'goal'} onOpenChange={() => setShowModal(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Set Fitness Goal</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="goal-type">Goal Type *</Label>
+                <Select value={fitnessGoalForm.type} onValueChange={(value) => setFitnessGoalForm({...fitnessGoalForm, type: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weight_loss">Weight Loss</SelectItem>
+                    <SelectItem value="weight_gain">Weight Gain</SelectItem>
+                    <SelectItem value="muscle_gain">Muscle Gain</SelectItem>
+                    <SelectItem value="strength">Strength</SelectItem>
+                    <SelectItem value="endurance">Endurance</SelectItem>
+                    <SelectItem value="flexibility">Flexibility</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="goal-title">Goal Title *</Label>
+                <Input
+                  id="goal-title"
+                  value={fitnessGoalForm.title}
+                  onChange={(e) => setFitnessGoalForm({...fitnessGoalForm, title: e.target.value})}
+                  placeholder="e.g., Lose 10 pounds"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="current-value">Current Value</Label>
+                  <Input
+                    id="current-value"
+                    type="number"
+                    step="0.1"
+                    value={fitnessGoalForm.currentValue}
+                    onChange={(e) => setFitnessGoalForm({...fitnessGoalForm, currentValue: e.target.value})}
+                    placeholder="e.g., 150"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="target-value">Target Value *</Label>
+                  <Input
+                    id="target-value"
+                    type="number"
+                    step="0.1"
+                    value={fitnessGoalForm.targetValue}
+                    onChange={(e) => setFitnessGoalForm({...fitnessGoalForm, targetValue: e.target.value})}
+                    placeholder="e.g., 140"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="unit">Unit *</Label>
+                  <Select value={fitnessGoalForm.unit} onValueChange={(value) => setFitnessGoalForm({...fitnessGoalForm, unit: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="lbs">lbs</SelectItem>
+                      <SelectItem value="kg">kg</SelectItem>
+                      <SelectItem value="reps">reps</SelectItem>
+                      <SelectItem value="minutes">minutes</SelectItem>
+                      <SelectItem value="miles">miles</SelectItem>
+                      <SelectItem value="inches">inches</SelectItem>
+                      <SelectItem value="percent">%</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="target-date">Target Date *</Label>
+                  <Input
+                    id="target-date"
+                    type="date"
+                    value={fitnessGoalForm.targetDate}
+                    onChange={(e) => setFitnessGoalForm({...fitnessGoalForm, targetDate: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="priority">Priority</Label>
+                  <Select value={fitnessGoalForm.priority} onValueChange={(value) => setFitnessGoalForm({...fitnessGoalForm, priority: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="goal-description">Description</Label>
+                <Textarea
+                  id="goal-description"
+                  value={fitnessGoalForm.description}
+                  onChange={(e) => setFitnessGoalForm({...fitnessGoalForm, description: e.target.value})}
+                  placeholder="Why is this goal important to you?"
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => setShowModal(null)} variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => createFitnessGoalMutation.mutate({
+                    ...fitnessGoalForm,
+                    targetValue: parseFloat(fitnessGoalForm.targetValue),
+                    currentValue: fitnessGoalForm.currentValue ? parseFloat(fitnessGoalForm.currentValue) : undefined,
+                    isActive: true
+                  })}
+                  className="flex-1"
+                  disabled={!fitnessGoalForm.title || !fitnessGoalForm.targetValue || createFitnessGoalMutation.isPending}
+                >
+                  {createFitnessGoalMutation.isPending ? 'Saving...' : 'Save Goal'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Nutrition Modal */}
+        <Dialog open={showModal === 'nutrition'} onOpenChange={() => setShowModal(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Log Meal</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="meal-type">Meal Type *</Label>
+                <Select value={nutritionForm.mealType} onValueChange={(value) => setNutritionForm({...nutritionForm, mealType: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="breakfast">Breakfast</SelectItem>
+                    <SelectItem value="lunch">Lunch</SelectItem>
+                    <SelectItem value="dinner">Dinner</SelectItem>
+                    <SelectItem value="snack">Snack</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="food">Food/Meal *</Label>
+                <Input
+                  id="food"
+                  value={nutritionForm.food}
+                  onChange={(e) => setNutritionForm({...nutritionForm, food: e.target.value})}
+                  placeholder="e.g., Grilled chicken salad"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="nutrition-calories">Calories *</Label>
+                  <Input
+                    id="nutrition-calories"
+                    type="number"
+                    value={nutritionForm.calories}
+                    onChange={(e) => setNutritionForm({...nutritionForm, calories: e.target.value})}
+                    placeholder="e.g., 450"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="protein">Protein (g)</Label>
+                  <Input
+                    id="protein"
+                    type="number"
+                    step="0.1"
+                    value={nutritionForm.protein}
+                    onChange={(e) => setNutritionForm({...nutritionForm, protein: e.target.value})}
+                    placeholder="e.g., 35"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="carbs">Carbs (g)</Label>
+                  <Input
+                    id="carbs"
+                    type="number"
+                    step="0.1"
+                    value={nutritionForm.carbs}
+                    onChange={(e) => setNutritionForm({...nutritionForm, carbs: e.target.value})}
+                    placeholder="e.g., 20"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fat">Fat (g)</Label>
+                  <Input
+                    id="fat"
+                    type="number"
+                    step="0.1"
+                    value={nutritionForm.fat}
+                    onChange={(e) => setNutritionForm({...nutritionForm, fat: e.target.value})}
+                    placeholder="e.g., 15"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="fiber">Fiber (g)</Label>
+                  <Input
+                    id="fiber"
+                    type="number"
+                    step="0.1"
+                    value={nutritionForm.fiber}
+                    onChange={(e) => setNutritionForm({...nutritionForm, fiber: e.target.value})}
+                    placeholder="e.g., 8"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sodium">Sodium (mg)</Label>
+                  <Input
+                    id="sodium"
+                    type="number"
+                    value={nutritionForm.sodium}
+                    onChange={(e) => setNutritionForm({...nutritionForm, sodium: e.target.value})}
+                    placeholder="e.g., 650"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => setShowModal(null)} variant="outline" className="flex-1">
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => createNutritionMutation.mutate({
+                    ...nutritionForm,
+                    date: dateString,
+                    calories: nutritionForm.calories ? parseInt(nutritionForm.calories) : undefined,
+                    protein: nutritionForm.protein ? parseFloat(nutritionForm.protein) : undefined,
+                    carbs: nutritionForm.carbs ? parseFloat(nutritionForm.carbs) : undefined,
+                    fat: nutritionForm.fat ? parseFloat(nutritionForm.fat) : undefined,
+                    fiber: nutritionForm.fiber ? parseFloat(nutritionForm.fiber) : undefined,
+                    sodium: nutritionForm.sodium ? parseInt(nutritionForm.sodium) : undefined
+                  })}
+                  className="flex-1"
+                  disabled={!nutritionForm.food || !nutritionForm.calories || createNutritionMutation.isPending}
+                >
+                  {createNutritionMutation.isPending ? 'Saving...' : 'Save Meal'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
         
       </div>
     </div>
