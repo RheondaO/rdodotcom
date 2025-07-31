@@ -143,6 +143,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (2025)
 
+### Site Map GitHub Repository Link Added (July 31, 2025)
+- **NEW FEATURE**: Added Belle Journal GitHub Repository external link to Site Map's "Development & Projects" section
+- **GitHub Integration**: Using SiGithub icon from react-icons/si for authentic GitHub branding
+- **External Link Handling**: Implemented proper external link navigation with window.open() and security attributes
+- **User Experience**: Repository link opens in new tab with GitHub icon, maintaining seamless navigation
+- **Repository Access**: Direct access to Belle Journal source code for developers and contributors
+
+## Recent Changes (2025)
+
 ### Stop Functionality Removal Complete (July 26, 2025)
 - **USER REQUEST**: Stop functionality completely removed from timer system per user preference
 - **✅ Simplified UI**: Timer modal now only shows Start button and Close button

@@ -50,6 +50,7 @@ import {
   Globe,
   Flame
 } from "lucide-react";
+import { SiGithub } from "react-icons/si";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 
@@ -167,7 +168,8 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       icon: Code2,
       color: "from-purple-400 to-indigo-500",
       items: [
-        { key: "apps", label: "App Development", icon: Code2, description: "Full-stack project management with task tracking and sprint planning" }
+        { key: "apps", label: "App Development", icon: Code2, description: "Full-stack project management with task tracking and sprint planning" },
+        { key: "github-repo", label: "Belle Journal GitHub Repository", icon: SiGithub, description: "View source code and contribute to Belle Journal development", external: "https://github.com/replit-user/belle-journal" }
       ]
     }
   ];
@@ -266,7 +268,13 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
                     return (
                       <Button
                         key={item.key}
-                        onClick={() => onNavigate(item.key)}
+                        onClick={() => {
+                          if ((item as any).external) {
+                            window.open((item as any).external, '_blank', 'noopener,noreferrer');
+                          } else {
+                            onNavigate(item.key);
+                          }
+                        }}
                         variant="ghost"
                         className="w-full h-auto p-4 text-left hover:bg-pink-50 dark:hover:bg-purple-900 rounded-xl transition-all duration-200 justify-start group"
                       >
