@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Code2, 
   Monitor, 
@@ -34,6 +43,47 @@ import {
   Wrench
 } from "lucide-react";
 import { format } from "date-fns";
+
+// Form Schemas
+const newProjectSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  description: z.string().optional(),
+  status: z.enum(["planning", "in_progress", "testing", "deployed", "on_hold"]),
+  projectType: z.enum(["web", "mobile", "desktop", "api"]),
+  repositoryUrl: z.string().optional(),
+  deploymentUrl: z.string().optional(),
+  targetDate: z.string().optional(),
+  estimatedHours: z.string().optional(),
+  techStack: z.string().optional(),
+  priority: z.enum(["low", "medium", "high"]).optional()
+});
+
+const newTaskSchema = z.object({
+  projectId: z.string().min(1, "Project is required"),
+  title: z.string().min(1, "Task title is required"),
+  description: z.string().optional(),
+  status: z.enum(["todo", "in_progress", "review", "testing", "done"]),
+  category: z.enum(["feature", "bug", "improvement", "documentation"]),
+  assignee: z.string().optional(),
+  estimatedHours: z.string().optional(),
+  dueDate: z.string().optional(),
+  priority: z.enum(["low", "medium", "high"]).optional()
+});
+
+const testItemSchema = z.object({
+  projectId: z.string().min(1, "Project is required"),
+  title: z.string().min(1, "Test item title is required"),
+  description: z.string().optional(),
+  testType: z.enum(["unit", "integration", "ui", "performance", "security", "manual"]),
+  priority: z.enum(["low", "medium", "high", "critical"]),
+  expectedResult: z.string().optional(),
+  testSteps: z.string().optional(),
+  automatedTest: z.boolean().optional()
+});
+
+type NewProjectForm = z.infer<typeof newProjectSchema>;
+type NewTaskForm = z.infer<typeof newTaskSchema>;
+type TestItemForm = z.infer<typeof testItemSchema>;
 
 interface AppProject {
   id: number;
@@ -84,6 +134,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
+  const [showTestItemForm, setShowTestItemForm] = useState(false);
+  const { toast } = useToast();
   
   // Time tracking state
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -111,6 +163,104 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     queryKey: ['/api/app-tasks'],
     select: (data: any[]) => data || []
   });
+
+  // Mutations
+  const createProjectMutation = useMutation({
+    mutationFn: (data: NewProjectForm) => 
+      apiRequest('/api/app-projects', 'POST', {
+        ...data,
+        progress: 0,
+        actualHours: 0,
+        isActive: true,
+        techStack: data.techStack ? data.techStack.split(',').map(s => s.trim()) : [],
+        estimatedHours: data.estimatedHours ? parseInt(data.estimatedHours) : undefined,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      toast({ title: "Success", description: "Project created successfully" });
+      setShowNewProjectForm(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create project", variant: "destructive" });
+    }
+  });
+
+  const createTaskMutation = useMutation({
+    mutationFn: (data: NewTaskForm) => 
+      apiRequest('/api/app-tasks', 'POST', {
+        ...data,
+        projectId: parseInt(data.projectId),
+        actualHours: 0,
+        dependencies: [],
+        attachments: [],
+        comments: '',
+        estimatedHours: data.estimatedHours ? parseInt(data.estimatedHours) : undefined,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      toast({ title: "Success", description: "Task created successfully" });
+      setShowNewTaskForm(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create task", variant: "destructive" });
+    }
+  });
+
+  // Form instances
+  const projectForm = useForm<NewProjectForm>({
+    resolver: zodResolver(newProjectSchema),
+    defaultValues: {
+      status: "planning",
+      projectType: "web",
+      priority: "medium"
+    }
+  });
+
+  const taskForm = useForm<NewTaskForm>({
+    resolver: zodResolver(newTaskSchema),
+    defaultValues: {
+      status: "todo",
+      category: "feature",
+      priority: "medium"
+    }
+  });
+
+  const testForm = useForm<TestItemForm>({
+    resolver: zodResolver(testItemSchema),
+    defaultValues: {
+      testType: "manual",
+      priority: "medium",
+      automatedTest: false
+    }
+  });
+
+  // Form handlers
+  const onSubmitProject = (data: NewProjectForm) => {
+    createProjectMutation.mutate(data);
+  };
+
+  const onSubmitTask = (data: NewTaskForm) => {
+    createTaskMutation.mutate(data);
+  };
+
+  const onSubmitTestItem = (data: TestItemForm) => {
+    // For now, create as a task with testing category
+    const taskData: NewTaskForm = {
+      projectId: data.projectId,
+      title: data.title,
+      description: `[${data.testType.toUpperCase()} TEST] ${data.description || ''}`,
+      status: "todo",
+      category: "feature",
+      priority: data.priority === "critical" ? "high" : data.priority,
+    };
+    createTaskMutation.mutate(taskData);
+    setShowTestItemForm(false);
+    toast({ title: "Success", description: "Test item added as task" });
+  };
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -685,6 +835,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Testing & Quality Assurance</h2>
             <div className="flex gap-2">
               <Button 
+                onClick={() => setShowTestItemForm(true)}
                 disabled={isReadOnly}
                 className={`bg-gradient-to-r from-red-400 to-orange-500 text-white ${
                   isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
@@ -1024,6 +1175,569 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
           )}
         </div>
       )}
+
+      {/* New Project Form Modal */}
+      <Dialog open={showNewProjectForm} onOpenChange={setShowNewProjectForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-purple-600 dark:text-purple-400">Create New Project</DialogTitle>
+          </DialogHeader>
+          <Form {...projectForm}>
+            <form onSubmit={projectForm.handleSubmit(onSubmitProject)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={projectForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="My Awesome Project" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={projectForm.control}
+                  name="projectType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="web">Web Application</SelectItem>
+                          <SelectItem value="mobile">Mobile App</SelectItem>
+                          <SelectItem value="desktop">Desktop App</SelectItem>
+                          <SelectItem value="api">API/Backend</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={projectForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Brief description of the project..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={projectForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="planning">Planning</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="testing">Testing</SelectItem>
+                          <SelectItem value="deployed">Deployed</SelectItem>
+                          <SelectItem value="on_hold">On Hold</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={projectForm.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select priority" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={projectForm.control}
+                  name="estimatedHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estimated Hours</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="40" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={projectForm.control}
+                  name="targetDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={projectForm.control}
+                name="techStack"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tech Stack (comma-separated)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="React, TypeScript, Tailwind CSS" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={projectForm.control}
+                  name="repositoryUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Repository URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://github.com/..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={projectForm.control}
+                  name="deploymentUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Deployment URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://myproject.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  type="submit" 
+                  disabled={createProjectMutation.isPending}
+                  className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                >
+                  {createProjectMutation.isPending ? "Creating..." : "Create Project"}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowNewProjectForm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Task Form Modal */}
+      <Dialog open={showNewTaskForm} onOpenChange={setShowNewTaskForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-blue-600 dark:text-blue-400">Create New Task</DialogTitle>
+          </DialogHeader>
+          <Form {...taskForm}>
+            <form onSubmit={taskForm.handleSubmit(onSubmitTask)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={taskForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Task Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Implement user authentication" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={taskForm.control}
+                  name="projectId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select project" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {projects.map(project => (
+                            <SelectItem key={project.id} value={project.id.toString()}>
+                              {project.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={taskForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Detailed description of the task..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={taskForm.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="feature">Feature</SelectItem>
+                          <SelectItem value="bug">Bug Fix</SelectItem>
+                          <SelectItem value="improvement">Improvement</SelectItem>
+                          <SelectItem value="documentation">Documentation</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={taskForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="todo">To Do</SelectItem>
+                          <SelectItem value="in_progress">In Progress</SelectItem>
+                          <SelectItem value="review">Review</SelectItem>
+                          <SelectItem value="testing">Testing</SelectItem>
+                          <SelectItem value="done">Done</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={taskForm.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select priority" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={taskForm.control}
+                  name="estimatedHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Estimated Hours</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="8" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={taskForm.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={taskForm.control}
+                name="assignee"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assignee</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  type="submit" 
+                  disabled={createTaskMutation.isPending}
+                  className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+                >
+                  {createTaskMutation.isPending ? "Creating..." : "Create Task"}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowNewTaskForm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Test Item Form Modal */}
+      <Dialog open={showTestItemForm} onOpenChange={setShowTestItemForm}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-orange-600 dark:text-orange-400">Add Test Item</DialogTitle>
+          </DialogHeader>
+          <Form {...testForm}>
+            <form onSubmit={testForm.handleSubmit(onSubmitTestItem)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={testForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Test Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Login functionality test" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={testForm.control}
+                  name="projectId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select project" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {projects.map(project => (
+                            <SelectItem key={project.id} value={project.id.toString()}>
+                              {project.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={testForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Detailed description of what needs to be tested..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={testForm.control}
+                  name="testType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Test Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select test type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="unit">Unit Test</SelectItem>
+                          <SelectItem value="integration">Integration Test</SelectItem>
+                          <SelectItem value="ui">UI Test</SelectItem>
+                          <SelectItem value="performance">Performance Test</SelectItem>
+                          <SelectItem value="security">Security Test</SelectItem>
+                          <SelectItem value="manual">Manual Test</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={testForm.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Priority</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select priority" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="low">Low</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                          <SelectItem value="critical">Critical</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={testForm.control}
+                name="expectedResult"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expected Result</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="What should happen when the test passes..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={testForm.control}
+                name="testSteps"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Test Steps</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Step-by-step instructions for testing..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  type="submit" 
+                  disabled={createTaskMutation.isPending}
+                  className="bg-gradient-to-r from-orange-400 to-red-500 text-white"
+                >
+                  {createTaskMutation.isPending ? "Adding..." : "Add Test Item"}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowTestItemForm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
