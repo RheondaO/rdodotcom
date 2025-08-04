@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a comprehensive digital wellness and productivity platform called "Belle Journal" built with modern web technologies. It features a full-stack architecture with a React frontend, Express backend, and PostgreSQL database using Drizzle ORM. The application provides personal tracking capabilities for health metrics, habits, productivity, finances, and content management.
+Belle Journal is a comprehensive digital wellness and productivity platform designed to help users track various aspects of their lives, including health, habits, productivity, finances, and content creation. It aims to provide reliable AI responses and analytics by prioritizing data integrity across all its features. The platform is built with a modern web stack, featuring a React frontend, Express backend, and leverages Notion for primary data storage. The project envisions significant market potential as a robust tool for personal and professional organization, with ambitions to continually integrate advanced features for enhanced user experience and data-driven insights.
 
 ## User Preferences
 
@@ -21,79 +21,50 @@ Preferred communication style: Simple, everyday language.
 - **ContentManagementSuite**: Simplified neutral gray design, handles mini-game blocks and @rotationonly content
 - **Rule**: When editing one content studio, the other must remain unchanged
 
-## Data Integrity Priority
-
-**Critical Requirement**: All Notion database integrations must be dependable and integral to support:
-- Accurate AI responses and recommendations
-- Reliable analytics and insights
-- Comprehensive data tracking across all categories
-
-**Systematic Widget Implementation**: Every widget in every category/section requires the same debugging and authentication patterns to prevent data integrity issues.
-
 ## System Architecture
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite for fast development and optimized builds
-- **UI Library**: Radix UI components with Tailwind CSS for styling
+- **Build Tool**: Vite
+- **UI Library**: Radix UI components with Tailwind CSS (shadcn/ui design system)
 - **State Management**: TanStack Query (React Query) for server state
-- **Routing**: Wouter for client-side routing
-- **Styling**: Tailwind CSS with shadcn/ui design system
+- **Routing**: Wouter
+- **Styling**: Tailwind CSS
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js server
-- **Language**: TypeScript with TSX for compilation
-- **Primary Storage**: Notion databases for persistent cross-device data storage
-- **Fallback Storage**: In-memory MemStorage system for reliability when Notion is unavailable
+- **Runtime**: Node.js with Express.js
+- **Language**: TypeScript with TSX
+- **Primary Storage**: Notion databases
+- **Fallback Storage**: In-memory MemStorage system for Notion unavailability
 - **Session Management**: Express sessions with in-memory store
-- **Authentication**: Simple admin-based authentication system
+- **Authentication**: Simple admin-based authentication
 
 ### Data Storage Solutions
-- **Primary Storage**: Notion databases (PRODUCTIVITYTASKS, PRODUCTIVITYTIMEBLOCKS, PRODUCTIVITYTIMERSESSIONS) for persistent data
-- **Local Fallback**: MemStorage for temporary data when Notion integration fails
+- **Primary Persistent Storage**: Notion databases (PRODUCTIVITYTASKS, PRODUCTIVITYTIMEBLOCKS, PRODUCTIVITYTIMERSESSIONS)
+- **Local Fallback**: MemStorage for temporary data
 - **Session Storage**: In-memory session store for authentication
-- **Data Models**: TypeScript interfaces for type safety with Drizzle ORM schemas
-- **Blogging Content Studio**: Complete blogging workflow with posts, ideas, and calendar management
+- **Data Models**: TypeScript interfaces with Drizzle ORM schemas
+- **Blogging Content Studio**: Complete blogging workflow with posts, ideas, and calendar management.
 
-## Key Components
-
-### Core Features
-1. **Daily Entry System**: Comprehensive daily tracking for health, productivity, and wellness metrics
-2. **Habit Tracking**: Create and monitor daily habits with streak counting
-3. **Goal Management**: Set and track personal goals with progress monitoring
-4. **Task Management**: Todo lists with date-based organization
-5. **Finance Tracking**: Income, expenses, and bill management
-6. **Content Management**: Creation pipeline for social media and digital content
-7. **Blogging Content Studio**: Complete blogging workflow with post development tracking, AI content generation, and content calendar
-8. **Health Monitoring**: Water intake, exercise, meals, sleep, and wellness metrics
-9. **Productivity Tools**: Time blocking, focus sessions, and work tracking
-
-### User Interface Components
-- **Dashboard**: Multi-view dashboard with day/week/month perspectives
-- **Sidebar Navigation**: Collapsible sidebar with theme toggle
-- **Modal System**: Quick-add functionality and detailed forms
-- **Chart Components**: Data visualization using Recharts
-- **Responsive Design**: Mobile-friendly interface
-
-### Authentication & Authorization
-- **Simple Authentication**: Admin login with session management
-- **Public Views**: Limited public access to certain statistics
-- **Protected Routes**: Admin-only dashboard access
-- **Session Persistence**: 24-hour session duration
-
-## Data Flow
-
-1. **Client Requests**: React components make API calls via TanStack Query
-2. **Server Processing**: Express routes handle business logic and storage operations
-3. **Storage Operations**: In-memory storage manages data persistence
-4. **Response Handling**: JSON responses with proper error handling
-5. **State Management**: Client-side caching and synchronization via React Query
-
-### API Structure
-- RESTful API design with `/api` prefix
-- Authentication middleware on protected routes
-- CRUD operations for all major entities
-- Public endpoints for limited data access
+### Key Components & Features
+- **Daily Entry System**: Tracking for health, productivity, and wellness.
+- **Habit Tracking**: Monitoring habits with streak counting.
+- **Goal Management**: Setting and tracking personal goals.
+- **Task Management**: Todo lists with date-based organization.
+- **Finance Tracking**: Income, expenses, and bill management.
+- **Content Management**: Creation pipeline for social media and digital content.
+- **Health Monitoring**: Water intake, exercise, meals, sleep, and wellness metrics.
+- **Productivity Tools**: Time blocking, focus sessions, and work tracking.
+- **User Interface**: Multi-view dashboard, collapsible sidebar, modal system, Recharts for data visualization, responsive design.
+- **Authentication & Authorization**: Admin login, protected routes, 24-hour session persistence.
+- **Data Flow**: React components (TanStack Query) -> Express routes (business logic, storage) -> In-memory storage/Notion -> JSON responses.
+- **API Structure**: RESTful API design with `/api` prefix, authentication middleware, CRUD operations.
+- **Comprehensive Focus Timer System**: Integrated with time blocks, offering Focus, Pomodoro, Deep Work, and Flow State modes. Features include interactive circular display, session tracking, audio notifications, and real-time progress bars.
+- **Time Block Scheduling**: Comprehensive UI with modal forms, smart suggested time slots, real-time status detection, and duration calculations.
+- **Advanced Financial Management System**: Budget tracking, investment tracking, bill management, income tracking, and financial analytics.
+- **Content Management Suite (CMS)**: Simplified neutral gray design for mini-game blocks and @rotationonly content. Features include brand category filtering and interactive effects.
+- **SEO Implementation**: Dynamic SEO Head component, structured data (JSON-LD), comprehensive meta tags, sitemap.xml, robots.txt.
+- **System-Wide Dark Mode**: Consistent dark mode styling using custom color `#17111d` across all components.
 
 ## External Dependencies
 
@@ -101,463 +72,17 @@ Preferred communication style: Simple, everyday language.
 - **@tanstack/react-query**: Server state management
 - **@radix-ui/react-***: UI component primitives
 - **express**: Web server framework
-- **typescript**: Type safety across the stack
+- **typescript**: Type safety
 - **zod**: Runtime type validation
 
 ### Development Dependencies
-- **tsx**: TypeScript execution for development
+- **tsx**: TypeScript execution
 - **vite**: Frontend build tool
 - **vitest**: Testing framework
 - **tailwindcss**: Utility-first CSS framework
 
 ### Third-party Integrations
-- **Replit**: Development environment integration
-- **Web Standards**: Uses modern web APIs and standards
-
-## Deployment Strategy
-
-### Production Deployment
-- **Primary Command**: `npx tsx server/index.ts`
-- **Alternative Commands**: Multiple startup options available for different environments
-- **Static Assets**: Vite builds to `dist/public` directory
-- **Environment Variables**: Session secret configuration for production security
-
-### Development Workflow
-- **Development Server**: `npm run dev` for local development
-- **Testing**: Vitest for unit and integration tests
-- **Build Process**: Vite for optimized production builds
-
-### Deployment Considerations
-- Node.js v20+ compatibility with modern ES modules
-- Environment-specific configuration via environment variables
-- Session secret configuration for production security
-- In-memory storage resets on deployment (data is not persistent)
-- Static file serving handled by Express in production
-- Blogging content studio with workflow tracking and AI content generation capabilities
-
-### Scalability Features
-- Connection pooling for database efficiency
-- Session-based authentication for horizontal scaling
-- Modular component architecture for maintainability
-- Type-safe API contracts between frontend and backend
-
-## Recent Changes (2025)
-
-### Site Map GitHub Repository Link Added (July 31, 2025)
-- **NEW FEATURE**: Added Belle Journal GitHub Repository external link to Site Map's "Development & Projects" section
-- **GitHub Integration**: Using SiGithub icon from react-icons/si for authentic GitHub branding
-- **External Link Handling**: Implemented proper external link navigation with window.open() and security attributes
-- **User Experience**: Repository link opens in new tab with GitHub icon, maintaining seamless navigation
-- **Repository Access**: Direct access to Belle Journal source code for developers and contributors
-
-## Recent Changes (2025)
-
-### Stop Functionality Removal Complete (July 26, 2025)
-- **USER REQUEST**: Stop functionality completely removed from timer system per user preference
-- **✅ Simplified UI**: Timer modal now only shows Start button and Close button
-- **✅ Simplified Backend**: Removed DELETE /api/timer/:id route and PATCH /api/timer/:id/stop route
-- **✅ Simplified Frontend**: Removed stopTimer function and isStopping state from useUniversalTimer hook
-- **✅ Cleaned Storage Interface**: Removed stopTimerSession from IStorage interface and DatabaseStorage implementation
-- **✅ Timer Behavior**: Timers now run until completion or session progression without manual stop intervention
-- **✅ Code Quality**: All LSP diagnostics resolved - codebase is error-free and simplified
-- **Production Status**: Timer system continues working normally with Notion integration and real-time updates
-
-### Universal Timer Engine Refactoring (July 25, 2025)
-- **ARCHITECTURAL BREAKTHROUGH**: Eliminated mode-specific timer implementations by creating universal timer engine
-- **Core Innovation**: Single `useUniversalTimer.ts` hook works for any timer mode without repetitive code
-- **Design Principle**: Any new timer mode automatically inherits Start functionality without additional implementation
-- **Universal Features**:
-  - ✅ Mode-agnostic session progression logic
-  - ✅ Unified Start/Stop/Pause functionality across all modes
-  - ✅ Centralized timer state management and synchronization
-  - ✅ Universal break detection and duration calculation
-  - ✅ Single source of truth for timer logic
-- **Eliminated Redundancy**: No more duplicated timer logic per mode - Focus, Pomodoro, Deep Work, Flow State, and Test modes all use identical core functionality
-- **Future-Proof Design**: Adding new timer modes requires only configuration, not implementation
-- **Production Benefits**: Reduced maintenance overhead, consistent behavior across modes, easier debugging and testing
-
-### Focus Timer Complete Implementation & Production Success (July 22, 2025)
-- **COMPLETE SUCCESS**: All timer requirements fully implemented and working in production
-- **UI Updates Applied**:
-  - ✅ Changed modal title from "Persistent Focus Timer" to "Setup Focus Timer"
-  - ✅ Replaced persistence notice text with title input field
-  - ✅ Added placeholder "What is being worked on?" for session naming
-  - ✅ Fixed component confusion - updated correct PersistentFocusTimer.tsx (not FocusTimer.tsx)
-- **Database Integration Verified**:
-  - ✅ Pause/Stop buttons confirmed working with database API (PATCH /api/timer/:id and DELETE /api/timer/:id)
-  - ✅ Real-time synchronization between admin dashboard and public view operational
-  - ✅ Cross-device timer persistence confirmed with PostgreSQL database storage
-  - ✅ Timer count-up display, green dot "Active" status, and database persistence all functioning
-- **Timer Expiration Bug Fixed**:
-  - ✅ Resolved critical bug where count-up timers were immediately marked as expired
-  - ✅ Fixed public endpoint logic to properly calculate elapsed time from start time
-  - ✅ Timer now correctly counts up and shows in public view with green "Active" status
-  - ✅ Authentication working - timer creation requires admin login (admin/#c0ngenialPr0xim!ty111)
-  - ✅ Production testing: Timer ID 3 successfully created and displaying with 25-minute pomodoro session
-
-### Complete Timer System with Notion Integration Success (July 25, 2025)
-- **FINAL SUCCESS**: Complete timer system implementation with full Notion database integration working in production
-- **Countdown Timer Implementation**: Simplified timer logic to count down from totalDuration to 0 (much cleaner than complex remaining time tracking)
-- **Notion Database Sync Confirmed**: Timer sessions now successfully sync to user's PRODUCTIVITYTIMERSESSIONS Notion database for visibility and AI analytics
-  - Latest session "🎯 Countdown Timer Test with Notion Sync" confirmed in Notion database (ID: 23bf3f41-49ed-8197-95e7-fe404c9eca06)
-  - Complete session data including title, mode, category, start time, duration, and active status
-  - Production logs show successful Notion sync: "⏱️ Successfully synced timer session to Notion"
-- **Universal Timer Engine Verified**: Single timer implementation works for all modes (Focus, Pomodoro, Deep Work, Flow State, Test) without code duplication
-- **Cross-Device Synchronization**: Complete success with real-time updates between admin dashboard and public view
-- **Production-Ready Architecture**: Database-first with Notion sync ensures data integrity and cross-device persistence
-- **User Requirements Met**: Timer sessions now appear in Notion database for AI analytics and comprehensive productivity tracking
-
-### Session Progression Testing Completed (July 25, 2025)
-- **COMPREHENSIVE TEST SUCCESS**: Complete test mode session progression (1→4) with breaks fully verified
-- **Notion Field Population Confirmed**: All critical fields properly populated in PRODUCTIVITYTIMERSESSIONS database:
-  - **isActive**: Correctly tracks active/inactive states for each session
-  - **isBreak**: Properly identifies break sessions vs work sessions
-  - **currentSession**: Accurate progression tracking 1→2→3→4
-  - **totalSessions**: Consistent value of 4 across all test sessions
-  - **totalFocusTime**: Proper accumulation 0→60→120→180→240 seconds
-- **Test Sessions Verified in Notion**:
-  1. "📊 Notion Test - Session 1/4" (currentSession: 1, isBreak: false, totalFocusTime: 0)
-  2. "☕ Break - After Session 1/4" (currentSession: 1, isBreak: true, totalFocusTime: 60)
-  3. "📊 Notion Test - Session 2/4" (currentSession: 2, isBreak: false, totalFocusTime: 120)
-  4. "📊 Notion Test - Session 3/4" (currentSession: 3, isBreak: false, totalFocusTime: 180)
-  5. "📊 Notion Test - FINAL Session 4/4" (currentSession: 4, isBreak: false, totalFocusTime: 240)
-- **Data Integrity Achieved**: All sessions successfully synced with proper field values for AI analytics and comprehensive tracking
-
-### Production-Grade Timer Persistence Implementation (July 22, 2025)
-- **PRODUCTION VERIFIED**: Implemented comprehensive PostgreSQL database-first timer storage system
-- **Database-First Architecture**: Timer system now prioritizes PostgreSQL database with Notion as fallback
-- **Production Reliability Features**:
-  - ✅ PostgreSQL timer_sessions table with complete schema for state management
-  - ✅ DatabaseStorage class with all CRUD operations (create, read, update, delete, pause, resume, stop)
-  - ✅ Database-first, Notion-fallback architecture in all timer routes
-  - ✅ Real-time timer synchronization with automatic time calculations
-  - ✅ Cross-device persistence working with production database
-  - ✅ Timer sessions survive page refreshes and navigation like other Belle Journal features
-- **Production Testing Completed**:
-  - Database connection verified and table operational
-  - Timer persistence confirmed working with real database storage
-  - Public and admin timer endpoints both use database-first approach
-  - Real-time countdown and state updates working correctly
-- **Enhanced User Experience**: Timer now behaves consistently with habits and tasks for reliable productivity tracking
-
-### Comprehensive Focus Timer System Implementation (July 21, 2025)
-- **NEW FEATURE**: Built complete focus timer system with 4 productivity modes integrated with time blocks
-- **Timer Modes Implemented**:
-  - **Focus Timer**: Custom duration based on time block length
-  - **Pomodoro**: Classic 25min work + 5min break cycles (4 sessions + long break)
-  - **Deep Work**: 90min focused sessions + 20min breaks (optimized for complex tasks)
-  - **Flow State**: 2-hour uninterrupted sessions + 30min breaks (for creative work)
-- **Advanced Features**:
-  - Interactive circular timer display with mode-specific gradients
-  - Session tracking and progress indicators
-  - Audio notifications on completion
-  - Real-time progress bars and session counters
-  - Mode-specific productivity tips and guidance
-  - Integrated with time blocks - click Focus icon to start timer for specific block
-- **User Experience**:
-  - Beautiful modal interface with gradient styling
-  - Quick access card in ProductivitySection for standalone timer use
-  - Time block integration - hover over blocks to reveal Focus button
-  - Automatic duration setting based on selected time block
-  - Real-time countdown with pause/resume functionality
-- **Technical Implementation**:
-  - React state management for timer functionality
-  - useEffect hooks for countdown intervals
-  - Audio feedback using HTML5 Audio API
-  - Responsive design with dark mode support
-  - Custom progress calculations and time formatting
-- **Notion Persistence Integration** (FULLY OPERATIONAL):
-  - ✅ Successfully migrated from PostgreSQL to Notion PRODUCTIVITYTIMERSESSIONS database
-  - ✅ Complete Notion API integration with all required database properties configured
-  - ✅ True cross-device timer persistence working with Notion database storage
-  - ✅ Timer sessions now use Notion IDs (e.g., 237f3f41-49ed-81bc-bdd4-e1902eef2305)
-  - ✅ Database schema complete: Title, Mode, Total Duration, Remaining Time, Is Active, Is Paused, Started At
-  - ✅ Real-time timer synchronization across browser sessions and devices confirmed
-  - ✅ Local storage fallback system maintains reliability during any connectivity issues
-
-### Universal Real-Time Update Implementation (July 21, 2025)
-- **CRITICAL ACHIEVEMENT**: Implemented comprehensive real-time update system across ALL Belle Journal widgets
-- **Direct State Management Pattern**: Replaced React Query cache dependencies with direct useState for immediate UI control
-- **Universal Optimistic Updates**: New items appear instantly with "Saving..." indicators before server confirmation
-- **Automatic Error Recovery**: Failed operations automatically revert optimistic updates and restore correct state
-- **Status Change Detection**: Widgets automatically detect and display status changes (like time blocks becoming active)
-- **Background Data Sync**: All widgets refresh data every 5 minutes to catch external changes
-- **Production-Ready**: Bypassed staleTime: Infinity cache issues that prevented real-time updates in production
-- **Widgets Updated**: ProductivityTasks, ProductivityTimeBlocks, HabitsSection, WaterIntakeCard, GoalsSection, GrocerySection, FinanceSection, AppDevelopmentSection, BlogContentStudio, ContentManagementSuite
-- **Visual Feedback System**: Temporary items show blue styling with "💾 Saving..." indicators until server confirmation
-- **Performance Optimization**: Real-time status checks every 30 seconds for responsive updates without excessive API calls
-
-### Time Block Scheduling Feature & Header Improvements (July 20, 2025)
-- **Complete Time Block UI**: Built comprehensive Time Block scheduling feature in ProductivitySection
-  - Modal form with title, description, start/end time, category selection, and validation
-  - Smart suggested time slots that avoid conflicts with existing blocks
-  - Enhanced visual display with status indicators (Active, Done, Upcoming)
-  - Real-time status detection based on current time and selected date
-  - Duration calculations and category icons for better UX
-- **Header Date & Time Enhancement**: Improved header display functionality
-  - Right-side date now always shows today's actual date regardless of Yesterday/Tomorrow selection
-  - Added live Universal Time with seconds precision (e.g., "Jul 20, 2025 • 15:52:30 UTC")
-  - Implemented real-time clock that updates every second without page refresh
-  - Left-side contextual date format remains unchanged and functional
-- **Dark Mode Consistency**: All new components use custom dark color #17111d for proper styling
-- **Notion Integration Update**: Updated to use new secret names NOTION_TASKS_URL and NOTION_TIMEBLOCKS_URL with proper database ID extraction
-  - Tasks database: PRODUCTIVITYTASKS (ID: 22ef3f41...)
-  - Time Blocks database: PRODUCTIVITYTIMEBLOCKS (ID: 236f3f41...)
-  - Environment variables properly configured and detected by server
-  - Resolution: ✅ Tasks integration fully working with 8+ tasks retrieved from Notion
-  - Status: ✅ Authentication resolved, database access updated, API routes functioning correctly  
-  - Time Blocks Fix: ✅ Schema mapping resolved - UI date/time fields now convert to Notion datetime format  
-  - Complete Success: Both tasks and time blocks now fully integrated with Notion databases
-
-#### **Notion Integration Standards & Error Prevention Patterns**
-
-**CRITICAL PATTERNS FOR ALL WIDGETS** (Apply to every database integration):
-
-**Date Handling Pattern** (Prevents .toISOString() errors):
-```typescript
-// In notion.ts functions - ALWAYS handle both Date objects and ISO strings
-if (data.dateField) {
-    const dateStr = data.dateField instanceof Date 
-        ? data.dateField.toISOString().split('T')[0]
-        : new Date(data.dateField).toISOString().split('T')[0];
-    
-    properties["Date Field"] = {
-        date: { start: dateStr }
-    };
-}
-```
-
-**Authentication Pattern** (Ensures consistent session-based auth):
-```typescript
-// In auth.ts - Check session directly, not user object
-export const requireAuth = (req, res, next) => {
-  const session = req.session;
-  if (!session?.isAuthenticated || !session?.isAdmin) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-  req.user = { id: 'admin', name: 'Admin User', username: 'admin', profileImage: '' };
-  next();
-};
-```
-
-**Environment Variables**: Use `NOTION_[FEATURE]_URL` format (e.g., `NOTION_TASKS_URL`, `NOTION_TIMEBLOCKS_URL`)
-**Database Names**: Use `PRODUCTIVITY[FEATURE]` format (e.g., `PRODUCTIVITYTASKS`, `PRODUCTIVITYTIMEBLOCKS`)  
-**API Routes**: Primary routes use `/api/[feature]` with Notion fallback logic built-in
-**Schema Mapping**: UI date/time separation converts to Notion datetime format (`YYYY-MM-DDTHH:mm:ss`)
-**Property Names**: Notion uses "Start Time" and "End Time" as **date** properties, not text
-**Date Filtering**: Use `on_or_after` and `before` with datetime ranges for date-specific queries
-**Duplicate Route Prevention**: Only one route per endpoint - enhanced version with Notion integration
-**Error Handling**: Graceful fallback to local storage when Notion integration fails
-**ID Handling**: String IDs indicate Notion records, numeric IDs indicate local storage records
-**Duration Calculation**: UI calculates duration, stored as minutes in Notion `Duration` number property
-**Duration Display**: Backend calculates and returns duration for both creation and retrieval operations
-**Timezone Handling**: Fixed timezone conversion issue - times now stored with EDT offset (-04:00) and correctly converted back on retrieval
-**Timezone Resolution**: New time blocks maintain correct user input times (e.g., 4:00pm stays 4:00pm), older entries may show offset until recreated
-**Chronological Display**: Time blocks now display in chronological order by start time for better daily schedule visualization
-**Task Creation Fix**: Enhanced task creation API with proper database ID handling, detailed error logging, and authentication debugging
-**Production Debugging**: Added `/api/notion/debug` endpoint to diagnose authentication and configuration issues in production
-**Task Creation Resolution**: Fixed critical bugs preventing task creation from web interface:
-  - **Date Parsing Issue**: Fixed `task.dueDate.toISOString is not a function` error by handling both Date objects and ISO strings
-  - **Authentication Flow**: Enhanced session-based authentication for consistent login state across UI and API
-  - **Error Handling**: Improved error logging and debugging for production troubleshooting
-  - **Verification**: Task creation confirmed working via API - tasks successfully created in Notion database
-- **Time Block Category Display Fix**: Fixed issue where all time blocks displayed "Work" category regardless of selection:
-  - **Root Cause**: Case mismatch between frontend category values and Notion database storage
-  - **Solution**: Updated category lookup to use case-insensitive matching: `cat.value.toLowerCase() === block.category.toLowerCase()`
-  - **Result**: Categories now display correctly as selected (Personal, Health, Learning, Creative)
-- **Real-Time Update System Implementation**: Built comprehensive auto-refresh system for time blocks without page refresh:
-  - **Direct State Management**: Replaced React Query cache with useState for immediate UI control
-  - **Optimistic Updates**: New time blocks appear instantly with "Saving..." indicator before server confirmation
-  - **Auto Status Detection**: Time blocks automatically update to "Active" when their scheduled time arrives (30-second intervals)
-  - **Background Data Refresh**: Automatic data sync every 5 minutes to catch external changes
-  - **Error Recovery**: Failed operations remove optimistic updates and restore correct state
-  - **Visual Feedback**: Temporary items show with blue styling and saving indicator until confirmed
-
-### Error Prevention Guidelines for Future Database Setups (July 20, 2025)
-
-**Apply These Patterns to EVERY Widget Integration**:
-
-1. **Date Field Handling**: Always check `instanceof Date` before calling `.toISOString()` - handle both Date objects and ISO strings
-2. **Authentication Check**: Use `session?.isAuthenticated && session?.isAdmin` directly, not user object dependencies
-3. **Error Logging**: Include detailed console logging with database IDs, user auth status, and request bodies
-4. **Production Debugging**: Add debug endpoints for troubleshooting authentication and configuration issues
-5. **Graceful Fallbacks**: Implement fallback to local storage when Notion integration fails
-6. **Type Safety**: Handle both string and Date object formats in all date-related properties
-
-**Data Integrity Focus**: Every database setup must prioritize authentic data storage to ensure AI recommendations and analytics accuracy across the entire application.
-
-### System-Wide Dark Mode CSS Fix (July 20, 2025)
-- **Complete CSS Syntax Resolution**: Fixed all instances of problematic `dark:[background-color:var(--custom-dark)]` syntax
-- **Systematic Search & Replace**: Updated all components to use proper `dark:bg-[#17111d]` syntax
-- **Comprehensive Coverage**: Fixed white background issues across all pages and components
-- **Components Updated**: ProductivitySection, HealthSection, AppDevelopmentSection, BlogContentStudio, ContentManagementSuite, and all page components
-
-### ContentManagementSuite Dark Mode Enhancement (July 16, 2025)
-- **Complete Dark Mode Styling**: Applied consistent `#0c0910` darker background to all containers in Mini-Game Block Studio
-- **Visual Depth Enhancement**: Used darker shade `#0c0910` for cards to create layered depth effect against `#17111d` main background
-- **Pink Border Accent**: Added thin pink borders `border-pink-200/50 dark:border-pink-800/50` to all containers matching PublicView design
-- **Gradient Category Pills**: Enhanced @rotationonly brand filter pills with distinct gradient backgrounds:
-  - `@rotationonly.mag` (📰): Blue gradient
-  - `@rotationonly.econ` (💰): Green gradient  
-  - `@rotationonly.xxx` (🔥): Red gradient
-  - `@rotationonly.ext` (🌐): Purple gradient
-  - `@rotationonly.stem` (🔬): Orange gradient
-  - `@rotationonly.music` (🎵): Pink gradient
-  - `@rotationonly.ceo` (💼): Yellow gradient
-- **Interactive Effects**: Added hover states, scaling, and shadow effects for better user experience
-- **Comprehensive Coverage**: Applied styling to stats cards, block containers, and form sections (Create, Analytics, Progress)
-
-### Complete Dark Mode Standardization to Custom Color (July 16, 2025)
-- **Global Dark Mode Update**: Implemented custom dark color `#17111d` across the entire platform
-- **Comprehensive Color Replacement**: Updated all components to use consistent dark mode background
-- **Technical Implementation**:
-  - Added `--custom-dark: #17111d` CSS variable to root and dark theme
-  - Replaced all instances of `dark:bg-gray-900`, `dark:bg-gray-800`, `dark:bg-gray-700`, `dark:bg-gray-600`
-  - Updated hover states, badges, and form elements to use custom color
-  - Applied changes to all 50+ components including Blog Studio, Content Management, Finance, Health, Productivity sections
-- **User Experience**: Uniform dark mode appearance across all sections and components
-- **Coverage**: Updated all `.tsx` files in components, pages, and UI elements
-- **Consistent Styling**: All dark mode backgrounds now use `dark:[background-color:var(--custom-dark)]`
-
-### Comprehensive SEO Implementation (July 16, 2025)
-- **Complete SEO Optimization**: Built comprehensive SEO system targeting "Rheonda Ogletree", "Rheonda D Ogletree", and "Rheonda" search terms
-- **Core Components**:
-  - Dynamic SEO Head component with real-time meta tag management
-  - Structured data (JSON-LD) implementation for Person, Website, and BlogPost schemas
-  - Comprehensive meta tags including Open Graph and Twitter Card optimization
-  - Sitemap.xml and robots.txt for search engine crawling
-- **Content Strategy**:
-  - About page with detailed biography and expertise showcase
-  - Featured blog article with SEO-optimized content
-  - Cross-linking strategy between all pages
-  - Target keyword integration throughout content
-- **Technical SEO**:
-  - Clean URL structure with keyword-rich paths
-  - Mobile optimization and responsive design
-  - Page load speed optimization
-  - Canonical URL implementation
-- **Search Engine Optimization**:
-  - Primary targeting: "Rheonda Ogletree", "Rheonda D Ogletree", "Rheonda"
-  - Secondary targeting: "digital wellness", "productivity expert", "Belle Journal"
-  - Business & Tech targeting: "Entrepreneurship", "Vibe Coding", "Replit", "Web App", "Prompt Engineer", "AI", "girl boss", "business"
-  - Brand targeting: "really obvious media lab", "rotationonly", "rotationonly.mag", "RODML", "@rotationonly on apple music"
-  - Rich snippets and enhanced search results appearance
-  - Social media sharing optimization
-- **Implementation Files**:
-  - `SEOHead.tsx` - Dynamic SEO management component
-  - `structuredData.ts` - JSON-LD schema generators
-  - `About.tsx` - Comprehensive biography page
-  - `RheondaOgletreeBlog.tsx` - SEO-optimized blog article
-  - `sitemap.xml` and `robots.txt` - Search engine directives
-
-### Security Updates
-- **CVE-2025-30208 Fix (July 13, 2025)**: Updated Vite from 5.4.14 to 5.4.15 to resolve security vulnerability
-- **Impact**: Minimal patch with no breaking changes, application functionality preserved
-
-### Notion Timer Database Integration Resolution (July 21, 2025)
-- **PRODUCTION ISSUE RESOLVED**: Fixed critical Notion database integration preventing timer creation in production
-- **Root Cause Analysis**: 
-  - Authentication middleware was correctly blocking public users from creating timers
-  - Database schema mismatch: Missing properties and incorrect property types in Notion integration
-  - "Updated At" was `last_edited_time` type (auto-generated), not manually settable `date` type
-- **Architecture Clarification**: 
-  - **Admin Users**: Can create, update, pause, and stop focus timers via authenticated endpoints
-  - **Public Users**: Can only VIEW active timer sessions via public endpoints for dashboard display
-  - **Cross-Device Sync**: Timer sessions persist in Notion PRODUCTIVITYTIMERSESSIONS database with proper UUID format
-- **Schema Fixes Applied**:
-  - Updated `createNotionTimerSession` to include all required properties: Category, Current Session, Total Sessions, Completed Sessions, Total Focus Time
-  - Fixed `updateNotionTimerSession` to use only manually settable properties (removed auto-generated "Updated At")
-  - Added proper "Last Sync" timestamp for real-time cross-device synchronization
-- **Verification Completed**:
-  - ✅ Admin timer creation now successfully writes to Notion database
-  - ✅ Timer sessions show proper Notion UUID format (e.g., 237f3f41-49ed-8112-b584-fa318949b76e)
-  - ✅ Cross-device synchronization confirmed working with real-time updates
-  - ✅ Public dashboard displays active admin-created timer sessions
-  - ✅ Timer pause/resume/stop operations update Notion database correctly
-
-### Notion Integration Implementation & Standards (July 13-20, 2025)
-- **Complete Notion Integration**: Built full-featured Notion API integration with existing PRODUCTIVITYTASKS database
-- **Core Features**: 
-  - Read/write access to existing Notion database entries
-  - Real-time synchronization between Belle Journal and Notion
-  - Task management with create, update, and delete operations
-  - Seamless authentication integration with admin controls
-- **Technical Components**:
-  - Notion API client setup with credential management
-  - Database schema adaptation for existing TABLEMAKER structure
-  - REST API endpoints for full CRUD operations
-  - React frontend component with modern UI
-  - Error handling and connection status monitoring
-- **User Experience**: 
-  - Integrated as primary task widget in ProductivitySection
-  - Real-time task list showing existing Notion entries
-  - Create/edit forms with proper validation
-  - Connection status indicators and setup verification
-- **Database Integration**: Successfully connected to user's existing PRODUCTIVITYTASKS database
-- **Enhanced Database Schema**: Added complete productivity task properties including:
-  - Task title, description, and category fields
-  - Priority levels (High, Medium, Low) and status tracking
-  - Estimated duration in minutes and due date/time
-  - Created and completed date tracking
-  - 8 predefined categories for task organization
-- **Productivity Widget**: Built comprehensive daily task management with:
-  - Date-based task filtering (today, yesterday, tomorrow views)
-  - Real-time task completion tracking with progress indicators
-  - Task duration estimation and time tracking
-  - Priority-based task organization and filtering
-  - Full CRUD operations with proper authentication
-- **UI Integration**: Replaced main "Today's Tasks" widget in ProductivitySection with Notion integration
-- **Navigation**: Hidden Notion integration from sidebar navigation for cleaner interface
-- **Simplified Interface**: Removed redundant local tasks section, using only Notion tasks as primary task management
-
-### Production Deployment Resolution (July 13, 2025)
-- **Issue**: Notion tasks widget showing "Connection Failed" in production despite environment variables being configured
-- **Root Cause**: Environment variables needed to be refreshed/re-entered in production deployment
-- **Solution**: Enhanced error handling and debugging capabilities added to diagnose production issues
-- **Resolution**: User re-entered secrets in production environment, resolving the connection issue
-- **Improvements**: Added comprehensive logging, specific error messages, and production debugging tools
-
-### Major Feature Enhancements (July 13, 2025)
-
-#### Advanced Financial Management System
-- **Budget Management**: Complete budget tracking with category management and spending analytics
-- **Investment Tracking**: Portfolio management with performance metrics and goal monitoring
-- **Bill Management**: Automated bill tracking with due dates and payment reminders
-- **Income Tracking**: Multiple income source management with recurring and one-time entries
-- **Financial Analytics**: Advanced spending pattern analysis and trend visualization
-- **Access Control**: Full CRUD operations for admins, read-only access for public users
-
-#### Blog Content Studio Enhancement
-- **Grid/List View Toggle**: Flexible content display with responsive grid cards and structured list view
-- **Comprehensive Workflow**: Ideas management, post creation, and content calendar integration
-- **Visual Improvements**: Line-clamp text truncation, badge system, and enhanced metadata display
-- **Access Control**: Admin-only editing capabilities with proper authentication integration
-
-#### ContentManagementSuite Updates
-- **Color Scheme**: Simplified from bright gradients to neutral gray design for professional appearance
-- **Header Layout**: Reduced header size from large to compact layout
-- **Brand Categories**: Updated to seven specific @rotationonly categories:
-  - @rotationonly.mag (📰 Magazine content)
-  - @rotationonly.econ (💰 Economic content)
-  - @rotationonly.xxx (🔥 Adult content)
-  - @rotationonly.ext (🌐 External content)
-  - @rotationonly.stem (🔬 Science/Tech content)
-  - @rotationonly.music (🎵 Music content)
-  - @rotationonly.ceo (💼 Executive content)
-
-#### Analytics & Reporting Enhancements
-- **Social Media Analytics**: Content performance tracking with engagement metrics
-- **Financial Analytics**: Advanced financial insights with spending patterns
-- **Productivity Analytics**: Work efficiency metrics and time allocation analysis
-- **Comprehensive Reports**: Multi-dimensional progress tracking and insights
-
-#### Access Control Implementation
-- **Authentication System**: Proper admin/public user differentiation across all components
-- **CRUD Restrictions**: Read-only access for public users, full operations for authenticated admins
-- **Security Pattern**: Consistent isReadOnly prop implementation throughout application
-- **User Experience**: Disabled buttons and visual indicators for restricted actions
-
-#### Site Map Enhancement
-- **Comprehensive Navigation**: Updated with all new features and capabilities
-- **Quick Actions**: Enhanced shortcuts for common tasks across all sections
-- **Feature Documentation**: Detailed descriptions of new functionality and improvements
+- **Notion**: Primary persistent database for core application data (PRODUCTIVITYTASKS, PRODUCTIVITYTIMEBLOCKS, PRODUCTIVITYTIMERSESSIONS).
+- **Replit**: Development environment integration.
+- **Web Standards**: Utilizes modern web APIs and standards.
+- **Recharts**: Data visualization library.
