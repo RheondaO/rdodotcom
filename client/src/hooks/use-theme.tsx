@@ -46,9 +46,7 @@ export function ThemeProvider({
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
-      <div className={theme}>
-        {children}
-      </div>
+      {children}
     </ThemeProviderContext.Provider>
   )
 }
