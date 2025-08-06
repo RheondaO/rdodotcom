@@ -28,51 +28,50 @@
 }
 
 :root {
-  --background: 330 50% 98%; /* #FDF8FD */
-  --foreground: 330 15% 15%;
-  --muted: 320 25% 96%;
-  --muted-foreground: 320 8% 55%; /* #8B7A8B */
-  --popover: 0 0% 100%;
-  --popover-foreground: 330 15% 15%;
-  --card: 0 0% 100%;
-  --card-foreground: 330 15% 15%;
-  --border: 320 20% 90%;
-  --input: 320 20% 90%;
-  --primary: 315 85% 55%; /* #E879C7 */
+  --background: 275 45% 97%; /* Softer purple-tinted white */
+  --foreground: 275 20% 15%;
+  --muted: 275 30% 95%;
+  --muted-foreground: 275 15% 45%;
+  --popover: 275 40% 99%;
+  --popover-foreground: 275 20% 15%;
+  --card: 275 40% 99%;
+  --card-foreground: 275 20% 15%;
+  --border: 275 25% 88%;
+  --input: 275 25% 92%;
+  --primary: 270 75% 60%; /* Rich violet */
   --primary-foreground: 0 0% 100%;
-  --secondary: 280 70% 65%; /* #A78BFA */
-  --secondary-foreground: 0 0% 100%;
-  --accent: 340 82% 70%; /* #F472B6 */
+  --secondary: 280 60% 70%; /* Harmonious lavender */
+  --secondary-foreground: 275 20% 15%;
+  --accent: 285 70% 65%; /* Complementary purple accent */
   --accent-foreground: 0 0% 100%;
-  --success: 155 75% 60%; /* #4ADE80 */
+  --success: 155 75% 55%;
   --success-foreground: 0 0% 100%;
-  --destructive: 0 84% 70%;
+  --destructive: 0 70% 65%;
   --destructive-foreground: 60 9% 98%;
-  --ring: 315 85% 55%;
+  --ring: 270 75% 60%;
   --radius: 1rem;
-  --custom-dark: #17111d; /* Custom dark shade */
 }
 
 .dark {
-  --background: 270 30% 5%; /* Deeper purple background */
-  --foreground: 0 0% 98%; /* Pure white text */
-  --muted: 270 25% 9%; /* Muted areas with more depth */
-  --muted-foreground: 0 0% 85%; /* Light gray muted text */
-  --popover: 270 25% 7%; /* Darker popover for depth */
-  --popover-foreground: 0 0% 98%; /* Pure white text */
-  --card: 270 22% 8%; /* Card with subtle purple tint */
-  --card-foreground: 0 0% 98%; /* Pure white text */
-  --border: 270 20% 15%; /* More defined borders */
-  --input: 270 20% 12%; /* Input fields slightly darker */
-  --primary: 315 90% 58%; /* More vibrant pink */
-  --primary-foreground: 0 0% 98%; /* Pure white text */
-  --secondary: 280 40% 20%; /* Richer purple secondary */
-  --secondary-foreground: 0 0% 98%; /* Pure white text */
-  --accent: 330 85% 65%; /* Brighter accent pink */
-  --accent-foreground: 0 0% 98%; /* Pure white text */
-  --success: 155 75% 55%;
-  --success-foreground: 0 0% 98%; /* Pure white text */
-  --destructive: 0 84% 65%;
+  --background: 275 35% 8%; /* Rich deep purple background */
+  --foreground: 275 10% 95%;
+  --muted: 275 30% 12%;
+  --muted-foreground: 275 8% 75%;
+  --popover: 275 30% 10%;
+  --popover-foreground: 275 10% 95%;
+  --card: 275 25% 11%;
+  --card-foreground: 275 10% 95%;
+  --border: 275 20% 20%;
+  --input: 275 25% 15%;
+  --primary: 270 80% 65%; /* Brighter violet for dark mode */
+  --primary-foreground: 275 35% 8%;
+  --secondary: 280 50% 25%;
+  --secondary-foreground: 275 10% 95%;
+  --accent: 285 75% 70%;
+  --accent-foreground: 275 35% 8%;
+  --success: 155 70% 50%;
+  --success-foreground: 275 35% 8%;
+  --destructive: 0 75% 60%;
   --destructive-foreground: 0 0% 98%; /* Pure white text */
   --ring: 315 90% 58%;
   --radius: 0.75rem;

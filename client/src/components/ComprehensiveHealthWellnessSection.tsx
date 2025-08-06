@@ -279,26 +279,26 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-900 dark:to-indigo-950 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/50 to-background p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <Heart className="h-8 w-8 text-red-500" />
+              <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+                <Heart className="h-8 w-8 text-primary" />
                 Health & Wellness Management
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Comprehensive fitness tracking and performance analytics for {getDateLabel()}
               </p>
             </div>
             <div className="flex gap-2">
-              <Badge variant="outline" className="px-3 py-1">
+              <Badge variant="secondary" className="px-3 py-1">
                 <Activity className="h-4 w-4 mr-1" />
                 {performanceData.totalWorkouts} Total Workouts
               </Badge>
-              <Badge variant="outline" className="px-3 py-1">
+              <Badge variant="secondary" className="px-3 py-1">
                 <Weight className="h-4 w-4 mr-1" />
                 {performanceData.currentWeight} lbs Current
               </Badge>
@@ -307,36 +307,36 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
 
           {/* Performance Dashboard Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Weight Trend (30d)</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm text-muted-foreground">Weight Trend (30d)</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {performanceData.weightTrend > 0 ? '+' : ''}{performanceData.weightTrend.toFixed(1)} lbs
                     </p>
                   </div>
-                  <div className={`p-2 rounded-full ${performanceData.weightTrend < 0 ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'}`}>
+                  <div className={`p-2 rounded-full ${performanceData.weightTrend < 0 ? 'bg-success/20' : 'bg-destructive/20'}`}>
                     {performanceData.weightTrend < 0 ? 
-                      <TrendingDown className="h-5 w-5 text-green-600 dark:text-green-400" /> :
-                      <TrendingUp className="h-5 w-5 text-red-600 dark:text-red-400" />
+                      <TrendingDown className="h-5 w-5 text-success" /> :
+                      <TrendingUp className="h-5 w-5 text-destructive" />
                     }
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Workout Consistency</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm text-muted-foreground">Workout Consistency</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {performanceData.workoutConsistency.toFixed(0)}%
                     </p>
                   </div>
-                  <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
-                    <Dumbbell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 rounded-full bg-primary/20">
+                    <Dumbbell className="h-5 w-5 text-primary" />
                   </div>
                 </div>
                 <Progress 
@@ -346,34 +346,34 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Daily Calories</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm text-muted-foreground">Daily Calories</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {performanceData.dailyCalories}
                     </p>
-                    <p className="text-xs text-gray-500">Target: {ageRecommendations.baseCalories}</p>
+                    <p className="text-xs text-muted-foreground">Target: {ageRecommendations.baseCalories}</p>
                   </div>
-                  <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900">
-                    <Apple className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  <div className="p-2 rounded-full bg-accent/20">
+                    <Apple className="h-5 w-5 text-accent" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Body Fat %</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-sm text-muted-foreground">Body Fat %</p>
+                    <p className="text-2xl font-bold text-foreground">
                       {performanceData.bodyFatPercentage.toFixed(1)}%
                     </p>
                   </div>
-                  <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900">
-                    <Scale className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <div className="p-2 rounded-full bg-secondary/20">
+                    <Scale className="h-5 w-5 text-secondary" />
                   </div>
                 </div>
               </CardContent>
@@ -397,7 +397,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Weight Tracking Chart */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Weight className="h-5 w-5" />
@@ -419,7 +419,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
               </Card>
 
               {/* Nutrition Breakdown */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <PieChartIcon className="h-5 w-5" />
@@ -452,39 +452,39 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-shadow"
+              <Card className="bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
                     onClick={() => setShowModal('workout')}>
                 <CardContent className="p-6 text-center">
-                  <Dumbbell className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                  <h3 className="font-semibold mb-2">Log Workout</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Record your exercise session</p>
+                  <Dumbbell className="h-8 w-8 mx-auto mb-2 text-primary" />
+                  <h3 className="font-semibold mb-2 text-foreground">Log Workout</h3>
+                  <p className="text-sm text-muted-foreground">Record your exercise session</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-shadow"
+              <Card className="bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
                     onClick={() => setShowModal('weight')}>
                 <CardContent className="p-6 text-center">
-                  <Scale className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                  <h3 className="font-semibold mb-2">Record Weight</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Track body composition</p>
+                  <Scale className="h-8 w-8 mx-auto mb-2 text-secondary" />
+                  <h3 className="font-semibold mb-2 text-foreground">Record Weight</h3>
+                  <p className="text-sm text-muted-foreground">Track body composition</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-shadow"
+              <Card className="bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
                     onClick={() => setShowModal('nutrition')}>
                 <CardContent className="p-6 text-center">
-                  <Apple className="h-8 w-8 mx-auto mb-2 text-orange-600" />
-                  <h3 className="font-semibold mb-2">Log Meal</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Track nutrition intake</p>
+                  <Apple className="h-8 w-8 mx-auto mb-2 text-accent" />
+                  <h3 className="font-semibold mb-2 text-foreground">Log Meal</h3>
+                  <p className="text-sm text-muted-foreground">Track nutrition intake</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg transition-shadow"
+              <Card className="bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
                     onClick={() => setShowModal('goal')}>
                 <CardContent className="p-6 text-center">
-                  <Target className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                  <h3 className="font-semibold mb-2">Set Goal</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Define fitness targets</p>
+                  <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
+                  <h3 className="font-semibold mb-2 text-foreground">Set Goal</h3>
+                  <p className="text-sm text-muted-foreground">Define fitness targets</p>
                 </CardContent>
               </Card>
             </div>
@@ -508,7 +508,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Today's Workouts</CardTitle>
                 </CardHeader>
@@ -541,7 +541,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Workout Stats</CardTitle>
                 </CardHeader>
@@ -576,7 +576,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Weekly Progress</CardTitle>
                 </CardHeader>
@@ -608,7 +608,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Today's Nutrition</CardTitle>
                 </CardHeader>
@@ -650,7 +650,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Age-Based Recommendations</CardTitle>
                 </CardHeader>
@@ -722,7 +722,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Weight History</CardTitle>
                 </CardHeader>
@@ -766,7 +766,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Body Measurements</CardTitle>
                 </CardHeader>
@@ -813,7 +813,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Active Goals</CardTitle>
                 </CardHeader>
@@ -860,7 +860,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Goal Categories</CardTitle>
                 </CardHeader>
@@ -888,7 +888,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>Performance Trends</CardTitle>
                 </CardHeader>
@@ -934,7 +934,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle>AI Insights</CardTitle>
                 </CardHeader>
