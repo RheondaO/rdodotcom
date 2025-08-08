@@ -307,7 +307,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
 
           {/* Performance Dashboard Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <Card className="bg-card border-border">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -326,7 +326,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
               </CardContent>
             </Card>
 
-            <Card className="bg-card border-border">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -346,7 +346,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
               </CardContent>
             </Card>
 
-            <Card className="bg-card border-border">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -363,7 +363,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
               </CardContent>
             </Card>
 
-            <Card className="bg-card border-border">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -397,7 +397,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Weight Tracking Chart */}
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Weight className="h-5 w-5" />
@@ -419,7 +419,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
               </Card>
 
               {/* Nutrition Breakdown */}
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <PieChartIcon className="h-5 w-5" />
@@ -452,7 +452,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl cursor-pointer hover:shadow-xl transition-shadow"
                     onClick={() => setShowModal('workout')}>
                 <CardContent className="p-6 text-center">
                   <Dumbbell className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -461,7 +461,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl cursor-pointer hover:shadow-xl transition-shadow"
                     onClick={() => setShowModal('weight')}>
                 <CardContent className="p-6 text-center">
                   <Scale className="h-8 w-8 mx-auto mb-2 text-secondary" />
@@ -470,7 +470,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl cursor-pointer hover:shadow-xl transition-shadow"
                     onClick={() => setShowModal('nutrition')}>
                 <CardContent className="p-6 text-center">
                   <Apple className="h-8 w-8 mx-auto mb-2 text-accent" />
@@ -479,7 +479,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border cursor-pointer hover:shadow-lg transition-shadow"
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl cursor-pointer hover:shadow-xl transition-shadow"
                     onClick={() => setShowModal('goal')}>
                 <CardContent className="p-6 text-center">
                   <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -508,7 +508,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Today's Workouts</CardTitle>
                 </CardHeader>
@@ -541,7 +541,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Workout Stats</CardTitle>
                 </CardHeader>
@@ -576,7 +576,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Weekly Progress</CardTitle>
                 </CardHeader>
@@ -608,7 +608,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Today's Nutrition</CardTitle>
                 </CardHeader>
@@ -650,7 +650,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Age-Based Recommendations</CardTitle>
                 </CardHeader>
@@ -722,7 +722,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Weight History</CardTitle>
                 </CardHeader>
@@ -766,7 +766,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Body Measurements</CardTitle>
                 </CardHeader>
@@ -813,7 +813,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Active Goals</CardTitle>
                 </CardHeader>
@@ -860,7 +860,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Goal Categories</CardTitle>
                 </CardHeader>
@@ -888,7 +888,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>Performance Trends</CardTitle>
                 </CardHeader>
@@ -934,7 +934,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 </CardContent>
               </Card>
 
-              <Card className="bg-card border-border">
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <CardTitle>AI Insights</CardTitle>
                 </CardHeader>
