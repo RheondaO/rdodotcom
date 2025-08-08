@@ -141,7 +141,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
 
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-600">Net Worth</CardTitle>
           </CardHeader>
@@ -154,7 +154,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-600">Monthly Cash Flow</CardTitle>
           </CardHeader>
@@ -168,7 +168,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-600">Investment Value</CardTitle>
           </CardHeader>
@@ -181,7 +181,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-gray-600">Savings Rate</CardTitle>
           </CardHeader>
@@ -195,7 +195,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle>Net Worth Trend</CardTitle>
           </CardHeader>
@@ -216,7 +216,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader>
             <CardTitle>Asset Allocation</CardTitle>
           </CardHeader>
@@ -246,7 +246,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
       </div>
 
       {/* Budget Overview */}
-      <Card>
+      <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
         <CardHeader>
           <CardTitle>Monthly Budget Overview</CardTitle>
         </CardHeader>
@@ -278,7 +278,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
 
       {/* Financial Health Indicators */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Emergency Fund</CardTitle>
           </CardHeader>
@@ -302,7 +302,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Debt-to-Income Ratio</CardTitle>
           </CardHeader>
@@ -326,7 +326,7 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Investment Allocation</CardTitle>
           </CardHeader>

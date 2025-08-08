@@ -402,7 +402,7 @@ export default function BlogContentStudio() {
           {/* Workflow Status */}
           {workflowStatus && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">Ideas</CardTitle>
                 </CardHeader>
@@ -413,7 +413,7 @@ export default function BlogContentStudio() {
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">Posts</CardTitle>
                 </CardHeader>
@@ -424,7 +424,7 @@ export default function BlogContentStudio() {
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">Upcoming</CardTitle>
                 </CardHeader>
@@ -433,7 +433,7 @@ export default function BlogContentStudio() {
                   <div className="text-sm text-gray-600 dark:text-gray-400">scheduled</div>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">Overdue</CardTitle>
                 </CardHeader>
@@ -446,7 +446,7 @@ export default function BlogContentStudio() {
           )}
 
           {/* Recent Ideas */}
-          <Card>
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lightbulb className="h-5 w-5" />
@@ -476,7 +476,7 @@ export default function BlogContentStudio() {
           </Card>
 
           {/* Recent Posts */}
-          <Card>
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
@@ -518,7 +518,7 @@ export default function BlogContentStudio() {
 
         <TabsContent value="posts" className="space-y-6">
           {/* Blog Posts List View */}
-          <Card>
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
