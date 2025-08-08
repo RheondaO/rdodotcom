@@ -169,7 +169,7 @@ export default function SiteMapSection({ onNavigate, isReadOnly = false }: SiteM
       color: "from-purple-400 to-indigo-500",
       items: [
         { key: "apps", label: "App Development", icon: Code2, description: "Full-stack project management with task tracking and sprint planning" },
-        { key: "github-repo", label: "Belle Journal GitHub Repository", icon: SiGithub, description: "View source code and contribute to Belle Journal development", external: "https://github.com/replit-user/belle-journal" }
+        { key: "github-repo", label: "Belle Journal GitHub Repository", icon: SiGithub, description: "View source code and contribute to Belle Journal development", external: "https://github.com/RheondaO/LifeTrackDash.git" }
       ]
     }
   ];
