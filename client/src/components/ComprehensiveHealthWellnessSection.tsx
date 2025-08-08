@@ -285,7 +285,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+              <h1 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent flex items-center gap-3">
                 <Heart className="h-8 w-8 text-primary" />
                 Health & Wellness Tracking
               </h1>
