@@ -210,9 +210,16 @@ export async function createAIDevProject(itemData: any) {
             createdAt: response.created_time,
             updatedAt: response.last_edited_time
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating AI Dev Project in Notion:", error);
-        throw new Error("Failed to create AI Dev Project in Notion");
+        console.error("Error details:", error.message);
+        console.error("Error code:", error.code);
+        console.error("Error body:", error.body);
+        console.error("Database ID:", databaseId);
+        console.error("Properties being sent:", JSON.stringify(properties, null, 2));
+        
+        // Include specific error details in the response
+        throw new Error(`Failed to create AI Dev Project in Notion: ${error.message || error.code || 'Unknown error'}`);
     }
 }
 
