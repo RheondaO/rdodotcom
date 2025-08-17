@@ -1027,7 +1027,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{task.title}</p>
                         <p className="text-xs text-muted-foreground dark:text-gray-400">
-                          {projects.find(p => p.id === task.projectId)?.name} • {task.category}
+                          {projects.find(p => p.notionId === task.projectId)?.name} • {task.category}
                         </p>
                       </div>
                       <Badge className={getStatusColor(task.status)} variant="outline">
@@ -1592,7 +1592,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             </Select>
                           ) : (
                             <span className="text-sm text-gray-900 dark:text-white">
-                              {projects.find(p => p.id === task.projectId)?.name || 'No Project'}
+                              {projects.find(p => p.notionId === task.projectId)?.name || 'No Project'}
                             </span>
                           )}
                         </td>
