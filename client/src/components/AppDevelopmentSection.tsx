@@ -1465,8 +1465,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('New Task button clicked');
+                  console.log('New Task button clicked, current showNewTaskForm:', showNewTaskForm);
+                  console.log('Setting showNewTaskForm to true...');
                   setShowNewTaskForm(true);
+                  console.log('showNewTaskForm should now be true');
+                  setTimeout(() => console.log('After timeout - showNewTaskForm is:', showNewTaskForm), 100);
                 }}
                 disabled={isReadOnly}
                 className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
@@ -2493,7 +2496,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       <Dialog open={showNewTaskForm} onOpenChange={setShowNewTaskForm}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-blue-600 dark:text-blue-400">Create New Task</DialogTitle>
+            <DialogTitle className="text-blue-600 dark:text-blue-400">
+              Create New Task {showNewTaskForm && "(MODAL IS OPEN)"}
+            </DialogTitle>
           </DialogHeader>
           <Form {...taskForm}>
             <form onSubmit={taskForm.handleSubmit(onSubmitTask)} className="space-y-4">
