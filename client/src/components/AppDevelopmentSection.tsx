@@ -286,15 +286,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     select: (data: any[]) => data || []
   });
   
-  // Debug the query state
-  console.log('🔍 Query Debug:', { 
-    isLoading, 
-    isError, 
-    error: error?.message,
-    dataLength: allAIDevItems?.length,
-    rawData: allAIDevItems 
-  });
-
   // Filter items by type - match the actual types in the database
   const projects = allAIDevItems.filter(item => 
     ['web application', 'api backend', 'mobile app', 'desktop app', 'library', 'tool', 'Project'].includes(item.type)
@@ -302,14 +293,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const tasks = allAIDevItems.filter(item => item.type === 'Task');
   const testItems = allAIDevItems.filter(item => item.type === 'Test Item');
   const promptTemplates = allAIDevItems.filter(item => item.type === 'Library Prompt');
-
-  // Debug logging - remove after fix
-  console.log('🔍 AI Dev Data Debug:', {
-    allAIDevItems: allAIDevItems.length,
-    projects: projects.length,
-    projectTypes: allAIDevItems.map(item => item.type),
-    projectNames: projects.map(p => p.name)
-  });
 
 
 
@@ -850,7 +833,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           </div>
                         </div>
                         <Badge className={getStatusColor(project.status)}>
-                          {project.status.replace('_', ' ')}
+                          {(project.status || 'Unknown').replace('_', ' ')}
                         </Badge>
                       </div>
                       
@@ -939,7 +922,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         </p>
                       </div>
                       <Badge className={getStatusColor(task.status)} variant="outline">
-                        {task.status.replace('_', ' ')}
+                        {(task.status || 'Unknown').replace('_', ' ')}
                       </Badge>
                     </div>
                   ))}
@@ -1096,11 +1079,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredProjects.map((project) => (
-                      <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                      <tr key={project.notionId || project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
-                              {getProjectIcon(project.projectType)}
+                              {getProjectIcon(project.type || 'web')}
                             </div>
                             <div className="flex-1 min-w-0">
                               {editingProject === project.id ? (
@@ -1147,7 +1130,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             </Select>
                           ) : (
                             <span className="text-sm text-gray-900 dark:text-white capitalize">
-                              {project.projectType.replace('_', ' ')}
+                              {(project.type || 'Unknown').replace('_', ' ')}
                             </span>
                           )}
                         </td>
@@ -1170,7 +1153,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             </Select>
                           ) : (
                             <Badge className={getStatusColor(project.status)}>
-                              {project.status.replace('_', ' ')}
+                              {(project.status || 'Unknown').replace('_', ' ')}
                             </Badge>
                           )}
                         </td>
@@ -1500,7 +1483,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             </Select>
                           ) : (
                             <Badge className={getStatusColor(task.status)}>
-                              {task.status.replace('_', ' ')}
+                              {(task.status || 'Unknown').replace('_', ' ')}
                             </Badge>
                           )}
                         </td>
@@ -1797,7 +1780,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             </Select>
                           ) : (
                             <Badge className={getTestStatusColor(testItem.status)}>
-                              {testItem.status.replace('_', ' ')}
+                              {(testItem.status || 'Unknown').replace('_', ' ')}
                             </Badge>
                           )}
                         </td>
@@ -2019,7 +2002,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                     </div>
                     <Badge className={getCategoryColor(template.category)}>
-                      {template.category.replace('_', ' ')}
+                      {(template.category || 'Unknown').replace('_', ' ')}
                     </Badge>
                   </div>
                 </CardHeader>
