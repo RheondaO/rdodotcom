@@ -1157,9 +1157,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                               <SelectContent>
                                 <SelectItem value="web">Web App</SelectItem>
                                 <SelectItem value="mobile">Mobile App</SelectItem>
-                                <SelectItem value="desktop">Desktop</SelectItem>
-                                <SelectItem value="api">API</SelectItem>
-                                <SelectItem value="database">Database</SelectItem>
+                                <SelectItem value="desktop">Desktop App</SelectItem>
+                                <SelectItem value="api">API Backend</SelectItem>
+                                <SelectItem value="library">Library</SelectItem>
+                                <SelectItem value="tool">Tool</SelectItem>
                               </SelectContent>
                             </Select>
                           ) : (
@@ -2187,7 +2188,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           <SelectItem value="web">Web Application</SelectItem>
                           <SelectItem value="mobile">Mobile App</SelectItem>
                           <SelectItem value="desktop">Desktop App</SelectItem>
-                          <SelectItem value="api">API/Backend</SelectItem>
+                          <SelectItem value="api">API Backend</SelectItem>
+                          <SelectItem value="library">Library</SelectItem>
+                          <SelectItem value="tool">Tool</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
