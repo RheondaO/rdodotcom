@@ -61,6 +61,82 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
+// Mock data generation for prompt templates
+const generateMockPrompts = (): PromptTemplate[] => [
+  {
+    id: 1,
+    title: "React Component Generator",
+    description: "Generate a functional React component with TypeScript",
+    category: "code_generation",
+    language: "TypeScript",
+    framework: "React",
+    prompt: "Create a React functional component in TypeScript that:\n- Uses proper TypeScript types\n- Includes basic props interface\n- Has proper JSX structure\n- Follows modern React patterns\n\nComponent name: [COMPONENT_NAME]\nProps needed: [PROPS_LIST]",
+    tags: ["react", "typescript", "component", "frontend"],
+    isCustom: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 2,
+    title: "API Endpoint Generator",
+    description: "Generate Express.js API endpoint with proper error handling",
+    category: "code_generation",
+    language: "JavaScript",
+    framework: "Express",
+    prompt: "Create an Express.js API endpoint that:\n- Has proper error handling\n- Validates request data\n- Returns structured JSON responses\n- Includes appropriate HTTP status codes\n\nEndpoint: [ENDPOINT_PATH]\nMethod: [HTTP_METHOD]\nPurpose: [ENDPOINT_PURPOSE]",
+    tags: ["express", "api", "backend", "javascript"],
+    isCustom: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 3,
+    title: "Database Query Optimizer",
+    description: "Optimize SQL queries for better performance",
+    category: "database",
+    language: "SQL",
+    prompt: "Analyze and optimize this SQL query:\n[QUERY]\n\nProvide:\n- Performance analysis\n- Optimization suggestions\n- Index recommendations\n- Rewritten optimized query",
+    tags: ["sql", "optimization", "database", "performance"],
+    isCustom: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 4,
+    title: "Bug Debugging Assistant",
+    description: "Systematic approach to debug code issues",
+    category: "debugging",
+    prompt: "Help debug this issue:\n\nCode: [CODE_SNIPPET]\nError: [ERROR_MESSAGE]\nExpected behavior: [EXPECTED_BEHAVIOR]\n\nProvide:\n- Root cause analysis\n- Step-by-step debugging approach\n- Possible solutions\n- Prevention strategies",
+    tags: ["debugging", "troubleshooting", "error-handling"],
+    isCustom: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 5,
+    title: "Mobile-First CSS Generator",
+    description: "Generate responsive CSS with mobile-first approach",
+    category: "mobile",
+    language: "CSS",
+    prompt: "Create mobile-first responsive CSS for:\n[ELEMENT_DESCRIPTION]\n\nInclude:\n- Mobile base styles (320px+)\n- Tablet breakpoint (768px+)\n- Desktop breakpoint (1024px+)\n- Flexbox/Grid layout\n- Touch-friendly interactions",
+    tags: ["css", "mobile", "responsive", "web-design"],
+    isCustom: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 6,
+    title: "Social Media Post Generator",
+    description: "Generate engaging social media content for tech posts",
+    category: "social_media",
+    prompt: "Create social media content for:\nTopic: [TOPIC]\nPlatform: [PLATFORM]\n\nGenerate:\n- Engaging headline\n- Main content (appropriate length)\n- Relevant hashtags\n- Call-to-action\n- Visual description suggestions",
+    tags: ["social-media", "content", "marketing"],
+    isCustom: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
 // Form Schemas
 const newProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -84,6 +160,16 @@ const newTaskSchema = z.object({
   priority: z.enum(["low", "medium", "high"]).optional()
 });
 
+const newPromptSchema = z.object({
+  title: z.string().min(1, "Prompt title is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.enum(["code_generation", "debugging", "documentation", "database", "web_design", "mobile", "social_media", "custom"]),
+  language: z.string().optional(),
+  framework: z.string().optional(),
+  prompt: z.string().min(10, "Prompt must be at least 10 characters"),
+  tags: z.string().optional()
+});
+
 const testItemSchema = z.object({
   projectId: z.string().min(1, "Project is required"),
   title: z.string().min(1, "Test item title is required"),
@@ -98,6 +184,7 @@ const testItemSchema = z.object({
 type NewProjectForm = z.infer<typeof newProjectSchema>;
 type NewTaskForm = z.infer<typeof newTaskSchema>;
 type TestItemForm = z.infer<typeof testItemSchema>;
+type NewPromptForm = z.infer<typeof newPromptSchema>;
 
 interface AppProject {
   id: number;
@@ -140,28 +227,36 @@ interface AppDevelopmentSectionProps {
   isReadOnly?: boolean;
 }
 
+// Prompt Library Interfaces
+interface PromptTemplate {
+  id: number;
+  title: string;
+  description: string;
+  category: "code_generation" | "debugging" | "documentation" | "database" | "web_design" | "mobile" | "social_media" | "custom";
+  language?: string;
+  framework?: string;
+  prompt: string;
+  tags: string[];
+  isCustom: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "time">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "library">("overview");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [showTestItemForm, setShowTestItemForm] = useState(false);
   const { toast } = useToast();
   
-  // Time tracking state
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [startTime, setStartTime] = useState<Date | null>(null);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [activeTask, setActiveTask] = useState<string>("");
-  const [timeEntries, setTimeEntries] = useState<Array<{
-    id: number;
-    projectId: number;
-    taskDescription: string;
-    startTime: Date;
-    endTime: Date;
-    duration: number; // in minutes
-    date: string;
-  }>>([]);
+  // Library state
+  const [showNewPromptForm, setShowNewPromptForm] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [editingPrompt, setEditingPrompt] = useState<number | null>(null);
+  const [editingPromptValues, setEditingPromptValues] = useState<any>({});
   
   // Enhanced UI state
   const [editingProject, setEditingProject] = useState<number | null>(null);
@@ -182,6 +277,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const { data: tasks = [] } = useQuery({
     queryKey: ['/api/app-tasks'],
     select: (data: any[]) => data || []
+  });
+
+  // Fetch prompt templates from API (will fall back to mock data for now)
+  const { data: promptTemplates = [] } = useQuery({
+    queryKey: ['/api/prompt-templates'],
+    select: (data: PromptTemplate[]) => data || [],
+    initialData: () => generateMockPrompts() // Mock data fallback
   });
 
   // Mutations
@@ -308,7 +410,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     return <Icon className="h-4 w-4" />;
   };
 
-  const getCategoryIcon = (category: string) => {
+  const getTaskCategoryIcon = (category: string) => {
     const icons = {
       feature: Lightbulb,
       bug: Bug,
@@ -318,6 +420,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     const Icon = icons[category as keyof typeof icons] || Lightbulb;
     return <Icon className="h-4 w-4" />;
   };
+
+
 
   // Enhanced utility functions for editing and management
   const startEditingProject = (project: AppProject) => {
@@ -458,54 +562,34 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     return task.status === taskFilter;
   });
 
-  // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isTimerRunning && startTime) {
-      interval = setInterval(() => {
-        setElapsedTime(Math.floor((Date.now() - startTime.getTime()) / 1000));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isTimerRunning, startTime]);
-
-  // Timer functions
-  const startTimer = (taskDescription: string = "") => {
-    setStartTime(new Date());
-    setIsTimerRunning(true);
-    setActiveTask(taskDescription);
-    setElapsedTime(0);
+  // Prompt library helper functions
+  const getCategoryIcon = (category: string) => {
+    const icons = {
+      code_generation: Code2,
+      debugging: Bug,
+      documentation: FileText,
+      database: Database,
+      web_design: Globe,
+      mobile: Smartphone,
+      social_media: MessageSquare,
+      custom: Settings
+    };
+    const Icon = icons[category as keyof typeof icons] || Code2;
+    return <Icon className="h-4 w-4" />;
   };
 
-  const stopTimer = () => {
-    if (startTime && isTimerRunning) {
-      const endTime = new Date();
-      const duration = Math.floor((endTime.getTime() - startTime.getTime()) / 60000); // minutes
-      
-      const newEntry = {
-        id: timeEntries.length + 1,
-        projectId: selectedProject || 1,
-        taskDescription: activeTask,
-        startTime,
-        endTime,
-        duration,
-        date: format(selectedDate, 'yyyy-MM-dd')
-      };
-      
-      setTimeEntries([...timeEntries, newEntry]);
-    }
-    
-    setIsTimerRunning(false);
-    setStartTime(null);
-    setElapsedTime(0);
-    setActiveTask("");
-  };
-
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      code_generation: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+      debugging: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400", 
+      documentation: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+      database: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+      web_design: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+      mobile: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
+      social_media: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400",
+      custom: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
+    };
+    return colors[category as keyof typeof colors] || colors.code_generation;
   };
 
   // Testing Template for AI Development Projects
@@ -560,7 +644,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             { key: "projects", label: "Projects", icon: Code2 },
             { key: "tasks", label: "Tasks", icon: CheckSquare },
             { key: "testing", label: "Testing & QA", icon: AlertCircle },
-            { key: "time", label: "Time Tracking", icon: Timer }
+            { key: "library", label: "Library", icon: Folder }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -755,7 +839,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   {tasks.slice(0, 5).map((task) => (
                     <div key={task.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-lg">
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
-                        {getCategoryIcon(task.category)}
+                        {getTaskCategoryIcon(task.category)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{task.title}</p>
@@ -1156,7 +1240,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3 flex-1">
                       <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
-                        {getCategoryIcon(task.category)}
+                        {getTaskCategoryIcon(task.category)}
                       </div>
                       <div className="flex-1 min-w-0">
                         {editingTask === task.id ? (
@@ -1491,193 +1575,191 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       )}
 
-      {/* Time Tracking View */}
-      {activeView === "time" && (
+      {/* Library View */}
+      {activeView === "library" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Time Tracking</h2>
-            {!isTimerRunning && (
-              <Button 
-                onClick={() => !isReadOnly && startTimer()}
-                disabled={isReadOnly}
-                className={`bg-gradient-to-r from-green-400 to-emerald-500 text-white ${
-                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Start Timer
-              </Button>
-            )}
+            <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Prompt Library</h2>
+            <Button 
+              onClick={() => setShowNewPromptForm(true)}
+              disabled={isReadOnly}
+              className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
+                isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Prompt
+            </Button>
           </div>
 
-          <Card className="border-green-100 dark:border-green-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-green-600 dark:text-green-400">
-                <Timer className="h-5 w-5" />
-                Time Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {projects.map((project) => (
-                  <div key={project.id} className="p-4 bg-white/60 dark:bg-[#17111d]/60 rounded-xl">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
-                        {getProjectIcon(project.projectType)}
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{project.name}</h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">
-                          {project.actualHours}h logged
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground dark:text-gray-400">Progress</span>
-                        <span className="font-medium">
-                          {project.estimatedHours ? 
-                            `${Math.round((project.actualHours / project.estimatedHours) * 100)}%` : 
-                            'No estimate'
-                          }
-                        </span>
-                      </div>
-                      {project.estimatedHours && (
-                        <Progress value={(project.actualHours / project.estimatedHours) * 100} className="h-2" />
-                      )}
-                    </div>
-                  </div>
-                ))}
+          {/* Search and Filters */}
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Search prompts..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="code_generation">Code Generation</SelectItem>
+                      <SelectItem value="debugging">Debugging</SelectItem>
+                      <SelectItem value="documentation">Documentation</SelectItem>
+                      <SelectItem value="database">Database</SelectItem>
+                      <SelectItem value="web_design">Web Design</SelectItem>
+                      <SelectItem value="mobile">Mobile</SelectItem>
+                      <SelectItem value="social_media">Social Media</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Languages</SelectItem>
+                      <SelectItem value="JavaScript">JavaScript</SelectItem>
+                      <SelectItem value="TypeScript">TypeScript</SelectItem>
+                      <SelectItem value="Python">Python</SelectItem>
+                      <SelectItem value="React">React</SelectItem>
+                      <SelectItem value="Node.js">Node.js</SelectItem>
+                      <SelectItem value="SQL">SQL</SelectItem>
+                      <SelectItem value="CSS">CSS</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Active Timer */}
-          <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                <Clock className="h-5 w-5" />
-                Active Session
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!isTimerRunning ? (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Task Description</label>
-                    <input
-                      type="text"
-                      placeholder="What are you working on?"
-                      className={`w-full p-3 border rounded-lg dark:bg-[#17111d] dark:border-gray-600 ${
-                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                      value={activeTask}
-                      onChange={(e) => setActiveTask(e.target.value)}
-                      disabled={isReadOnly}
-                      readOnly={isReadOnly}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Project</label>
-                    <select
-                      className={`w-full p-3 border rounded-lg dark:bg-[#17111d] dark:border-gray-600 ${
-                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                      value={selectedProject || ""}
-                      onChange={(e) => setSelectedProject(Number(e.target.value))}
-                      disabled={isReadOnly}
-                    >
-                      <option value="">Select a project</option>
-                      {activeProjects.map(project => (
-                        <option key={project.id} value={project.id}>
-                          {project.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <Button 
-                    onClick={() => !isReadOnly && startTimer(activeTask)}
-                    disabled={isReadOnly}
-                    className={`w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white ${
-                      isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <Play className="h-4 w-4 mr-2" />
-                    Start Session
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center p-8">
-                  <div className="text-6xl font-mono font-bold text-green-600 dark:text-green-400 mb-4">
-                    {formatTime(elapsedTime)}
-                  </div>
-                  <div className="space-y-2 mb-6">
-                    <p className="text-gray-900 dark:text-white font-medium">
-                      {activeTask || "Unnamed task"}
-                    </p>
-                    <p className="text-muted-foreground dark:text-gray-400">
-                      {projects.find(p => p.id === selectedProject)?.name || "No project selected"}
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={stopTimer}
-                    disabled={isReadOnly}
-                    variant="destructive"
-                    className={`bg-red-500 hover:bg-red-600 ${
-                      isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <Square className="h-4 w-4 mr-2" />
-                    Stop Session
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Time Entries */}
-          {timeEntries.length > 0 && (
-            <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
-                  <BarChart3 className="h-5 w-5" />
-                  Today's Sessions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {timeEntries.map((entry) => (
-                    <div key={entry.id} className="p-4 bg-white/60 dark:bg-[#17111d]/60 rounded-xl border">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">
-                            {entry.taskDescription || "Unnamed task"}
-                          </h4>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400">
-                            {projects.find(p => p.id === entry.projectId)?.name || "No project"}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold text-green-600 dark:text-green-400">
-                            {entry.duration}m
-                          </div>
-                          <div className="text-xs text-muted-foreground dark:text-gray-400">
-                            {format(entry.startTime, 'HH:mm')} - {format(entry.endTime, 'HH:mm')}
-                          </div>
-                        </div>
+          {/* Prompt Templates Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {promptTemplates
+              .filter(template => {
+                const matchesSearch = searchQuery === '' || 
+                  template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                
+                const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
+                const matchesLanguage = selectedLanguage === 'all' || template.language === selectedLanguage;
+                
+                return matchesSearch && matchesCategory && matchesLanguage;
+              })
+              .map((template) => (
+              <Card key={template.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                        {getCategoryIcon(template.category)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg truncate">{template.title}</CardTitle>
+                        <p className="text-sm text-muted-foreground dark:text-gray-400">
+                          {template.description}
+                        </p>
                       </div>
                     </div>
-                  ))}
-                  <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                    <div className="font-semibold text-green-700 dark:text-green-400">
-                      Total today: {timeEntries.reduce((sum, entry) => sum + entry.duration, 0)} minutes
-                    </div>
+                    <Badge className={getCategoryColor(template.category)}>
+                      {template.category.replace('_', ' ')}
+                    </Badge>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardHeader>
+                
+                <CardContent className="space-y-4">
+                  {template.language && (
+                    <div className="flex items-center gap-2">
+                      <Code2 className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium">{template.language}</span>
+                      {template.framework && (
+                        <span className="text-sm text-muted-foreground">• {template.framework}</span>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                    <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-mono">
+                      {template.prompt.length > 200 ? 
+                        `${template.prompt.substring(0, 200)}...` : 
+                        template.prompt
+                      }
+                    </pre>
+                  </div>
+
+                  {template.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {template.tags.map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      size="sm"
+                      onClick={() => navigator.clipboard.writeText(template.prompt)}
+                      className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white flex-1"
+                    >
+                      <FileText className="h-3 w-3 mr-1" />
+                      Copy Prompt
+                    </Button>
+                    {template.isCustom && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingPrompt(template.id);
+                          setEditingPromptValues(template);
+                        }}
+                        disabled={isReadOnly}
+                        className="flex-1"
+                      >
+                        <Edit3 className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {promptTemplates.length === 0 && (
+              <div className="col-span-full">
+                <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                  <CardContent className="p-12 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Folder className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Prompts Found</h3>
+                    <p className="text-muted-foreground dark:text-gray-400 mb-4">
+                      Start building your prompt library by adding your first template!
+                    </p>
+                    <Button
+                      onClick={() => setShowNewPromptForm(true)}
+                      disabled={isReadOnly}
+                      className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create First Prompt
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
