@@ -2497,7 +2497,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-blue-600 dark:text-blue-400">
-              Create New Task {showNewTaskForm && "(MODAL IS OPEN)"}
+              Create New Task
             </DialogTitle>
           </DialogHeader>
           <Form {...taskForm}>
