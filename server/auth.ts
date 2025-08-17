@@ -35,11 +35,9 @@ export const authenticateUser = async (req: AuthenticatedRequest, res: Response,
 export const requireAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   // Check session directly for authentication
   const session = (req as any).session;
+  
   if (!session?.isAuthenticated || !session?.isAdmin) {
-    console.log("🔒 Authentication failed:");
-    console.log("  - Session exists:", !!session);
-    console.log("  - isAuthenticated:", session?.isAuthenticated);
-    console.log("  - isAdmin:", session?.isAdmin);
+    console.log("🔒 Authentication failed - User needs to login as admin");
     return res.status(401).json({ error: 'Authentication required' });
   }
   

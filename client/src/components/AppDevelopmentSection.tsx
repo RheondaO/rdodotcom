@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { 
   Code2, 
@@ -244,6 +245,9 @@ interface PromptTemplate {
 }
 
 export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
+  // Authentication
+  const { isAuthenticated, isAdmin } = useAuth();
+  
   const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "library">("overview");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
@@ -311,8 +315,18 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       toast({ title: "Success", description: "Project created successfully" });
       setShowNewProjectForm(false);
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to create project", variant: "destructive" });
+    onError: (error: any) => {
+      console.log("🚨 Project creation error:", error);
+      const message = error?.message || "Failed to create project";
+      if (message.includes("Authentication") || message.includes("401")) {
+        toast({ 
+          title: "Authentication Required", 
+          description: "Please log in as admin to create projects", 
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Error", description: message, variant: "destructive" });
+      }
     }
   });
 
@@ -1288,12 +1302,19 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                           <Button
                             onClick={() => setShowNewProjectForm(true)}
-                            disabled={isReadOnly}
+                            disabled={isReadOnly || !isAdmin}
                             className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                            title={!isAdmin ? "Admin access required to create projects" : ""}
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Project
                           </Button>
+                          {!isAdmin && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                              <AlertCircle className="h-3 w-3 inline mr-1" />
+                              Admin login required to create projects
+                            </p>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1593,12 +1614,19 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                           <Button
                             onClick={() => setShowNewTaskForm(true)}
-                            disabled={isReadOnly}
+                            disabled={isReadOnly || !isAdmin}
                             className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+                            title={!isAdmin ? "Admin access required to create tasks" : ""}
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Task
                           </Button>
+                          {!isAdmin && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                              <AlertCircle className="h-3 w-3 inline mr-1" />
+                              Admin login required to create tasks
+                            </p>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1887,12 +1915,19 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                           <Button
                             onClick={() => setShowTestItemForm(true)}
-                            disabled={isReadOnly}
+                            disabled={isReadOnly || !isAdmin}
                             className="bg-gradient-to-r from-red-400 to-orange-500 text-white"
+                            title={!isAdmin ? "Admin access required to create test items" : ""}
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Test Item
                           </Button>
+                          {!isAdmin && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                              <AlertCircle className="h-3 w-3 inline mr-1" />
+                              Admin login required to create test items
+                            </p>
+                          )}
                         </div>
                       </td>
                     </tr>
