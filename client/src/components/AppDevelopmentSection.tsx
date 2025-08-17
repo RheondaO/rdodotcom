@@ -2551,7 +2551,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         </FormControl>
                         <SelectContent>
                           {projects.map((project, index) => (
-                            <SelectItem key={project.id || `task-project-${index}`} value={(project.id || index).toString()}>
+                            <SelectItem key={project.notionId || `task-project-${index}`} value={project.notionId || index.toString()}>
                               {project.name || 'Untitled Project'}
                             </SelectItem>
                           ))}

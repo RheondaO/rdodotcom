@@ -240,7 +240,7 @@ export async function getAppDevelopmentTasks() {
                 status: properties.Status?.select?.name || "todo",
                 priority: properties.Priority?.select?.name || "medium",
                 category: properties.Category?.select?.name || "general",
-                projectId: properties.ProjectId?.rich_text?.[0]?.plain_text || "",
+                projectId: properties.ProjectId?.relation?.[0]?.id || "",
                 dueDate: properties.DueDate?.date?.start || null,
                 createdAt: page.created_time,
                 updatedAt: page.last_edited_time
@@ -374,7 +374,7 @@ export async function createAppDevelopmentTask(taskData: any) {
                 },
                 ...(taskData.projectId && {
                     ProjectId: {
-                        rich_text: [{ text: { content: taskData.projectId } }]
+                        relation: [{ id: taskData.projectId }]
                     }
                 }),
                 ...(taskData.dueDate && {
