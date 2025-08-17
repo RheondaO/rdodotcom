@@ -303,7 +303,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   // Mutations
   const createProjectMutation = useMutation({
     mutationFn: (data: NewProjectForm) => 
-      apiRequest('/api/ai-development/projects', 'POST', {
+      apiRequest('POST', '/api/ai-development/projects', {
         ...data,
         type: 'Project',
         actualHours: 0,
@@ -332,7 +332,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const createTaskMutation = useMutation({
     mutationFn: (data: NewTaskForm) => 
-      apiRequest('/api/ai-development/projects', 'POST', {
+      apiRequest('POST', '/api/ai-development/projects', {
         ...data,
         type: 'Task',
         projectName: projects.find(p => p.notionId === data.projectId)?.name || '',
@@ -387,7 +387,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const createTestItemMutation = useMutation({
     mutationFn: (data: TestItemForm) => 
-      apiRequest('/api/ai-development/projects', 'POST', {
+      apiRequest('POST', '/api/ai-development/projects', {
         name: data.title,
         description: data.description,
         type: 'Test Item',
@@ -478,7 +478,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const saveProjectEdit = async (projectId: number) => {
     try {
-      await apiRequest(`/api/app-projects/${projectId}`, 'PATCH', editingValues);
+      await apiRequest('PATCH', `/api/app-projects/${projectId}`, editingValues);
       queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
       setEditingProject(null);
       setEditingValues({});
@@ -490,7 +490,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const saveTaskEdit = async (taskId: number) => {
     try {
-      await apiRequest(`/api/app-tasks/${taskId}`, 'PATCH', editingTaskValues);
+      await apiRequest('PATCH', `/api/app-tasks/${taskId}`, editingTaskValues);
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setEditingTask(null);
       setEditingTaskValues({});
@@ -514,7 +514,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const deleteProject = async (projectId: number) => {
     if (confirm('Are you sure you want to delete this project?')) {
       try {
-        await apiRequest(`/api/app-projects/${projectId}`, 'DELETE');
+        await apiRequest('DELETE', `/api/app-projects/${projectId}`);
         queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
         toast({ title: "Success", description: "Project deleted successfully" });
       } catch (error) {
@@ -577,7 +577,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const deleteTask = async (taskId: number) => {
     if (confirm('Are you sure you want to delete this task?')) {
       try {
-        await apiRequest(`/api/app-tasks/${taskId}`, 'DELETE');
+        await apiRequest('DELETE', `/api/app-tasks/${taskId}`);
         queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
         toast({ title: "Success", description: "Task deleted successfully" });
       } catch (error) {
