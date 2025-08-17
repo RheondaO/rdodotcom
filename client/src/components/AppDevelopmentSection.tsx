@@ -249,7 +249,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const { isAuthenticated, isAdmin } = useAuth();
   
   const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "library">("overview");
-  const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [showTestItemForm, setShowTestItemForm] = useState(false);
@@ -297,6 +297,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const tasks = allAIDevItems.filter(item => item.type === 'Task');
   const testItems = allAIDevItems.filter(item => item.type === 'Test Item');
   const promptTemplates = allAIDevItems.filter(item => item.type === 'Library Prompt');
+
+  // Task filtering and state management (already defined above in the enhanced UI state section)
+
+  // Filter tasks based on current filters (handled below)
+
+  // Task statistics (moved below to avoid duplicates)
+
+  // Project tasks (when viewing specific project) - removed duplicate, handled below
 
 
 
@@ -351,20 +359,63 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: (data: NewTaskForm) => 
-      apiRequest('POST', '/api/ai-development/projects', {
+    mutationFn: (data: NewTaskForm) => {
+      console.log("🔄 Creating task with data:", data);
+      return apiRequest('POST', '/api/ai-development/projects', {
         ...data,
         type: 'Task',
         projectName: projects.find(p => p.notionId === data.projectId)?.name || '',
-        actualHours: 0
-      }),
+        actualHours: 0,
+        estimatedHours: 0,
+        isActive: false
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
       toast({ title: "Success", description: "Task created successfully" });
       setShowNewTaskForm(false);
+      taskForm.reset();
     },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to create task", variant: "destructive" });
+    onError: (error: any) => {
+      console.error("❌ Task creation error:", error);
+      const message = error?.message || "Failed to create task";
+      if (message.includes("Authentication") || message.includes("401")) {
+        toast({ 
+          title: "Authentication Required", 
+          description: "Please log in as admin to create tasks", 
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Error", description: message, variant: "destructive" });
+      }
+    }
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      apiRequest('PATCH', `/api/ai-development/projects/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
+      toast({ title: "Success", description: "Task updated successfully" });
+      setEditingTask(null);
+      setEditingTaskValues({});
+    },
+    onError: (error: any) => {
+      console.error("❌ Task update error:", error);
+      toast({ title: "Error", description: "Failed to update task", variant: "destructive" });
+    }
+  });
+
+  const deleteTaskMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiRequest('DELETE', `/api/ai-development/projects/${id}`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
+      toast({ title: "Success", description: "Task deleted successfully" });
+    },
+    onError: (error: any) => {
+      console.error("❌ Task deletion error:", error);
+      toast({ title: "Error", description: "Failed to delete task", variant: "destructive" });
     }
   });
 
@@ -404,6 +455,42 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const onSubmitTask = (data: NewTaskForm) => {
     createTaskMutation.mutate(data);
   };
+
+  // Task management functions
+  const startEditingTask = (task: any) => {
+    setEditingTask(task.notionId || task.id);
+    setEditingTaskValues({
+      title: task.name || task.title,
+      description: task.description,
+      status: task.status,
+      category: task.category,
+      priority: task.priority,
+      projectId: task.projectId
+    });
+  };
+
+  const saveTaskEdit = (taskId: string) => {
+    updateTaskMutation.mutate({ 
+      id: taskId, 
+      data: {
+        ...editingTaskValues,
+        name: editingTaskValues.title // Map title to name for Notion
+      }
+    });
+  };
+
+  const cancelTaskEdit = () => {
+    setEditingTask(null);
+    setEditingTaskValues({});
+  };
+
+  const deleteTask = (taskId: string) => {
+    if (confirm('Are you sure you want to delete this task?')) {
+      deleteTaskMutation.mutate(taskId);
+    }
+  };
+
+
 
   const createTestItemMutation = useMutation({
     mutationFn: (data: TestItemForm) => 
@@ -485,16 +572,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     });
   };
 
-  const startEditingTask = (task: AppTask) => {
-    setEditingTask(task.id);
-    setEditingTaskValues({
-      title: task.title,
-      description: task.description,
-      status: task.status,
-      category: task.category,
-      priority: 'medium' // Default if not provided
-    });
-  };
+
 
   const saveProjectEdit = async (projectId: number) => {
     try {
@@ -508,27 +586,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     }
   };
 
-  const saveTaskEdit = async (taskId: number) => {
-    try {
-      await apiRequest('PATCH', `/api/app-tasks/${taskId}`, editingTaskValues);
-      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-      setEditingTask(null);
-      setEditingTaskValues({});
-      toast({ title: "Success", description: "Task updated successfully" });
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to update task", variant: "destructive" });
-    }
-  };
+
 
   const cancelEdit = () => {
     setEditingProject(null);
     setEditingTask(null);
     setEditingValues({});
-  };
-
-  const cancelTaskEdit = () => {
-    setEditingTask(null);
-    setEditingTaskValues({});
   };
 
   const deleteProject = async (projectId: number) => {
@@ -594,17 +657,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     return colors[status as keyof typeof colors] || colors.pending;
   };
 
-  const deleteTask = async (taskId: number) => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      try {
-        await apiRequest('DELETE', `/api/app-tasks/${taskId}`);
-        queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
-        toast({ title: "Success", description: "Task deleted successfully" });
-      } catch (error) {
-        toast({ title: "Error", description: "Failed to delete task", variant: "destructive" });
-      }
-    }
-  };
+
 
   // Sorting and filtering functions
   const sortedProjects = [...projects].sort((a, b) => {
@@ -626,12 +679,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   // Define derived data first
   const activeProjects = projects.filter(p => p.isActive);
-  const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
   const testingTasks = tasks.filter(t => t.status === 'testing');
+
+  const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
 
   const sortedTasks = [...projectTasks].sort((a, b) => {
     switch (sortBy) {
-      case 'name': return a.title.localeCompare(b.title);
+      case 'name': return (a.name || a.title).localeCompare(b.name || b.title);
       case 'status': return a.status.localeCompare(b.status);
       default: return 0;
     }
@@ -1459,14 +1513,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredTasks.map((task) => (
-                      <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                      <tr key={task.notionId || task.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
                               {getTaskCategoryIcon(task.category)}
                             </div>
                             <div className="flex-1 min-w-0">
-                              {editingTask === task.id ? (
+                              {editingTask === (task.notionId || task.id) ? (
                                 <div className="space-y-2">
                                   <Input
                                     value={editingTaskValues.title || ''}
@@ -1484,7 +1538,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                 </div>
                               ) : (
                                 <div>
-                                  <div className="font-semibold text-gray-900 dark:text-white">{task.title}</div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">{task.name || task.title}</div>
                                   <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{task.description}</div>
                                 </div>
                               )}
@@ -1492,7 +1546,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          {editingTask === task.id ? (
+                          {editingTask === (task.notionId || task.id) ? (
                             <Select 
                               value={editingTaskValues.projectId || task.projectId} 
                               onValueChange={(value) => setEditingTaskValues({...editingTaskValues, projectId: value})}
@@ -1515,7 +1569,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingTask === task.id ? (
+                          {editingTask === (task.notionId || task.id) ? (
                             <Select 
                               value={editingTaskValues.category || task.category} 
                               onValueChange={(value) => setEditingTaskValues({...editingTaskValues, category: value})}
@@ -1526,9 +1580,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                               <SelectContent>
                                 <SelectItem value="feature">Feature</SelectItem>
                                 <SelectItem value="bug">Bug Fix</SelectItem>
-                                <SelectItem value="enhancement">Enhancement</SelectItem>
+                                <SelectItem value="improvement">Improvement</SelectItem>
                                 <SelectItem value="documentation">Documentation</SelectItem>
-                                <SelectItem value="testing">Testing</SelectItem>
                               </SelectContent>
                             </Select>
                           ) : (
@@ -1538,7 +1591,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingTask === task.id ? (
+                          {editingTask === (task.notionId || task.id) ? (
                             <Select 
                               value={editingTaskValues.status || task.status} 
                               onValueChange={(value) => setEditingTaskValues({...editingTaskValues, status: value})}
@@ -1549,6 +1602,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                               <SelectContent>
                                 <SelectItem value="todo">To Do</SelectItem>
                                 <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="review">Review</SelectItem>
                                 <SelectItem value="testing">Testing</SelectItem>
                                 <SelectItem value="done">Done</SelectItem>
                               </SelectContent>
@@ -1560,7 +1614,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingTask === task.id ? (
+                          {editingTask === (task.notionId || task.id) ? (
                             <Select 
                               value={editingTaskValues.priority || task.priority} 
                               onValueChange={(value) => setEditingTaskValues({...editingTaskValues, priority: value})}
@@ -1572,27 +1626,25 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                 <SelectItem value="low">Low</SelectItem>
                                 <SelectItem value="medium">Medium</SelectItem>
                                 <SelectItem value="high">High</SelectItem>
-                                <SelectItem value="urgent">Urgent</SelectItem>
                               </SelectContent>
                             </Select>
                           ) : (
                             <span className={`text-sm font-medium ${
-                              task.priority === 'urgent' ? 'text-red-600 dark:text-red-400' :
                               task.priority === 'high' ? 'text-orange-600 dark:text-orange-400' :
                               task.priority === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
                               'text-green-600 dark:text-green-400'
                             }`}>
-                              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                              {(task.priority || 'medium').charAt(0).toUpperCase() + (task.priority || 'medium').slice(1)}
                             </span>
                           )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            {editingTask === task.id ? (
+                            {editingTask === (task.notionId || task.id) ? (
                               <div className="flex gap-1">
                                 <Button 
                                   size="sm" 
-                                  onClick={() => saveTaskEdit(task.id)}
+                                  onClick={() => saveTaskEdit(task.notionId || task.id)}
                                   disabled={isReadOnly}
                                   className="bg-green-500 hover:bg-green-600 text-white"
                                 >
@@ -1621,7 +1673,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                 <Button 
                                   size="sm" 
                                   variant="ghost" 
-                                  onClick={() => deleteTask(task.id)}
+                                  onClick={() => deleteTask(task.notionId || task.id)}
                                   disabled={isReadOnly}
                                   className={`text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 ${
                                     isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
