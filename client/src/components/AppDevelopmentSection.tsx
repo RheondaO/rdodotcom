@@ -54,7 +54,10 @@ import {
   CheckCircle,
   Circle,
   Eye,
-  ExternalLink
+  ExternalLink,
+  Tag,
+  Folder,
+  MessageSquare
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -170,8 +173,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [editingProject, setEditingProject] = useState<number | null>(null);
   const [editingTask, setEditingTask] = useState<number | null>(null);
   const [editingValues, setEditingValues] = useState<any>({});
+  const [editingTaskValues, setEditingTaskValues] = useState<any>({});
   const [sortBy, setSortBy] = useState<'name' | 'status' | 'progress' | 'priority'>('name');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [taskFilter, setTaskFilter] = useState<string>('all');
 
   // Fetch real project data from API
   const { data: projects = [] } = useQuery({
@@ -334,7 +339,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const startEditingTask = (task: AppTask) => {
     setEditingTask(task.id);
-    setEditingValues({
+    setEditingTaskValues({
       title: task.title,
       description: task.description,
       status: task.status,
@@ -357,10 +362,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const saveTaskEdit = async (taskId: number) => {
     try {
-      await apiRequest(`/api/app-tasks/${taskId}`, 'PATCH', editingValues);
+      await apiRequest(`/api/app-tasks/${taskId}`, 'PATCH', editingTaskValues);
       queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
       setEditingTask(null);
-      setEditingValues({});
+      setEditingTaskValues({});
       toast({ title: "Success", description: "Task updated successfully" });
     } catch (error) {
       toast({ title: "Error", description: "Failed to update task", variant: "destructive" });
@@ -371,6 +376,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     setEditingProject(null);
     setEditingTask(null);
     setEditingValues({});
+  };
+
+  const cancelTaskEdit = () => {
+    setEditingTask(null);
+    setEditingTaskValues({});
   };
 
   const deleteProject = async (projectId: number) => {
@@ -448,6 +458,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     bugs: tasks.filter(t => t.category === 'bug').length,
     features: tasks.filter(t => t.category === 'feature').length
   };
+
+  // Enhanced task filtering
+  const filteredTasks = projectTasks.filter(task => {
+    if (taskFilter === 'all') return true;
+    return task.status === taskFilter;
+  });
 
   // Timer effect
   useEffect(() => {
