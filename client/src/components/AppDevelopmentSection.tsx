@@ -261,11 +261,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   // Enhanced UI state
   const [editingProject, setEditingProject] = useState<number | null>(null);
   const [editingTask, setEditingTask] = useState<number | null>(null);
+  const [editingTestItem, setEditingTestItem] = useState<number | null>(null);
   const [editingValues, setEditingValues] = useState<any>({});
   const [editingTaskValues, setEditingTaskValues] = useState<any>({});
+  const [editingTestValues, setEditingTestValues] = useState<any>({});
   const [sortBy, setSortBy] = useState<'name' | 'status' | 'progress' | 'priority'>('name');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [taskFilter, setTaskFilter] = useState<string>('all');
+  const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
 
   // Fetch real project data from API
   const { data: projects = [] } = useQuery({
@@ -285,6 +288,28 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     select: (data: PromptTemplate[]) => data || [],
     initialData: () => generateMockPrompts() // Mock data fallback
   });
+
+  // Mock test items data (until API is implemented)
+  const testItems = [
+    {
+      id: 1,
+      title: "User Authentication Flow",
+      description: "Test login/logout functionality",
+      projectId: 1,
+      type: "e2e",
+      status: "pending",
+      priority: "high"
+    },
+    {
+      id: 2,
+      title: "API Response Validation",
+      description: "Verify API returns correct data format",
+      projectId: 1,
+      type: "integration",
+      status: "in_progress",
+      priority: "medium"
+    }
+  ];
 
   // Mutations
   const createProjectMutation = useMutation({
@@ -492,6 +517,57 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     }
   };
 
+  // Testing functions
+  const startEditingTestItem = (testItem: any) => {
+    setEditingTestItem(testItem.id);
+    setEditingTestValues({
+      title: testItem.title,
+      description: testItem.description,
+      type: testItem.type,
+      status: testItem.status,
+      priority: testItem.priority,
+      projectId: testItem.projectId
+    });
+  };
+
+  const saveTestItemEdit = async (testItemId: number) => {
+    try {
+      // Mock implementation - in real app would call API
+      setEditingTestItem(null);
+      setEditingTestValues({});
+      toast({ title: "Success", description: "Test item updated successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update test item", variant: "destructive" });
+    }
+  };
+
+  const cancelTestEdit = () => {
+    setEditingTestItem(null);
+    setEditingTestValues({});
+  };
+
+  const deleteTestItem = async (testItemId: number) => {
+    if (confirm('Are you sure you want to delete this test item?')) {
+      try {
+        // Mock implementation - in real app would call API
+        toast({ title: "Success", description: "Test item deleted successfully" });
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to delete test item", variant: "destructive" });
+      }
+    }
+  };
+
+  const getTestStatusColor = (status: string) => {
+    const colors = {
+      pending: "bg-gray-100 text-gray-800 dark:bg-[#17111d]/30 dark:text-gray-400",
+      in_progress: "bg-yellow-100 text-yellow-800 dark:bg-[#17111d]/30 dark:text-yellow-400",
+      passed: "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400",
+      failed: "bg-red-100 text-red-800 dark:bg-[#17111d]/30 dark:text-red-400",
+      blocked: "bg-purple-100 text-purple-800 dark:bg-[#17111d]/30 dark:text-purple-400"
+    };
+    return colors[status as keyof typeof colors] || colors.pending;
+  };
+
   const deleteTask = async (taskId: number) => {
     if (confirm('Are you sure you want to delete this task?')) {
       try {
@@ -560,6 +636,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const filteredTasks = projectTasks.filter(task => {
     if (taskFilter === 'all') return true;
     return task.status === taskFilter;
+  });
+
+  // Test items filtering
+  const filteredTestItems = testItems.filter(testItem => {
+    if (!selectedTestProject) return true;
+    return testItem.projectId.toString() === selectedTestProject;
   });
 
   // Prompt library helper functions
@@ -1268,197 +1350,288 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </div>
           </div>
 
-          {/* Enhanced Task Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredTasks.map((task) => (
-              <Card key={task.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
-                        {getTaskCategoryIcon(task.category)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        {editingTask === task.id ? (
-                          <div className="space-y-2">
-                            <Input
-                              value={editingTaskValues.title || ''}
-                              onChange={(e) => setEditingTaskValues({...editingTaskValues, title: e.target.value})}
-                              className="font-semibold"
-                              placeholder="Task title"
-                            />
-                            <Textarea
-                              value={editingTaskValues.description || ''}
-                              onChange={(e) => setEditingTaskValues({...editingTaskValues, description: e.target.value})}
-                              className="text-sm resize-none"
-                              rows={2}
-                              placeholder="Task description"
-                            />
+          {/* Tasks Table with Inline Editing */}
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Task
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Project
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Priority
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {filteredTasks.map((task) => (
+                      <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                              {getTaskCategoryIcon(task.category)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              {editingTask === task.id ? (
+                                <div className="space-y-2">
+                                  <Input
+                                    value={editingTaskValues.title || ''}
+                                    onChange={(e) => setEditingTaskValues({...editingTaskValues, title: e.target.value})}
+                                    className="font-semibold"
+                                    placeholder="Task title"
+                                  />
+                                  <Textarea
+                                    value={editingTaskValues.description || ''}
+                                    onChange={(e) => setEditingTaskValues({...editingTaskValues, description: e.target.value})}
+                                    className="text-sm resize-none"
+                                    rows={2}
+                                    placeholder="Task description"
+                                  />
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">{task.title}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{task.description}</div>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        ) : (
-                          <div>
-                            <h4 className="font-semibold text-gray-900 dark:text-white truncate">{task.title}</h4>
-                            <p className="text-sm text-muted-foreground dark:text-gray-400 line-clamp-2">{task.description}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingTask === task.id ? (
+                            <Select 
+                              value={editingTaskValues.projectId || task.projectId} 
+                              onValueChange={(value) => setEditingTaskValues({...editingTaskValues, projectId: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {projects.map((project) => (
+                                  <SelectItem key={project.id} value={project.id}>
+                                    {project.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {projects.find(p => p.id === task.projectId)?.name || 'No Project'}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingTask === task.id ? (
+                            <Select 
+                              value={editingTaskValues.category || task.category} 
+                              onValueChange={(value) => setEditingTaskValues({...editingTaskValues, category: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="feature">Feature</SelectItem>
+                                <SelectItem value="bug">Bug Fix</SelectItem>
+                                <SelectItem value="enhancement">Enhancement</SelectItem>
+                                <SelectItem value="documentation">Documentation</SelectItem>
+                                <SelectItem value="testing">Testing</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {task.category}
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingTask === task.id ? (
+                            <Select 
+                              value={editingTaskValues.status || task.status} 
+                              onValueChange={(value) => setEditingTaskValues({...editingTaskValues, status: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="todo">To Do</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="testing">Testing</SelectItem>
+                                <SelectItem value="done">Done</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge className={getStatusColor(task.status)}>
+                              {task.status.replace('_', ' ')}
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingTask === task.id ? (
+                            <Select 
+                              value={editingTaskValues.priority || task.priority} 
+                              onValueChange={(value) => setEditingTaskValues({...editingTaskValues, priority: value})}
+                            >
+                              <SelectTrigger className="w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="urgent">Urgent</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className={`text-sm font-medium ${
+                              task.priority === 'urgent' ? 'text-red-600 dark:text-red-400' :
+                              task.priority === 'high' ? 'text-orange-600 dark:text-orange-400' :
+                              task.priority === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
+                              'text-green-600 dark:text-green-400'
+                            }`}>
+                              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            {editingTask === task.id ? (
+                              <div className="flex gap-1">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => saveTaskEdit(task.id)}
+                                  disabled={isReadOnly}
+                                  className="bg-green-500 hover:bg-green-600 text-white"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={cancelTaskEdit}
+                                  disabled={isReadOnly}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-1">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => startEditingTask(task)}
+                                  disabled={isReadOnly}
+                                  className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => deleteTask(task.id)}
+                                  disabled={isReadOnly}
+                                  className={`text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 ${
+                                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                                  }`}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      {editingTask === task.id ? (
-                        <Select 
-                          value={editingTaskValues.status || task.status} 
-                          onValueChange={(value) => setEditingTaskValues({...editingTaskValues, status: value})}
-                        >
-                          <SelectTrigger className="w-28">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="todo">To Do</SelectItem>
-                            <SelectItem value="in_progress">In Progress</SelectItem>
-                            <SelectItem value="testing">Testing</SelectItem>
-                            <SelectItem value="done">Done</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Badge className={getStatusColor(task.status)}>
-                          {task.status.replace('_', ' ')}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Clock4 className="h-4 w-4 text-purple-500" />
-                        <span className="text-muted-foreground dark:text-gray-400">Time:</span>
-                        <span className="font-medium">{task.actualHours}h</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-blue-500" />
-                        <span className="text-muted-foreground dark:text-gray-400">Type:</span>
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {task.category}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm">
-                      <Folder className="h-4 w-4 text-green-500" />
-                      <span className="text-muted-foreground dark:text-gray-400">Project:</span>
-                      <span className="font-medium text-green-600 dark:text-green-400">
-                        {projects.find(p => p.id === task.projectId)?.name || 'No Project'}
-                      </span>
-                    </div>
-
-                    {task.comments && editingTask !== task.id && (
-                      <div className="p-3 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
-                        <div className="flex items-start gap-2">
-                          <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />
-                          <p className="text-sm text-gray-700 dark:text-gray-300">{task.comments}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 pt-2">
-                      {editingTask === task.id ? (
-                        <div className="flex gap-2 w-full">
-                          <Button
-                            size="sm"
-                            onClick={() => saveTaskEdit(task.id)}
-                            disabled={isReadOnly}
-                            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white flex-1"
-                          >
-                            <Save className="h-3 w-3 mr-1" />
-                            Save
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={cancelTaskEdit}
-                            className="flex-1"
-                          >
-                            <X className="h-3 w-3 mr-1" />
-                            Cancel
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2 w-full">
-                          <Button
-                            size="sm"
-                            onClick={() => startEditingTask(task)}
-                            disabled={isReadOnly}
-                            variant="outline"
-                            className="flex-1"
-                          >
-                            <Edit3 className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => console.log('Timer feature removed')}
-                            disabled={isReadOnly}
-                            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white flex-1"
-                          >
-                            <Timer className="h-3 w-3 mr-1" />
-                            Timer
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => deleteTask(task.id)}
-                            disabled={isReadOnly}
-                            className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 dark:text-red-400 dark:border-red-800"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                        </td>
+                      </tr>
+                    ))}
             
-            {filteredTasks.length === 0 && (
-              <div className="col-span-full">
-                <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-                  <CardContent className="p-12 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <CheckSquare className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Tasks Found</h3>
-                    <p className="text-muted-foreground dark:text-gray-400 mb-4">
-                      {taskFilter === 'all' 
-                        ? selectedProject 
-                          ? "No tasks in this project yet. Create your first task to get started!"
-                          : "No tasks created yet. Start by adding your first development task!"
-                        : `No tasks match the current filter: ${taskFilter}`
-                      }
-                    </p>
-                    <Button
-                      onClick={() => setShowNewTaskForm(true)}
-                      disabled={isReadOnly}
-                      className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create First Task
-                    </Button>
-                  </CardContent>
-                </Card>
+                    
+                    {/* Add New Task Row */}
+                    <tr className="border-t-2 border-dashed border-gray-300 dark:border-gray-600">
+                      <td colSpan={6} className="px-6 py-8">
+                        <div className="text-center">
+                          {filteredTasks.length === 0 ? (
+                            <div className="py-8">
+                              <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <CheckSquare className="h-8 w-8 text-white" />
+                              </div>
+                              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Tasks Found</h3>
+                              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                                {taskFilter === 'all' 
+                                  ? selectedProject 
+                                    ? "No tasks in this project yet. Create your first task to get started!"
+                                    : "No tasks created yet. Start by adding your first development task!"
+                                  : `No tasks match the current filter: ${taskFilter}`
+                                }
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="py-4">
+                              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                                Add a new task to continue building
+                              </p>
+                            </div>
+                          )}
+                          <Button
+                            onClick={() => setShowNewTaskForm(true)}
+                            disabled={isReadOnly}
+                            className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Task
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       {/* Testing & QA View */}
       {activeView === "testing" && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Testing & Quality Assurance</h2>
-            <div className="flex gap-2">
+          {/* Header with Enhanced Controls */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Testing & Quality Assurance</h2>
+              <p className="text-sm text-muted-foreground dark:text-gray-400">
+                {selectedTestProject 
+                  ? `Testing tasks for ${projects.find(p => p.id === selectedTestProject)?.name || 'selected project'}` 
+                  : `${testItems.length} total test items • ${testItems.filter(t => t.status === 'in_progress').length} in progress`
+                }
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <Select value={selectedTestProject || 'all'} onValueChange={(value) => setSelectedTestProject(value === 'all' ? null : value)}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
               <Button 
                 onClick={() => setShowTestItemForm(true)}
                 disabled={isReadOnly}
@@ -1469,143 +1642,257 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <Plus className="h-4 w-4 mr-2" />
                 Add Test Item
               </Button>
-              <Button 
-                variant="outline"
-                disabled={isReadOnly}
-                className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-              >
-                <CheckSquare className="h-4 w-4 mr-2" />
-                Run All Tests
-              </Button>
             </div>
           </div>
 
-          {/* Tasks in Testing Status */}
-          {testingTasks.length > 0 && (
-            <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-orange-600 dark:text-orange-400">
-                  <AlertCircle className="h-5 w-5" />
-                  Tasks Currently in Testing
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {testingTasks.map((task) => (
-                    <div key={task.id} className="p-4 bg-white/60 dark:bg-[#17111d]/60 rounded-xl border-l-4 border-orange-400">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400">{task.description}</p>
-                          <p className="text-xs text-muted-foreground dark:text-gray-400 mt-1">
-                            {projects.find(p => p.id === task.projectId)?.name}
-                          </p>
+          {/* Testing Items Table with Inline Editing */}
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Test Item
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Project
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Priority
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {filteredTestItems.map((testItem) => (
+                      <tr key={testItem.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-red-400 to-orange-500 rounded-xl flex items-center justify-center">
+                              <CheckSquare className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              {editingTestItem === testItem.id ? (
+                                <div className="space-y-2">
+                                  <Input
+                                    value={editingTestValues.title || ''}
+                                    onChange={(e) => setEditingTestValues({...editingTestValues, title: e.target.value})}
+                                    className="font-semibold"
+                                    placeholder="Test item title"
+                                  />
+                                  <Textarea
+                                    value={editingTestValues.description || ''}
+                                    onChange={(e) => setEditingTestValues({...editingTestValues, description: e.target.value})}
+                                    className="text-sm resize-none"
+                                    rows={2}
+                                    placeholder="Test description"
+                                  />
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">{testItem.title}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{testItem.description}</div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingTestItem === testItem.id ? (
+                            <Select 
+                              value={editingTestValues.projectId || testItem.projectId} 
+                              onValueChange={(value) => setEditingTestValues({...editingTestValues, projectId: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {projects.map((project) => (
+                                  <SelectItem key={project.id} value={project.id}>
+                                    {project.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {projects.find(p => p.id === testItem.projectId)?.name || 'No Project'}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingTestItem === testItem.id ? (
+                            <Select 
+                              value={editingTestValues.type || testItem.type} 
+                              onValueChange={(value) => setEditingTestValues({...editingTestValues, type: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="unit">Unit Test</SelectItem>
+                                <SelectItem value="integration">Integration</SelectItem>
+                                <SelectItem value="e2e">End-to-End</SelectItem>
+                                <SelectItem value="performance">Performance</SelectItem>
+                                <SelectItem value="security">Security</SelectItem>
+                                <SelectItem value="usability">Usability</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge variant="outline" className="text-xs capitalize">
+                              {testItem.type}
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingTestItem === testItem.id ? (
+                            <Select 
+                              value={editingTestValues.status || testItem.status} 
+                              onValueChange={(value) => setEditingTestValues({...editingTestValues, status: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="passed">Passed</SelectItem>
+                                <SelectItem value="failed">Failed</SelectItem>
+                                <SelectItem value="blocked">Blocked</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge className={getTestStatusColor(testItem.status)}>
+                              {testItem.status.replace('_', ' ')}
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingTestItem === testItem.id ? (
+                            <Select 
+                              value={editingTestValues.priority || testItem.priority} 
+                              onValueChange={(value) => setEditingTestValues({...editingTestValues, priority: value})}
+                            >
+                              <SelectTrigger className="w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="critical">Critical</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className={`text-sm font-medium ${
+                              testItem.priority === 'critical' ? 'text-red-600 dark:text-red-400' :
+                              testItem.priority === 'high' ? 'text-orange-600 dark:text-orange-400' :
+                              testItem.priority === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
+                              'text-green-600 dark:text-green-400'
+                            }`}>
+                              {testItem.priority.charAt(0).toUpperCase() + testItem.priority.slice(1)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            {editingTestItem === testItem.id ? (
+                              <div className="flex gap-1">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => saveTestItemEdit(testItem.id)}
+                                  disabled={isReadOnly}
+                                  className="bg-green-500 hover:bg-green-600 text-white"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={cancelTestEdit}
+                                  disabled={isReadOnly}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-1">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => startEditingTestItem(testItem)}
+                                  disabled={isReadOnly}
+                                  className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => deleteTestItem(testItem.id)}
+                                  disabled={isReadOnly}
+                                  className={`text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 ${
+                                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                                  }`}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    
+                    {/* Add New Test Item Row */}
+                    <tr className="border-t-2 border-dashed border-gray-300 dark:border-gray-600">
+                      <td colSpan={6} className="px-6 py-8">
+                        <div className="text-center">
+                          {filteredTestItems.length === 0 ? (
+                            <div className="py-8">
+                              <div className="w-16 h-16 bg-gradient-to-r from-red-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <CheckSquare className="h-8 w-8 text-white" />
+                              </div>
+                              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Test Items Found</h3>
+                              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                                {selectedTestProject 
+                                  ? "No test items for this project yet. Create your first test item to get started!"
+                                  : "No test items created yet. Start by adding your first test case!"
+                                }
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="py-4">
+                              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                                Add a new test item to continue quality assurance
+                              </p>
+                            </div>
+                          )}
+                          <Button
+                            onClick={() => setShowTestItemForm(true)}
+                            disabled={isReadOnly}
+                            className="bg-gradient-to-r from-red-400 to-orange-500 text-white"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Test Item
+                          </Button>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getStatusColor(task.status)}>
-                            {task.status}
-                          </Badge>
-                          <Badge variant="outline" className="capitalize">
-                            {task.category}
-                          </Badge>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Category:</span>
-                          <span className="ml-1 font-medium capitalize">{task.category}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Time Spent:</span>
-                          <span className="ml-1 font-medium">{task.actualHours}h / {task.estimatedHours}h</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Due Date:</span>
-                          <span className="ml-1 font-medium">
-                            {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {task.comments && (
-                        <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded text-sm">
-                          <span className="text-blue-600 dark:text-blue-400 font-medium">Testing Notes:</span>
-                          <span className="ml-1">{task.comments}</span>
-                        </div>
-                      )}
-
-                      <div className="flex gap-2 mt-3">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          disabled={isReadOnly}
-                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
-                          Pass Test
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          disabled={isReadOnly}
-                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
-                          Fail Test
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          disabled={isReadOnly}
-                          className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                        >
-                          Add Notes
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Simple Test Lists */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Portfolio Testing */}
-            <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-                  <Globe className="h-5 w-5" />
-                  Professional Portfolio Tests
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <CheckSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No test items yet. Click "Add Test Item" to start.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Media Lab Testing */}
-            <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
-                  <Globe className="h-5 w-5" />
-                  Really Obvious Media Lab Tests
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <CheckSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No test items yet. Click "Add Test Item" to start.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
 
 
         </div>
