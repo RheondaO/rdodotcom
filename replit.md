@@ -21,6 +21,12 @@ Preferred communication style: Simple, everyday language.
 - **ContentManagementSuite**: Simplified neutral gray design, handles mini-game blocks and @rotationonly content
 - **Rule**: When editing one content studio, the other must remain unchanged
 
+## Recent Changes
+- **August 17, 2025**: Implementing Notion database integration for AI App Development section
+- Working on resolving database creation issues - current NOTION_PAGE_URL points to database instead of page
+- Created setup scripts and documentation for AI Development databases (Projects, Tasks, Test Items, Library)
+- Identified need for separate NOTION_AI_DEV_PAGE_URL environment variable pointing to a Notion page
+
 ## System Architecture
 
 ### Frontend Architecture

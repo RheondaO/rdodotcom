@@ -176,15 +176,19 @@ export async function findDatabaseByTitle(title: string) {
 }
 
 // Create a new database if one with a matching title does not exist
-export async function createDatabaseIfNotExists(title: string, properties: any) {
+export async function createDatabaseIfNotExists(title: string, properties: any, parentPageId?: string) {
     const existingDb = await findDatabaseByTitle(title);
     if (existingDb) {
         return existingDb;
     }
+    
+    // Use provided parentPageId or default to NOTION_DATABASE_ID for existing functionality
+    const pageId = parentPageId || NOTION_DATABASE_ID!;
+    
     return await notion.databases.create({
         parent: {
             type: "page_id",
-            page_id: NOTION_DATABASE_ID!
+            page_id: pageId
         },
         title: [
             {
