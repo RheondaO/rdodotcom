@@ -147,6 +147,7 @@ const newProjectSchema = z.object({
   deploymentUrl: z.string().optional(),
   targetDate: z.string().optional(),
   startDate: z.string().optional(),
+  endDate: z.string().optional(),
   techStack: z.string().optional(),
   priority: z.enum(["low", "medium", "high"]).optional()
 });
@@ -196,6 +197,7 @@ interface AppProject {
   deploymentUrl?: string;
   targetDate?: string;
   startDate?: string;
+  endDate?: string;
   completedDate?: string;
   actualHours: number;
   techStack: string[];
@@ -454,7 +456,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       status: project.status,
       priority: project.priority || 'medium',
       projectType: project.projectType,
-      startDate: project.startDate || ''
+      startDate: project.startDate || '',
+      endDate: project.endDate || ''
     });
   };
 
@@ -1082,6 +1085,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         Start Date
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        End Date
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -1208,6 +1214,20 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                         </td>
                         <td className="px-6 py-4">
+                          {editingProject === project.id ? (
+                            <Input
+                              type="date"
+                              value={editingValues.endDate || ''}
+                              onChange={(e) => setEditingValues({...editingValues, endDate: e.target.value})}
+                              className="w-36"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {project.endDate ? format(new Date(project.endDate), 'MMM dd, yyyy') : 'Not set'}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             {editingProject === project.id ? (
                               <div className="flex gap-1">
@@ -1259,7 +1279,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     
                     {/* Add New Row */}
                     <tr className="border-t-2 border-dashed border-gray-300 dark:border-gray-600">
-                      <td colSpan={6} className="px-6 py-8">
+                      <td colSpan={7} className="px-6 py-8">
                         <div className="text-center">
                           {filteredProjects.length === 0 ? (
                             <div className="py-8">
@@ -2199,13 +2219,26 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={projectForm.control}
                   name="startDate"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Start Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={projectForm.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Date</FormLabel>
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
