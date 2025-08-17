@@ -199,9 +199,15 @@ async function setupAppDevelopmentNotionDatabases() {
                     { name: "Database", color: "purple" },
                     { name: "Testing", color: "orange" },
                     { name: "Deployment", color: "red" },
-                    { name: "Documentation", color: "gray" }
+                    { name: "Documentation", color: "gray" },
+                    { name: "general", color: "gray" },
+                    { name: "feature", color: "blue" },
+                    { name: "bug", color: "red" }
                 ]
             }
+        },
+        ProjectId: {
+            rich_text: {}
         },
         AssignedProject: {
             relation: {
