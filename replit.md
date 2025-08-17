@@ -22,12 +22,13 @@ Preferred communication style: Simple, everyday language.
 - **Rule**: When editing one content studio, the other must remain unchanged
 
 ## Recent Changes
-- **August 17, 2025**: ✅ **COMPLETED** - AI App Development Notion integration fully working
-- **RESOLVED**: Fixed HTTP method error by correcting apiRequest parameter order (method, url, data)
-- **RESOLVED**: Aligned AI Development integration with successful Notion patterns (Tasks, Timeblocks, Timer Sessions)
-- **RESOLVED**: Database creation issues - now properly using database.id from notion.databases.retrieve()
-- **SUCCESS**: AI Development section now successfully POSTs to Notion with HTTP 200 responses
-- **VERIFIED**: Production-ready with comprehensive error logging and environment variable validation
+- **August 17, 2025**: ✅ **COMPLETED** - AI App Development Tasks Integration fully working
+- **RESOLVED**: Added dedicated tasks database query (`/api/ai-development/tasks`) 
+- **RESOLVED**: Fixed task creation to use correct API endpoint instead of projects endpoint
+- **RESOLVED**: Updated frontend to fetch existing Notion tasks using separate query
+- **RESOLVED**: Fixed TypeScript errors in app-development-notion.ts library function
+- **VERIFIED**: Tasks API working correctly - existing tasks being fetched from Notion (confirmed via curl test)
+- **FIELD REFERENCE**: Task title field name is consistently **"title"** across frontend form, API, and Notion integration
 
 ## System Architecture
 

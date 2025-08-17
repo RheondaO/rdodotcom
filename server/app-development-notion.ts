@@ -450,9 +450,9 @@ export async function createAppDevelopmentLibraryItem(libraryData: any) {
                 Category: {
                     select: { name: libraryData.category }
                 },
-                Tags: libraryData.tags ? {
-                    multi_select: libraryData.tags.map((tag: string) => ({ name: tag }))
-                } : undefined,
+                Tags: {
+                    multi_select: libraryData.tags ? libraryData.tags.map((tag: string) => ({ name: tag })) : []
+                },
                 Usage: {
                     select: { name: libraryData.usage || "New" }
                 },
