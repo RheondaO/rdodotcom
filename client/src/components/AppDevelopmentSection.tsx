@@ -1461,7 +1461,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               </Select>
               
               <Button 
-                onClick={() => setShowNewTaskForm(true)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('New Task button clicked');
+                  setShowNewTaskForm(true);
+                }}
                 disabled={isReadOnly}
                 className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
               >
@@ -1714,7 +1720,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             </div>
                           )}
                           <Button
-                            onClick={() => setShowNewTaskForm(true)}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Add New Task button clicked');
+                              setShowNewTaskForm(true);
+                            }}
                             disabled={isReadOnly}
                             className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
                           >
