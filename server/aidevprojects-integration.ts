@@ -11,10 +11,17 @@ function extractDatabaseIdFromUrl(databaseUrl: string): string {
 
 // Get the AIDEVPROJECTS database ID
 export function getAIDevProjectsDatabaseId(): string {
-    if (!process.env.NOTION_AI_DEV_PAGE_URL) {
-        throw new Error("NOTION_AI_DEV_PAGE_URL environment variable is required");
+    // Try NOTION_AI_DEV_PAGE_URL first (if it's a database URL)
+    if (process.env.NOTION_AI_DEV_PAGE_URL) {
+        return extractDatabaseIdFromUrl(process.env.NOTION_AI_DEV_PAGE_URL);
     }
-    return extractDatabaseIdFromUrl(process.env.NOTION_AI_DEV_PAGE_URL);
+    
+    // Fallback to checking if NOTION_PAGE_URL points to the database
+    if (process.env.NOTION_PAGE_URL) {
+        return extractDatabaseIdFromUrl(process.env.NOTION_PAGE_URL);
+    }
+    
+    throw new Error("Either NOTION_AI_DEV_PAGE_URL or NOTION_PAGE_URL environment variable is required and must point to the AIDEVPROJECTS database");
 }
 
 /**
@@ -214,12 +221,25 @@ export async function createAIDevProject(itemData: any) {
         console.error("Error creating AI Dev Project in Notion:", error);
         console.error("Error details:", error.message);
         console.error("Error code:", error.code);
-        console.error("Error body:", error.body);
+        console.error("Error status:", error.status);
         console.error("Database ID:", databaseId);
+        console.error("Environment check:");
+        console.error("  NOTION_AI_DEV_PAGE_URL:", !!process.env.NOTION_AI_DEV_PAGE_URL);
+        console.error("  NOTION_PAGE_URL:", !!process.env.NOTION_PAGE_URL);
         console.error("Properties being sent:", JSON.stringify(properties, null, 2));
         
-        // Include specific error details in the response
-        throw new Error(`Failed to create AI Dev Project in Notion: ${error.message || error.code || 'Unknown error'}`);
+        // Provide specific error guidance based on successful patterns
+        if (error.code === 'object_not_found') {
+            throw new Error(`Database not found. Please ensure your environment variable points to the AIDEVPROJECTS database URL (not a page URL). Current database ID: ${databaseId}`);
+        } else if (error.code === 'unauthorized') {
+            throw new Error(`Notion integration unauthorized. Please check NOTION_INTEGRATION_SECRET is valid and the integration has access to the AIDEVPROJECTS database.`);
+        } else if (error.code === 'forbidden') {
+            throw new Error(`Permission denied. Please share the AIDEVPROJECTS database with your Notion integration.`);
+        } else if (error.code === 'validation_error') {
+            throw new Error(`Database schema mismatch: ${error.message}. Please ensure the database has the required properties.`);
+        } else {
+            throw new Error(`Failed to create AI Dev Project in Notion: ${error.message || error.code || 'Unknown error'}`);
+        }
     }
 }
 
