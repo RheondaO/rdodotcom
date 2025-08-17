@@ -40,7 +40,21 @@ import {
   Timer,
   Bug,
   Lightbulb,
-  Wrench
+  Wrench,
+  Edit3,
+  Save,
+  X,
+  Trash2,
+  Activity,
+  TrendingUp,
+  Clock4,
+  GitCommit,
+  Star,
+  Archive,
+  CheckCircle,
+  Circle,
+  Eye,
+  ExternalLink
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -151,6 +165,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     duration: number; // in minutes
     date: string;
   }>>([]);
+  
+  // Enhanced UI state
+  const [editingProject, setEditingProject] = useState<number | null>(null);
+  const [editingTask, setEditingTask] = useState<number | null>(null);
+  const [editingValues, setEditingValues] = useState<any>({});
+  const [sortBy, setSortBy] = useState<'name' | 'status' | 'progress' | 'priority'>('name');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   // Fetch real project data from API
   const { data: projects = [] } = useQuery({
@@ -300,6 +321,134 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     return <Icon className="h-4 w-4" />;
   };
 
+  // Enhanced utility functions for editing and management
+  const startEditingProject = (project: AppProject) => {
+    setEditingProject(project.id);
+    setEditingValues({
+      name: project.name,
+      description: project.description,
+      status: project.status,
+      priority: 'medium' // Default if not provided
+    });
+  };
+
+  const startEditingTask = (task: AppTask) => {
+    setEditingTask(task.id);
+    setEditingValues({
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      category: task.category,
+      priority: 'medium' // Default if not provided
+    });
+  };
+
+  const saveProjectEdit = async (projectId: number) => {
+    try {
+      await apiRequest(`/api/app-projects/${projectId}`, 'PATCH', editingValues);
+      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      setEditingProject(null);
+      setEditingValues({});
+      toast({ title: "Success", description: "Project updated successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update project", variant: "destructive" });
+    }
+  };
+
+  const saveTaskEdit = async (taskId: number) => {
+    try {
+      await apiRequest(`/api/app-tasks/${taskId}`, 'PATCH', editingValues);
+      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      setEditingTask(null);
+      setEditingValues({});
+      toast({ title: "Success", description: "Task updated successfully" });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update task", variant: "destructive" });
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingProject(null);
+    setEditingTask(null);
+    setEditingValues({});
+  };
+
+  const deleteProject = async (projectId: number) => {
+    if (confirm('Are you sure you want to delete this project?')) {
+      try {
+        await apiRequest(`/api/app-projects/${projectId}`, 'DELETE');
+        queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+        toast({ title: "Success", description: "Project deleted successfully" });
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to delete project", variant: "destructive" });
+      }
+    }
+  };
+
+  const deleteTask = async (taskId: number) => {
+    if (confirm('Are you sure you want to delete this task?')) {
+      try {
+        await apiRequest(`/api/app-tasks/${taskId}`, 'DELETE');
+        queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+        toast({ title: "Success", description: "Task deleted successfully" });
+      } catch (error) {
+        toast({ title: "Error", description: "Failed to delete task", variant: "destructive" });
+      }
+    }
+  };
+
+  // Sorting and filtering functions
+  const sortedProjects = [...projects].sort((a, b) => {
+    switch (sortBy) {
+      case 'name': return a.name.localeCompare(b.name);
+      case 'status': return a.status.localeCompare(b.status);
+      case 'progress': return b.progress - a.progress;
+      case 'priority': {
+        const priorityOrder = { high: 3, medium: 2, low: 1 };
+        return (priorityOrder[b.priority as keyof typeof priorityOrder] || 2) - 
+               (priorityOrder[a.priority as keyof typeof priorityOrder] || 2);
+      }
+      default: return 0;
+    }
+  });
+
+  const filteredProjects = sortedProjects.filter(project => 
+    filterStatus === 'all' || project.status === filterStatus
+  );
+
+  // Define derived data first
+  const activeProjects = projects.filter(p => p.isActive);
+  const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
+  const testingTasks = tasks.filter(t => t.status === 'testing');
+
+  const sortedTasks = [...projectTasks].sort((a, b) => {
+    switch (sortBy) {
+      case 'name': return a.title.localeCompare(b.title);
+      case 'status': return a.status.localeCompare(b.status);
+      default: return 0;
+    }
+  });
+
+  // Statistics calculations
+  const projectStats = {
+    total: projects.length,
+    active: projects.filter(p => p.isActive).length,
+    completed: projects.filter(p => p.status === 'deployed').length,
+    inProgress: projects.filter(p => p.status === 'in_progress').length,
+    avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length) : 0,
+    totalHours: projects.reduce((sum, p) => sum + p.actualHours, 0),
+    estimatedHours: projects.reduce((sum, p) => sum + (p.estimatedHours || 0), 0)
+  };
+
+  const taskStats = {
+    total: tasks.length,
+    completed: tasks.filter(t => t.status === 'done').length,
+    inProgress: tasks.filter(t => t.status === 'in_progress').length,
+    todo: tasks.filter(t => t.status === 'todo').length,
+    bugs: tasks.filter(t => t.category === 'bug').length,
+    features: tasks.filter(t => t.category === 'feature').length
+  };
+
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -349,10 +498,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     const secs = seconds % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
-
-  const activeProjects = projects.filter(p => p.isActive);
-  const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
-  const testingTasks = tasks.filter(t => t.status === 'testing');
 
   // Testing Template for AI Development Projects
   const testingTemplate = {
@@ -427,403 +572,764 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         </div>
       </div>
 
-      {/* Overview */}
+      {/* Enhanced Overview Dashboard */}
       {activeView === "overview" && (
         <div className="space-y-8">
-          {/* Stats Cards */}
+          {/* Comprehensive Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground dark:text-gray-400">Active Projects</p>
-                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {activeProjects.length}
-                    </p>
+                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{projectStats.active}</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">of {projectStats.total} total</p>
                   </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
                     <Code2 className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-blue-100 dark:border-blue-800 shadow-lg">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Open Tasks</p>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {tasks.filter(t => t.status !== 'done').length}
-                    </p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Tasks Progress</p>
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">{taskStats.completed}</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">{taskStats.inProgress} in progress</p>
                   </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
                     <CheckSquare className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-green-100 dark:border-green-800 shadow-lg">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Hours Logged</p>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {projects.reduce((sum, p) => sum + p.actualHours, 0)}h
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Time Tracked</p>
+                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{projectStats.totalHours}h</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">
+                      {projectStats.estimatedHours > 0 ? 
+                        `${Math.round((projectStats.totalHours / projectStats.estimatedHours) * 100)}% of estimated` :
+                        'No estimates set'
+                      }
                     </p>
                   </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
                     <Clock className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-orange-100 dark:border-orange-800 shadow-lg">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground dark:text-gray-400">Avg Progress</p>
-                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                      {Math.round(activeProjects.reduce((sum, p) => sum + p.progress, 0) / activeProjects.length)}%
-                    </p>
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{projectStats.avgProgress}%</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">{taskStats.bugs} bugs reported</p>
                   </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-amber-500 rounded-xl flex items-center justify-center">
-                    <Target className="h-6 w-6 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Current Projects */}
-          <Card className="border-purple-100 dark:border-purple-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-purple-600 dark:text-purple-400">
-                <Code2 className="h-5 w-5" />
-                Active Projects
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {activeProjects.map((project) => (
-                  <div key={project.id} className="p-4 bg-white/60 dark:bg-[#17111d]/60 rounded-xl">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
-                          {getProjectIcon(project.projectType)}
+          {/* Enhanced Recent Projects with More Detail */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-[#4b5563] dark:text-white">
+                  <Activity className="h-5 w-5" />
+                  Project Portfolio Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {projects.slice(0, 4).map((project) => (
+                    <div key={project.id} className="p-4 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
+                            {getProjectIcon(project.projectType)}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{project.name}</h4>
+                            <p className="text-sm text-muted-foreground dark:text-gray-400 capitalize">{project.projectType} Project</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{project.name}</h4>
-                          <p className="text-sm text-muted-foreground dark:text-gray-400">{project.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(project.status)}>
                           {project.status.replace('_', ' ')}
                         </Badge>
-
                       </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-muted-foreground dark:text-gray-400">Progress</span>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Progress</span>
                           <span className="font-medium">{project.progress}%</span>
                         </div>
                         <Progress value={project.progress} className="h-2" />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
-                          <span className="ml-1 font-medium">{project.actualHours}/{project.estimatedHours || 'N/A'}</span>
+                        
+                        <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Clock4 className="h-4 w-4 text-purple-500" />
+                            <span>{project.actualHours}h logged</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <GitCommit className="h-4 w-4 text-green-500" />
+                            <span>{tasks.filter(t => t.projectId === project.id).length} tasks</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Tasks:</span>
-                          <span className="ml-1 font-medium">{tasks.filter(t => t.projectId === project.id).length}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Type:</span>
-                          <span className="ml-1 font-medium capitalize">{project.projectType}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground dark:text-gray-400">Target:</span>
-                          <span className="ml-1 font-medium">
-                            {project.targetDate ? format(new Date(project.targetDate), 'MMM dd') : 'TBD'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {project.techStack.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {project.techStack.map((tech: string, index: number) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {tech}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="flex gap-2 mt-3">
-                        <Button
-                          size="sm"
-                          onClick={() => setSelectedProject(project.id)}
-                          disabled={isReadOnly}
-                          className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                            isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          View Details
-                        </Button>
-                        {project.repositoryUrl && (
+                        
+                        <div className="flex gap-2 mt-3">
                           <Button 
                             size="sm" 
                             variant="outline"
+                            onClick={() => {
+                              setSelectedProject(project.id);
+                              setActiveView('projects');
+                            }}
                             disabled={isReadOnly}
-                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                            className="text-xs"
                           >
-                            <GitBranch className="h-4 w-4 mr-1" />
-                            Repository
+                            <Eye className="h-3 w-3 mr-1" />
+                            View
                           </Button>
-                        )}
-                        {project.deploymentUrl && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            disabled={isReadOnly}
-                            className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                          >
-                            <Link className="h-4 w-4 mr-1" />
-                            Live Site
-                          </Button>
-                        )}
+                          {project.repositoryUrl && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              disabled={isReadOnly}
+                              className="text-xs"
+                            >
+                              <GitBranch className="h-3 w-3 mr-1" />
+                              Repo
+                            </Button>
+                          )}
+                          {project.deploymentUrl && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              disabled={isReadOnly}
+                              className="text-xs"
+                            >
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              Live
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Task Activity Feed */}
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-[#4b5563] dark:text-white">
+                  <CheckCircle className="h-5 w-5" />
+                  Recent Task Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {tasks.slice(0, 5).map((task) => (
+                    <div key={task.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-lg">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
+                        {getCategoryIcon(task.category)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{task.title}</p>
+                        <p className="text-xs text-muted-foreground dark:text-gray-400">
+                          {projects.find(p => p.id === task.projectId)?.name} • {task.category}
+                        </p>
+                      </div>
+                      <Badge className={getStatusColor(task.status)} variant="outline">
+                        {task.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                  ))}
+                  
+                  {tasks.length === 0 && (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <CheckSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>No tasks yet. Create your first project to get started!</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Productivity Insights */}
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-[#4b5563] dark:text-white">
+                <BarChart3 className="h-5 w-5" />
+                Development Insights
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Star className="h-5 w-5 text-blue-600" />
+                    <span className="font-medium text-blue-900 dark:text-blue-100">Project Health</span>
                   </div>
-                ))}
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    {projectStats.completed > 0 ? 
+                      `${projectStats.completed} projects deployed successfully` :
+                      'No projects completed yet - keep pushing forward!'
+                    }
+                  </p>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Clock4 className="h-5 w-5 text-green-600" />
+                    <span className="font-medium text-green-900 dark:text-green-100">Time Efficiency</span>
+                  </div>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    {projectStats.totalHours > 0 ?
+                      `Average ${Math.round(projectStats.totalHours / Math.max(projectStats.active, 1))}h per active project` :
+                      'Start tracking time to see efficiency metrics'
+                    }
+                  </p>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Target className="h-5 w-5 text-purple-600" />
+                    <span className="font-medium text-purple-900 dark:text-purple-100">Focus Areas</span>
+                  </div>
+                  <p className="text-sm text-purple-700 dark:text-purple-300">
+                    {taskStats.features > taskStats.bugs ?
+                      `Building features (${taskStats.features} vs ${taskStats.bugs} bugs)` :
+                      taskStats.bugs > 0 ?
+                      `Focus on bug fixes (${taskStats.bugs} pending)` :
+                      'Ready for feature development'
+                    }
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* Projects View */}
+      {/* Enhanced Projects View */}
       {activeView === "projects" && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Projects</h2>
-            <Button 
-              onClick={() => setShowNewProjectForm(true)}
-              disabled={isReadOnly}
-              className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {projects.map((project) => (
-              <Card key={project.id} className="border-purple-100 dark:border-purple-800 shadow-lg">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
-                        {getProjectIcon(project.projectType)}
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{project.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">{project.projectType}</p>
-                      </div>
-                    </div>
-                    <Badge className={getStatusColor(project.status)}>
-                      {project.status.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">{project.description}</p>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Progress</span>
-                      <span className="font-medium">{project.progress}%</span>
-                    </div>
-                    <Progress value={project.progress} className="h-2" />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
-                      <span className="ml-1 font-medium">{project.actualHours}/{project.estimatedHours || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Type:</span>
-                      <Badge variant="outline" className="ml-1 capitalize">
-                        {project.projectType}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {project.techStack.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {project.techStack.slice(0, 3).map((tech: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {tech}
-                        </Badge>
-                      ))}
-                      {project.techStack.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{project.techStack.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => setSelectedProject(project.id)}
-                      disabled={isReadOnly}
-                      className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                        isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      Manage
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      disabled={isReadOnly}
-                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Tasks View */}
-      {activeView === "tasks" && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Tasks</h2>
-              {selectedProject && (
-                <Badge variant="outline" className="text-sm">
-                  {projects.find(p => p.id === selectedProject)?.name}
-                </Badge>
-              )}
+          {/* Header with Controls */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Project Management</h2>
+              <p className="text-sm text-muted-foreground dark:text-gray-400">
+                {filteredProjects.length} projects • {projectStats.active} active • {projectStats.completed} completed
+              </p>
             </div>
-            <div className="flex gap-2">
-              <select
-                value={selectedProject || ""}
-                onChange={(e) => setSelectedProject(e.target.value ? Number(e.target.value) : null)}
-                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-[#17111d]"
-              >
-                <option value="">All Projects</option>
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
+            
+            {/* Controls */}
+            <div className="flex gap-3">
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Filter status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="planning">Planning</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="testing">Testing</SelectItem>
+                  <SelectItem value="deployed">Deployed</SelectItem>
+                  <SelectItem value="on_hold">On Hold</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="status">Status</SelectItem>
+                  <SelectItem value="progress">Progress</SelectItem>
+                  <SelectItem value="priority">Priority</SelectItem>
+                </SelectContent>
+              </Select>
+              
               <Button 
-                onClick={() => setShowNewTaskForm(true)}
+                onClick={() => setShowNewProjectForm(true)}
                 disabled={isReadOnly}
                 className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
                   isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                New Task
+                New Project
               </Button>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {projectTasks.map((task) => (
-              <Card key={task.id} className="border-blue-100 dark:border-blue-800 shadow-lg">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
-                        {getCategoryIcon(task.category)}
+          {/* Enhanced Project Grid with Inline Editing */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {filteredProjects.map((project) => (
+              <Card key={project.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                        {getProjectIcon(project.projectType)}
                       </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white">{task.title}</h4>
-                        <p className="text-sm text-muted-foreground dark:text-gray-400">{task.description}</p>
+                      <div className="flex-1 min-w-0">
+                        {editingProject === project.id ? (
+                          <div className="space-y-2">
+                            <Input
+                              value={editingValues.name || ''}
+                              onChange={(e) => setEditingValues({...editingValues, name: e.target.value})}
+                              className="font-semibold"
+                              placeholder="Project name"
+                            />
+                            <Textarea
+                              value={editingValues.description || ''}
+                              onChange={(e) => setEditingValues({...editingValues, description: e.target.value})}
+                              className="text-sm resize-none"
+                              rows={2}
+                              placeholder="Project description"
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <CardTitle className="text-lg truncate">{project.name}</CardTitle>
+                            <p className="text-sm text-muted-foreground dark:text-gray-400 capitalize">
+                              {project.projectType} Project
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
+                    
                     <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(task.status)}>
-                        {task.status.replace('_', ' ')}
-                      </Badge>
-                      <Badge variant="outline" className="capitalize">
-                        {task.category}
-                      </Badge>
+                      {editingProject === project.id ? (
+                        <Select 
+                          value={editingValues.status || project.status} 
+                          onValueChange={(value) => setEditingValues({...editingValues, status: value})}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="planning">Planning</SelectItem>
+                            <SelectItem value="in_progress">In Progress</SelectItem>
+                            <SelectItem value="testing">Testing</SelectItem>
+                            <SelectItem value="deployed">Deployed</SelectItem>
+                            <SelectItem value="on_hold">On Hold</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Badge className={getStatusColor(project.status)}>
+                          {project.status.replace('_', ' ')}
+                        </Badge>
+                      )}
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Category:</span>
-                      <span className="ml-1 font-medium capitalize">{task.category}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Hours:</span>
-                      <span className="ml-1 font-medium">{task.actualHours}/{task.estimatedHours || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Project:</span>
-                      <span className="ml-1 font-medium">
-                        {projects.find(p => p.id === task.projectId)?.name}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground dark:text-gray-400">Due:</span>
-                      <span className="ml-1 font-medium">
-                        {task.dueDate ? format(new Date(task.dueDate), 'MMM dd') : 'No due date'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {task.comments && (
-                    <div className="mt-3 p-2 bg-gray-50 dark:bg-[#17111d]/50 rounded text-sm">
-                      <span className="text-muted-foreground dark:text-gray-400">Notes:</span>
-                      <span className="ml-1">{task.comments}</span>
-                    </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-4">
+                  {editingProject !== project.id && (
+                    <p className="text-sm text-muted-foreground dark:text-gray-400 line-clamp-2">
+                      {project.description}
+                    </p>
                   )}
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-muted-foreground dark:text-gray-400">Progress</span>
+                        <span className="font-semibold text-purple-600 dark:text-purple-400">{project.progress}%</span>
+                      </div>
+                      <Progress value={project.progress} className="h-3 bg-gray-100 dark:bg-gray-800">
+                        <div 
+                          className="h-full bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full transition-all duration-300"
+                          style={{ width: `${project.progress}%` }}
+                        />
+                      </Progress>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Clock4 className="h-4 w-4 text-blue-500" />
+                        <span className="text-muted-foreground dark:text-gray-400">Time:</span>
+                        <span className="font-medium">{project.actualHours}h</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <GitCommit className="h-4 w-4 text-green-500" />
+                        <span className="text-muted-foreground dark:text-gray-400">Tasks:</span>
+                        <span className="font-medium">{tasks.filter(t => t.projectId === project.id).length}</span>
+                      </div>
+                    </div>
 
-                  <div className="flex gap-2 mt-3">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      disabled={isReadOnly}
-                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      disabled={isReadOnly}
-                      className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
-                    >
-                      <Timer className="h-4 w-4 mr-1" />
-                      Log Time
-                    </Button>
+                    {project.techStack.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {project.techStack.slice(0, 4).map((tech: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                            {tech}
+                          </Badge>
+                        ))}
+                        {project.techStack.length > 4 && (
+                          <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                            +{project.techStack.length - 4}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex gap-2 pt-2">
+                      {editingProject === project.id ? (
+                        <div className="flex gap-2 w-full">
+                          <Button
+                            size="sm"
+                            onClick={() => saveProjectEdit(project.id)}
+                            disabled={isReadOnly}
+                            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white flex-1"
+                          >
+                            <Save className="h-3 w-3 mr-1" />
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={cancelEdit}
+                            className="flex-1"
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 w-full">
+                          <Button
+                            size="sm"
+                            onClick={() => startEditingProject(project)}
+                            disabled={isReadOnly}
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            <Edit3 className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setSelectedProject(project.id);
+                              setActiveView('tasks');
+                            }}
+                            disabled={isReadOnly}
+                            className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white flex-1"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            Tasks
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deleteProject(project.id)}
+                            disabled={isReadOnly}
+                            className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 dark:text-red-400 dark:border-red-800"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
+            
+            {filteredProjects.length === 0 && (
+              <div className="col-span-full">
+                <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                  <CardContent className="p-12 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Code2 className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Projects Found</h3>
+                    <p className="text-muted-foreground dark:text-gray-400 mb-4">
+                      {filterStatus === 'all' 
+                        ? "Get started by creating your first development project"
+                        : `No projects match the current filter: ${filterStatus}`
+                      }
+                    </p>
+                    <Button
+                      onClick={() => setShowNewProjectForm(true)}
+                      disabled={isReadOnly}
+                      className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create First Project
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced Tasks View */}
+      {activeView === "tasks" && (
+        <div className="space-y-6">
+          {/* Header with Enhanced Controls */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Task Management</h2>
+              <p className="text-sm text-muted-foreground dark:text-gray-400">
+                {selectedProject 
+                  ? `${projectTasks.length} tasks in ${projects.find(p => p.id === selectedProject)?.name || 'selected project'}` 
+                  : `${tasks.length} total tasks • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
+                }
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <Select value={taskFilter} onValueChange={setTaskFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Filter tasks" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tasks</SelectItem>
+                  <SelectItem value="todo">To Do</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="testing">Testing</SelectItem>
+                  <SelectItem value="done">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button 
+                onClick={() => setShowNewTaskForm(true)}
+                disabled={isReadOnly}
+                className={`bg-gradient-to-r from-blue-400 to-cyan-500 text-white ${
+                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Task
+              </Button>
+              
+              {selectedProject && (
+                <Button 
+                  variant="outline"
+                  onClick={() => setSelectedProject(null)}
+                  disabled={isReadOnly}
+                  className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                >
+                  View All Tasks
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Enhanced Task Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {filteredTasks.map((task) => (
+              <Card key={task.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                        {getCategoryIcon(task.category)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {editingTask === task.id ? (
+                          <div className="space-y-2">
+                            <Input
+                              value={editingTaskValues.title || ''}
+                              onChange={(e) => setEditingTaskValues({...editingTaskValues, title: e.target.value})}
+                              className="font-semibold"
+                              placeholder="Task title"
+                            />
+                            <Textarea
+                              value={editingTaskValues.description || ''}
+                              onChange={(e) => setEditingTaskValues({...editingTaskValues, description: e.target.value})}
+                              className="text-sm resize-none"
+                              rows={2}
+                              placeholder="Task description"
+                            />
+                          </div>
+                        ) : (
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white truncate">{task.title}</h4>
+                            <p className="text-sm text-muted-foreground dark:text-gray-400 line-clamp-2">{task.description}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {editingTask === task.id ? (
+                        <Select 
+                          value={editingTaskValues.status || task.status} 
+                          onValueChange={(value) => setEditingTaskValues({...editingTaskValues, status: value})}
+                        >
+                          <SelectTrigger className="w-28">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="todo">To Do</SelectItem>
+                            <SelectItem value="in_progress">In Progress</SelectItem>
+                            <SelectItem value="testing">Testing</SelectItem>
+                            <SelectItem value="done">Done</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Badge className={getStatusColor(task.status)}>
+                          {task.status.replace('_', ' ')}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Clock4 className="h-4 w-4 text-purple-500" />
+                        <span className="text-muted-foreground dark:text-gray-400">Time:</span>
+                        <span className="font-medium">{task.actualHours}h / {task.estimatedHours || 'N/A'}h</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-blue-500" />
+                        <span className="text-muted-foreground dark:text-gray-400">Type:</span>
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {task.category}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <Folder className="h-4 w-4 text-green-500" />
+                      <span className="text-muted-foreground dark:text-gray-400">Project:</span>
+                      <span className="font-medium text-green-600 dark:text-green-400">
+                        {projects.find(p => p.id === task.projectId)?.name || 'No Project'}
+                      </span>
+                    </div>
+
+                    {task.dueDate && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Calendar className="h-4 w-4 text-orange-500" />
+                        <span className="text-muted-foreground dark:text-gray-400">Due:</span>
+                        <span className="font-medium text-orange-600 dark:text-orange-400">
+                          {format(new Date(task.dueDate), 'MMM dd, yyyy')}
+                        </span>
+                      </div>
+                    )}
+
+                    {task.comments && editingTask !== task.id && (
+                      <div className="p-3 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <div className="flex items-start gap-2">
+                          <MessageSquare className="h-4 w-4 text-gray-500 mt-0.5" />
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{task.comments}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2 pt-2">
+                      {editingTask === task.id ? (
+                        <div className="flex gap-2 w-full">
+                          <Button
+                            size="sm"
+                            onClick={() => saveTaskEdit(task.id)}
+                            disabled={isReadOnly}
+                            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white flex-1"
+                          >
+                            <Save className="h-3 w-3 mr-1" />
+                            Save
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={cancelTaskEdit}
+                            className="flex-1"
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 w-full">
+                          <Button
+                            size="sm"
+                            onClick={() => startEditingTask(task)}
+                            disabled={isReadOnly}
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            <Edit3 className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => startTimer(task.id)}
+                            disabled={isReadOnly}
+                            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white flex-1"
+                          >
+                            <Timer className="h-3 w-3 mr-1" />
+                            Timer
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => deleteTask(task.id)}
+                            disabled={isReadOnly}
+                            className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 dark:text-red-400 dark:border-red-800"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {filteredTasks.length === 0 && (
+              <div className="col-span-full">
+                <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                  <CardContent className="p-12 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckSquare className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Tasks Found</h3>
+                    <p className="text-muted-foreground dark:text-gray-400 mb-4">
+                      {taskFilter === 'all' 
+                        ? selectedProject 
+                          ? "No tasks in this project yet. Create your first task to get started!"
+                          : "No tasks created yet. Start by adding your first development task!"
+                        : `No tasks match the current filter: ${taskFilter}`
+                      }
+                    </p>
+                    <Button
+                      onClick={() => setShowNewTaskForm(true)}
+                      disabled={isReadOnly}
+                      className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create First Task
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
         </div>
       )}
