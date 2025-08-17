@@ -1155,12 +1155,42 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="web">Web App</SelectItem>
-                                <SelectItem value="mobile">Mobile App</SelectItem>
-                                <SelectItem value="desktop">Desktop App</SelectItem>
-                                <SelectItem value="api">API Backend</SelectItem>
-                                <SelectItem value="library">Library</SelectItem>
-                                <SelectItem value="tool">Tool</SelectItem>
+                                <SelectItem value="web">
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">Web App</span>
+                                    <span className="text-xs text-muted-foreground">Browser-based applications</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="mobile">
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">Mobile App</span>
+                                    <span className="text-xs text-muted-foreground">iOS, Android, or cross-platform</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="desktop">
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">Desktop App</span>
+                                    <span className="text-xs text-muted-foreground">Windows, Mac, or Linux applications</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="api">
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">API Backend</span>
+                                    <span className="text-xs text-muted-foreground">Server APIs, databases, microservices</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="library">
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">Library</span>
+                                    <span className="text-xs text-muted-foreground">Reusable code packages, SDKs</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="tool">
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">Tool</span>
+                                    <span className="text-xs text-muted-foreground">CLI tools, utilities, automation scripts</span>
+                                  </div>
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           ) : (
@@ -2185,12 +2215,42 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="web">Web Application</SelectItem>
-                          <SelectItem value="mobile">Mobile App</SelectItem>
-                          <SelectItem value="desktop">Desktop App</SelectItem>
-                          <SelectItem value="api">API Backend</SelectItem>
-                          <SelectItem value="library">Library</SelectItem>
-                          <SelectItem value="tool">Tool</SelectItem>
+                          <SelectItem value="web">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Web Application</span>
+                              <span className="text-xs text-muted-foreground">Browser-based applications, websites</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="mobile">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Mobile App</span>
+                              <span className="text-xs text-muted-foreground">iOS, Android, React Native, Flutter</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="desktop">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Desktop App</span>
+                              <span className="text-xs text-muted-foreground">Electron, native Windows/Mac/Linux apps</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="api">
+                            <div className="flex flex-col">
+                              <span className="font-medium">API Backend</span>
+                              <span className="text-xs text-muted-foreground">REST APIs, GraphQL, databases, servers</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="library">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Library</span>
+                              <span className="text-xs text-muted-foreground">NPM packages, Python libraries, SDKs</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="tool">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Tool</span>
+                              <span className="text-xs text-muted-foreground">CLI tools, build scripts, automation</span>
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
