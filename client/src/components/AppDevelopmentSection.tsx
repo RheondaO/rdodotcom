@@ -973,209 +973,245 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             </div>
           </div>
 
-          {/* Enhanced Project Grid with Inline Editing */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredProjects.map((project) => (
-              <Card key={project.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
-                        {getProjectIcon(project.projectType)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        {editingProject === project.id ? (
-                          <div className="space-y-2">
-                            <Input
-                              value={editingValues.name || ''}
-                              onChange={(e) => setEditingValues({...editingValues, name: e.target.value})}
-                              className="font-semibold"
-                              placeholder="Project name"
-                            />
-                            <Textarea
-                              value={editingValues.description || ''}
-                              onChange={(e) => setEditingValues({...editingValues, description: e.target.value})}
-                              className="text-sm resize-none"
-                              rows={2}
-                              placeholder="Project description"
-                            />
+          {/* Projects Table with Inline Editing */}
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-800/50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Project
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Priority
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Progress
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {filteredProjects.map((project) => (
+                      <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                              {getProjectIcon(project.projectType)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              {editingProject === project.id ? (
+                                <div className="space-y-2">
+                                  <Input
+                                    value={editingValues.name || ''}
+                                    onChange={(e) => setEditingValues({...editingValues, name: e.target.value})}
+                                    className="font-semibold"
+                                    placeholder="Project name"
+                                  />
+                                  <Textarea
+                                    value={editingValues.description || ''}
+                                    onChange={(e) => setEditingValues({...editingValues, description: e.target.value})}
+                                    className="text-sm resize-none"
+                                    rows={2}
+                                    placeholder="Project description"
+                                  />
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">{project.name}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{project.description}</div>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        ) : (
-                          <div>
-                            <CardTitle className="text-lg truncate">{project.name}</CardTitle>
-                            <p className="text-sm text-muted-foreground dark:text-gray-400 capitalize">
-                              {project.projectType} Project
-                            </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingProject === project.id ? (
+                            <Select 
+                              value={editingValues.projectType || project.projectType} 
+                              onValueChange={(value) => setEditingValues({...editingValues, projectType: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="web">Web App</SelectItem>
+                                <SelectItem value="mobile">Mobile App</SelectItem>
+                                <SelectItem value="desktop">Desktop</SelectItem>
+                                <SelectItem value="api">API</SelectItem>
+                                <SelectItem value="database">Database</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-sm text-gray-900 dark:text-white capitalize">
+                              {project.projectType.replace('_', ' ')}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingProject === project.id ? (
+                            <Select 
+                              value={editingValues.status || project.status} 
+                              onValueChange={(value) => setEditingValues({...editingValues, status: value})}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="planning">Planning</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="testing">Testing</SelectItem>
+                                <SelectItem value="deployed">Deployed</SelectItem>
+                                <SelectItem value="on_hold">On Hold</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge className={getStatusColor(project.status)}>
+                              {project.status.replace('_', ' ')}
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {editingProject === project.id ? (
+                            <Select 
+                              value={editingValues.priority || project.priority} 
+                              onValueChange={(value) => setEditingValues({...editingValues, priority: value})}
+                            >
+                              <SelectTrigger className="w-24">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="urgent">Urgent</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className={`text-sm font-medium ${
+                              project.priority === 'urgent' ? 'text-red-600 dark:text-red-400' :
+                              project.priority === 'high' ? 'text-orange-600 dark:text-orange-400' :
+                              project.priority === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
+                              'text-green-600 dark:text-green-400'
+                            }`}>
+                              {project.priority.charAt(0).toUpperCase() + project.priority.slice(1)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div 
+                                  className="bg-gradient-to-r from-purple-400 to-indigo-500 h-2 rounded-full transition-all"
+                                  style={{ width: `${project.progress}%` }}
+                                />
+                              </div>
+                            </div>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white min-w-[3rem]">
+                              {project.progress}%
+                            </span>
                           </div>
-                        )}
-                      </div>
-                    </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            {editingProject === project.id ? (
+                              <div className="flex gap-1">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => saveProjectEdit(project.id)}
+                                  disabled={isReadOnly}
+                                  className="bg-green-500 hover:bg-green-600 text-white"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={cancelEdit}
+                                  disabled={isReadOnly}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex gap-1">
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => startEditingProject(project)}
+                                  disabled={isReadOnly}
+                                  className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => deleteProject(project.id)}
+                                  disabled={isReadOnly}
+                                  className={`text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 ${
+                                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
+                                  }`}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                     
-                    <div className="flex items-center gap-2">
-                      {editingProject === project.id ? (
-                        <Select 
-                          value={editingValues.status || project.status} 
-                          onValueChange={(value) => setEditingValues({...editingValues, status: value})}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="planning">Planning</SelectItem>
-                            <SelectItem value="in_progress">In Progress</SelectItem>
-                            <SelectItem value="testing">Testing</SelectItem>
-                            <SelectItem value="deployed">Deployed</SelectItem>
-                            <SelectItem value="on_hold">On Hold</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Badge className={getStatusColor(project.status)}>
-                          {project.status.replace('_', ' ')}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  {editingProject !== project.id && (
-                    <p className="text-sm text-muted-foreground dark:text-gray-400 line-clamp-2">
-                      {project.description}
-                    </p>
-                  )}
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-muted-foreground dark:text-gray-400">Progress</span>
-                        <span className="font-semibold text-purple-600 dark:text-purple-400">{project.progress}%</span>
-                      </div>
-                      <Progress value={project.progress} className="h-3 bg-gray-100 dark:bg-gray-800">
-                        <div 
-                          className="h-full bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full transition-all duration-300"
-                          style={{ width: `${project.progress}%` }}
-                        />
-                      </Progress>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Clock4 className="h-4 w-4 text-blue-500" />
-                        <span className="text-muted-foreground dark:text-gray-400">Time:</span>
-                        <span className="font-medium">{project.actualHours}h</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <GitCommit className="h-4 w-4 text-green-500" />
-                        <span className="text-muted-foreground dark:text-gray-400">Tasks:</span>
-                        <span className="font-medium">{tasks.filter(t => t.projectId === project.id).length}</span>
-                      </div>
-                    </div>
-
-                    {project.techStack.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {project.techStack.slice(0, 4).map((tech: string, index: number) => (
-                          <Badge key={index} variant="secondary" className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-                            {tech}
-                          </Badge>
-                        ))}
-                        {project.techStack.length > 4 && (
-                          <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                            +{project.techStack.length - 4}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 pt-2">
-                      {editingProject === project.id ? (
-                        <div className="flex gap-2 w-full">
+                    {/* Add New Row */}
+                    <tr className="border-t-2 border-dashed border-gray-300 dark:border-gray-600">
+                      <td colSpan={6} className="px-6 py-8">
+                        <div className="text-center">
+                          {filteredProjects.length === 0 ? (
+                            <div className="py-8">
+                              <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Code2 className="h-8 w-8 text-white" />
+                              </div>
+                              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Projects Found</h3>
+                              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                                {filterStatus === 'all' 
+                                  ? "Click below to create your first development project"
+                                  : `No projects match the current filter: ${filterStatus}`
+                                }
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="py-4">
+                              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                                Add a new project to continue building
+                              </p>
+                            </div>
+                          )}
                           <Button
-                            size="sm"
-                            onClick={() => saveProjectEdit(project.id)}
+                            onClick={() => setShowNewProjectForm(true)}
                             disabled={isReadOnly}
-                            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white flex-1"
+                            className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
                           >
-                            <Save className="h-3 w-3 mr-1" />
-                            Save
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={cancelEdit}
-                            className="flex-1"
-                          >
-                            <X className="h-3 w-3 mr-1" />
-                            Cancel
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add New Project
                           </Button>
                         </div>
-                      ) : (
-                        <div className="flex gap-2 w-full">
-                          <Button
-                            size="sm"
-                            onClick={() => startEditingProject(project)}
-                            disabled={isReadOnly}
-                            variant="outline"
-                            className="flex-1"
-                          >
-                            <Edit3 className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setSelectedProject(project.id);
-                              setActiveView('tasks');
-                            }}
-                            disabled={isReadOnly}
-                            className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white flex-1"
-                          >
-                            <Eye className="h-3 w-3 mr-1" />
-                            Tasks
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => deleteProject(project.id)}
-                            disabled={isReadOnly}
-                            className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 dark:text-red-400 dark:border-red-800"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            
-            {filteredProjects.length === 0 && (
-              <div className="col-span-full">
-                <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-                  <CardContent className="p-12 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Code2 className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Projects Found</h3>
-                    <p className="text-muted-foreground dark:text-gray-400 mb-4">
-                      {filterStatus === 'all' 
-                        ? "Get started by creating your first development project"
-                        : `No projects match the current filter: ${filterStatus}`
-                      }
-                    </p>
-                    <Button
-                      onClick={() => setShowNewProjectForm(true)}
-                      disabled={isReadOnly}
-                      className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create First Project
-                    </Button>
-                  </CardContent>
-                </Card>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -1361,7 +1397,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           </Button>
                           <Button
                             size="sm"
-                            onClick={() => startTimer(task.id)}
+                            onClick={() => console.log('Timer feature removed')}
                             disabled={isReadOnly}
                             className="bg-gradient-to-r from-green-400 to-emerald-500 text-white flex-1"
                           >
