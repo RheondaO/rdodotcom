@@ -11,17 +11,38 @@ function extractDatabaseIdFromUrl(databaseUrl: string): string {
 
 // Get the AIDEVPROJECTS database ID
 export function getAIDevProjectsDatabaseId(): string {
+    console.log("🔍 Getting AI Dev Projects Database ID...");
+    console.log("Environment variables check:");
+    console.log("  NOTION_AI_DEV_PAGE_URL:", !!process.env.NOTION_AI_DEV_PAGE_URL);
+    console.log("  NOTION_PAGE_URL:", !!process.env.NOTION_PAGE_URL);
+    
     // Try NOTION_AI_DEV_PAGE_URL first (if it's a database URL)
     if (process.env.NOTION_AI_DEV_PAGE_URL) {
-        return extractDatabaseIdFromUrl(process.env.NOTION_AI_DEV_PAGE_URL);
+        console.log("  Using NOTION_AI_DEV_PAGE_URL:", process.env.NOTION_AI_DEV_PAGE_URL.substring(0, 50) + "...");
+        try {
+            const id = extractDatabaseIdFromUrl(process.env.NOTION_AI_DEV_PAGE_URL);
+            console.log("  ✅ Extracted database ID:", id.substring(0, 8) + "...");
+            return id;
+        } catch (error: any) {
+            console.error("  ❌ Failed to extract from NOTION_AI_DEV_PAGE_URL:", error.message);
+        }
     }
     
     // Fallback to checking if NOTION_PAGE_URL points to the database
     if (process.env.NOTION_PAGE_URL) {
-        return extractDatabaseIdFromUrl(process.env.NOTION_PAGE_URL);
+        console.log("  Falling back to NOTION_PAGE_URL:", process.env.NOTION_PAGE_URL.substring(0, 50) + "...");
+        try {
+            const id = extractDatabaseIdFromUrl(process.env.NOTION_PAGE_URL);
+            console.log("  ✅ Extracted database ID from fallback:", id.substring(0, 8) + "...");
+            return id;
+        } catch (error: any) {
+            console.error("  ❌ Failed to extract from NOTION_PAGE_URL:", error.message);
+        }
     }
     
-    throw new Error("Either NOTION_AI_DEV_PAGE_URL or NOTION_PAGE_URL environment variable is required and must point to the AIDEVPROJECTS database");
+    const errorMsg = "Either NOTION_AI_DEV_PAGE_URL or NOTION_PAGE_URL environment variable is required and must point to the AIDEVPROJECTS database";
+    console.error("  ❌", errorMsg);
+    throw new Error(errorMsg);
 }
 
 /**
@@ -92,7 +113,14 @@ export async function getAIDevProjects() {
  */
 export async function createAIDevProject(itemData: any) {
     try {
+        console.log("🚀 Starting AI Dev Project creation...");
         const databaseId = getAIDevProjectsDatabaseId();
+        
+        if (!databaseId) {
+            throw new Error("Database ID is null or undefined. Check environment variable configuration.");
+        }
+        
+        console.log("✅ Database ID obtained successfully:", databaseId.substring(0, 8) + "...");
 
         const properties: any = {
             Name: {
