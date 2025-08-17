@@ -112,6 +112,9 @@ export async function getAIDevProjects() {
  * Create a new item in AIDEVPROJECTS database
  */
 export async function createAIDevProject(itemData: any) {
+    let database: any = null;
+    let properties: any = {};
+    
     try {
         console.log("🚀 Starting AI Dev Project creation...");
         const databaseId = getAIDevProjectsDatabaseId();
@@ -124,12 +127,12 @@ export async function createAIDevProject(itemData: any) {
         
         // First retrieve the database to ensure it exists and we have access
         console.log("🔍 Retrieving database to verify access...");
-        const database = await notion.databases.retrieve({
+        database = await notion.databases.retrieve({
             database_id: databaseId,
         });
         console.log("✅ Database retrieved successfully:", (database as any).title?.[0]?.plain_text || "Unknown");
 
-        const properties: any = {
+        properties = {
             Name: {
                 title: [{ text: { content: itemData.name } }]
             }
@@ -251,15 +254,15 @@ export async function createAIDevProject(itemData: any) {
         return {
             notionId: response.id,
             ...itemData,
-            createdAt: response.created_time,
-            updatedAt: response.last_edited_time
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
     } catch (error: any) {
         console.error("Error creating AI Dev Project in Notion:", error);
         console.error("Error details:", error.message);
         console.error("Error code:", error.code);
         console.error("Error status:", error.status);
-        console.error("Database ID:", databaseId);
+        console.error("Database ID:", database?.id || "undefined");
         console.error("Environment check:");
         console.error("  NOTION_AI_DEV_PAGE_URL:", !!process.env.NOTION_AI_DEV_PAGE_URL);
         console.error("  NOTION_PAGE_URL:", !!process.env.NOTION_PAGE_URL);
@@ -267,7 +270,7 @@ export async function createAIDevProject(itemData: any) {
         
         // Provide specific error guidance based on successful patterns
         if (error.code === 'object_not_found') {
-            throw new Error(`Database not found. Please ensure your environment variable points to the AIDEVPROJECTS database URL (not a page URL). Current database ID: ${databaseId}`);
+            throw new Error(`Database not found. Please ensure your environment variable points to the AIDEVPROJECTS database URL (not a page URL). Current database ID: ${database?.id || "undefined"}`);
         } else if (error.code === 'unauthorized') {
             throw new Error(`Notion integration unauthorized. Please check NOTION_INTEGRATION_SECRET is valid and the integration has access to the AIDEVPROJECTS database.`);
         } else if (error.code === 'forbidden') {
