@@ -1463,9 +1463,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <Button 
                 onClick={() => setShowNewTaskForm(true)}
                 disabled={isReadOnly}
-                className={`bg-gradient-to-r from-blue-400 to-cyan-500 text-white ${
-                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 New Task
@@ -1717,17 +1715,16 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                           <Button
                             onClick={() => setShowNewTaskForm(true)}
-                            disabled={isReadOnly || !isAdmin}
+                            disabled={isReadOnly}
                             className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
-                            title={!isAdmin ? "Admin access required to create tasks" : ""}
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Task
                           </Button>
                           {!isAdmin && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                               <AlertCircle className="h-3 w-3 inline mr-1" />
-                              Admin login required to create tasks
+                              Demo mode - task creation enabled for testing
                             </p>
                           )}
                         </div>
