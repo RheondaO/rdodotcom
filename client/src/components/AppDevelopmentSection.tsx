@@ -277,8 +277,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     select: (data: any[]) => data || []
   });
 
-  // Filter items by type
-  const projects = allAIDevItems.filter(item => item.type === 'Project');
+  // Filter items by type - match the actual types in the database
+  const projects = allAIDevItems.filter(item => 
+    ['web application', 'api backend', 'mobile app', 'desktop app', 'library', 'tool', 'Project'].includes(item.type)
+  );
   const tasks = allAIDevItems.filter(item => item.type === 'Task');
   const testItems = allAIDevItems.filter(item => item.type === 'Test Item');
   const promptTemplates = allAIDevItems.filter(item => item.type === 'Library Prompt');
