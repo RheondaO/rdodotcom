@@ -2529,9 +2529,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {projects.map(project => (
-                            <SelectItem key={project.id} value={project.id.toString()}>
-                              {project.name}
+                          {projects.map((project, index) => (
+                            <SelectItem key={project.id || `task-project-${index}`} value={(project.id || index).toString()}>
+                              {project.name || 'Untitled Project'}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -2684,9 +2684,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {projects.map(project => (
-                            <SelectItem key={project.id} value={project.id.toString()}>
-                              {project.name}
+                          {projects.map((project, index) => (
+                            <SelectItem key={project.id || `test-project-${index}`} value={(project.id || index).toString()}>
+                              {project.name || 'Untitled Project'}
                             </SelectItem>
                           ))}
                         </SelectContent>
