@@ -240,6 +240,7 @@ export async function getAppDevelopmentTasks() {
                 status: properties.Status?.select?.name || "todo",
                 priority: properties.Priority?.select?.name || "medium",
                 category: properties.Category?.select?.name || "general",
+                projectId: properties.ProjectId?.rich_text?.[0]?.plain_text || "",
                 dueDate: properties.DueDate?.date?.start || null,
                 createdAt: page.created_time,
                 updatedAt: page.last_edited_time
@@ -371,6 +372,11 @@ export async function createAppDevelopmentTask(taskData: any) {
                 Category: {
                     select: { name: taskData.category }
                 },
+                ...(taskData.projectId && {
+                    ProjectId: {
+                        rich_text: [{ text: { content: taskData.projectId } }]
+                    }
+                }),
                 ...(taskData.dueDate && {
                     DueDate: {
                         date: { start: taskData.dueDate }
