@@ -272,9 +272,27 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
 
   // Fetch all AI Development items from AIDEVPROJECTS database
-  const { data: allAIDevItems = [] } = useQuery({
+  const { data: allAIDevItems = [], isLoading, error, isError } = useQuery({
     queryKey: ['/api/ai-development/projects'],
+    queryFn: async () => {
+      const response = await fetch('/api/ai-development/projects', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
     select: (data: any[]) => data || []
+  });
+  
+  // Debug the query state
+  console.log('🔍 Query Debug:', { 
+    isLoading, 
+    isError, 
+    error: error?.message,
+    dataLength: allAIDevItems?.length,
+    rawData: allAIDevItems 
   });
 
   // Filter items by type - match the actual types in the database
@@ -284,6 +302,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const tasks = allAIDevItems.filter(item => item.type === 'Task');
   const testItems = allAIDevItems.filter(item => item.type === 'Test Item');
   const promptTemplates = allAIDevItems.filter(item => item.type === 'Library Prompt');
+
+  // Debug logging - remove after fix
+  console.log('🔍 AI Dev Data Debug:', {
+    allAIDevItems: allAIDevItems.length,
+    projects: projects.length,
+    projectTypes: allAIDevItems.map(item => item.type),
+    projectNames: projects.map(p => p.name)
+  });
 
 
 
