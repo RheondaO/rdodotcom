@@ -38,7 +38,6 @@ export async function getAppDevelopmentProjects() {
                 repositoryUrl: properties.RepositoryUrl?.url || "",
                 deploymentUrl: properties.DeploymentUrl?.url || "",
                 techStack: properties.TechStack?.multi_select?.map((tech: any) => tech.name) || [],
-                actualHours: properties.ActualHours?.number || 0,
                 isActive: properties.IsActive?.checkbox || false,
                 createdAt: page.created_time,
                 updatedAt: page.last_edited_time
@@ -217,9 +216,6 @@ export async function getAppDevelopmentTasks() {
                 priority: properties.Priority?.select?.name || "medium",
                 category: properties.Category?.select?.name || "general",
                 dueDate: properties.DueDate?.date?.start || null,
-                estimatedHours: properties.EstimatedHours?.number || 0,
-                actualHours: properties.ActualHours?.number || 0,
-                completedDate: properties.CompletedDate?.date?.start || null,
                 createdAt: page.created_time,
                 updatedAt: page.last_edited_time
             };
@@ -263,9 +259,6 @@ export async function getAppDevelopmentTestItems() {
                 testType: properties.TestType?.select?.name || "unit",
                 status: properties.Status?.select?.name || "not_started",
                 priority: properties.Priority?.select?.name || "medium",
-                testEnvironment: properties.TestEnvironment?.select?.name || "development",
-                expectedResult: properties.ExpectedResult?.rich_text?.[0]?.plain_text || "",
-                actualResult: properties.ActualResult?.rich_text?.[0]?.plain_text || "",
                 lastRun: properties.LastRun?.date?.start || null,
                 executionTime: properties.ExecutionTime?.number || 0,
                 createdAt: page.created_time,
@@ -313,7 +306,6 @@ export async function getAppDevelopmentLibrary() {
                 usage: properties.Usage?.select?.name || "new",
                 createdDate: properties.CreatedDate?.date?.start || null,
                 lastUsed: properties.LastUsed?.date?.start || null,
-                notes: properties.Notes?.rich_text?.[0]?.plain_text || "",
                 promptFiles: properties.PromptFile?.files || [],
                 createdAt: page.created_time,
                 updatedAt: page.last_edited_time
@@ -355,12 +347,11 @@ export async function createAppDevelopmentTask(taskData: any) {
                 Category: {
                     select: { name: taskData.category }
                 },
-                DueDate: taskData.dueDate ? {
-                    date: { start: taskData.dueDate }
-                } : undefined,
-                EstimatedHours: taskData.estimatedHours ? {
-                    number: taskData.estimatedHours
-                } : undefined
+                ...(taskData.dueDate && {
+                    DueDate: {
+                        date: { start: taskData.dueDate }
+                    }
+                })
             }
         });
 
@@ -400,12 +391,6 @@ export async function createAppDevelopmentTestItem(testData: any) {
                 },
                 Priority: {
                     select: { name: testData.priority }
-                },
-                TestEnvironment: {
-                    select: { name: testData.testEnvironment }
-                },
-                ExpectedResult: {
-                    rich_text: [{ text: { content: testData.expectedResult || "" } }]
                 }
             }
         });
@@ -449,10 +434,7 @@ export async function createAppDevelopmentLibraryItem(libraryData: any) {
                 },
                 CreatedDate: {
                     date: { start: new Date().toISOString().split('T')[0] }
-                },
-                Notes: libraryData.notes ? {
-                    rich_text: [{ text: { content: libraryData.notes } }]
-                } : undefined
+                }
             }
         });
 

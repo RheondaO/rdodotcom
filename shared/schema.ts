@@ -535,8 +535,6 @@ export interface AppTask {
   description?: string;
   status?: string; // todo, in_progress, completed, blocked
   priority?: string; // low, medium, high
-  estimatedHours?: number;
-  actualHours?: number;
   dueDate?: string;
   createdAt?: Date;
 }

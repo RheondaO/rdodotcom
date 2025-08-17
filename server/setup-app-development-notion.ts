@@ -157,9 +157,6 @@ async function setupAppDevelopmentNotionDatabases() {
                 ]
             }
         },
-        ActualHours: {
-            number: {}
-        },
         IsActive: {
             checkbox: {}
         }
@@ -213,15 +210,6 @@ async function setupAppDevelopmentNotionDatabases() {
         },
         DueDate: {
             date: {}
-        },
-        EstimatedHours: {
-            number: {}
-        },
-        ActualHours: {
-            number: {}
-        },
-        CompletedDate: {
-            date: {}
         }
     });
 
@@ -271,21 +259,7 @@ async function setupAppDevelopmentNotionDatabases() {
                 database_id: "" // Will be updated after projects database is created
             }
         },
-        TestEnvironment: {
-            select: {
-                options: [
-                    { name: "Development", color: "blue" },
-                    { name: "Staging", color: "orange" },
-                    { name: "Production", color: "red" }
-                ]
-            }
-        },
-        ExpectedResult: {
-            rich_text: {}
-        },
-        ActualResult: {
-            rich_text: {}
-        },
+
         LastRun: {
             date: {}
         },
@@ -347,9 +321,7 @@ async function setupAppDevelopmentNotionDatabases() {
         PromptFile: {
             files: {} // This will store the .txt file attachments
         },
-        Notes: {
-            rich_text: {}
-        }
+
     });
 
     console.log("✅ All AI App Development databases created successfully!");
@@ -421,9 +393,11 @@ async function createSampleAppDevelopmentData() {
                     TargetDate: {
                         date: { start: project.targetDate }
                     },
-                    RepositoryUrl: project.repositoryUrl ? {
-                        url: project.repositoryUrl
-                    } : undefined,
+                    ...(project.repositoryUrl && {
+                        RepositoryUrl: {
+                            url: project.repositoryUrl
+                        }
+                    }),
                     TechStack: {
                         multi_select: project.techStack.map(tech => ({ name: tech }))
                     },
@@ -442,8 +416,7 @@ async function createSampleAppDevelopmentData() {
                 status: "In Progress",
                 priority: "High",
                 category: "Backend",
-                dueDate: "2025-01-25",
-                estimatedHours: 16
+                dueDate: "2025-01-25"
             },
             {
                 title: "Create responsive dashboard",
@@ -451,18 +424,14 @@ async function createSampleAppDevelopmentData() {
                 status: "Todo",
                 priority: "High",
                 category: "Frontend",
-                dueDate: "2025-01-30",
-                estimatedHours: 24
+                dueDate: "2025-01-30"
             },
             {
                 title: "Setup database migrations",
                 description: "Create and configure database migration system",
                 status: "Done",
                 priority: "Medium",
-                category: "Database",
-                estimatedHours: 8,
-                actualHours: 6,
-                completedDate: "2025-01-10"
+                category: "Database"
             }
         ];
 
@@ -487,18 +456,12 @@ async function createSampleAppDevelopmentData() {
                     Category: {
                         select: { name: task.category }
                     },
-                    DueDate: task.dueDate ? {
-                        date: { start: task.dueDate }
-                    } : undefined,
-                    EstimatedHours: {
-                        number: task.estimatedHours
-                    },
-                    ActualHours: task.actualHours ? {
-                        number: task.actualHours
-                    } : undefined,
-                    CompletedDate: task.completedDate ? {
-                        date: { start: task.completedDate }
-                    } : undefined
+                    ...(task.dueDate && {
+                        DueDate: {
+                            date: { start: task.dueDate }
+                        }
+                    }),
+
                 }
             });
         }
@@ -511,9 +474,6 @@ async function createSampleAppDevelopmentData() {
                 testType: "E2E Test",
                 status: "Passed",
                 priority: "High",
-                testEnvironment: "Development",
-                expectedResult: "User can successfully log in with valid credentials",
-                actualResult: "Login successful, redirected to dashboard",
                 lastRun: "2025-01-15",
                 executionTime: 45
             },
@@ -523,8 +483,6 @@ async function createSampleAppDevelopmentData() {
                 testType: "Performance Test",
                 status: "In Progress",
                 priority: "Medium",
-                testEnvironment: "Staging",
-                expectedResult: "API responses under 200ms",
                 lastRun: "2025-01-16",
                 executionTime: 120
             }
@@ -551,15 +509,7 @@ async function createSampleAppDevelopmentData() {
                     Priority: {
                         select: { name: testItem.priority }
                     },
-                    TestEnvironment: {
-                        select: { name: testItem.testEnvironment }
-                    },
-                    ExpectedResult: {
-                        rich_text: [{ text: { content: testItem.expectedResult } }]
-                    },
-                    ActualResult: {
-                        rich_text: [{ text: { content: testItem.actualResult } }]
-                    },
+
                     LastRun: {
                         date: { start: testItem.lastRun }
                     },
@@ -579,8 +529,7 @@ async function createSampleAppDevelopmentData() {
                 tags: ["React", "TypeScript", "Frontend"],
                 usage: "Frequently Used",
                 createdDate: "2025-01-01",
-                lastUsed: "2025-01-16",
-                notes: "Useful for creating consistent component structure"
+                lastUsed: "2025-01-16"
             },
             {
                 promptName: "API Endpoint Documentation",
@@ -589,8 +538,7 @@ async function createSampleAppDevelopmentData() {
                 tags: ["API", "Backend", "Documentation"],
                 usage: "Occasionally Used",
                 createdDate: "2025-01-05",
-                lastUsed: "2025-01-12",
-                notes: "Helps maintain consistent API docs"
+                lastUsed: "2025-01-12"
             }
         ];
 
@@ -620,9 +568,6 @@ async function createSampleAppDevelopmentData() {
                     },
                     LastUsed: {
                         date: { start: libraryItem.lastUsed }
-                    },
-                    Notes: {
-                        rich_text: [{ text: { content: libraryItem.notes } }]
                     }
                 }
             });
