@@ -30,7 +30,8 @@ export async function getAIDevProjects() {
 
         // Debug: log the structure of the first item
         if (response.results.length > 0) {
-            console.log("First item properties:", Object.keys(response.results[0].properties));
+            const firstItem = response.results[0] as any;
+            console.log("First item properties:", Object.keys(firstItem.properties || {}));
         }
 
         return response.results.map((page: any) => {
@@ -69,8 +70,8 @@ export async function getAIDevProjects() {
                 promptFile: properties.PromptFile?.files || [],
                 isActive: properties.IsActive?.checkbox || false,
                 isCustom: properties.IsCustom?.checkbox || false,
-                createdAt: page.created_time,
-                updatedAt: page.last_edited_time
+                createdAt: (page as any).created_time,
+                updatedAt: (page as any).last_edited_time
             };
         });
     } catch (error) {
@@ -284,7 +285,7 @@ export async function updateAIDevProject(notionId: string, updateData: any) {
             properties
         });
 
-        return response;
+        return response as any;
     } catch (error) {
         console.error("Error updating AI Dev Project in Notion:", error);
         throw new Error("Failed to update AI Dev Project in Notion");
@@ -322,21 +323,18 @@ export async function getAIDevProjectsByType(type: string) {
                 select: {
                     equals: type
                 }
-            },
-            sorts: [
-                {
-                    property: "Name",
-                    direction: "ascending"
-                }
-            ]
+            }
         });
 
         return response.results.map((page: any) => {
             const properties = page.properties;
             
+            // Try different possible name property names
+            const nameProperty = properties.Name || properties.Title || properties.name || properties.title;
+            
             return {
                 notionId: page.id,
-                name: properties.Name?.title?.[0]?.plain_text || "Untitled",
+                name: nameProperty?.title?.[0]?.plain_text || nameProperty?.rich_text?.[0]?.plain_text || "Untitled",
                 description: properties.Description?.rich_text?.[0]?.plain_text || "",
                 type: properties.Type?.select?.name || "Project",
                 status: properties.Status?.select?.name || "Planning",
@@ -352,8 +350,8 @@ export async function getAIDevProjectsByType(type: string) {
                 repositoryUrl: properties.RepositoryUrl?.url || "",
                 deploymentUrl: properties.DeploymentUrl?.url || "",
                 isActive: properties.IsActive?.checkbox || false,
-                createdAt: page.created_time,
-                updatedAt: page.last_edited_time
+                createdAt: (page as any).created_time,
+                updatedAt: (page as any).last_edited_time
             };
         });
     } catch (error) {
