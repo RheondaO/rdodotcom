@@ -1906,17 +1906,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/ai-development/projects", async (req, res) => {
+  app.post("/api/ai-development/projects", requireAuth, async (req, res) => {
     try {
+      console.log("🚀 Creating AI development project with data:", JSON.stringify(req.body, null, 2));
       const project = await createAIDevProject(req.body);
+      console.log("✅ Project created successfully:", project);
       res.json(project);
     } catch (error: any) {
-      console.error("Error creating AI development project:", error);
+      console.error("❌ Error creating AI development project:", error);
+      console.error("❌ Error stack:", error.stack);
       res.status(500).json({ error: error.message || "Failed to create AI development project" });
     }
   });
 
-  app.patch("/api/ai-development/projects/:notionId", async (req, res) => {
+  app.patch("/api/ai-development/projects/:notionId", requireAuth, async (req, res) => {
     try {
       const project = await updateAIDevProject(req.params.notionId, req.body);
       res.json(project);
@@ -1926,7 +1929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/ai-development/projects/:notionId", async (req, res) => {
+  app.delete("/api/ai-development/projects/:notionId", requireAuth, async (req, res) => {
     try {
       await deleteAIDevProject(req.params.notionId);
       res.json({ success: true });
