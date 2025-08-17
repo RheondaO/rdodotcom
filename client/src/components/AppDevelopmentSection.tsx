@@ -271,60 +271,32 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [taskFilter, setTaskFilter] = useState<string>('all');
   const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
 
-  // Fetch real project data from API
-  const { data: projects = [] } = useQuery({
-    queryKey: ['/api/app-projects'],
+  // Fetch all AI Development items from AIDEVPROJECTS database
+  const { data: allAIDevItems = [] } = useQuery({
+    queryKey: ['/api/ai-development/projects'],
     select: (data: any[]) => data || []
   });
 
-  // Fetch real task data from API
-  const { data: tasks = [] } = useQuery({
-    queryKey: ['/api/app-tasks'],
-    select: (data: any[]) => data || []
-  });
+  // Filter items by type
+  const projects = allAIDevItems.filter(item => item.type === 'Project');
+  const tasks = allAIDevItems.filter(item => item.type === 'Task');
+  const testItems = allAIDevItems.filter(item => item.type === 'Test Item');
+  const promptTemplates = allAIDevItems.filter(item => item.type === 'Library Prompt');
 
-  // Fetch prompt templates from API (will fall back to mock data for now)
-  const { data: promptTemplates = [] } = useQuery({
-    queryKey: ['/api/prompt-templates'],
-    select: (data: PromptTemplate[]) => data || [],
-    initialData: () => generateMockPrompts() // Mock data fallback
-  });
 
-  // Mock test items data (until API is implemented)
-  const testItems = [
-    {
-      id: 1,
-      title: "User Authentication Flow",
-      description: "Test login/logout functionality",
-      projectId: 1,
-      type: "e2e",
-      status: "pending",
-      priority: "high"
-    },
-    {
-      id: 2,
-      title: "API Response Validation",
-      description: "Verify API returns correct data format",
-      projectId: 1,
-      type: "integration",
-      status: "in_progress",
-      priority: "medium"
-    }
-  ];
 
   // Mutations
   const createProjectMutation = useMutation({
     mutationFn: (data: NewProjectForm) => 
-      apiRequest('/api/app-projects', 'POST', {
+      apiRequest('/api/ai-development/projects', 'POST', {
         ...data,
+        type: 'Project',
         actualHours: 0,
         isActive: true,
-        techStack: data.techStack ? data.techStack.split(',').map(s => s.trim()) : [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        tags: data.techStack ? data.techStack.split(',').map(s => s.trim()) : []
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
       toast({ title: "Success", description: "Project created successfully" });
       setShowNewProjectForm(false);
     },
@@ -335,18 +307,14 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
   const createTaskMutation = useMutation({
     mutationFn: (data: NewTaskForm) => 
-      apiRequest('/api/app-tasks', 'POST', {
+      apiRequest('/api/ai-development/projects', 'POST', {
         ...data,
-        projectId: parseInt(data.projectId),
-        actualHours: 0,
-        dependencies: [],
-        attachments: [],
-        comments: '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        type: 'Task',
+        projectName: projects.find(p => p.notionId === data.projectId)?.name || '',
+        actualHours: 0
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/app-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
       toast({ title: "Success", description: "Task created successfully" });
       setShowNewTaskForm(false);
     },
@@ -392,19 +360,30 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     createTaskMutation.mutate(data);
   };
 
+  const createTestItemMutation = useMutation({
+    mutationFn: (data: TestItemForm) => 
+      apiRequest('/api/ai-development/projects', 'POST', {
+        name: data.title,
+        description: data.description,
+        type: 'Test Item',
+        category: data.testType,
+        status: 'Not Started',
+        priority: data.priority,
+        projectName: projects.find(p => p.notionId === data.projectId)?.name || '',
+        testEnvironment: 'Development'
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
+      toast({ title: "Success", description: "Test item created successfully" });
+      setShowTestItemForm(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create test item", variant: "destructive" });
+    }
+  });
+
   const onSubmitTestItem = (data: TestItemForm) => {
-    // For now, create as a task with testing category
-    const taskData: NewTaskForm = {
-      projectId: data.projectId,
-      title: data.title,
-      description: `[${data.testType.toUpperCase()} TEST] ${data.description || ''}`,
-      status: "todo",
-      category: "feature",
-      priority: data.priority === "critical" ? "high" : data.priority,
-    };
-    createTaskMutation.mutate(taskData);
-    setShowTestItemForm(false);
-    toast({ title: "Success", description: "Test item added as task" });
+    createTestItemMutation.mutate(data);
   };
 
   const getStatusColor = (status: string) => {
@@ -587,12 +566,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     switch (sortBy) {
       case 'name': return a.name.localeCompare(b.name);
       case 'status': return a.status.localeCompare(b.status);
-      case 'startDate': {
-        if (!a.startDate && !b.startDate) return 0;
-        if (!a.startDate) return 1;
-        if (!b.startDate) return -1;
-        return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
-      }
       case 'priority': {
         const priorityOrder = { high: 3, medium: 2, low: 1 };
         return (priorityOrder[b.priority as keyof typeof priorityOrder] || 2) - 
@@ -624,6 +597,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     total: projects.length,
     active: projects.filter(p => p.isActive).length,
     completed: projects.filter(p => p.status === 'deployed').length,
+    avgProgress: projects.length > 0 ? Math.round(projects.filter(p => p.status === 'deployed').length / projects.length * 100) : 0,
     inProgress: projects.filter(p => p.status === 'in_progress').length,
     totalHours: projects.reduce((sum, p) => sum + p.actualHours, 0),
     withStartDate: projects.filter(p => p.startDate).length
@@ -1994,7 +1968,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 const matchesSearch = searchQuery === '' || 
                   template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                  template.tags?.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
                 
                 const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
                 const matchesLanguage = selectedLanguage === 'all' || template.language === selectedLanguage;
@@ -2044,7 +2018,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
                   {template.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {template.tags.map((tag, index) => (
+                      {template.tags.map((tag: string, index: number) => (
                         <Badge key={index} variant="outline" className="text-xs">
                           <Tag className="h-3 w-3 mr-1" />
                           {tag}

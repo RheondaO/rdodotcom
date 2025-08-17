@@ -17,6 +17,13 @@ import {
 import timerRoutes from "./timer-routes-new";
 import fitnessRoutes from "./fitness-routes";
 import { 
+  getAIDevProjects, 
+  createAIDevProject, 
+  updateAIDevProject, 
+  deleteAIDevProject, 
+  getAIDevProjectsByType 
+} from "./aidevprojects-integration";
+import { 
   insertDailyEntrySchema, 
   insertBillSchema, 
   insertBillPaymentSchema, 
@@ -1880,7 +1887,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Development Routes
+  app.get("/api/ai-development/projects", async (req, res) => {
+    try {
+      const { type } = req.query;
+      let projects;
+      
+      if (type) {
+        projects = await getAIDevProjectsByType(type as string);
+      } else {
+        projects = await getAIDevProjects();
+      }
+      
+      res.json(projects);
+    } catch (error: any) {
+      console.error("Error fetching AI development projects:", error);
+      res.status(500).json({ error: error.message || "Failed to fetch AI development projects" });
+    }
+  });
 
+  app.post("/api/ai-development/projects", async (req, res) => {
+    try {
+      const project = await createAIDevProject(req.body);
+      res.json(project);
+    } catch (error: any) {
+      console.error("Error creating AI development project:", error);
+      res.status(500).json({ error: error.message || "Failed to create AI development project" });
+    }
+  });
+
+  app.patch("/api/ai-development/projects/:notionId", async (req, res) => {
+    try {
+      const project = await updateAIDevProject(req.params.notionId, req.body);
+      res.json(project);
+    } catch (error: any) {
+      console.error("Error updating AI development project:", error);
+      res.status(500).json({ error: error.message || "Failed to update AI development project" });
+    }
+  });
+
+  app.delete("/api/ai-development/projects/:notionId", async (req, res) => {
+    try {
+      await deleteAIDevProject(req.params.notionId);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting AI development project:", error);
+      res.status(500).json({ error: error.message || "Failed to delete AI development project" });
+    }
+  });
 
   // Mount Timer routes
   app.use("/api/timer", timerRoutes);
