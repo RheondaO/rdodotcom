@@ -143,7 +143,7 @@ const newProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   description: z.string().optional(),
   status: z.enum(["planning", "in_progress", "testing", "deployed", "on_hold"]),
-  projectType: z.enum(["web", "mobile", "desktop", "api"]),
+  projectType: z.enum(["web", "mobile", "desktop", "api", "library", "tool"]),
   repositoryUrl: z.string().optional(),
   deploymentUrl: z.string().optional(),
   targetDate: z.string().optional(),
@@ -300,16 +300,36 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
 
 
 
+  // Map projectType to database type values
+  const mapProjectTypeToDBType = (projectType: string): string => {
+    const typeMapping: Record<string, string> = {
+      'web': 'web application',
+      'mobile': 'mobile app', 
+      'desktop': 'desktop app',
+      'api': 'api backend',
+      'library': 'library',
+      'tool': 'tool'
+    };
+    return typeMapping[projectType] || 'Project';
+  };
+
   // Mutations
   const createProjectMutation = useMutation({
-    mutationFn: (data: NewProjectForm) => 
-      apiRequest('POST', '/api/ai-development/projects', {
+    mutationFn: (data: NewProjectForm) => {
+      const mappedType = mapProjectTypeToDBType(data.projectType);
+      console.log("🔄 Frontend mapping:", { 
+        original: data.projectType, 
+        mapped: mappedType 
+      });
+      
+      return apiRequest('POST', '/api/ai-development/projects', {
         ...data,
-        type: 'Project',
+        type: mappedType,
         actualHours: 0,
         isActive: true,
         tags: data.techStack ? data.techStack.split(',').map(s => s.trim()) : []
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
       toast({ title: "Success", description: "Project created successfully" });
