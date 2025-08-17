@@ -275,8 +275,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [taskFilter, setTaskFilter] = useState<string>('all');
   const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
 
-  // Fetch all AI Development items from AIDEVPROJECTS database
-  const { data: allAIDevItems = [], isLoading, error, isError } = useQuery({
+  // Fetch all AI Development projects from AIDEVPROJECTS database
+  const { data: allAIDevItems = [], isLoading: isLoadingProjects, error: projectsError, isError: isProjectsError } = useQuery({
     queryKey: ['/api/ai-development/projects'],
     queryFn: async () => {
       const response = await fetch('/api/ai-development/projects', {
@@ -289,14 +289,35 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     },
     select: (data: any[]) => data || []
   });
+
+  // Fetch AI Development tasks from dedicated tasks database
+  const { data: tasksData = [], isLoading: isLoadingTasks, error: tasksError, isError: isTasksError } = useQuery({
+    queryKey: ['/api/ai-development/tasks'],
+    queryFn: async () => {
+      const response = await fetch('/api/ai-development/tasks', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
+    select: (data: any[]) => data || []
+  });
   
-  // Filter items by type - match the actual types in the database
+  // Filter projects by type from AIDEVPROJECTS database
   const projects = allAIDevItems.filter(item => 
     ['web application', 'api backend', 'mobile app', 'desktop app', 'library', 'tool', 'Project'].includes(item.type)
   );
-  const tasks = allAIDevItems.filter(item => item.type === 'Task');
+  
+  // Use tasks from dedicated tasks database
+  const tasks = tasksData;
   const testItems = allAIDevItems.filter(item => item.type === 'Test Item');
   const promptTemplates = allAIDevItems.filter(item => item.type === 'Library Prompt');
+
+  const isLoading = isLoadingProjects || isLoadingTasks;
+  const error = projectsError || tasksError;
+  const isError = isProjectsError || isTasksError;
 
   // Task filtering and state management (already defined above in the enhanced UI state section)
 
@@ -361,17 +382,17 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const createTaskMutation = useMutation({
     mutationFn: (data: NewTaskForm) => {
       console.log("🔄 Creating task with data:", data);
-      return apiRequest('POST', '/api/ai-development/projects', {
-        ...data,
-        type: 'Task',
-        projectName: projects.find(p => p.notionId === data.projectId)?.name || '',
-        actualHours: 0,
-        estimatedHours: 0,
-        isActive: false
+      return apiRequest('POST', '/api/ai-development/tasks', {
+        title: data.title,
+        description: data.description || '',
+        category: data.category,
+        status: data.status,
+        priority: data.priority || 'medium',
+        projectId: data.projectId
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/tasks'] });
       toast({ title: "Success", description: "Task created successfully" });
       setShowNewTaskForm(false);
       taskForm.reset();
