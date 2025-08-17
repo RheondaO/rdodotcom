@@ -121,6 +121,13 @@ export async function createAIDevProject(itemData: any) {
         }
         
         console.log("✅ Database ID obtained successfully:", databaseId.substring(0, 8) + "...");
+        
+        // First retrieve the database to ensure it exists and we have access
+        console.log("🔍 Retrieving database to verify access...");
+        const database = await notion.databases.retrieve({
+            database_id: databaseId,
+        });
+        console.log("✅ Database retrieved successfully:", (database as any).title?.[0]?.plain_text || "Unknown");
 
         const properties: any = {
             Name: {
@@ -232,12 +239,14 @@ export async function createAIDevProject(itemData: any) {
             properties.CreatedDate = { date: { start: new Date().toISOString().split('T')[0] } };
         }
 
+        console.log("📝 Creating new page in database...");
         const response = await notion.pages.create({
             parent: {
-                database_id: databaseId
+                database_id: database.id
             },
             properties
         });
+        console.log("✅ Page created successfully with ID:", response.id);
 
         return {
             notionId: response.id,
