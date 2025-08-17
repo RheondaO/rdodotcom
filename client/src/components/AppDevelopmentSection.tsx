@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 import { 
   Code2, 
   Monitor, 
@@ -59,7 +60,6 @@ import {
   Folder,
   MessageSquare
 } from "lucide-react";
-import { format } from "date-fns";
 
 // Mock data generation for prompt templates
 const generateMockPrompts = (): PromptTemplate[] => [
@@ -146,7 +146,7 @@ const newProjectSchema = z.object({
   repositoryUrl: z.string().optional(),
   deploymentUrl: z.string().optional(),
   targetDate: z.string().optional(),
-  estimatedHours: z.string().optional(),
+  startDate: z.string().optional(),
   techStack: z.string().optional(),
   priority: z.enum(["low", "medium", "high"]).optional()
 });
@@ -197,10 +197,9 @@ interface AppProject {
   targetDate?: string;
   startDate?: string;
   completedDate?: string;
-  progress: number;
-  estimatedHours?: number;
   actualHours: number;
   techStack: string[];
+  priority?: "low" | "medium" | "high";
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -316,11 +315,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     mutationFn: (data: NewProjectForm) => 
       apiRequest('/api/app-projects', 'POST', {
         ...data,
-        progress: 0,
         actualHours: 0,
         isActive: true,
         techStack: data.techStack ? data.techStack.split(',').map(s => s.trim()) : [],
-        estimatedHours: data.estimatedHours ? parseInt(data.estimatedHours) : undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }),
@@ -455,7 +452,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
       name: project.name,
       description: project.description,
       status: project.status,
-      priority: 'medium' // Default if not provided
+      priority: project.priority || 'medium',
+      projectType: project.projectType,
+      startDate: project.startDate || ''
     });
   };
 
@@ -585,7 +584,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     switch (sortBy) {
       case 'name': return a.name.localeCompare(b.name);
       case 'status': return a.status.localeCompare(b.status);
-      case 'progress': return b.progress - a.progress;
+      case 'startDate': {
+        if (!a.startDate && !b.startDate) return 0;
+        if (!a.startDate) return 1;
+        if (!b.startDate) return -1;
+        return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+      }
       case 'priority': {
         const priorityOrder = { high: 3, medium: 2, low: 1 };
         return (priorityOrder[b.priority as keyof typeof priorityOrder] || 2) - 
@@ -618,9 +622,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     active: projects.filter(p => p.isActive).length,
     completed: projects.filter(p => p.status === 'deployed').length,
     inProgress: projects.filter(p => p.status === 'in_progress').length,
-    avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length) : 0,
     totalHours: projects.reduce((sum, p) => sum + p.actualHours, 0),
-    estimatedHours: projects.reduce((sum, p) => sum + (p.estimatedHours || 0), 0)
+    withStartDate: projects.filter(p => p.startDate).length
   };
 
   const taskStats = {
@@ -789,9 +792,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     <p className="text-sm text-muted-foreground dark:text-gray-400">Time Tracked</p>
                     <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{projectStats.totalHours}h</p>
                     <p className="text-xs text-muted-foreground dark:text-gray-500">
-                      {projectStats.estimatedHours > 0 ? 
-                        `${Math.round((projectStats.totalHours / projectStats.estimatedHours) * 100)}% of estimated` :
-                        'No estimates set'
+                      {projectStats.withStartDate > 0 ? 
+                        `${projectStats.withStartDate} projects have start dates` :
+                        'No start dates set'
                       }
                     </p>
                   </div>
@@ -848,10 +851,11 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span>Progress</span>
-                          <span className="font-medium">{project.progress}%</span>
+                          <span>Start Date</span>
+                          <span className="font-medium">
+                            {project.startDate ? format(new Date(project.startDate), 'MMM dd') : 'Not set'}
+                          </span>
                         </div>
-                        <Progress value={project.progress} className="h-2" />
                         
                         <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
                           <div className="flex items-center gap-2">
@@ -1037,7 +1041,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <SelectContent>
                   <SelectItem value="name">Name</SelectItem>
                   <SelectItem value="status">Status</SelectItem>
-                  <SelectItem value="progress">Progress</SelectItem>
+                  <SelectItem value="startDate">Start Date</SelectItem>
                   <SelectItem value="priority">Priority</SelectItem>
                 </SelectContent>
               </Select>
@@ -1075,7 +1079,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         Priority
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Progress
+                        Start Date
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         Actions
@@ -1190,19 +1194,18 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1">
-                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                <div 
-                                  className="bg-gradient-to-r from-purple-400 to-indigo-500 h-2 rounded-full transition-all"
-                                  style={{ width: `${project.progress}%` }}
-                                />
-                              </div>
-                            </div>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white min-w-[3rem]">
-                              {project.progress}%
+                          {editingProject === project.id ? (
+                            <Input
+                              type="date"
+                              value={editingValues.startDate || ''}
+                              onChange={(e) => setEditingValues({...editingValues, startDate: e.target.value})}
+                              className="w-36"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {project.startDate ? format(new Date(project.startDate), 'MMM dd, yyyy') : 'Not set'}
                             </span>
-                          </div>
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
@@ -2199,12 +2202,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={projectForm.control}
-                  name="estimatedHours"
+                  name="startDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Estimated Hours</FormLabel>
+                      <FormLabel>Start Date</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="40" {...field} />
+                        <Input type="date" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
