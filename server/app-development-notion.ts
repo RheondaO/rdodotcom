@@ -1,6 +1,32 @@
 import { Client } from "@notionhq/client";
 import { notion, findDatabaseByTitle } from "./notion";
 
+// Extract AI Development Tasks database ID from URL
+function extractAIDevTasksDatabaseId(): string | null {
+    const url = process.env.NOTION_AI_DEV_TASKS_URL;
+    if (!url) {
+        console.warn("⚠️ NOTION_AI_DEV_TASKS_URL not found in environment variables");
+        return null;
+    }
+
+    try {
+        // Extract database ID from Notion URL
+        const match = url.match(/([a-f0-9]{32})/i);
+        if (match && match[1]) {
+            const databaseId = match[1];
+            console.log(`🗂️ AI Dev Tasks database ID extracted: ${databaseId.substring(0, 8)}...`);
+            return databaseId;
+        }
+    } catch (error) {
+        console.error("❌ Error extracting AI Dev Tasks database ID:", error);
+    }
+
+    console.error("❌ Failed to extract AI Dev Tasks database ID from URL:", url);
+    return null;
+}
+
+export const NOTION_AI_DEV_TASKS_DATABASE_ID = extractAIDevTasksDatabaseId();
+
 // App Development Notion Integration Functions
 
 /**
@@ -187,13 +213,12 @@ export async function deleteAppDevelopmentProject(notionId: string) {
  */
 export async function getAppDevelopmentTasks() {
     try {
-        const tasksDb = await findDatabaseByTitle("App Development Tasks");
-        if (!tasksDb) {
-            throw new Error("App Development Tasks database not found");
+        if (!NOTION_AI_DEV_TASKS_DATABASE_ID) {
+            throw new Error("NOTION_AI_DEV_TASKS_URL not configured or invalid");
         }
 
         const response = await notion.databases.query({
-            database_id: tasksDb.id,
+            database_id: NOTION_AI_DEV_TASKS_DATABASE_ID,
             sorts: [
                 {
                     property: "Priority",
@@ -322,14 +347,13 @@ export async function getAppDevelopmentLibrary() {
  */
 export async function createAppDevelopmentTask(taskData: any) {
     try {
-        const tasksDb = await findDatabaseByTitle("App Development Tasks");
-        if (!tasksDb) {
-            throw new Error("App Development Tasks database not found");
+        if (!NOTION_AI_DEV_TASKS_DATABASE_ID) {
+            throw new Error("NOTION_AI_DEV_TASKS_URL not configured or invalid");
         }
 
         const response = await notion.pages.create({
             parent: {
-                database_id: tasksDb.id
+                database_id: NOTION_AI_DEV_TASKS_DATABASE_ID
             },
             properties: {
                 Title: {

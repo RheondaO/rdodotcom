@@ -23,6 +23,17 @@ import {
   deleteAIDevProject, 
   getAIDevProjectsByType 
 } from "./aidevprojects-integration";
+import {
+  getAppDevelopmentTasks,
+  createAppDevelopmentTask,
+  getAppDevelopmentProjects,
+  createAppDevelopmentProject,
+  getAppDevelopmentTestItems,
+  createAppDevelopmentTestItem,
+  getAppDevelopmentLibraryItems,
+  createAppDevelopmentLibraryItem,
+  NOTION_AI_DEV_TASKS_DATABASE_ID
+} from "./app-development-notion";
 import { 
   insertDailyEntrySchema, 
   insertBillSchema, 
@@ -1936,6 +1947,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error deleting AI development project:", error);
       res.status(500).json({ error: error.message || "Failed to delete AI development project" });
+    }
+  });
+
+  // AI Development Tasks Routes
+  app.get("/api/ai-development/tasks", async (req, res) => {
+    try {
+      const tasks = await getAppDevelopmentTasks();
+      res.json(tasks);
+    } catch (error: any) {
+      console.error("Error fetching AI development tasks:", error);
+      res.status(500).json({ error: error.message || "Failed to fetch AI development tasks" });
+    }
+  });
+
+  app.post("/api/ai-development/tasks", requireAuth, async (req, res) => {
+    try {
+      console.log("🚀 Creating AI development task with data:", JSON.stringify(req.body, null, 2));
+      const task = await createAppDevelopmentTask(req.body);
+      console.log("✅ Task created successfully:", task);
+      res.json({ id: task });
+    } catch (error: any) {
+      console.error("❌ Error creating AI development task:", error);
+      console.error("❌ Error stack:", error.stack);
+      res.status(500).json({ error: error.message || "Failed to create AI development task" });
     }
   });
 
