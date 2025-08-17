@@ -81,9 +81,6 @@ const newTaskSchema = z.object({
   description: z.string().optional(),
   status: z.enum(["todo", "in_progress", "review", "testing", "done"]),
   category: z.enum(["feature", "bug", "improvement", "documentation"]),
-  assignee: z.string().optional(),
-  estimatedHours: z.string().optional(),
-  dueDate: z.string().optional(),
   priority: z.enum(["low", "medium", "high"]).optional()
 });
 
@@ -129,10 +126,7 @@ interface AppTask {
   description: string;
   status: "todo" | "in_progress" | "review" | "testing" | "done";
   category: "feature" | "bug" | "improvement" | "documentation";
-  assignee?: string;
-  estimatedHours?: number;
   actualHours: number;
-  dueDate?: string;
   completedDate?: string;
   dependencies: string[];
   attachments: string[];
@@ -222,7 +216,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
         dependencies: [],
         attachments: [],
         comments: '',
-        estimatedHours: data.estimatedHours ? parseInt(data.estimatedHours) : undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }),
@@ -1220,7 +1213,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       <div className="flex items-center gap-2">
                         <Clock4 className="h-4 w-4 text-purple-500" />
                         <span className="text-muted-foreground dark:text-gray-400">Time:</span>
-                        <span className="font-medium">{task.actualHours}h / {task.estimatedHours || 'N/A'}h</span>
+                        <span className="font-medium">{task.actualHours}h</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Tag className="h-4 w-4 text-blue-500" />
@@ -1238,16 +1231,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         {projects.find(p => p.id === task.projectId)?.name || 'No Project'}
                       </span>
                     </div>
-
-                    {task.dueDate && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-orange-500" />
-                        <span className="text-muted-foreground dark:text-gray-400">Due:</span>
-                        <span className="font-medium text-orange-600 dark:text-orange-400">
-                          {format(new Date(task.dueDate), 'MMM dd, yyyy')}
-                        </span>
-                      </div>
-                    )}
 
                     {task.comments && editingTask !== task.id && (
                       <div className="p-3 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
@@ -2034,49 +2017,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   )}
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={taskForm.control}
-                  name="estimatedHours"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estimated Hours</FormLabel>
-                      <FormControl>
-                        <Input type="number" placeholder="8" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={taskForm.control}
-                  name="dueDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Due Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={taskForm.control}
-                name="assignee"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assignee</FormLabel>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <div className="flex gap-2 pt-4">
                 <Button 
