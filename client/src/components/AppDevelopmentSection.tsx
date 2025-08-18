@@ -276,6 +276,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [taskFilter, setTaskFilter] = useState<string>('all');
   const [taskProjectFilter, setTaskProjectFilter] = useState<string>('all');
   const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [modalProject, setModalProject] = useState<any>(null);
 
   // Fetch all AI Development projects from AIDEVPROJECTS database
   const { data: allAIDevItems = [], isLoading: isLoadingProjects, error: projectsError, isError: isProjectsError } = useQuery({
@@ -1011,8 +1013,8 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             size="sm" 
                             variant="outline"
                             onClick={() => {
-                              setSelectedProject(project.id);
-                              setActiveView('projects');
+                              setModalProject(project);
+                              setShowProjectModal(true);
                             }}
                             className="text-xs"
                           >
@@ -2885,6 +2887,238 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Details Modal */}
+      <Dialog open={showProjectModal} onOpenChange={setShowProjectModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-purple-600 dark:text-purple-400 flex items-center gap-3">
+              <Folder className="h-6 w-6" />
+              {modalProject?.name || 'Project Details'}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground dark:text-gray-400">
+              Read-only view of project information
+            </p>
+          </DialogHeader>
+          
+          {modalProject && (
+            <div className="space-y-6">
+              {/* Project Header */}
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{modalProject.name}</h3>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400 capitalize mt-1">
+                      {modalProject.projectType} Project
+                    </p>
+                  </div>
+                  <Badge className={getStatusColor(modalProject.status)}>
+                    {(modalProject.status || 'Unknown').replace('_', ' ')}
+                  </Badge>
+                </div>
+                
+                {modalProject.description && (
+                  <p className="text-gray-700 dark:text-gray-300 mb-4">{modalProject.description}</p>
+                )}
+                
+                {/* Key Metrics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <Clock4 className="h-4 w-4 text-purple-500" />
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {getProjectLength(modalProject)} days
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Duration</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <GitCommit className="h-4 w-4 text-green-500" />
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {modalProject.taskCount || 0}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Tasks</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <Bug className="h-4 w-4 text-orange-500" />
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {testItems.filter(t => t.projectId === modalProject.notionId).length}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">QA Items</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
+                        {modalProject.priority || 'Medium'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Priority</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Project Dates */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card className="bg-white/50 dark:bg-gray-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-blue-500" />
+                      Project Timeline
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Start Date:</span>
+                      <span className="text-sm font-medium">
+                        {modalProject.startDate ? format(new Date(modalProject.startDate), 'MMM dd, yyyy') : 'Not set'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">End Date:</span>
+                      <span className="text-sm font-medium">
+                        {modalProject.endDate ? format(new Date(modalProject.endDate), 'MMM dd, yyyy') : 'Not set'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Target Date:</span>
+                      <span className="text-sm font-medium">
+                        {modalProject.targetDate ? format(new Date(modalProject.targetDate), 'MMM dd, yyyy') : 'Not set'}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/50 dark:bg-gray-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Code2 className="h-4 w-4 text-green-500" />
+                      Technical Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Tech Stack:</span>
+                      <span className="text-sm font-medium">
+                        {modalProject.techStack || 'Not specified'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Is Active:</span>
+                      <Badge variant={modalProject.isActive ? "default" : "secondary"}>
+                        {modalProject.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Project Length:</span>
+                      <span className="text-sm font-medium">
+                        {modalProject.projectLength ? `${modalProject.projectLength} days` : 'Calculated'}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Project Links */}
+              {(modalProject.repositoryUrl || modalProject.deploymentUrl) && (
+                <Card className="bg-white/50 dark:bg-gray-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <ExternalLink className="h-4 w-4 text-purple-500" />
+                      Project Links
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-3">
+                      {modalProject.repositoryUrl && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(modalProject.repositoryUrl, '_blank')}
+                          className="flex items-center gap-2"
+                        >
+                          <GitBranch className="h-4 w-4" />
+                          View Repository
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      )}
+                      {modalProject.deploymentUrl && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(modalProject.deploymentUrl, '_blank')}
+                          className="flex items-center gap-2"
+                        >
+                          <Globe className="h-4 w-4" />
+                          View Live Site
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Project Tags */}
+              {modalProject.tags && modalProject.tags.length > 0 && (
+                <Card className="bg-white/50 dark:bg-gray-800/50">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-indigo-500" />
+                      Tags
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {modalProject.tags.map((tag: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Related Tasks Preview */}
+              <Card className="bg-white/50 dark:bg-gray-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <CheckSquare className="h-4 w-4 text-green-500" />
+                    Related Tasks ({tasks.filter(t => t.projectId === modalProject.notionId).length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {tasks.filter(t => t.projectId === modalProject.notionId).slice(0, 5).map((task) => (
+                      <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
+                        <span className="text-sm font-medium truncate flex-1">{task.title}</span>
+                        <Badge className={getStatusColor(task.status)} variant="outline">
+                          {(task.status || 'Unknown').replace('_', ' ')}
+                        </Badge>
+                      </div>
+                    ))}
+                    {tasks.filter(t => t.projectId === modalProject.notionId).length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No tasks found for this project
+                      </p>
+                    )}
+                    {tasks.filter(t => t.projectId === modalProject.notionId).length > 5 && (
+                      <p className="text-xs text-muted-foreground text-center">
+                        ... and {tasks.filter(t => t.projectId === modalProject.notionId).length - 5} more tasks
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
