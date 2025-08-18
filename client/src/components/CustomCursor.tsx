@@ -90,10 +90,10 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       className="custom-cursor"
       style={{
         position: 'fixed',
-        left: cursorPosition.x - 12, // Center the 24px cursor
-        top: cursorPosition.y - 12,
-        width: '24px',
-        height: '24px',
+        left: cursorPosition.x - 20, // Center the cursor (40px wide)
+        top: cursorPosition.y - 25, // Adjust for Godzilla height
+        width: '40px',
+        height: '40px',
         backgroundImage: `url(${isClicking ? '/cursor-click.png' : '/cursor-move.png'})`,
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
@@ -102,10 +102,11 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
         zIndex: 9999,
         transition: 'opacity 0.2s ease',
         opacity: 1,
-        transform: isClicking ? 'scale(0.9)' : 'scale(1)',
+        transform: isClicking ? 'scale(0.85) rotate(5deg)' : 'scale(1)',
         transitionProperty: 'transform',
-        transitionDuration: '0.1s',
-        transitionTimingFunction: 'ease-out'
+        transitionDuration: '0.15s',
+        transitionTimingFunction: 'ease-out',
+        filter: isClicking ? 'brightness(1.2)' : 'brightness(1)'
       }}
     />
   );
