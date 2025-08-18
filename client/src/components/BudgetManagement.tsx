@@ -199,7 +199,7 @@ export default function BudgetManagement() {
     },
     onError: () => {
       toast({ 
-        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
         variant: "destructive"
       });
     },
@@ -225,7 +225,7 @@ export default function BudgetManagement() {
     },
     onError: () => {
       toast({ 
-        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
         variant: "destructive"
       });
     },
@@ -250,7 +250,7 @@ export default function BudgetManagement() {
     },
     onError: () => {
       toast({ 
-        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
         variant: "destructive"
       });
     },
@@ -733,7 +733,7 @@ export default function BudgetManagement() {
               <CardContent>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={debtPayoffProjections}>
+                    <LineChart data={(debtPayoffProjections as any[]) || []}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />

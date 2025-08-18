@@ -198,7 +198,7 @@ export default function InvestmentTracking() {
     },
     onError: () => {
       toast({ 
-        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
         variant: "destructive"
       });
     },
@@ -223,7 +223,7 @@ export default function InvestmentTracking() {
     },
     onError: () => {
       toast({ 
-        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
         variant: "destructive"
       });
     },
@@ -248,7 +248,7 @@ export default function InvestmentTracking() {
     },
     onError: () => {
       toast({ 
-        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
         variant: "destructive"
       });
     },
@@ -274,7 +274,7 @@ export default function InvestmentTracking() {
     },
     onError: () => {
       toast({ 
-        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
         variant: "destructive"
       });
     },
