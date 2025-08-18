@@ -729,6 +729,21 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     }
   });
 
+  // Calculate project length from dates when ProjectLength field is 0
+  const getProjectLength = (project: any) => {
+    if (project.projectLength && project.projectLength > 0) {
+      return project.projectLength;
+    }
+    if (project.startDate && project.endDate) {
+      const start = new Date(project.startDate);
+      const end = new Date(project.endDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+    return 0;
+  };
+
   // Statistics calculations
   const projectStats = {
     total: projects.length,
@@ -736,7 +751,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     completed: projects.filter(p => p.status === 'deployed').length,
     avgProgress: projects.length > 0 ? Math.round(projects.filter(p => p.status === 'deployed').length / projects.length * 100) : 0,
     inProgress: projects.filter(p => p.status === 'in_progress').length,
-    totalHours: projects.reduce((sum, p) => sum + p.actualHours, 0),
+    avgLength: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + getProjectLength(p), 0) / projects.length) : 0,
     withStartDate: projects.filter(p => p.startDate).length
   };
 
@@ -903,12 +918,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Time Tracked</p>
-                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{projectStats.totalHours}h</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Average Length of Projects</p>
+                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{projectStats.avgLength}</p>
                     <p className="text-xs text-muted-foreground dark:text-gray-500">
-                      {projectStats.withStartDate > 0 ? 
-                        `${projectStats.withStartDate} projects have start dates` :
-                        'No start dates set'
+                      {projectStats.total > 0 ? 
+                        `based on ${projectStats.total} projects` :
+                        'No projects available'
                       }
                     </p>
                   </div>
@@ -1090,12 +1105,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl">
                   <div className="flex items-center gap-3 mb-3">
                     <Clock4 className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-green-900 dark:text-green-100">Time Efficiency</span>
+                    <span className="font-medium text-green-900 dark:text-green-100">Project Length</span>
                   </div>
                   <p className="text-sm text-green-700 dark:text-green-300">
-                    {projectStats.totalHours > 0 ?
-                      `Average ${Math.round(projectStats.totalHours / Math.max(projectStats.active, 1))}h per active project` :
-                      'Start tracking time to see efficiency metrics'
+                    {projectStats.avgLength > 0 ?
+                      `Average project length is ${projectStats.avgLength} days` :
+                      'Set project lengths to see duration metrics'
                     }
                   </p>
                 </div>

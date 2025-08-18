@@ -88,6 +88,7 @@ export async function getAIDevProjects() {
                 estimatedHours: properties.EstimatedHours?.number || 0,
                 actualHours: properties.ActualHours?.number || 0,
                 taskCount: properties.TaskCount?.formula?.number || 0,
+                projectLength: properties.ProjectLength?.number || 0,
                 executionTime: properties.ExecutionTime?.number || 0,
                 projectName: properties.ProjectName?.rich_text?.[0]?.plain_text || "",
                 testEnvironment: properties.TestEnvironment?.rich_text?.[0]?.plain_text || "",

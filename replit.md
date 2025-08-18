@@ -34,6 +34,10 @@ Preferred communication style: Simple, everyday language.
 - **RESOLVED**: Dashboard now correctly displays task counts from TaskCount field in AIDEVPROJECTS Notion database
 - **IMPLEMENTATION**: Added taskCount property to API integration and frontend components
 - **VERIFIED**: Project Portfolio Overview section successfully uses Notion TaskCount values instead of calculated counts
+- **August 18, 2025**: ✅ **COMPLETED** - ProjectLength Integration for Average Project Duration
+- **REPLACED**: "Time Tracked" metric with "Average Length of Projects" using ProjectLength field from AIDEVPROJECTS
+- **CALCULATION**: Updated statistics to calculate average project length across all projects
+- **DISPLAY**: Updated Development Insights section to show project length metrics instead of time tracking
 - **August 18, 2025**: ✅ **COMPLETED** - Custom Godzilla Cursor Implementation
 - **UPDATED**: Replaced purple cursor with user-provided Godzilla image for fun, unique experience
 - **SPECIAL FEATURE**: About page (/about) uses admin face image as 70px cursor instead of Godzilla
