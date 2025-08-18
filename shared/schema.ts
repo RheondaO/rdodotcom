@@ -627,6 +627,41 @@ export interface PerformanceInsights {
   createdAt?: Date;
 }
 
+// AI Development QA Testing Models
+export interface QATestingRecord {
+  id: string; // Notion ID
+  notionId: string;
+  name: string;
+  description?: string;
+  testType: string; // Manual, Automated, Unit, Integration, E2E
+  status: string; // Pending, In Progress, Passed, Failed, Blocked
+  priority: string; // Low, Medium, High, Critical
+  projectId?: string; // Relation to AIDEVPROJECTS
+  projectName?: string;
+  testCase?: string;
+  expectedResult?: string;
+  actualResult?: string;
+  steps?: string;
+  environment: string; // Development, Staging, Production
+  browser?: string; // Chrome, Firefox, Safari, Edge
+  device?: string; // Desktop, Mobile, Tablet
+  assignedTo?: string;
+  reportedBy?: string;
+  severity: string; // Low, Medium, High, Critical
+  tags?: string[]; // Array of tag strings
+  createdDate?: string;
+  updatedDate?: string;
+  resolvedDate?: string;
+  estimatedHours?: number;
+  actualHours?: number;
+  bugReportUrl?: string;
+  attachments?: any[]; // Notion file attachments
+  notes?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Blog Content Studio Models
 export interface BlogPost {
   id: number;

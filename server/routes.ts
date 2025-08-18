@@ -23,6 +23,11 @@ import {
   deleteAIDevProject, 
   getAIDevProjectsByType 
 } from "./aidevprojects-integration";
+import { 
+  fetchQATestingRecords, 
+  createQATestingRecord, 
+  updateQATestingRecord 
+} from "./aidevqatesting-integration";
 import {
   getAppDevelopmentTasks,
   createAppDevelopmentTask,
@@ -2013,6 +2018,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("❌ Error creating AI development task:", error);
       console.error("❌ Error stack:", error.stack);
       res.status(500).json({ error: error.message || "Failed to create AI development task" });
+    }
+  });
+
+  // AI Development QA Testing Routes
+  app.get("/api/ai-development/qa-testing", async (req, res) => {
+    try {
+      const qaRecords = await fetchQATestingRecords();
+      res.json(qaRecords);
+    } catch (error: any) {
+      console.error("Error fetching QA testing records:", error);
+      res.status(500).json({ error: error.message || "Failed to fetch QA testing records" });
+    }
+  });
+
+  app.post("/api/ai-development/qa-testing", requireAuth, async (req, res) => {
+    try {
+      console.log("🧪 Creating QA testing record with data:", JSON.stringify(req.body, null, 2));
+      const result = await createQATestingRecord(req.body);
+      console.log("✅ QA testing record created successfully:", result);
+      res.json(result);
+    } catch (error: any) {
+      console.error("❌ Error creating QA testing record:", error);
+      console.error("❌ Error stack:", error.stack);
+      res.status(500).json({ error: error.message || "Failed to create QA testing record" });
+    }
+  });
+
+  app.patch("/api/ai-development/qa-testing/:notionId", requireAuth, async (req, res) => {
+    try {
+      const result = await updateQATestingRecord(req.params.notionId, req.body);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error updating QA testing record:", error);
+      res.status(500).json({ error: error.message || "Failed to update QA testing record" });
     }
   });
 
