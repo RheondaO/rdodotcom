@@ -850,7 +850,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             AI App Development & Coding
           </h3>
           <p className="text-muted-foreground dark:text-gray-300 mt-1">
-            Manage your development projects with professional project management tools
+            Build intelligent applications with AI-powered development tools and automated project workflows
           </p>
         </div>
       </div>
