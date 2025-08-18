@@ -982,7 +982,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         <div className="flex justify-between text-sm">
                           <span>Start Date</span>
                           <span className="font-medium">
-                            {project.startDate ? format(new Date(project.startDate), 'MMM dd') : 'Not set'}
+                            {project.startDate ? format(new Date(project.startDate), 'MMM dd, yyyy') : 'Not set'}
                           </span>
                         </div>
                         
