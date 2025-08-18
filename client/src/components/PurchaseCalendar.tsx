@@ -106,7 +106,7 @@ export default function PurchaseCalendar({}: PurchaseCalendarProps) {
     return (
       <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg font-heading font-semibold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:text-white">
+          <CardTitle className="font-heading font-semibold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:text-white">
             Purchase Planner
           </CardTitle>
         </CardHeader>
@@ -121,7 +121,7 @@ export default function PurchaseCalendar({}: PurchaseCalendarProps) {
     <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl overflow-hidden">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-heading font-semibold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:text-white">
+          <CardTitle className="font-heading font-semibold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:text-white">
             Purchase Planner
           </CardTitle>
           <Button
