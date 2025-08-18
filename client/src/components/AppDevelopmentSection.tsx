@@ -918,7 +918,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Average Length of Projects</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Avg Project Length</p>
                     <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{projectStats.avgLength}</p>
                     <p className="text-xs text-muted-foreground dark:text-gray-500">
                       {projectStats.total > 0 ? 
