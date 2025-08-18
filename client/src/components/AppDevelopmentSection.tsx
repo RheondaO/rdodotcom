@@ -274,6 +274,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const [sortBy, setSortBy] = useState<'name' | 'status' | 'progress' | 'priority'>('name');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [taskFilter, setTaskFilter] = useState<string>('all');
+  const [taskProjectFilter, setTaskProjectFilter] = useState<string>('all');
   const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
 
   // Fetch all AI Development projects from AIDEVPROJECTS database
@@ -719,7 +720,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   const activeProjects = projects.filter(p => p.isActive);
   const testingTasks = tasks.filter(t => t.status === 'testing');
 
-  const projectTasks = selectedProject ? tasks.filter(t => t.projectId === selectedProject) : tasks;
+  // Apply project filter first, then selected project filter
+  const baseFilteredTasks = taskProjectFilter === 'all' ? tasks : tasks.filter(t => t.projectId === taskProjectFilter);
+  const projectTasks = selectedProject ? baseFilteredTasks.filter(t => t.projectId === selectedProject) : baseFilteredTasks;
 
   const sortedTasks = [...projectTasks].sort((a, b) => {
     switch (sortBy) {
@@ -756,12 +759,12 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   };
 
   const taskStats = {
-    total: tasks.length,
-    completed: tasks.filter(t => t.status === 'done').length,
-    inProgress: tasks.filter(t => t.status === 'in_progress').length,
-    todo: tasks.filter(t => t.status === 'todo').length,
-    bugs: tasks.filter(t => t.category === 'bug').length,
-    features: tasks.filter(t => t.category === 'feature').length
+    total: baseFilteredTasks.length,
+    completed: baseFilteredTasks.filter(t => t.status === 'done').length,
+    inProgress: baseFilteredTasks.filter(t => t.status === 'in_progress').length,
+    todo: baseFilteredTasks.filter(t => t.status === 'todo').length,
+    bugs: baseFilteredTasks.filter(t => t.category === 'bug').length,
+    features: baseFilteredTasks.filter(t => t.category === 'feature').length
   };
 
   // Enhanced task filtering
@@ -1499,12 +1502,28 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <p className="text-sm text-muted-foreground dark:text-gray-400">
                 {selectedProject 
                   ? `${projectTasks.length} tasks in ${projects.find(p => p.id === selectedProject)?.name || 'selected project'}` 
-                  : `${tasks.length} total tasks • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
+                  : taskProjectFilter !== 'all'
+                    ? `${baseFilteredTasks.length} tasks in ${projects.find(p => p.id === taskProjectFilter)?.name || 'selected project'} • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
+                    : `${baseFilteredTasks.length} total tasks • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
                 }
               </p>
             </div>
             
             <div className="flex gap-3">
+              <Select value={taskProjectFilter} onValueChange={setTaskProjectFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {projects.map((project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
               <Select value={taskFilter} onValueChange={setTaskFilter}>
                 <SelectTrigger className="w-32">
                   <SelectValue placeholder="Filter tasks" />
