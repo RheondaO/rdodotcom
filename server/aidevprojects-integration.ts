@@ -52,17 +52,39 @@ export async function getAIDevProjects() {
     try {
         const databaseId = getAIDevProjectsDatabaseId();
         
-        const response = await notion.databases.query({
-            database_id: databaseId
-        });
+        let allResults: any[] = [];
+        let hasMore = true;
+        let startCursor: string | undefined = undefined;
+
+        // Fetch all pages with pagination
+        while (hasMore) {
+            const queryParams: any = {
+                database_id: databaseId,
+                page_size: 100
+            };
+
+            if (startCursor) {
+                queryParams.start_cursor = startCursor;
+            }
+
+            const response = await notion.databases.query(queryParams);
+            
+            allResults = allResults.concat(response.results);
+            hasMore = response.has_more;
+            startCursor = response.next_cursor || undefined;
+            
+            console.log(`📄 Fetched ${response.results.length} projects, total: ${allResults.length}, has more: ${hasMore}`);
+        }
+
+        console.log(`✅ Total projects fetched: ${allResults.length}`);
 
         // Debug: log the structure of the first item
-        if (response.results.length > 0) {
-            const firstItem = response.results[0] as any;
+        if (allResults.length > 0) {
+            const firstItem = allResults[0] as any;
             console.log("First item properties:", Object.keys(firstItem.properties || {}));
         }
 
-        return response.results.map((page: any) => {
+        return allResults.map((page: any) => {
             const properties = page.properties;
             
             // Try different possible name property names
@@ -385,17 +407,39 @@ export async function getAIDevProjectsByType(type: string) {
     try {
         const databaseId = getAIDevProjectsDatabaseId();
         
-        const response = await notion.databases.query({
-            database_id: databaseId,
-            filter: {
-                property: "Type",
-                select: {
-                    equals: type
-                }
-            }
-        });
+        let allResults: any[] = [];
+        let hasMore = true;
+        let startCursor: string | undefined = undefined;
 
-        return response.results.map((page: any) => {
+        // Fetch all pages with pagination and filtering
+        while (hasMore) {
+            const queryParams: any = {
+                database_id: databaseId,
+                page_size: 100,
+                filter: {
+                    property: "Type",
+                    select: {
+                        equals: type
+                    }
+                }
+            };
+
+            if (startCursor) {
+                queryParams.start_cursor = startCursor;
+            }
+
+            const response = await notion.databases.query(queryParams);
+            
+            allResults = allResults.concat(response.results);
+            hasMore = response.has_more;
+            startCursor = response.next_cursor || undefined;
+            
+            console.log(`📄 Fetched ${response.results.length} ${type} items, total: ${allResults.length}, has more: ${hasMore}`);
+        }
+
+        console.log(`✅ Total ${type} items fetched: ${allResults.length}`);
+
+        return allResults.map((page: any) => {
             const properties = page.properties;
             
             // Try different possible name property names
