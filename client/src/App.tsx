@@ -10,6 +10,7 @@ import { ThemeProvider } from "./hooks/use-theme";
 import { Toaster } from "./components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
+import { CustomCursor } from "./components/CustomCursor";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,7 @@ function App() {
             <NotFoundPage />
           </Route>
         </Switch>
+        <CustomCursor enabled={true} />
         <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
