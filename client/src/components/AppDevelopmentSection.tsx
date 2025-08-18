@@ -227,7 +227,6 @@ interface AppTask {
 
 interface AppDevelopmentSectionProps {
   selectedDate: Date;
-  isReadOnly?: boolean;
 }
 
 // Prompt Library Interfaces
@@ -245,7 +244,7 @@ interface PromptTemplate {
   updatedAt: string;
 }
 
-export default function AppDevelopmentSection({ selectedDate, isReadOnly = false }: AppDevelopmentSectionProps) {
+export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSectionProps) {
   // Authentication
   const { isAuthenticated, isAdmin } = useAuth();
   
@@ -1187,10 +1186,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               
               <Button 
                 onClick={() => setShowNewProjectForm(true)}
-                disabled={isReadOnly}
-                className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 New Project
@@ -1401,7 +1397,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                 <Button 
                                   size="sm" 
                                   onClick={() => saveProjectEdit(project.id)}
-                                  disabled={isReadOnly}
                                   className="bg-green-500 hover:bg-green-600 text-white"
                                 >
                                   <Save className="h-3 w-3" />
@@ -1410,7 +1405,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="outline" 
                                   onClick={cancelEdit}
-                                  disabled={isReadOnly}
                                 >
                                   <X className="h-3 w-3" />
                                 </Button>
@@ -1421,8 +1415,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="ghost" 
                                   onClick={() => startEditingProject(project)}
-                                  disabled={isReadOnly}
-                                  className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
                                 >
                                   <Edit3 className="h-3 w-3" />
                                 </Button>
@@ -1430,10 +1422,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="ghost" 
                                   onClick={() => deleteProject(project.id)}
-                                  disabled={isReadOnly}
-                                  className={`text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 ${
-                                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                                  }`}
+                                  className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
                                   <Trash2 className="h-3 w-3" />
                                 </Button>
@@ -1470,7 +1459,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                           <Button
                             onClick={() => setShowNewProjectForm(true)}
-                            disabled={isReadOnly || !isAdmin}
+                            disabled={!isAdmin}
                             className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
                             title={!isAdmin ? "Admin access required to create projects" : ""}
                           >
@@ -1550,7 +1539,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   console.log('showNewTaskForm should now be true');
                   setTimeout(() => console.log('After timeout - showNewTaskForm is:', showNewTaskForm), 100);
                 }}
-                disabled={isReadOnly}
                 className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -1561,8 +1549,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <Button 
                   variant="outline"
                   onClick={() => setSelectedProject(null)}
-                  disabled={isReadOnly}
-                  className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
                 >
                   View All Tasks
                 </Button>
@@ -1731,7 +1717,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                 <Button 
                                   size="sm" 
                                   onClick={() => saveTaskEdit(task.notionId || task.id)}
-                                  disabled={isReadOnly}
                                   className="bg-green-500 hover:bg-green-600 text-white"
                                 >
                                   <Save className="h-3 w-3" />
@@ -1740,7 +1725,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="outline" 
                                   onClick={cancelTaskEdit}
-                                  disabled={isReadOnly}
                                 >
                                   <X className="h-3 w-3" />
                                 </Button>
@@ -1751,8 +1735,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="ghost" 
                                   onClick={() => startEditingTask(task)}
-                                  disabled={isReadOnly}
-                                  className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
                                 >
                                   <Edit3 className="h-3 w-3" />
                                 </Button>
@@ -1760,10 +1742,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="ghost" 
                                   onClick={() => deleteTask(task.notionId || task.id)}
-                                  disabled={isReadOnly}
-                                  className={`text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 ${
-                                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                                  }`}
+                                  className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
                                   <Trash2 className="h-3 w-3" />
                                 </Button>
@@ -1809,7 +1788,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                               console.log('Add New Task button clicked');
                               setShowNewTaskForm(true);
                             }}
-                            disabled={isReadOnly}
+                            disabled={!isAdmin}
                             className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
                           >
                             <Plus className="h-4 w-4 mr-2" />
@@ -1864,10 +1843,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               
               <Button 
                 onClick={() => setShowTestItemForm(true)}
-                disabled={isReadOnly}
-                className={`bg-gradient-to-r from-red-400 to-orange-500 text-white ${
-                  isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className="bg-gradient-to-r from-red-400 to-orange-500 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Test Item
@@ -2040,7 +2016,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                 <Button 
                                   size="sm" 
                                   onClick={() => saveTestItemEdit(testItem.id)}
-                                  disabled={isReadOnly}
                                   className="bg-green-500 hover:bg-green-600 text-white"
                                 >
                                   <Save className="h-3 w-3" />
@@ -2049,7 +2024,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="outline" 
                                   onClick={cancelTestEdit}
-                                  disabled={isReadOnly}
                                 >
                                   <X className="h-3 w-3" />
                                 </Button>
@@ -2060,8 +2034,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="ghost" 
                                   onClick={() => startEditingTestItem(testItem)}
-                                  disabled={isReadOnly}
-                                  className={isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}
                                 >
                                   <Edit3 className="h-3 w-3" />
                                 </Button>
@@ -2069,10 +2041,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                   size="sm" 
                                   variant="ghost" 
                                   onClick={() => deleteTestItem(testItem.id)}
-                                  disabled={isReadOnly}
-                                  className={`text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 ${
-                                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                                  }`}
+                                  className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
                                   <Trash2 className="h-3 w-3" />
                                 </Button>
@@ -2109,7 +2078,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           )}
                           <Button
                             onClick={() => setShowTestItemForm(true)}
-                            disabled={isReadOnly || !isAdmin}
+                            disabled={!isAdmin}
                             className="bg-gradient-to-r from-red-400 to-orange-500 text-white"
                             title={!isAdmin ? "Admin access required to create test items" : ""}
                           >
@@ -2142,10 +2111,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
             <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Prompt Library</h2>
             <Button 
               onClick={() => setShowNewPromptForm(true)}
-              disabled={isReadOnly}
-              className={`bg-gradient-to-r from-purple-400 to-indigo-500 text-white ${
-                isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Prompt
@@ -2284,7 +2250,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           setEditingPrompt(template.id);
                           setEditingPromptValues(template);
                         }}
-                        disabled={isReadOnly}
+
                         className="flex-1"
                       >
                         <Edit3 className="h-3 w-3 mr-1" />
@@ -2309,7 +2275,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                     </p>
                     <Button
                       onClick={() => setShowNewPromptForm(true)}
-                      disabled={isReadOnly}
+
                       className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
                     >
                       <Plus className="h-4 w-4 mr-2" />

@@ -284,7 +284,7 @@ function Dashboard() {
           {activeView === "groceries" && <GrocerySection isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
           {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
           {activeView === "blog-studio" && <BlogContentStudio />}
           {activeView === "notion" && <NotionIntegration />}
           {activeView === "sitemap" && (
