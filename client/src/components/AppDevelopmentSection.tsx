@@ -1005,7 +1005,6 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                               setSelectedProject(project.id);
                               setActiveView('projects');
                             }}
-                            disabled={isReadOnly}
                             className="text-xs"
                           >
                             <Eye className="h-3 w-3 mr-1" />
@@ -1015,7 +1014,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             <Button 
                               size="sm" 
                               variant="outline"
-                              disabled={isReadOnly}
+                              onClick={() => window.open(project.repositoryUrl, '_blank')}
                               className="text-xs"
                             >
                               <GitBranch className="h-3 w-3 mr-1" />
@@ -1026,7 +1025,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             <Button 
                               size="sm" 
                               variant="outline"
-                              disabled={isReadOnly}
+                              onClick={() => window.open(project.deploymentUrl, '_blank')}
                               className="text-xs"
                             >
                               <ExternalLink className="h-3 w-3 mr-1" />
