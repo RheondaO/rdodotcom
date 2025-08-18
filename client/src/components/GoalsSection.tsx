@@ -31,10 +31,9 @@ import type { Goal, InsertGoal } from "@shared/schema";
 
 interface GoalsSectionProps {
   selectedDate: Date;
-  isReadOnly?: boolean;
 }
 
-export default function GoalsSection({ selectedDate, isReadOnly = false }: GoalsSectionProps) {
+export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -142,11 +141,11 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
     console.log("Attempting to create goal...");
     createGoalMutation.mutate({
       title: newGoal.title,
-      description: newGoal.description || null,
+      description: newGoal.description || undefined,
       category: newGoal.category,
       targetValue: newGoal.targetValue.toString(),
       currentValue: "0",
-      unit: newGoal.unit || null,
+      unit: newGoal.unit || undefined,
       targetDate: newGoal.targetDate,
       isCompleted: false
     });
@@ -187,11 +186,11 @@ export default function GoalsSection({ selectedDate, isReadOnly = false }: Goals
           </p>
         </div>
         
-        <Dialog open={showCreateDialog} onOpenChange={!isReadOnly ? setShowCreateDialog : undefined}>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
             <Button 
-              disabled={isReadOnly || goals.length >= 5}
-              className={`bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg ${(isReadOnly || goals.length >= 5) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={goals.length >= 5}
+              className={`bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg ${goals.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Plus className="mr-2 h-4 w-4" />
               New Goal {goals.length >= 5 ? "(5/5)" : `(${goals.length}/5)`}

@@ -9,11 +9,9 @@ import { useState } from "react";
 import PurchaseCalendar from "./PurchaseCalendar";
 
 
-interface GrocerySectionProps {
-  isReadOnly?: boolean;
-}
+interface GrocerySectionProps {}
 
-export default function GrocerySection({ isReadOnly = false }: GrocerySectionProps) {
+export default function GrocerySection({}: GrocerySectionProps = {}) {
   const [newItemName, setNewItemName] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
 
@@ -115,27 +113,25 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
             <h4 className="font-heading font-semibold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:text-white">Shopping List</h4>
           </div>
           
-          <form onSubmit={!isReadOnly ? handleAddItem : (e) => e.preventDefault()} className="flex gap-3">
+          <form onSubmit={handleAddItem} className="flex gap-3">
             <Input
               placeholder="Item name"
               value={newItemName}
-              onChange={(e) => !isReadOnly && setNewItemName(e.target.value)}
-              disabled={isReadOnly}
-              className={`flex-1 rounded-xl border-pink-200 dark:border-gray-600 focus:border-pink-400 dark:focus:border-pink-400 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onChange={(e) => setNewItemName(e.target.value)}
+              className="flex-1 rounded-xl border-pink-200 dark:border-gray-600 focus:border-pink-400 dark:focus:border-pink-400"
             />
             <Input
               placeholder="Price ($)"
               type="number"
               step="0.01"
               value={newItemPrice}
-              onChange={(e) => !isReadOnly && setNewItemPrice(e.target.value)}
-              disabled={isReadOnly}
-              className={`w-28 rounded-xl border-pink-200 dark:border-gray-600 focus:border-pink-400 dark:focus:border-pink-400 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onChange={(e) => setNewItemPrice(e.target.value)}
+              className="w-28 rounded-xl border-pink-200 dark:border-gray-600 focus:border-pink-400 dark:focus:border-pink-400"
             />
             <Button 
               type="submit" 
-              className={`bg-gradient-to-r from-purple-400 to-pink-500 text-white shadow-md rounded-xl px-6 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:from-purple-500 hover:to-pink-600'}`}
-              disabled={isReadOnly || createItemMutation.isPending}
+              className="bg-gradient-to-r from-purple-400 to-pink-500 text-white shadow-md rounded-xl px-6 hover:from-purple-500 hover:to-pink-600"
+              disabled={createItemMutation.isPending}
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Item
@@ -156,10 +152,10 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
                   <Checkbox
                     checked={item.isCompleted}
                     onCheckedChange={(checked) => 
-                      !isReadOnly && handleToggleItem(item.id, checked as boolean)
+                      handleToggleItem(item.id, checked as boolean)
                     }
-                    disabled={isReadOnly || updateItemMutation.isPending}
-                    className={`data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-pink-500 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={updateItemMutation.isPending}
+                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-pink-500"
                   />
                   <span className={`flex-1 font-medium ${
                     item.isCompleted ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-700 dark:text-gray-200'
@@ -199,7 +195,7 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
       </Card>
 
       <div className="mt-6">
-        <PurchaseCalendar isReadOnly={isReadOnly} />
+        <PurchaseCalendar />
       </div>
     </section>
   );
