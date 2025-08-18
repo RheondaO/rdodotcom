@@ -749,7 +749,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     total: projects.length,
     active: projects.filter(p => p.isActive).length,
     completed: projects.filter(p => p.status === 'deployed').length,
-    avgProgress: projects.length > 0 ? Math.round(projects.filter(p => p.status === 'deployed').length / projects.length * 100) : 0,
+    avgTaskCompletion: tasks.length > 0 ? Math.round(tasks.filter(t => t.status === 'done').length / tasks.length * 100) : 0,
     inProgress: projects.filter(p => p.status === 'in_progress').length,
     avgLength: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + getProjectLength(p), 0) / projects.length) : 0,
     withStartDate: projects.filter(p => p.startDate).length
@@ -938,9 +938,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Avg Progress</p>
-                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{projectStats.avgProgress}%</p>
-                    <p className="text-xs text-muted-foreground dark:text-gray-500">{taskStats.bugs} bugs reported</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Avg Task Completion Rate</p>
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{projectStats.avgTaskCompletion}%</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">{taskStats.completed} of {taskStats.total} tasks done</p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
                     <TrendingUp className="h-6 w-6 text-white" />
