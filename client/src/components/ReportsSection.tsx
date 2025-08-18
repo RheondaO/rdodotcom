@@ -9,11 +9,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { TrendingUp, TrendingDown, Calendar, Target, Award, Lightbulb } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, subDays } from 'date-fns';
 
-interface ReportsSectionProps {
-  isReadOnly?: boolean;
-}
+interface ReportsSectionProps {}
 
-export default function ReportsSection({ isReadOnly = false }: ReportsSectionProps) {
+export default function ReportsSection({}: ReportsSectionProps) {
   const [selectedPeriod, setSelectedPeriod] = useState('weekly');
   const [dateRange, setDateRange] = useState(() => {
     const now = new Date();

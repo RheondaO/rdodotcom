@@ -10,11 +10,9 @@ import { useState } from "react";
 import { format, addDays } from "date-fns";
 import type { Purchase, InsertPurchase } from "@shared/schema";
 
-interface PurchaseCalendarProps {
-  isReadOnly?: boolean;
-}
+interface PurchaseCalendarProps {}
 
-export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalendarProps) {
+export default function PurchaseCalendar({}: PurchaseCalendarProps) {
   const [isAddingPurchase, setIsAddingPurchase] = useState(false);
   const [newPurchase, setNewPurchase] = useState<Partial<InsertPurchase>>({
     date: format(addDays(new Date(), 1), 'yyyy-MM-dd'), // Default to tomorrow

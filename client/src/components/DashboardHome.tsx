@@ -41,10 +41,9 @@ import type { Goal, Medication } from "@shared/schema";
 interface DashboardHomeProps {
   selectedDate: Date;
   onNavigate: (section: string) => void;
-  isReadOnly?: boolean;
 }
 
-export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = false }: DashboardHomeProps) {
+export default function DashboardHome({ selectedDate, onNavigate }: DashboardHomeProps) {
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const { data: habits = [] } = useHabits();
@@ -503,11 +502,10 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
 
             <div className="mt-4 text-center">
               <Button
-                onClick={() => !isReadOnly && onNavigate('rotationonly')}
+                onClick={() => onNavigate('rotationonly')}
                 variant="outline"
                 size="sm"
-                disabled={isReadOnly}
-                className={`bg-white/60 dark:bg-gray-900/60 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white dark:hover:bg-gray-800'}`}
+                className="bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
               >
                 Open Content Studio →
               </Button>
@@ -578,9 +576,8 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                 </div>
               )}
               <Button 
-                onClick={() => !isReadOnly && onNavigate('habits')}
-                disabled={isReadOnly}
-                className={`w-full mt-3 bg-gradient-to-r from-pink-400 to-purple-500 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => onNavigate('habits')}
+                className="w-full mt-3 bg-gradient-to-r from-pink-400 to-purple-500 text-white"
               >
                 View All Habits
               </Button>
@@ -626,9 +623,8 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                 </div>
               )}
               <Button 
-                onClick={() => !isReadOnly && onNavigate('productivity')}
-                disabled={isReadOnly}
-                className={`w-full mt-3 bg-gradient-to-r from-blue-400 to-cyan-500 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => onNavigate('productivity')}
+                className="w-full mt-3 bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
               >
                 Manage Tasks
               </Button>
@@ -649,25 +645,22 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                 <>
                   <div className="grid grid-cols-1 gap-2">
                     <Button
-                      onClick={() => !isReadOnly && startFocusSession('Pomodoro', 25)}
-                      disabled={isReadOnly}
-                      className={`bg-gradient-to-r from-red-400 to-pink-400 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => startFocusSession('Pomodoro', 25)}
+                      className="bg-gradient-to-r from-red-400 to-pink-400 text-white"
                     >
                       <Play className="h-4 w-4 mr-2" />
                       Pomodoro (25min)
                     </Button>
                     <Button
-                      onClick={() => !isReadOnly && startFocusSession('Deep Work', 90)}
-                      disabled={isReadOnly}
-                      className={`bg-gradient-to-r from-purple-400 to-indigo-400 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => startFocusSession('Deep Work', 90)}
+                      className="bg-gradient-to-r from-purple-400 to-indigo-400 text-white"
                     >
                       <Play className="h-4 w-4 mr-2" />
                       Deep Work (90min)
                     </Button>
                     <Button
-                      onClick={() => !isReadOnly && startFocusSession('Flow State', 120)}
-                      disabled={isReadOnly}
-                      className={`bg-gradient-to-r from-blue-400 to-teal-400 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => startFocusSession('Flow State', 120)}
+                      className="bg-gradient-to-r from-blue-400 to-teal-400 text-white"
                     >
                       <Play className="h-4 w-4 mr-2" />
                       Flow State (2h)
@@ -734,9 +727,8 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                 </div>
               ))}
               <Button 
-                onClick={() => !isReadOnly && onNavigate('goals')}
-                disabled={isReadOnly}
-                className={`w-full mt-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => onNavigate('goals')}
+                className="w-full mt-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 View All Goals
@@ -792,10 +784,9 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
                   </div>
                 </div>
                 <Button 
-                  onClick={() => !isReadOnly && onNavigate('reports')}
-                  disabled={isReadOnly}
+                  onClick={() => onNavigate('reports')}
                   size="sm"
-                  className={`w-full mt-2 bg-gradient-to-r from-purple-400 to-pink-400 text-white ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className="w-full mt-2 bg-gradient-to-r from-purple-400 to-pink-400 text-white"
                 >
                   View Full Analytics
                 </Button>
@@ -813,40 +804,36 @@ export default function DashboardHome({ selectedDate, onNavigate, isReadOnly = f
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Button
-              onClick={() => !isReadOnly && onNavigate('reports')}
-              disabled={isReadOnly}
+              onClick={() => onNavigate('reports')}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className="h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
             >
               <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <span className="text-xs">Progress Reports</span>
             </Button>
             
             <Button
-              onClick={() => !isReadOnly && onNavigate('finances')}
-              disabled={isReadOnly}
+              onClick={() => onNavigate('finances')}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className="h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
             >
               <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
               <span className="text-xs">Finances</span>
             </Button>
             
             <Button
-              onClick={() => !isReadOnly && onNavigate('groceries')}
-              disabled={isReadOnly}
+              onClick={() => onNavigate('groceries')}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className="h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
             >
               <CheckSquare className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               <span className="text-xs">Shopping</span>
             </Button>
             
             <Button
-              onClick={() => !isReadOnly && onNavigate('goals')}
-              disabled={isReadOnly}
+              onClick={() => onNavigate('goals')}
               variant="outline"
-              className={`h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className="h-16 flex-col space-y-2 bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
             >
               <Award className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               <span className="text-xs">Achievements</span>

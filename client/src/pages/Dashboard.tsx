@@ -85,8 +85,7 @@ function Dashboard() {
     logoutMutation.mutate();
   };
 
-  // Determine read-only mode based on authentication
-  const isReadOnly = !isAuthenticated || !isAdmin;
+  // Note: All functionality is now open to all users
 
   // Date comparison helpers
   const today = new Date();
@@ -161,7 +160,7 @@ function Dashboard() {
       <Sidebar 
         activeView={activeView} 
         onViewChange={setActiveView}
-        onQuickAdd={isReadOnly ? () => {} : () => setQuickAddOpen(true)}
+        onQuickAdd={() => setQuickAddOpen(true)}
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         isCollapsed={sidebarCollapsed}
@@ -272,37 +271,33 @@ function Dashboard() {
             <DashboardHome 
               selectedDate={selectedDate} 
               onNavigate={(section: string) => setActiveView(section as ViewType)}
-              isReadOnly={!isAuthenticated || !isAdmin}
             />
           )}
-          {activeView === "health" && <HealthWellnessSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "reports" && <ReportsSection isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "groceries" && <GrocerySection isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
-          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} isReadOnly={!isAuthenticated || !isAdmin} />}
+          {activeView === "health" && <HealthWellnessSection selectedDate={selectedDate} />}
+          {activeView === "habits" && <HabitsSection selectedDate={selectedDate} />}
+          {activeView === "productivity" && <ProductivitySection selectedDate={selectedDate} />}
+          {activeView === "goals" && <GoalsSection selectedDate={selectedDate} />}
+          {activeView === "reports" && <ReportsSection />}
+          {activeView === "finances" && <FinanceSection selectedDate={selectedDate} />}
+          {activeView === "groceries" && <GrocerySection />}
+          {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
+          {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} />}
           {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
           {activeView === "blog-studio" && <BlogContentStudio />}
           {activeView === "notion" && <NotionIntegration />}
           {activeView === "sitemap" && (
             <SiteMapSection 
               onNavigate={(section: string) => setActiveView(section as ViewType)}
-              isReadOnly={!isAuthenticated || !isAdmin}
             />
           )}
         </div>
       </main>
 
-      {!isReadOnly && (
-        <QuickAddModal 
-          open={quickAddOpen} 
-          onOpenChange={setQuickAddOpen}
-          selectedDate={selectedDate}
-        />
-      )}
+      <QuickAddModal 
+        open={quickAddOpen} 
+        onOpenChange={setQuickAddOpen}
+        selectedDate={selectedDate}
+      />
     </div>
   );
 }
