@@ -260,7 +260,7 @@ export default function BlogContentStudio() {
           setShowEditor(false);
           setEditingPost(null);
         }}
-        isReadOnly={isReadOnly}
+
       />
     );
   }
@@ -283,12 +283,10 @@ export default function BlogContentStudio() {
         <div className="flex items-center gap-2">
           <PenTool className="h-5 w-5 text-purple-600" />
           <span 
-            className={`text-sm font-medium ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-purple-600 hover:text-purple-800 cursor-pointer'}`}
+            className="text-sm font-medium text-purple-600 hover:text-purple-800 cursor-pointer"
             onClick={() => {
-              if (!isReadOnly) {
-                setEditingPost(null);
-                setShowEditor(true);
-              }
+              setEditingPost(null);
+              setShowEditor(true);
             }}
           >
             Write New Post
@@ -298,11 +296,9 @@ export default function BlogContentStudio() {
         <div className="flex items-center gap-2">
           <Lightbulb className="h-5 w-5 text-yellow-600" />
           <span 
-            className={`text-sm font-medium ${isReadOnly ? 'text-gray-400 cursor-not-allowed' : 'text-yellow-600 hover:text-yellow-800 cursor-pointer'}`}
+            className="text-sm font-medium text-yellow-600 hover:text-yellow-800 cursor-pointer"
             onClick={() => {
-              if (!isReadOnly) {
-                setNewIdeaDialog(true);
-              }
+              setNewIdeaDialog(true);
             }}
           >
             Add Idea
