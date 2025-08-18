@@ -24,9 +24,10 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 - **August 18, 2025**: ✅ **COMPLETED** - Custom Godzilla Cursor Implementation
 - **UPDATED**: Replaced purple cursor with user-provided Godzilla image for fun, unique experience
-- **FEATURES**: 60px Godzilla cursor with smooth easing movement and click animations (scale + rotation)
-- **TECHNICAL**: React component with RAF animation loop, completely hides system cursor
-- **ASSETS**: User-provided Godzilla image as cursor-move.png and cursor-click.png in client/public/
+- **SPECIAL FEATURE**: About page (/about) uses admin face image as 70px cursor instead of Godzilla
+- **FEATURES**: 60px Godzilla cursor site-wide, 70px admin face cursor on About page
+- **TECHNICAL**: React component with RAF animation loop, page-aware cursor switching, completely hides system cursor
+- **ASSETS**: Godzilla images (cursor-move.png, cursor-click.png) and admin face images (cursor-admin-move.png, cursor-admin-click.png) in client/public/
 - **ANIMATIONS**: Scale down to 0.85x and 5-degree rotation on click with brightness increase
 - **August 17, 2025**: ✅ **COMPLETED** - AI App Development Tasks Integration fully working
 - **RESOLVED**: Added dedicated tasks database query (`/api/ai-development/tasks`) 

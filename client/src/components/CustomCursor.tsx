@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'wouter';
 
 interface CustomCursorProps {
   enabled?: boolean;
@@ -10,6 +11,10 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const animationRef = useRef<number>();
   const targetPosition = useRef({ x: 0, y: 0 });
+  const [location] = useLocation();
+  
+  // Check if we're on the About page (meet the admin page)
+  const isAboutPage = location === '/about';
 
   useEffect(() => {
     if (!enabled) return;
@@ -84,17 +89,40 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
 
   if (!enabled) return null;
 
+  // Choose cursor images based on the page
+  const getCursorImages = () => {
+    if (isAboutPage) {
+      return {
+        normal: '/cursor-admin-move.png',
+        click: '/cursor-admin-click.png',
+        size: 70, // Larger for admin face
+        offsetX: 35,
+        offsetY: 45
+      };
+    } else {
+      return {
+        normal: '/cursor-move.png',
+        click: '/cursor-click.png',
+        size: 60, // Standard Godzilla size
+        offsetX: 30,
+        offsetY: 40
+      };
+    }
+  };
+
+  const cursorConfig = getCursorImages();
+
   return (
     <div
       ref={cursorRef}
       className="custom-cursor"
       style={{
         position: 'fixed',
-        left: cursorPosition.x - 30, // Center the cursor (60px wide)
-        top: cursorPosition.y - 40, // Adjust for larger Godzilla height
-        width: '60px',
-        height: '60px',
-        backgroundImage: `url(${isClicking ? '/cursor-click.png' : '/cursor-move.png'})`,
+        left: cursorPosition.x - cursorConfig.offsetX,
+        top: cursorPosition.y - cursorConfig.offsetY,
+        width: `${cursorConfig.size}px`,
+        height: `${cursorConfig.size}px`,
+        backgroundImage: `url(${isClicking ? cursorConfig.click : cursorConfig.normal})`,
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
