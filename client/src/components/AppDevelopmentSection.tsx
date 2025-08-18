@@ -989,7 +989,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                         <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
                           <div className="flex items-center gap-2">
                             <Clock4 className="h-4 w-4 text-purple-500" />
-                            <span>{project.actualHours}h logged</span>
+                            <span>{getProjectLength(project)} days</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <GitCommit className="h-4 w-4 text-green-500" />
