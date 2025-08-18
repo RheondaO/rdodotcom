@@ -90,10 +90,10 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       className="custom-cursor"
       style={{
         position: 'fixed',
-        left: cursorPosition.x - 20, // Center the cursor (40px wide)
-        top: cursorPosition.y - 25, // Adjust for Godzilla height
-        width: '40px',
-        height: '40px',
+        left: cursorPosition.x - 30, // Center the cursor (60px wide)
+        top: cursorPosition.y - 40, // Adjust for larger Godzilla height
+        width: '60px',
+        height: '60px',
         backgroundImage: `url(${isClicking ? '/cursor-click.png' : '/cursor-move.png'})`,
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',

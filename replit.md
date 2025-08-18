@@ -24,7 +24,7 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 - **August 18, 2025**: ✅ **COMPLETED** - Custom Godzilla Cursor Implementation
 - **UPDATED**: Replaced purple cursor with user-provided Godzilla image for fun, unique experience
-- **FEATURES**: 40px Godzilla cursor with smooth easing movement and click animations (scale + rotation)
+- **FEATURES**: 60px Godzilla cursor with smooth easing movement and click animations (scale + rotation)
 - **TECHNICAL**: React component with RAF animation loop, completely hides system cursor
 - **ASSETS**: User-provided Godzilla image as cursor-move.png and cursor-click.png in client/public/
 - **ANIMATIONS**: Scale down to 0.85x and 5-degree rotation on click with brightness increase
