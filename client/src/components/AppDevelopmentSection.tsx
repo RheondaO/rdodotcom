@@ -1459,19 +1459,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                           <Button
                             onClick={() => setShowNewProjectForm(true)}
-                            disabled={!isAdmin}
                             className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
-                            title={!isAdmin ? "Admin access required to create projects" : ""}
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Project
                           </Button>
-                          {!isAdmin && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                              <AlertCircle className="h-3 w-3 inline mr-1" />
-                              Admin login required to create projects
-                            </p>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -1788,18 +1780,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               console.log('Add New Task button clicked');
                               setShowNewTaskForm(true);
                             }}
-                            disabled={!isAdmin}
                             className="bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Task
                           </Button>
-                          {!isAdmin && (
-                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                              <AlertCircle className="h-3 w-3 inline mr-1" />
-                              Admin login required to create tasks
-                            </p>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -2078,19 +2063,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                           <Button
                             onClick={() => setShowTestItemForm(true)}
-                            disabled={!isAdmin}
                             className="bg-gradient-to-r from-red-400 to-orange-500 text-white"
-                            title={!isAdmin ? "Admin access required to create test items" : ""}
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Add New Test Item
                           </Button>
-                          {!isAdmin && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                              <AlertCircle className="h-3 w-3 inline mr-1" />
-                              Admin login required to create test items
-                            </p>
-                          )}
                         </div>
                       </td>
                     </tr>
