@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { 
   Droplets, 
@@ -61,6 +63,8 @@ const performanceColors = {
 
 export default function ComprehensiveHealthWellnessSection({ selectedDate, isReadOnly = false }: ComprehensiveHealthWellnessSectionProps) {
   const queryClient = useQueryClient();
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   
   // State management
@@ -202,34 +206,72 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
 
   // Mutations
   const createWorkoutMutation = useMutation({
-    mutationFn: async (data: any) => await apiRequest('/api/workouts', 'POST', data),
+    mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
+      return await apiRequest('/api/workouts', 'POST', data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/workouts'] });
       setShowModal(null);
       setWorkoutForm({ name: '', duration: '', notes: '', calories: '', difficulty: 3, type: 'strength' });
+    },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
     }
   });
 
   const createWeightMutation = useMutation({
-    mutationFn: async (data: any) => await apiRequest('/api/body-weights', 'POST', data),
+    mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
+      return await apiRequest('/api/body-weights', 'POST', data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/body-weights'] });
       setShowModal(null);
       setWeightForm({ weight: '', bodyFat: '', muscleMass: '', waterWeight: '', notes: '' });
+    },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
     }
   });
 
   const createMeasurementMutation = useMutation({
-    mutationFn: async (data: any) => await apiRequest('/api/body-measurements', 'POST', data),
+    mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
+      return await apiRequest('/api/body-measurements', 'POST', data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/body-measurements'] });
       setShowModal(null);
       setMeasurementForm({ neck: '', chest: '', waist: '', hips: '', bicep: '', thigh: '', notes: '' });
+    },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
     }
   });
 
   const createFitnessGoalMutation = useMutation({
-    mutationFn: async (data: any) => await apiRequest('/api/fitness-goals', 'POST', data),
+    mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
+      return await apiRequest('/api/fitness-goals', 'POST', data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/fitness-goals'] });
       setShowModal(null);
@@ -242,6 +284,12 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
         unit: 'lbs',
         targetDate: '',
         priority: 'medium'
+      });
+    },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
       });
     }
   });
