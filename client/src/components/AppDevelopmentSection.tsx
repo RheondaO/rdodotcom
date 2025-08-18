@@ -305,6 +305,21 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     },
     select: (data: any[]) => data || []
   });
+
+  // Fetch QA Testing data from dedicated AIDEVQATESTING database
+  const { data: qaTestingData = [], isLoading: isLoadingQATesting, error: qaTestingError, isError: isQATestingError } = useQuery({
+    queryKey: ['/api/ai-development/qa-testing'],
+    queryFn: async () => {
+      const response = await fetch('/api/ai-development/qa-testing', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    },
+    select: (data: any[]) => data || []
+  });
   
   // Filter projects by type from AIDEVPROJECTS database
   const projects = allAIDevItems.filter(item => 
@@ -313,12 +328,13 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
   
   // Use tasks from dedicated tasks database
   const tasks = tasksData;
-  const testItems = allAIDevItems.filter(item => item.type === 'Test Item');
+  // Use QA testing data from dedicated AIDEVQATESTING database
+  const testItems = qaTestingData;
   const promptTemplates = allAIDevItems.filter(item => item.type === 'Library Prompt');
 
-  const isLoading = isLoadingProjects || isLoadingTasks;
-  const error = projectsError || tasksError;
-  const isError = isProjectsError || isTasksError;
+  const isLoading = isLoadingProjects || isLoadingTasks || isLoadingQATesting;
+  const error = projectsError || tasksError || qaTestingError;
+  const isError = isProjectsError || isTasksError || isQATestingError;
 
   // Task filtering and state management (already defined above in the enhanced UI state section)
 
