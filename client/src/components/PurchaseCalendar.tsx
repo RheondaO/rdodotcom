@@ -9,10 +9,14 @@ import { queryClient, apiRequest } from "../lib/queryClient";
 import { useState } from "react";
 import { format, addDays } from "date-fns";
 import type { Purchase, InsertPurchase } from "@shared/schema";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
 
 interface PurchaseCalendarProps {}
 
 export default function PurchaseCalendar({}: PurchaseCalendarProps) {
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
   const [isAddingPurchase, setIsAddingPurchase] = useState(false);
   const [newPurchase, setNewPurchase] = useState<Partial<InsertPurchase>>({
     date: format(addDays(new Date(), 1), 'yyyy-MM-dd'), // Default to tomorrow
@@ -56,6 +60,16 @@ export default function PurchaseCalendar({}: PurchaseCalendarProps) {
 
   const handleAddPurchase = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAdmin) {
+      toast({
+        title: "Authentication Required",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!newPurchase.itemName?.trim() || !newPurchase.price?.trim()) return;
 
     createPurchaseMutation.mutate({
@@ -69,6 +83,14 @@ export default function PurchaseCalendar({}: PurchaseCalendarProps) {
   };
 
   const handleDeletePurchase = (id: number) => {
+    if (!isAdmin) {
+      toast({
+        title: "Authentication Required",
+        description: "Records can only be deleted when logged in as the admin. Please log in to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
     deletePurchaseMutation.mutate(id);
   };
 
@@ -104,20 +126,18 @@ export default function PurchaseCalendar({}: PurchaseCalendarProps) {
             <Calendar className="h-5 w-5" />
             Purchase Planner
           </CardTitle>
-          {!isReadOnly && (
-            <Button
-              onClick={() => setIsAddingPurchase(!isAddingPurchase)}
-              className="bg-gradient-to-r from-purple-400 to-pink-500 text-white shadow-md rounded-xl px-4 py-2 hover:from-purple-500 hover:to-pink-600"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Plan Purchase
-            </Button>
-          )}
+          <Button
+            onClick={() => setIsAddingPurchase(!isAddingPurchase)}
+            className="bg-gradient-to-r from-purple-400 to-pink-500 text-white shadow-md rounded-xl px-4 py-2 hover:from-purple-500 hover:to-pink-600"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Plan Purchase
+          </Button>
         </div>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {isAddingPurchase && !isReadOnly && (
+        {isAddingPurchase && (
           <form onSubmit={handleAddPurchase} className="space-y-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-pink-100 dark:border-gray-600">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -278,7 +298,6 @@ export default function PurchaseCalendar({}: PurchaseCalendarProps) {
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{purchase.notes}</p>
                       )}
                     </div>
-                  {!isReadOnly && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -288,7 +307,6 @@ export default function PurchaseCalendar({}: PurchaseCalendarProps) {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  )}
                   </div>
                 </div>
               );
