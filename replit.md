@@ -22,6 +22,12 @@ Preferred communication style: Simple, everyday language.
 - **Rule**: When editing one content studio, the other must remain unchanged
 
 ## Recent Changes
+- **August 18, 2025**: ✅ **COMPLETED** - Project Management List Display Fix
+- **PAGINATION FIX**: Implemented proper Notion API pagination to fetch all records (was limited to first 100)
+- **TYPE FILTER FIX**: Added "web" to allowed project types filter to display all project types from AIDEVPROJECTS database
+- **FUNCTIONS UPDATED**: Fixed both getAIDevProjects() and getAIDevProjectsByType() with pagination loops
+- **FRONTEND FIX**: Updated AppDevelopmentSection filter to include "web" type projects alongside "web application", "api backend", "mobile app", "desktop app", "library", "tool", "Project"
+- **VERIFIED**: All 4 active records now properly displayed in Project Management list
 - **August 18, 2025**: ✅ **COMPLETED** - Complete Finance Management Admin Validation Implementation
 - **FINALIZED TRANSITION**: All Belle Journal components now use functional admin validation pattern instead of read-only restrictions
 - **FINANCE COMPONENTS UPDATED**: BudgetManagement and InvestmentTracking components fully transitioned to admin validation

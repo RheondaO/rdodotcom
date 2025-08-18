@@ -325,7 +325,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   
   // Filter projects by type from AIDEVPROJECTS database
   const projects = allAIDevItems.filter(item => 
-    ['web application', 'api backend', 'mobile app', 'desktop app', 'library', 'tool', 'Project'].includes(item.type)
+    ['web application', 'web', 'api backend', 'mobile app', 'desktop app', 'library', 'tool', 'Project'].includes(item.type)
   );
   
   // Use tasks from dedicated tasks database
