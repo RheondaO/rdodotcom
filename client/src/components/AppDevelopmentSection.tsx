@@ -979,9 +979,9 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                       </div>
                       
                       <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Start Date:</span>
-                          <span className="font-medium text-right">
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Start Date: </span>
+                          <span className="font-medium">
                             {project.startDate ? format(new Date(project.startDate), 'MMM dd, yyyy') : 'Not set'}
                           </span>
                         </div>
