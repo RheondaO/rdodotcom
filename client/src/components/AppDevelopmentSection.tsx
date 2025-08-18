@@ -967,7 +967,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent>
                 <div className="space-y-4">
                   {projects.slice(0, 4).map((project) => (
-                    <div key={project.id} className="p-4 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div key={project.notionId || project.id} className="p-4 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
@@ -1062,7 +1062,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <CardContent>
                 <div className="space-y-3">
                   {tasks.slice(0, 5).map((task) => (
-                    <div key={task.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-lg">
+                    <div key={task.notionId || task.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-lg">
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
                         {getTaskCategoryIcon(task.category)}
                       </div>
@@ -1904,7 +1904,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredTestItems.map((testItem) => (
-                      <tr key={testItem.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                      <tr key={testItem.notionId || testItem.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-red-400 to-orange-500 rounded-xl flex items-center justify-center">
@@ -2259,7 +2259,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                   {template.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {template.tags.map((tag: string, index: number) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge key={`${template.id}-tag-${index}`} variant="outline" className="text-xs">
                           <Tag className="h-3 w-3 mr-1" />
                           {tag}
                         </Badge>
