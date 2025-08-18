@@ -22,6 +22,10 @@ Preferred communication style: Simple, everyday language.
 - **Rule**: When editing one content studio, the other must remain unchanged
 
 ## Recent Changes
+- **August 18, 2025**: ✅ **COMPLETED** - TaskCount Field Integration for Project Dashboard
+- **RESOLVED**: Dashboard now correctly displays task counts from TaskCount field in AIDEVPROJECTS Notion database
+- **IMPLEMENTATION**: Added taskCount property to API integration and frontend components
+- **VERIFIED**: Project Portfolio Overview section successfully uses Notion TaskCount values instead of calculated counts
 - **August 18, 2025**: ✅ **COMPLETED** - Custom Godzilla Cursor Implementation
 - **UPDATED**: Replaced purple cursor with user-provided Godzilla image for fun, unique experience
 - **SPECIAL FEATURE**: About page (/about) uses admin face image as 70px cursor instead of Godzilla
