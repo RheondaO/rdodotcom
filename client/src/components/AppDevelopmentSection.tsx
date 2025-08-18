@@ -755,10 +755,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
     return task.status === taskFilter;
   });
 
-  // Test items filtering
+  // Test items filtering - use notionId to match projects
   const filteredTestItems = testItems.filter(testItem => {
     if (!selectedTestProject) return true;
-    return testItem.projectId.toString() === selectedTestProject;
+    return testItem.projectId === selectedTestProject;
   });
 
   // Prompt library helper functions
@@ -1800,7 +1800,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
               <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Testing & Quality Assurance</h2>
               <p className="text-sm text-muted-foreground dark:text-gray-400">
                 {selectedTestProject 
-                  ? `Testing tasks for ${projects.find(p => p.id === selectedTestProject)?.name || 'selected project'}` 
+                  ? `Testing tasks for ${projects.find(p => p.notionId === selectedTestProject)?.name || 'selected project'}` 
                   : `${testItems.length} total test items • ${testItems.filter(t => t.status === 'in_progress').length} in progress`
                 }
               </p>
@@ -1814,7 +1814,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <SelectContent>
                   <SelectItem value="all">All Projects</SelectItem>
                   {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
+                    <SelectItem key={project.notionId} value={project.notionId}>
                       {project.name}
                     </SelectItem>
                   ))}
@@ -1888,7 +1888,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                                 </div>
                               ) : (
                                 <div>
-                                  <div className="font-semibold text-gray-900 dark:text-white">{testItem.title}</div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">{testItem.name}</div>
                                   <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{testItem.description}</div>
                                 </div>
                               )}
@@ -1914,7 +1914,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             </Select>
                           ) : (
                             <span className="text-sm text-gray-900 dark:text-white">
-                              {projects.find(p => p.id === testItem.projectId)?.name || 'No Project'}
+                              {projects.find(p => p.notionId === testItem.projectId)?.name || testItem.projectName || 'No Project'}
                             </span>
                           )}
                         </td>
@@ -1938,7 +1938,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             </Select>
                           ) : (
                             <Badge variant="outline" className="text-xs capitalize">
-                              {testItem.type}
+                              {testItem.testType}
                             </Badge>
                           )}
                         </td>
