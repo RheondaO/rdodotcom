@@ -80,10 +80,9 @@ const mockExpenseBreakdown = [
 
 interface ComprehensiveFinanceSectionProps {
   selectedDate: Date;
-  isReadOnly: boolean;
 }
 
-export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }: ComprehensiveFinanceSectionProps) {
+export default function ComprehensiveFinanceSection({ selectedDate }: ComprehensiveFinanceSectionProps) {
   const [selectedView, setSelectedView] = useState<string>("overview");
 
   const formatCurrency = (amount: number) => {
@@ -360,11 +359,11 @@ export default function ComprehensiveFinanceSection({ selectedDate, isReadOnly }
         </TabsList>
 
         <TabsContent value="budget" className="space-y-4">
-          <BudgetManagement isReadOnly={isReadOnly} />
+          <BudgetManagement />
         </TabsContent>
 
         <TabsContent value="investments" className="space-y-4">
-          <InvestmentTracking isReadOnly={isReadOnly} />
+          <InvestmentTracking />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">

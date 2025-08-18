@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { format, parseISO, subDays, subMonths, subYears } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   ComposedChart, 
   Bar, 
@@ -129,13 +130,12 @@ interface InvestmentTransaction {
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-interface InvestmentTrackingProps {
-  isReadOnly: boolean;
-}
+// Interface removed - no props needed
 
-export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingProps) {
+export default function InvestmentTracking() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   
   const [selectedPeriod, setSelectedPeriod] = useState<string>("1Y");
   const [selectedPortfolio, setSelectedPortfolio] = useState<string>("all");
@@ -181,6 +181,9 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
   // Mutations
   const createInvestmentMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
       const response = await fetch("/api/investments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -193,10 +196,19 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
       setNewInvestmentDialog(false);
       toast({ title: "Investment added successfully" });
     },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
+    },
   });
 
   const createPortfolioMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
       const response = await fetch("/api/portfolios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -209,10 +221,19 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
       setNewPortfolioDialog(false);
       toast({ title: "Portfolio created successfully" });
     },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
+    },
   });
 
   const createAccountMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
       const response = await fetch("/api/accounts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -225,10 +246,19 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
       setNewAccountDialog(false);
       toast({ title: "Account added successfully" });
     },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
+    },
   });
 
   const createTransactionMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
       const response = await fetch("/api/investment-transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -241,6 +271,12 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
       queryClient.invalidateQueries({ queryKey: ["/api/investments"] });
       setNewTransactionDialog(false);
       toast({ title: "Transaction recorded successfully" });
+    },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
     },
   });
 
@@ -349,39 +385,37 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
               <SelectItem value="ALL">All Time</SelectItem>
             </SelectContent>
           </Select>
-          {!isReadOnly && (
-            <>
-              <Dialog open={newAccountDialog} onOpenChange={setNewAccountDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Account
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add New Account</DialogTitle>
-                  </DialogHeader>
-                  <AccountForm onSubmit={createAccountMutation.mutate} />
-                </DialogContent>
-              </Dialog>
-              <Dialog open={newPortfolioDialog} onOpenChange={setNewPortfolioDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Portfolio
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Portfolio</DialogTitle>
-                  </DialogHeader>
-                  <PortfolioForm onSubmit={createPortfolioMutation.mutate} />
-                </DialogContent>
-              </Dialog>
-              <Dialog open={newInvestmentDialog} onOpenChange={setNewInvestmentDialog}>
-                <DialogTrigger asChild>
-                  <Button>
+          <Dialog open={newAccountDialog} onOpenChange={setNewAccountDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Account
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Account</DialogTitle>
+              </DialogHeader>
+              <AccountForm onSubmit={createAccountMutation.mutate} />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={newPortfolioDialog} onOpenChange={setNewPortfolioDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                New Portfolio
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Portfolio</DialogTitle>
+              </DialogHeader>
+              <PortfolioForm onSubmit={createPortfolioMutation.mutate} />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={newInvestmentDialog} onOpenChange={setNewInvestmentDialog}>
+            <DialogTrigger asChild>
+              <Button>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Investment
                   </Button>
@@ -393,8 +427,6 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
                   <InvestmentForm onSubmit={createInvestmentMutation.mutate} />
                 </DialogContent>
               </Dialog>
-            </>
-          )}
         </div>
       </div>
 
@@ -544,12 +576,10 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
                     </span>
                   </div>
                   <div className="flex gap-2">
-                    {!isReadOnly && (
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    )}
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
                     <Button variant="outline" size="sm">
                       <BarChart3 className="h-4 w-4 mr-2" />
                       View Details
@@ -564,25 +594,23 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
         <TabsContent value="holdings" className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Investment Holdings</h2>
-            {!isReadOnly && (
-              <Dialog open={newTransactionDialog} onOpenChange={setNewTransactionDialog}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Record Transaction
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Record Transaction</DialogTitle>
-                  </DialogHeader>
-                  <TransactionForm 
+            <Dialog open={newTransactionDialog} onOpenChange={setNewTransactionDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Record Transaction
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Record Transaction</DialogTitle>
+                </DialogHeader>
+                <TransactionForm 
                     onSubmit={createTransactionMutation.mutate} 
                     investments={investments || []}
                   />
                 </DialogContent>
               </Dialog>
-            )}
           </div>
 
           <Card>
@@ -633,19 +661,17 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
                           </div>
                         </TableCell>
                         <TableCell>
-                          {!isReadOnly && (
-                            <div className="flex gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => {
-                                setSelectedInvestmentId(investment.id);
-                                setNewTransactionDialog(true);
-                              }}>
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          )}
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              setSelectedInvestmentId(investment.id);
+                              setNewTransactionDialog(true);
+                            }}>
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -685,12 +711,10 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
                       Account: ***{account.accountNumber || "0000"}
                     </span>
                     <div className="flex gap-2">
-                      {!isReadOnly && (
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </Button>
-                      )}
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
                       <Button variant="outline" size="sm">
                         <Activity className="h-4 w-4 mr-2" />
                         View History
@@ -740,16 +764,14 @@ export default function InvestmentTracking({ isReadOnly }: InvestmentTrackingPro
                         <TableCell>${transaction.totalAmount}</TableCell>
                         <TableCell>{transaction.fees ? `$${transaction.fees}` : "—"}</TableCell>
                         <TableCell>
-                          {!isReadOnly && (
-                            <div className="flex gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          )}
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { format, addMonths, subMonths, isWithinInterval, parseISO } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   ComposedChart, 
   Bar, 
@@ -127,13 +128,10 @@ interface Debt {
   createdAt?: Date;
 }
 
-interface BudgetManagementProps {
-  isReadOnly: boolean;
-}
-
-export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) {
+export default function BudgetManagement() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   
   const [selectedPeriod, setSelectedPeriod] = useState<string>(format(new Date(), "yyyy-MM"));
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -184,6 +182,9 @@ export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) 
   // Mutations
   const createBudgetMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
       const response = await fetch("/api/budgets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -196,10 +197,19 @@ export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) 
       setNewBudgetDialog(false);
       toast({ title: "Budget created successfully" });
     },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
+    },
   });
 
   const createExpenseMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
       const response = await fetch("/api/expenses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -213,10 +223,19 @@ export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) 
       setNewExpenseDialog(false);
       toast({ title: "Expense added successfully" });
     },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
+    },
   });
 
   const createDebtMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!isAdmin) {
+        throw new Error("Admin authentication required");
+      }
       const response = await fetch("/api/debts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -228,6 +247,12 @@ export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) 
       queryClient.invalidateQueries({ queryKey: ["/api/debts"] });
       setNewDebtDialog(false);
       toast({ title: "Debt added successfully" });
+    },
+    onError: () => {
+      toast({ 
+        title: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive"
+      });
     },
   });
 
@@ -310,38 +335,34 @@ export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) 
             <BarChart3 className="h-4 w-4 mr-2" />
             {showTrends ? "Hide" : "Show"} Trends
           </Button>
-          {!isReadOnly && (
-            <>
-              <Dialog open={newExpenseDialog} onOpenChange={setNewExpenseDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Expense
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add New Expense</DialogTitle>
-                  </DialogHeader>
-                  <ExpenseForm onSubmit={createExpenseMutation.mutate} />
-                </DialogContent>
-              </Dialog>
-              <Dialog open={newBudgetDialog} onOpenChange={setNewBudgetDialog}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Budget
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create New Budget</DialogTitle>
-                  </DialogHeader>
-                  <BudgetForm onSubmit={createBudgetMutation.mutate} />
-                </DialogContent>
-              </Dialog>
-            </>
-          )}
+          <Dialog open={newExpenseDialog} onOpenChange={setNewExpenseDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Expense
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Expense</DialogTitle>
+              </DialogHeader>
+              <ExpenseForm onSubmit={createExpenseMutation.mutate} />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={newBudgetDialog} onOpenChange={setNewBudgetDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                New Budget
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Budget</DialogTitle>
+              </DialogHeader>
+              <BudgetForm onSubmit={createBudgetMutation.mutate} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -581,16 +602,14 @@ export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) 
                       <TableCell>${expense.amount}</TableCell>
                       <TableCell>{expense.paymentMethod || "N/A"}</TableCell>
                       <TableCell>
-                        {!isReadOnly && (
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -603,22 +622,20 @@ export default function BudgetManagement({ isReadOnly }: BudgetManagementProps) 
         <TabsContent value="debts" className="space-y-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Debt Management</h2>
-            {!isReadOnly && (
-              <Dialog open={newDebtDialog} onOpenChange={setNewDebtDialog}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Debt
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
+            <Dialog open={newDebtDialog} onOpenChange={setNewDebtDialog}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Debt
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
                     <DialogTitle>Add New Debt</DialogTitle>
                   </DialogHeader>
                   <DebtForm onSubmit={createDebtMutation.mutate} />
                 </DialogContent>
               </Dialog>
-            )}
           </div>
 
           <div className="grid gap-4">
