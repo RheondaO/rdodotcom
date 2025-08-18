@@ -1499,8 +1499,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
           
           {/* Admin Notice */}
           <div className="text-center">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              (!) Admin login required to create projects
+            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Admin login required to create projects
             </p>
           </div>
         </div>
@@ -1827,8 +1828,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
           
           {/* Admin Notice */}
           <div className="text-center">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              (!) Admin login required to create tasks
+            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Admin login required to create tasks
             </p>
           </div>
         </div>
@@ -2117,8 +2119,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
           
           {/* Admin Notice */}
           <div className="text-center">
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              (!) Admin login required to create test items
+            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Admin login required to create test items
             </p>
           </div>
         </div>
