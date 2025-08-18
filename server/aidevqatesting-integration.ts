@@ -77,21 +77,11 @@ export async function fetchQATestingRecords() {
                 expectedResult: properties.ExpectedResult?.rich_text?.[0]?.plain_text || "",
                 actualResult: properties.ActualResult?.rich_text?.[0]?.plain_text || "",
                 steps: properties.Steps?.rich_text?.[0]?.plain_text || "",
-                environment: properties.Environment?.select?.name || "Development",
-                browser: properties.Browser?.select?.name || "",
-                device: properties.Device?.select?.name || "",
-                assignedTo: properties.AssignedTo?.people?.[0]?.name || "",
-                reportedBy: properties.ReportedBy?.people?.[0]?.name || "",
                 severity: properties.Severity?.select?.name || "Low",
                 tags: properties.Tags?.multi_select?.map((tag: any) => tag.name) || [],
                 createdDate: properties.CreatedDate?.date?.start || null,
                 updatedDate: properties.UpdatedDate?.date?.start || null,
                 resolvedDate: properties.ResolvedDate?.date?.start || null,
-                estimatedHours: properties.EstimatedHours?.number || 0,
-                actualHours: properties.ActualHours?.number || 0,
-                bugReportUrl: properties.BugReportUrl?.url || "",
-                attachments: properties.Attachments?.files || [],
-                notes: properties.Notes?.rich_text?.[0]?.plain_text || "",
                 isActive: properties.IsActive?.checkbox || true,
                 createdAt: (page as any).created_time,
                 updatedAt: (page as any).last_edited_time
@@ -176,21 +166,9 @@ export async function createQATestingRecord(recordData: any) {
             };
         }
 
-        if (recordData.environment) {
-            properties.Environment = {
-                select: { name: recordData.environment }
-            };
-        }
-
         if (recordData.severity) {
             properties.Severity = {
                 select: { name: recordData.severity }
-            };
-        }
-
-        if (recordData.notes) {
-            properties.Notes = {
-                rich_text: [{ text: { content: recordData.notes } }]
             };
         }
 
