@@ -224,6 +224,40 @@
   box-shadow: 0 0 0 3px hsla(var(--ring), 0.2);
 }
 
+/* Custom cursor for Belle Journal */
+* {
+  cursor: url('./assets/cursor.png') 10 10, auto;
+}
+
+/* Interactive elements with custom pointer */
+button, a, [role="button"], .cursor-pointer, 
+[data-sidebar-trigger], [data-sidebar-toggle],
+.clickable, select, label[for] {
+  cursor: url('./assets/cursor.png') 10 10, pointer;
+}
+
+/* Enhanced hover states for interactive elements */
+button:hover, a:hover, [role="button"]:hover, .cursor-pointer:hover,
+[data-sidebar-trigger]:hover, [data-sidebar-toggle]:hover,
+.clickable:hover, select:hover, label[for]:hover {
+  cursor: url('./assets/cursor-hover.png') 10 10, pointer;
+}
+
+/* Text input areas */
+input, textarea, [contenteditable] {
+  cursor: url('./assets/cursor.png') 10 10, text;
+}
+
+/* Disabled elements */
+button:disabled, input:disabled, select:disabled, textarea:disabled {
+  cursor: url('./assets/cursor.png') 10 10, not-allowed;
+}
+
+/* Resize handles */
+[data-panel-resize-handle], .resize {
+  cursor: url('./assets/cursor.png') 10 10, col-resize;
+}
+
 /* Line clamp utilities for content display */
 .line-clamp-1 {
   overflow: hidden;
