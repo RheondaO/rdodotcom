@@ -1505,7 +1505,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 {selectedProject 
                   ? `${projectTasks.length} tasks in ${projects.find(p => p.id === selectedProject)?.name || 'selected project'}` 
                   : taskProjectFilter !== 'all'
-                    ? `${baseFilteredTasks.length} tasks in ${projects.find(p => p.id === taskProjectFilter)?.name || 'selected project'} • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
+                    ? `${baseFilteredTasks.length} tasks in ${projects.find(p => p.notionId === taskProjectFilter)?.name || 'selected project'} • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
                     : `${baseFilteredTasks.length} total tasks • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
                 }
               </p>
@@ -1519,7 +1519,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                 <SelectContent>
                   <SelectItem value="all">All Projects</SelectItem>
                   {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
+                    <SelectItem key={project.id} value={project.notionId}>
                       {project.name}
                     </SelectItem>
                   ))}
