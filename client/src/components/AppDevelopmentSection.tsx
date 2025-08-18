@@ -1496,6 +1496,13 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </div>
             </CardContent>
           </Card>
+          
+          {/* Admin Notice */}
+          <div className="text-center">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              (!) Admin login required to create projects
+            </p>
+          </div>
         </div>
       )}
 
@@ -1817,6 +1824,13 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </div>
             </CardContent>
           </Card>
+          
+          {/* Admin Notice */}
+          <div className="text-center">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              (!) Admin login required to create tasks
+            </p>
+          </div>
         </div>
       )}
 
@@ -2100,8 +2114,13 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </div>
             </CardContent>
           </Card>
-
-
+          
+          {/* Admin Notice */}
+          <div className="text-center">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              (!) Admin login required to create test items
+            </p>
+          </div>
         </div>
       )}
 

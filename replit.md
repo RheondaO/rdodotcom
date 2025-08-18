@@ -22,12 +22,14 @@ Preferred communication style: Simple, everyday language.
 - **Rule**: When editing one content studio, the other must remain unchanged
 
 ## Recent Changes
-- **August 18, 2025**: ✅ **COMPLETED** - Complete Removal of Read-Only Restrictions
+- **August 18, 2025**: ✅ **COMPLETED** - Complete Removal of Read-Only Restrictions & Admin Warning Implementation
 - **FULL TRANSITION**: Belle Journal is now completely open functionality for all users
 - **REMOVED**: All disabled={isReadOnly} restrictions from AppDevelopmentSection, ContentPipelineSection, GrocerySection, GoalsSection, BlogContentStudio
 - **UPDATED**: Component interfaces no longer include isReadOnly props
 - **ENHANCED**: All buttons, forms, and interactive elements are now fully functional for everyone
-- **ADMIN MESSAGING**: Consistent "Admin login required to create {item}" messaging across all components
+- **ADMIN MESSAGING**: Consistent "Records can only be created when logged in as the admin. Please log in to continue." toast messages across all form submission handlers
+- **WARNING NOTICES**: Added small gray warning text "(!) Admin login required to create {item}" at bottom of AI App Development lists (projects, tasks, test items)
+- **IMPORTS**: Fixed missing useAuth and useToast hook imports in GoalsSection, GrocerySection, and BlogContentStudio
 - **VERIFIED**: All TypeScript errors resolved and components properly updated
 - **August 18, 2025**: ✅ **COMPLETED** - AIDEVQATESTING Notion Database Integration
 - **IMPLEMENTATION**: Created complete QA testing integration with server routes, API endpoints, and data models
