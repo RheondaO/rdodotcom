@@ -973,18 +973,20 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                             <p className="text-sm text-muted-foreground dark:text-gray-400 capitalize">{project.projectType} Project</p>
                           </div>
                         </div>
-                        <Badge className={getStatusColor(project.status)}>
-                          {(project.status || 'Unknown').replace('_', ' ')}
-                        </Badge>
+                        <div className="text-right">
+                          <Badge className={getStatusColor(project.status)}>
+                            {(project.status || 'Unknown').replace('_', ' ')}
+                          </Badge>
+                          <div className="text-sm mt-1">
+                            <span className="text-muted-foreground">Start Date: </span>
+                            <span className="font-medium">
+                              {project.startDate ? format(new Date(project.startDate), 'MMM dd, yyyy') : 'Not set'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       
                       <div className="space-y-2">
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Start Date: </span>
-                          <span className="font-medium">
-                            {project.startDate ? format(new Date(project.startDate), 'MMM dd, yyyy') : 'Not set'}
-                          </span>
-                        </div>
                         
                         <div className="grid grid-cols-3 gap-3 mt-3 text-sm">
                           <div className="flex items-center gap-2">
