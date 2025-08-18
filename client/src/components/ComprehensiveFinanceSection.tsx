@@ -124,18 +124,16 @@ export default function ComprehensiveFinanceSection({ selectedDate }: Comprehens
             Comprehensive financial tracking and budget management
           </p>
         </div>
-        {!isReadOnly && (
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Transaction
-            </Button>
-            <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
-              Monthly Report
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Transaction
+          </Button>
+          <Button variant="outline" size="sm">
+            <Calendar className="h-4 w-4 mr-2" />
+            Monthly Report
+          </Button>
+        </div>
       </div>
 
       {/* Financial Overview Cards */}
