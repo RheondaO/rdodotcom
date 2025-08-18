@@ -986,7 +986,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           </span>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+                        <div className="grid grid-cols-3 gap-3 mt-3 text-sm">
                           <div className="flex items-center gap-2">
                             <Clock4 className="h-4 w-4 text-purple-500" />
                             <span>{getProjectLength(project)} days</span>
@@ -994,6 +994,10 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           <div className="flex items-center gap-2">
                             <GitCommit className="h-4 w-4 text-green-500" />
                             <span>{project.taskCount || 0} tasks</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Bug className="h-4 w-4 text-orange-500" />
+                            <span>{testItems.filter(t => t.projectId === project.notionId).length} QA</span>
                           </div>
                         </div>
                         
