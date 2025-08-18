@@ -1,4 +1,4 @@
-import { Calendar, Plus, Trash2, ExternalLink } from "lucide-react";
+import { Calendar, Plus, Trash2, ExternalLink, Clock, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "./ui/textarea";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "../lib/queryClient";
 import { useState } from "react";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import type { Purchase, InsertPurchase } from "@shared/schema";
 
 interface PurchaseCalendarProps {
@@ -17,7 +17,7 @@ interface PurchaseCalendarProps {
 export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalendarProps) {
   const [isAddingPurchase, setIsAddingPurchase] = useState(false);
   const [newPurchase, setNewPurchase] = useState<Partial<InsertPurchase>>({
-    date: format(new Date(), 'yyyy-MM-dd'),
+    date: format(addDays(new Date(), 1), 'yyyy-MM-dd'), // Default to tomorrow
     price: '',
     itemName: '',
     itemUrl: '',
@@ -36,7 +36,7 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/purchases'] });
       setNewPurchase({
-        date: format(new Date(), 'yyyy-MM-dd'),
+        date: format(addDays(new Date(), 1), 'yyyy-MM-dd'), // Reset to tomorrow
         price: '',
         itemName: '',
         itemUrl: '',
@@ -61,7 +61,7 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
     if (!newPurchase.itemName?.trim() || !newPurchase.price?.trim()) return;
 
     createPurchaseMutation.mutate({
-      date: newPurchase.date || format(new Date(), 'yyyy-MM-dd'),
+      date: newPurchase.date || format(addDays(new Date(), 1), 'yyyy-MM-dd'),
       price: newPurchase.price,
       itemName: newPurchase.itemName.trim(),
       itemUrl: newPurchase.itemUrl?.trim() || undefined,
@@ -74,12 +74,12 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
     deletePurchaseMutation.mutate(id);
   };
 
-  const totalSpent = purchases.reduce((sum, purchase) => {
+  const totalPlanned = purchases.reduce((sum, purchase) => {
     return sum + parseFloat(purchase.price || "0");
   }, 0);
 
   const sortedPurchases = purchases.sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+    new Date(a.date).getTime() - new Date(b.date).getTime() // Sort by upcoming dates first
   );
 
   if (isLoading) {
@@ -88,7 +88,7 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg font-heading font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:text-white">
             <Calendar className="h-5 w-5" />
-            Purchase Calendar
+            Purchase Planner
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -104,7 +104,7 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg font-heading font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent dark:text-white">
             <Calendar className="h-5 w-5" />
-            Purchase Calendar
+            Purchase Planner
           </CardTitle>
           {!isReadOnly && (
             <Button
@@ -112,7 +112,7 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
               className="bg-gradient-to-r from-purple-400 to-pink-500 text-white shadow-md rounded-xl px-4 py-2 hover:from-purple-500 hover:to-pink-600"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Purchase
+              Plan Purchase
             </Button>
           )}
         </div>
@@ -201,7 +201,7 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
                 className="bg-gradient-to-r from-purple-400 to-pink-500 text-white shadow-md rounded-xl px-6 hover:from-purple-500 hover:to-pink-600"
                 disabled={createPurchaseMutation.isPending}
               >
-                {createPurchaseMutation.isPending ? 'Adding...' : 'Add Purchase'}
+                {createPurchaseMutation.isPending ? 'Planning...' : 'Plan Purchase'}
               </Button>
               <Button 
                 type="button" 
@@ -217,43 +217,69 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
 
         {sortedPurchases.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
-            <div className="text-lg font-script mb-2">No purchases recorded yet</div>
-            <div className="text-sm">Add some purchases to track your spending!</div>
+            <div className="text-lg font-script mb-2">No purchases planned yet</div>
+            <div className="text-sm">Start planning your future purchases!</div>
           </div>
         ) : (
           <div className="space-y-3">
-            {sortedPurchases.map((purchase) => (
-              <div key={purchase.id} className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 rounded-xl border border-pink-100 dark:border-gray-600">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-gray-800 dark:text-gray-200">{purchase.itemName}</h4>
-                      {purchase.itemUrl && (
-                        <a
-                          href={purchase.itemUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{format(new Date(purchase.date), 'MMM dd, yyyy')}</span>
-                      <span className="font-semibold text-purple-700 dark:text-purple-300">
-                        ${parseFloat(purchase.price).toFixed(2)}
-                      </span>
-                      {purchase.category && (
-                        <span className="bg-white/60 dark:bg-[#17111d]/60 rounded-lg px-2 py-1">
-                          {purchase.category}
+            {sortedPurchases.map((purchase) => {
+              const purchaseDate = new Date(purchase.date);
+              const today = new Date();
+              const isToday = purchaseDate.toDateString() === today.toDateString();
+              const isPastDue = purchaseDate < today && !isToday;
+              const isUpcoming = purchaseDate > today;
+              
+              return (
+                <div key={purchase.id} className={`p-4 rounded-xl border ${
+                  isPastDue 
+                    ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-800' 
+                    : isToday
+                    ? 'bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-200 dark:border-yellow-800'
+                    : 'bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 border-pink-100 dark:border-gray-600'
+                }`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        {(isPastDue || isToday) && (
+                          <AlertCircle className={`h-4 w-4 ${
+                            isPastDue ? 'text-red-500' : 'text-yellow-500'
+                          }`} />
+                        )}
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">{purchase.itemName}</h4>
+                        {purchase.itemUrl && (
+                          <a
+                            href={purchase.itemUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className={`${
+                          isPastDue ? 'text-red-600 dark:text-red-400 font-medium' 
+                          : isToday ? 'text-yellow-600 dark:text-yellow-400 font-medium'
+                          : ''
+                        }`}>
+                          {format(purchaseDate, 'MMM dd, yyyy')}
+                          {isPastDue && ' (Past Due)'}
+                          {isToday && ' (Today)'}
                         </span>
+                        <span className="font-semibold text-purple-700 dark:text-purple-300">
+                          ${parseFloat(purchase.price).toFixed(2)}
+                        </span>
+                        {purchase.category && (
+                          <span className="bg-white/60 dark:bg-[#17111d]/60 rounded-lg px-2 py-1">
+                            {purchase.category}
+                          </span>
+                        )}
+                      </div>
+                      {purchase.notes && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{purchase.notes}</p>
                       )}
                     </div>
-                    {purchase.notes && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{purchase.notes}</p>
-                    )}
-                  </div>
                   {!isReadOnly && (
                     <Button
                       variant="ghost"
@@ -265,18 +291,19 @@ export default function PurchaseCalendar({ isReadOnly = false }: PurchaseCalenda
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {sortedPurchases.length > 0 && (
           <div className="mt-6 pt-4 border-t border-pink-100 dark:border-gray-700">
             <div className="flex items-center justify-between text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 rounded-xl p-3">
-              <span className="text-muted-foreground font-medium">Total Spent:</span>
+              <span className="text-muted-foreground font-medium">Total Planned:</span>
               <span className="font-heading font-bold text-purple-700 dark:text-purple-300">
-                ${totalSpent.toFixed(2)}
+                ${totalPlanned.toFixed(2)}
               </span>
             </div>
           </div>
