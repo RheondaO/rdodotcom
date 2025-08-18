@@ -201,6 +201,7 @@ interface AppProject {
   endDate?: string;
   completedDate?: string;
   actualHours: number;
+  taskCount?: number;
   techStack: string[];
   priority?: "low" | "medium" | "high";
   isActive: boolean;
@@ -961,7 +962,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           </div>
                           <div className="flex items-center gap-2">
                             <GitCommit className="h-4 w-4 text-green-500" />
-                            <span>{tasks.filter(t => t.projectId === project.id).length} tasks</span>
+                            <span>{project.taskCount || 0} tasks</span>
                           </div>
                         </div>
                         
