@@ -1818,7 +1818,7 @@ export default function AppDevelopmentSection({ selectedDate, isReadOnly = false
                           {!isAdmin && (
                             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                               <AlertCircle className="h-3 w-3 inline mr-1" />
-                              Demo mode - task creation enabled for testing
+                              Admin login required to create tasks
                             </p>
                           )}
                         </div>
