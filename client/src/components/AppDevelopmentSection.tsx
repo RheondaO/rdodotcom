@@ -2309,6 +2309,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </div>
             )}
           </div>
+          
+          {/* Admin Notice */}
+          <div className="text-center">
+            <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Admin login required to create prompts
+            </p>
+          </div>
         </div>
       )}
 
