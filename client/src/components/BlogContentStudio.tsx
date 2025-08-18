@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import BlogEditor from "./BlogEditor";
 import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
 
 interface BlogPost {
   id: number;
@@ -312,9 +313,9 @@ export default function BlogContentStudio() {
           </span>
         </div>
         <div className="h-4 w-px bg-gray-300 dark:bg-[#17111d]" />
-        <div className={`flex items-center gap-2 ${isReadOnly ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
-          <Zap className={`h-5 w-5 ${isReadOnly ? 'text-gray-400' : 'text-green-600'}`} />
-          <span className={`text-sm font-medium ${isReadOnly ? 'text-gray-400' : 'text-green-600 hover:text-green-800'}`}>
+        <div className="flex items-center gap-2 cursor-pointer">
+          <Zap className="h-5 w-5 text-green-600" />
+          <span className="text-sm font-medium text-green-600 hover:text-green-800">
             AI Generate
           </span>
         </div>
@@ -325,7 +326,7 @@ export default function BlogContentStudio() {
           <DialogHeader>
             <DialogTitle>Create New Blog Idea</DialogTitle>
           </DialogHeader>
-          <NewIdeaForm onSubmit={createIdeaMutation.mutate} isReadOnly={isReadOnly} />
+          <NewIdeaForm onSubmit={createIdeaMutation.mutate} />
         </DialogContent>
       </Dialog>
       {/* Content Filter Bar */}
@@ -1247,15 +1248,28 @@ export default function BlogContentStudio() {
   );
 }
 
-function NewIdeaForm({ onSubmit, isReadOnly = false }: { onSubmit: (data: any) => void; isReadOnly?: boolean }) {
+function NewIdeaForm({ onSubmit }: { onSubmit: (data: any) => void }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [priority, setPriority] = useState("medium");
   const [platform, setPlatform] = useState("");
 
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isAdmin) {
+      toast({
+        title: "Authentication Required",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     onSubmit({
       title,
       description,

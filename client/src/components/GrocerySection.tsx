@@ -6,6 +6,8 @@ import { Input } from "./ui/input";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "../lib/queryClient";
 import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/use-toast";
 import PurchaseCalendar from "./PurchaseCalendar";
 
 
@@ -14,6 +16,8 @@ interface GrocerySectionProps {}
 export default function GrocerySection({}: GrocerySectionProps = {}) {
   const [newItemName, setNewItemName] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
 
   const { data: groceryItems = [], isLoading } = useQuery({
     queryKey: ['/api/grocery-items'],
@@ -51,6 +55,15 @@ export default function GrocerySection({}: GrocerySectionProps = {}) {
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
+
+    if (!isAdmin) {
+      toast({
+        title: "Authentication Required",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     createItemMutation.mutate({
       name: newItemName.trim(),

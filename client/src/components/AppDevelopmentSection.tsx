@@ -489,10 +489,26 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Form handlers
   const onSubmitProject = (data: NewProjectForm) => {
+    if (!isAdmin) {
+      toast({
+        title: "Authentication Required",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
     createProjectMutation.mutate(data);
   };
 
   const onSubmitTask = (data: NewTaskForm) => {
+    if (!isAdmin) {
+      toast({
+        title: "Authentication Required",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
     createTaskMutation.mutate(data);
   };
 
@@ -555,6 +571,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   });
 
   const onSubmitTestItem = (data: TestItemForm) => {
+    if (!isAdmin) {
+      toast({
+        title: "Authentication Required",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
     createTestItemMutation.mutate(data);
   };
 

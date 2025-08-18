@@ -25,6 +25,7 @@ import {
 import { format, differenceInDays, isAfter, isBefore, isToday, isYesterday, isTomorrow } from "date-fns";
 import { apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
+import { useAuth } from "../hooks/useAuth";
 import type { Goal, InsertGoal } from "@shared/schema";
 
 
@@ -36,6 +37,7 @@ interface GoalsSectionProps {
 export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
   
   const getDateLabel = () => {
     if (isToday(selectedDate)) return "Today";
@@ -121,6 +123,15 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const handleCreateGoal = () => {
     console.log("Create Goal button clicked");
     console.log("Current goal data:", newGoal);
+    
+    if (!isAdmin) {
+      toast({
+        title: "Authentication Required",
+        description: "Records can only be created when logged in as the admin. Please log in to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!newGoal.title || !newGoal.targetDate) {
       console.log("Validation failed:", { title: newGoal.title, targetDate: newGoal.targetDate });
