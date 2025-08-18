@@ -77,6 +77,17 @@ export interface GroceryList {
   createdAt?: Date;
 }
 
+export interface Purchase {
+  id: number;
+  date: string;
+  price: string;
+  itemName: string;
+  itemUrl?: string;
+  category?: string;
+  notes?: string;
+  createdAt?: Date;
+}
+
 export interface Goal {
   id: number;
   title: string;
@@ -726,6 +737,18 @@ export const blogCalendar = pgTable('blog_calendar', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// Purchase Calendar Table
+export const purchases = pgTable('purchases', {
+  id: serial('id').primaryKey(),
+  date: text('date').notNull(),
+  price: text('price').notNull(),
+  itemName: text('item_name').notNull(),
+  itemUrl: text('item_url'),
+  category: text('category'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 // Fitness & Exercise Database Tables
 export const exercises = pgTable('exercises', {
   id: serial('id').primaryKey(),
@@ -1222,6 +1245,21 @@ export const insertFoodDatabaseSchema = z.object({
 export type BlogPostType = typeof blogPosts.$inferSelect;
 export type BlogIdeaType = typeof blogIdeas.$inferSelect;
 export type BlogCalendarType = typeof blogCalendar.$inferSelect;
+
+// Purchase schema and types
+export type PurchaseType = typeof purchases.$inferSelect;
+export const insertPurchaseSchema = createInsertSchema(purchases).omit({ 
+  id: true, 
+  createdAt: true 
+}).extend({
+  date: z.string().min(1, "Date is required"),
+  price: z.string().min(1, "Price is required"),
+  itemName: z.string().min(1, "Item name is required"),
+  itemUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  category: z.string().optional(),
+  notes: z.string().optional()
+});
+export type InsertPurchase = z.infer<typeof insertPurchaseSchema>;
 
 export const insertBudgetCategorySchema = z.object({
   name: z.string().min(1, "Name is required"),

@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "../lib/queryClient";
 import { useState } from "react";
+import PurchaseCalendar from "./PurchaseCalendar";
 
 
 interface GrocerySectionProps {
@@ -196,6 +197,10 @@ export default function GrocerySection({ isReadOnly = false }: GrocerySectionPro
           )}
         </CardContent>
       </Card>
+
+      <div className="mt-6">
+        <PurchaseCalendar isReadOnly={isReadOnly} />
+      </div>
     </section>
   );
 }

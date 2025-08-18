@@ -75,13 +75,17 @@ import {
   type InsertInvestmentTransaction,
   type TimerSession,
   type InsertTimerSession,
+  type Purchase,
+  type InsertPurchase,
   timerSessions,
   blogPosts,
   blogIdeas,
   blogCalendar,
+  purchases,
   type BlogPostType,
   type BlogIdeaType,
-  type BlogCalendarType
+  type BlogCalendarType,
+  type PurchaseType
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -107,9 +111,13 @@ export interface IStorage {
   createGroceryItem(item: InsertGroceryItem): Promise<GroceryItem>;
   updateGroceryItem(id: number, updates: Partial<GroceryItem>): Promise<GroceryItem>;
   deleteGroceryItem(id: number): Promise<void>;
-  getAllGroceryLists(): Promise<GroceryList[]>;
-  createGroceryList(list: InsertGroceryList): Promise<GroceryList>;
-  deleteGroceryList(id: number): Promise<void>;
+
+  // Purchase Calendar
+  getAllPurchases(): Promise<Purchase[]>;
+  getPurchasesByDateRange(startDate: string, endDate: string): Promise<Purchase[]>;
+  createPurchase(purchase: InsertPurchase): Promise<Purchase>;
+  updatePurchase(id: number, updates: Partial<Purchase>): Promise<Purchase>;
+  deletePurchase(id: number): Promise<void>;
 
   // Goals
   getAllGoals(): Promise<Goal[]>;
@@ -473,6 +481,7 @@ export class MemStorage implements IStorage {
   private portfolioHoldings: Map<number, PortfolioHolding> = new Map();
   private priceHistory: Map<number, PriceHistory> = new Map();
   private investmentTransactions: Map<number, InvestmentTransaction> = new Map();
+  private purchases: Map<number, Purchase> = new Map();
   private currentId = 1;
 
   constructor() {
@@ -766,6 +775,40 @@ export class MemStorage implements IStorage {
 
   async deleteGroceryItem(id: number): Promise<void> {
     this.groceryItems.delete(id);
+  }
+
+  // Purchase Calendar
+  async getAllPurchases(): Promise<Purchase[]> {
+    return Array.from(this.purchases.values());
+  }
+
+  async getPurchasesByDateRange(startDate: string, endDate: string): Promise<Purchase[]> {
+    return Array.from(this.purchases.values()).filter(purchase => 
+      purchase.date >= startDate && purchase.date <= endDate
+    );
+  }
+
+  async createPurchase(purchase: InsertPurchase): Promise<Purchase> {
+    const newPurchase: Purchase = {
+      id: this.currentId++,
+      ...purchase,
+      createdAt: new Date()
+    };
+    this.purchases.set(newPurchase.id, newPurchase);
+    return newPurchase;
+  }
+
+  async updatePurchase(id: number, updates: Partial<Purchase>): Promise<Purchase> {
+    const purchase = this.purchases.get(id);
+    if (!purchase) throw new Error("Purchase not found");
+    
+    const updatedPurchase = { ...purchase, ...updates };
+    this.purchases.set(id, updatedPurchase);
+    return updatedPurchase;
+  }
+
+  async deletePurchase(id: number): Promise<void> {
+    this.purchases.delete(id);
   }
 
   // Grocery Lists

@@ -70,7 +70,8 @@ import {
   insertPortfolioSchema,
   insertPortfolioHoldingSchema,
   insertPriceHistorySchema,
-  insertInvestmentTransactionSchema
+  insertInvestmentTransactionSchema,
+  insertPurchaseSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -452,6 +453,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete grocery item" });
+    }
+  });
+
+  // Purchase Calendar
+  app.get("/api/purchases", async (req, res) => {
+    try {
+      const purchases = await storage.getAllPurchases();
+      res.json(purchases);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch purchases" });
+    }
+  });
+
+  app.post("/api/purchases", async (req, res) => {
+    try {
+      const data = insertPurchaseSchema.parse(req.body);
+      const purchase = await storage.createPurchase(data);
+      res.json(purchase);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid purchase data" });
+    }
+  });
+
+  app.patch("/api/purchases/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const purchase = await storage.updatePurchase(id, updates);
+      res.json(purchase);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update purchase" });
+    }
+  });
+
+  app.delete("/api/purchases/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deletePurchase(id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete purchase" });
     }
   });
 
