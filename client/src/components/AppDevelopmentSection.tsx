@@ -745,7 +745,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   };
 
   // File upload handlers for project documentation
-  // Handle file upload to Object Storage, then update Notion Documents field
+  // Handle file upload to Object Storage, then update Notion Documents field (Admin only)
   const handleFileUpload = async (projectId: string, files: FileList) => {
     try {
       setUploadingFiles(prev => ({ ...prev, [projectId]: true }));
@@ -753,13 +753,16 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       // Upload each file to object storage first
       const uploadPromises = Array.from(files).map(async (file) => {
         try {
-          // Get presigned URL for upload
+          // Get presigned URL for upload (requires admin authentication)
           const uploadResponse = await fetch('/upload/objects', {
             method: 'POST',
             credentials: 'include'
           });
           
           if (!uploadResponse.ok) {
+            if (uploadResponse.status === 401 || uploadResponse.status === 403) {
+              throw new Error('Admin login required to upload files');
+            }
             throw new Error('Failed to get upload URL');
           }
           
@@ -818,10 +821,13 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         title: "Success", 
         description: `Successfully uploaded ${files.length} file(s) to object storage and updated Notion` 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading files:', error);
       setUploadingFiles(prev => ({ ...prev, [projectId]: false }));
-      toast({ title: "Error", description: "Failed to upload files to storage", variant: "destructive" });
+      const errorMessage = error.message === 'Admin login required to upload files' 
+        ? "Admin login required to upload files. Please log in to continue."
+        : "Failed to upload files to storage";
+      toast({ title: "Error", description: errorMessage, variant: "destructive" });
     }
   };
 
@@ -3484,6 +3490,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <p className="text-sm text-muted-foreground">
                         Attach files to organize project documentation, images, and resources
                       </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        (!) Admin login required to upload files
+                      </p>
                       <div className="flex items-center gap-2">
                         <input
                           type="file"
@@ -3584,8 +3593,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
                           <File className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                           <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">No documents attached</h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                             Start by uploading project documentation, images, or resources to Notion
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                            (!) Admin login required to upload files
                           </p>
                           <div className="flex justify-center">
                             <input

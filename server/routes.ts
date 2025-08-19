@@ -2087,8 +2087,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Move upload endpoint outside /api namespace to avoid authentication requirement
-  app.post("/upload/objects", async (req, res) => {
+  // Object storage upload endpoint (admin only)
+  app.post("/upload/objects", requireAdmin, async (req, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
