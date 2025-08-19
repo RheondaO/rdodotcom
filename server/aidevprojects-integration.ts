@@ -120,6 +120,7 @@ export async function getAIDevProjects() {
                 repositoryUrl: properties.RepositoryUrl?.url || "",
                 deploymentUrl: properties.DeploymentUrl?.url || "",
                 promptFile: properties.PromptFile?.files || [],
+                documents: properties.Documents?.files || [],
                 isActive: properties.IsActive?.checkbox || false,
                 isCustom: properties.IsCustom?.checkbox || false,
                 createdAt: (page as any).created_time,
@@ -470,5 +471,29 @@ export async function getAIDevProjectsByType(type: string) {
     } catch (error) {
         console.error(`Error fetching ${type} items from Notion:`, error);
         throw new Error(`Failed to fetch ${type} items from Notion`);
+    }
+}
+
+/**
+ * Update project documents in AIDEVPROJECTS database
+ */
+export async function updateProjectDocuments(projectId: string, documents: any[]) {
+    try {
+        console.log("📄 Updating project documents for:", projectId.substring(0, 8) + "...");
+        
+        const response = await notion.pages.update({
+            page_id: projectId,
+            properties: {
+                Documents: {
+                    files: documents
+                }
+            }
+        });
+
+        console.log("✅ Project documents updated successfully");
+        return response;
+    } catch (error) {
+        console.error("Error updating project documents in Notion:", error);
+        throw new Error("Failed to update project documents in Notion");
     }
 }

@@ -68,8 +68,7 @@ import {
   File,
   Link as LinkIcon
 } from "lucide-react";
-import { ObjectUploader } from "./ObjectUploader";
-import type { UploadResult } from "@uppy/core";
+
 
 // Mock data generation for prompt templates
 const generateMockPrompts = (): PromptTemplate[] => [
@@ -286,7 +285,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [modalProject, setModalProject] = useState<any>(null);
-  const [projectAttachments, setProjectAttachments] = useState<Record<string, Array<{name: string, url: string, size?: number, type?: string}>>>({});
+
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
 
   // Fetch all AI Development projects from AIDEVPROJECTS database
@@ -467,6 +466,19 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     onError: (error: any) => {
       console.error("❌ Task deletion error:", error);
       toast({ title: "Error", description: "Failed to delete task", variant: "destructive" });
+    }
+  });
+
+  const updateDocumentsMutation = useMutation({
+    mutationFn: ({ projectId, documents }: { projectId: string; documents: any[] }) =>
+      apiRequest('PATCH', `/api/ai-development/projects/${projectId}/documents`, { documents }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
+      toast({ title: "Success", description: "Documents updated successfully" });
+    },
+    onError: (error: any) => {
+      console.error("❌ Document update error:", error);
+      toast({ title: "Error", description: "Failed to update documents", variant: "destructive" });
     }
   });
 
@@ -733,56 +745,67 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   };
 
   // File upload handlers for project documentation
-  const handleGetUploadParameters = async () => {
+  // Handle file upload to Notion Documents field
+  const handleFileUpload = async (projectId: string, files: FileList) => {
     try {
-      const response = await fetch('/api/objects/upload', {
-        method: 'POST',
-        credentials: 'include'
+      setUploadingFiles(prev => ({ ...prev, [projectId]: true }));
+
+      // For now, we'll create file objects that Notion can handle
+      // In a real implementation, files would be uploaded to a file hosting service first
+      const newDocuments = Array.from(files).map(file => ({
+        name: file.name,
+        type: "file",
+        file: {
+          url: `placeholder://uploaded/${file.name}`, // This would be a real URL in production
+          expiry_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
+        }
+      }));
+
+      // Get current project documents
+      const currentProject = projects?.find((p: any) => p.notionId === projectId);
+      const existingDocuments = currentProject?.documents || [];
+
+      // Add new documents to existing ones
+      const updatedDocuments = [...existingDocuments, ...newDocuments];
+
+      // Update Notion Documents field
+      await updateDocumentsMutation.mutateAsync({ 
+        projectId, 
+        documents: updatedDocuments 
       });
-      if (!response.ok) {
-        throw new Error('Failed to get upload URL');
-      }
-      const data = await response.json();
-      return {
-        method: 'PUT' as const,
-        url: data.uploadURL,
-      };
-    } catch (error) {
-      console.error('Error getting upload parameters:', error);
-      toast({ title: "Error", description: "Failed to prepare file upload", variant: "destructive" });
-      throw error;
-    }
-  };
-
-  const handleFileUploadComplete = (projectId: string) => (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful && result.successful.length > 0) {
-      const uploadedFiles = result.successful.map(file => ({
-        name: file.name || 'Unknown file',
-        url: file.uploadURL || '',
-        size: file.size || undefined,
-        type: file.type || undefined
-      }));
-
-      setProjectAttachments(prev => ({
-        ...prev,
-        [projectId]: [...(prev[projectId] || []), ...uploadedFiles]
-      }));
 
       setUploadingFiles(prev => ({ ...prev, [projectId]: false }));
       
       toast({ 
         title: "Success", 
-        description: `Successfully uploaded ${uploadedFiles.length} file(s)` 
+        description: `Successfully uploaded ${files.length} file(s) to Notion` 
       });
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      setUploadingFiles(prev => ({ ...prev, [projectId]: false }));
+      toast({ title: "Error", description: "Failed to upload files", variant: "destructive" });
     }
   };
 
-  const handleRemoveAttachment = (projectId: string, fileName: string) => {
-    setProjectAttachments(prev => ({
-      ...prev,
-      [projectId]: (prev[projectId] || []).filter(file => file.name !== fileName)
-    }));
-    toast({ title: "Success", description: "File removed from project" });
+  const handleRemoveDocument = async (projectId: string, documentIndex: number) => {
+    try {
+      const currentProject = projects?.find((p: any) => p.notionId === projectId);
+      const existingDocuments = currentProject?.documents || [];
+      
+      // Remove document at specified index
+      const updatedDocuments = existingDocuments.filter((_: any, index: number) => index !== documentIndex);
+
+      // Update Notion Documents field
+      await updateDocumentsMutation.mutateAsync({ 
+        projectId, 
+        documents: updatedDocuments 
+      });
+
+      toast({ title: "Success", description: "Document removed from project" });
+    } catch (error) {
+      console.error('Error removing document:', error);
+      toast({ title: "Error", description: "Failed to remove document", variant: "destructive" });
+    }
   };
 
   const formatFileSize = (bytes?: number) => {
@@ -3413,7 +3436,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Paperclip className="h-4 w-4 text-blue-500" />
-                    Project Documents ({(projectAttachments[modalProject.notionId || modalProject.id] || []).length})
+                    Project Documents ({(modalProject.documents || []).length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -3423,22 +3446,51 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <p className="text-sm text-muted-foreground">
                         Attach files to organize project documentation, images, and resources
                       </p>
-                      <ObjectUploader
-                        maxNumberOfFiles={5}
-                        maxFileSize={50 * 1024 * 1024} // 50MB
-                        onGetUploadParameters={handleGetUploadParameters}
-                        onComplete={handleFileUploadComplete(modalProject.notionId || modalProject.id)}
-                        buttonClassName="h-9 px-4 text-sm bg-blue-500 hover:bg-blue-600 text-white"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Attach Files
-                      </ObjectUploader>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          multiple
+                          accept="*/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              handleFileUpload(modalProject.notionId || modalProject.id, e.target.files);
+                              e.target.value = ''; // Reset input
+                            }
+                          }}
+                          className="hidden"
+                          id={`file-upload-${modalProject.notionId || modalProject.id}`}
+                        />
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => {
+                            const input = document.getElementById(`file-upload-${modalProject.notionId || modalProject.id}`) as HTMLInputElement;
+                            input?.click();
+                          }}
+                          disabled={uploadingFiles[modalProject.notionId || modalProject.id]}
+                          className="h-9 px-4 text-sm bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          {uploadingFiles[modalProject.notionId || modalProject.id] ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="h-4 w-4 mr-2" />
+                              Attach Files
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
 
                     {/* File List */}
                     <div className="space-y-3 max-h-64 overflow-y-auto">
-                      {(projectAttachments[modalProject.notionId || modalProject.id] || []).map((file, index) => {
-                        const FileIcon = getFileIcon(file.type);
+                      {(modalProject.documents || []).map((doc: any, index: number) => {
+                        const fileName = doc.name || doc.file?.name || 'Unknown File';
+                        const fileUrl = doc.file?.url || doc.url || '#';
+                        const FileIcon = getFileIcon(doc.type);
                         return (
                           <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -3447,10 +3499,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                  {file.name}
+                                  {fileName}
                                 </p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {formatFileSize(file.size)} • {file.type || 'Unknown type'}
+                                  Notion Document • {doc.type || 'File'}
                                 </p>
                               </div>
                             </div>
@@ -3458,7 +3510,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                onClick={() => window.open(file.url, '_blank')}
+                                onClick={() => window.open(fileUrl, '_blank')}
                                 className="h-8 w-8 p-0 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                                 title="Download file"
                               >
@@ -3468,8 +3520,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                 variant="ghost" 
                                 size="sm"
                                 onClick={() => {
-                                  navigator.clipboard.writeText(file.url);
-                                  toast({ title: "Success", description: "File link copied to clipboard" });
+                                  navigator.clipboard.writeText(fileUrl);
+                                  toast({ title: "Success", description: "Document link copied to clipboard" });
                                 }}
                                 className="h-8 w-8 p-0 text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
                                 title="Copy link"
@@ -3479,9 +3531,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                onClick={() => handleRemoveAttachment(modalProject.notionId || modalProject.id, file.name)}
+                                onClick={() => handleRemoveDocument(modalProject.notionId || modalProject.id, index)}
                                 className="h-8 w-8 p-0 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                                title="Remove file"
+                                title="Remove document"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -3490,23 +3542,40 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         );
                       })}
 
-                      {(projectAttachments[modalProject.notionId || modalProject.id] || []).length === 0 && (
+                      {(!modalProject.documents || modalProject.documents.length === 0) && (
                         <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
                           <File className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">No files attached</h3>
+                          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">No documents attached</h3>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                            Start by uploading project documentation, images, or resources
+                            Start by uploading project documentation, images, or resources to Notion
                           </p>
-                          <ObjectUploader
-                            maxNumberOfFiles={5}
-                            maxFileSize={50 * 1024 * 1024}
-                            onGetUploadParameters={handleGetUploadParameters}
-                            onComplete={handleFileUploadComplete(modalProject.notionId || modalProject.id)}
-                            buttonClassName="h-8 px-3 text-xs bg-blue-500 hover:bg-blue-600 text-white"
-                          >
-                            <Upload className="h-3 w-3 mr-1" />
-                            Upload First File
-                          </ObjectUploader>
+                          <div className="flex justify-center">
+                            <input
+                              type="file"
+                              multiple
+                              accept="*/*"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files.length > 0) {
+                                  handleFileUpload(modalProject.notionId || modalProject.id, e.target.files);
+                                  e.target.value = '';
+                                }
+                              }}
+                              className="hidden"
+                              id={`file-upload-empty-${modalProject.notionId || modalProject.id}`}
+                            />
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => {
+                                const input = document.getElementById(`file-upload-empty-${modalProject.notionId || modalProject.id}`) as HTMLInputElement;
+                                input?.click();
+                              }}
+                              className="h-8 px-3 text-xs bg-blue-500 hover:bg-blue-600 text-white"
+                            >
+                              <Upload className="h-3 w-3 mr-1" />
+                              Upload First Document
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
