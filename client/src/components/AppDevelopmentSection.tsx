@@ -646,14 +646,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
 
   // Enhanced utility functions for editing and management
-  const startEditingProject = (project: AppProject) => {
-    setEditingProject(project.id);
+  const startEditingProject = (project: any) => {
+    setEditingProject(project.notionId);
     setEditingValues({
       name: project.name,
       description: project.description,
       status: project.status,
       priority: project.priority || 'medium',
-      projectType: project.projectType,
+      type: project.type,
       startDate: project.startDate || '',
       endDate: project.endDate || ''
     });
@@ -661,10 +661,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
 
 
-  const saveProjectEdit = async (projectId: number) => {
+  const saveProjectEdit = async (projectId: string) => {
     try {
-      await apiRequest('PATCH', `/api/app-projects/${projectId}`, editingValues);
-      queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+      await apiRequest('PATCH', `/api/ai-development/projects/${projectId}`, editingValues);
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
       setEditingProject(null);
       setEditingValues({});
       toast({ title: "Success", description: "Project updated successfully" });
@@ -681,11 +681,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     setEditingValues({});
   };
 
-  const deleteProject = async (projectId: number) => {
+  const deleteProject = async (projectId: string) => {
     if (confirm('Are you sure you want to delete this project?')) {
       try {
-        await apiRequest('DELETE', `/api/app-projects/${projectId}`);
-        queryClient.invalidateQueries({ queryKey: ['/api/app-projects'] });
+        await apiRequest('DELETE', `/api/ai-development/projects/${projectId}`);
+        queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
         toast({ title: "Success", description: "Project deleted successfully" });
       } catch (error) {
         toast({ title: "Error", description: "Failed to delete project", variant: "destructive" });
@@ -1361,7 +1361,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               {getProjectIcon(project.type || 'web')}
                             </div>
                             <div className="flex-1 min-w-0">
-                              {editingProject === project.id ? (
+                              {editingProject === project.notionId ? (
                                 <div className="space-y-2">
                                   <Input
                                     value={editingValues.name || ''}
@@ -1387,10 +1387,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.id ? (
+                          {editingProject === project.notionId ? (
                             <Select 
-                              value={editingValues.projectType || project.projectType} 
-                              onValueChange={(value) => setEditingValues({...editingValues, projectType: value})}
+                              value={editingValues.type || project.type} 
+                              onValueChange={(value) => setEditingValues({...editingValues, type: value})}
                             >
                               <SelectTrigger className="w-32">
                                 <SelectValue />
@@ -1441,7 +1441,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.id ? (
+                          {editingProject === project.notionId ? (
                             <Select 
                               value={editingValues.status || project.status} 
                               onValueChange={(value) => setEditingValues({...editingValues, status: value})}
@@ -1464,7 +1464,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.id ? (
+                          {editingProject === project.notionId ? (
                             <Select 
                               value={editingValues.priority || project.priority} 
                               onValueChange={(value) => setEditingValues({...editingValues, priority: value})}
@@ -1491,7 +1491,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.id ? (
+                          {editingProject === project.notionId ? (
                             <Input
                               type="date"
                               value={editingValues.startDate || ''}
@@ -1505,7 +1505,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.id ? (
+                          {editingProject === project.notionId ? (
                             <Input
                               type="date"
                               value={editingValues.endDate || ''}
@@ -1520,11 +1520,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            {editingProject === project.id ? (
+                            {editingProject === project.notionId ? (
                               <div className="flex gap-1">
                                 <Button 
                                   size="sm" 
-                                  onClick={() => saveProjectEdit(project.id)}
+                                  onClick={() => saveProjectEdit(project.notionId)}
                                   className="bg-green-500 hover:bg-green-600 text-white"
                                 >
                                   <Save className="h-3 w-3" />
@@ -1549,7 +1549,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                 <Button 
                                   size="sm" 
                                   variant="ghost" 
-                                  onClick={() => deleteProject(project.id)}
+                                  onClick={() => deleteProject(project.notionId)}
                                   className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
                                   <Trash2 className="h-3 w-3" />
