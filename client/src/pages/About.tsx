@@ -88,7 +88,11 @@ export default function About() {
                     </p>
                     
                     <p>
-                      If you’re here, pause. Look deeper. This space is an experiment in what it truly means to build a life worth archiving. I’m building something beautiful here—a space to share my journey in AI, prompt engineering, and personal wellness
+                      If you’re here, pause. Look deeper. This space is an experiment in what it truly means to build a life worth archiving. 
+                    </p>
+
+                    <p>
+                      I’m building something beautiful here—a space to share my journey in AI, prompt engineering, and personal wellness.
                     </p>
                   </div>
                 </div>
