@@ -156,28 +156,54 @@ export class ObjectStorageService {
 
   // Gets the object entity file from the object path.
   async getObjectEntityFile(objectPath: string): Promise<File> {
+    console.log(`🔍 ObjectStorage: Attempting to find file at path: ${objectPath}`);
+    
     if (!objectPath.startsWith("/objects/")) {
+      console.log(`❌ ObjectStorage: Invalid path prefix: ${objectPath}`);
       throw new ObjectNotFoundError();
     }
 
     const parts = objectPath.slice(1).split("/");
     if (parts.length < 2) {
+      console.log(`❌ ObjectStorage: Invalid path structure: ${objectPath}`);
       throw new ObjectNotFoundError();
     }
 
+    // Extract the file path after /objects/
     const entityId = parts.slice(1).join("/");
+    console.log(`🔍 ObjectStorage: Extracted entityId: ${entityId}`);
+    
+    // For /objects/uploads/uuid.ext, we need to map to privateDir/uploads/uuid
+    // Remove the file extension from the UUID for storage lookup
+    let storageEntityId = entityId;
+    if (entityId.startsWith("uploads/")) {
+      const uploadsPart = entityId.substring("uploads/".length);
+      // Remove file extension from UUID for storage
+      const uuidWithoutExt = uploadsPart.split('.')[0];
+      storageEntityId = `uploads/${uuidWithoutExt}`;
+      console.log(`🔍 ObjectStorage: Converted to storageEntityId: ${storageEntityId}`);
+    }
+    
     let entityDir = this.getPrivateObjectDir();
     if (!entityDir.endsWith("/")) {
       entityDir = `${entityDir}/`;
     }
-    const objectEntityPath = `${entityDir}${entityId}`;
+    const objectEntityPath = `${entityDir}${storageEntityId}`;
+    console.log(`🔍 ObjectStorage: Full object path: ${objectEntityPath}`);
+    
     const { bucketName, objectName } = parseObjectPath(objectEntityPath);
+    console.log(`🔍 ObjectStorage: Bucket: ${bucketName}, Object: ${objectName}`);
+    
     const bucket = objectStorageClient.bucket(bucketName);
     const objectFile = bucket.file(objectName);
     const [exists] = await objectFile.exists();
+    
     if (!exists) {
+      console.log(`❌ ObjectStorage: File does not exist in object storage`);
       throw new ObjectNotFoundError();
     }
+    
+    console.log(`✅ ObjectStorage: File found successfully`);
     return objectFile;
   }
 

@@ -784,7 +784,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
           // Extract object path from upload URL for serving
           const urlObj = new URL(uploadURL);
           const objectPath = urlObj.pathname;
-          const serveUrl = `/objects${objectPath.split('/.private')[1]}`;
+          
+          // Create serve URL that includes the file extension
+          // The upload URL structure is: /bucket-name/.private/uploads/uuid
+          // We want to serve as: /objects/uploads/uuid.extension
+          const pathParts = objectPath.split('/');
+          const uuid = pathParts[pathParts.length - 1];
+          const fileExtension = file.name.split('.').pop();
+          const serveUrl = `/objects/uploads/${uuid}${fileExtension ? `.${fileExtension}` : ''}`;
           
           return {
             name: file.name,
@@ -3536,7 +3543,22 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     <div className="space-y-3 max-h-64 overflow-y-auto">
                       {(modalProject.documents || []).map((doc: any, index: number) => {
                         const fileName = doc.name || doc.file?.name || 'Unknown File';
-                        const fileUrl = doc.file?.url || doc.url || '#';
+                        // Handle both direct URLs and external object structure
+                        let fileUrl = '#';
+                        if (doc.external?.url) {
+                          // Convert external URLs to local server URLs
+                          const externalUrl = doc.external.url;
+                          if (externalUrl.includes('/objects/uploads/')) {
+                            const pathPart = externalUrl.substring(externalUrl.indexOf('/objects/uploads/'));
+                            fileUrl = `${window.location.origin}${pathPart}`;
+                          } else {
+                            fileUrl = externalUrl;
+                          }
+                        } else if (doc.file?.url) {
+                          fileUrl = doc.file.url;
+                        } else if (doc.url) {
+                          fileUrl = doc.url;
+                        }
                         const FileIcon = getFileIcon(doc.type);
                         return (
                           <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
