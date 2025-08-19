@@ -102,27 +102,7 @@ export default function SEOHead({
       document.head.appendChild(script);
     }
     
-    // Favicon management
-    const updateFavicon = () => {
-      // Remove existing favicon links
-      const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
-      existingFavicons.forEach(link => link.remove());
-      
-      // Add new favicon link
-      const faviconLink = document.createElement('link');
-      faviconLink.rel = 'icon';
-      faviconLink.type = 'image/svg+xml';
-      faviconLink.href = '/favicon-sparkle.svg';
-      document.head.appendChild(faviconLink);
-      
-      // Add Apple touch icon
-      const appleTouchIcon = document.createElement('link');
-      appleTouchIcon.rel = 'apple-touch-icon';
-      appleTouchIcon.href = '/favicon-sparkle.svg';
-      document.head.appendChild(appleTouchIcon);
-    };
-    
-    updateFavicon();
+
     
     // Additional meta tags for better indexing
     updateMetaTag('viewport', 'width=device-width, initial-scale=1.0');
