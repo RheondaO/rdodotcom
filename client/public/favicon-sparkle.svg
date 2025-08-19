@@ -14,8 +14,8 @@
     </filter>
   </defs>
   
-  <!-- Gradient background with rounded corners -->
-  <rect width="32" height="32" rx="6" fill="url(#backgroundGradient)"/>
+  <!-- Gradient background with rounded corners and white border -->
+  <rect width="32" height="32" rx="6" fill="url(#backgroundGradient)" stroke="white" stroke-width="2"/>
   
   <!-- Main Sparkles icon (matching Lucide Sparkles shape) -->
   <g filter="url(#glow)" fill="white" transform="translate(16,16)">
