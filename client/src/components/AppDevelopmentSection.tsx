@@ -61,8 +61,15 @@ import {
   Folder,
   MessageSquare,
   Layers,
-  ListTodo
+  ListTodo,
+  Upload,
+  Download,
+  Paperclip,
+  File,
+  Link as LinkIcon
 } from "lucide-react";
+import { ObjectUploader } from "./ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 // Mock data generation for prompt templates
 const generateMockPrompts = (): PromptTemplate[] => [
@@ -279,6 +286,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [modalProject, setModalProject] = useState<any>(null);
+  const [projectAttachments, setProjectAttachments] = useState<Record<string, Array<{name: string, url: string, size?: number, type?: string}>>>({});
+  const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
 
   // Fetch all AI Development projects from AIDEVPROJECTS database
   const { data: allAIDevItems = [], isLoading: isLoadingProjects, error: projectsError, isError: isProjectsError } = useQuery({
@@ -721,6 +730,75 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       blocked: "bg-purple-100 text-purple-800 dark:bg-[#17111d]/30 dark:text-purple-400"
     };
     return colors[status as keyof typeof colors] || colors.pending;
+  };
+
+  // File upload handlers for project documentation
+  const handleGetUploadParameters = async () => {
+    try {
+      const response = await fetch('/api/objects/upload', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to get upload URL');
+      }
+      const data = await response.json();
+      return {
+        method: 'PUT' as const,
+        url: data.uploadURL,
+      };
+    } catch (error) {
+      console.error('Error getting upload parameters:', error);
+      toast({ title: "Error", description: "Failed to prepare file upload", variant: "destructive" });
+      throw error;
+    }
+  };
+
+  const handleFileUploadComplete = (projectId: string) => (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadedFiles = result.successful.map(file => ({
+        name: file.name || 'Unknown file',
+        url: file.uploadURL || '',
+        size: file.size || undefined,
+        type: file.type || undefined
+      }));
+
+      setProjectAttachments(prev => ({
+        ...prev,
+        [projectId]: [...(prev[projectId] || []), ...uploadedFiles]
+      }));
+
+      setUploadingFiles(prev => ({ ...prev, [projectId]: false }));
+      
+      toast({ 
+        title: "Success", 
+        description: `Successfully uploaded ${uploadedFiles.length} file(s)` 
+      });
+    }
+  };
+
+  const handleRemoveAttachment = (projectId: string, fileName: string) => {
+    setProjectAttachments(prev => ({
+      ...prev,
+      [projectId]: (prev[projectId] || []).filter(file => file.name !== fileName)
+    }));
+    toast({ title: "Success", description: "File removed from project" });
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return '';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    if (bytes === 0) return '0 Bytes';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const getFileIcon = (type?: string) => {
+    if (!type) return File;
+    if (type.includes('image')) return File;
+    if (type.includes('pdf')) return File;
+    if (type.includes('text')) return FileText;
+    return File;
   };
 
 
@@ -2327,6 +2405,93 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           </p>
                         )}
                       </div>
+                    </div>
+
+                    {/* Project Documentation Attachments */}
+                    <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                          <Paperclip className="h-4 w-4 text-blue-500" />
+                          Project Documents ({(projectAttachments[project.notionId || project.id] || []).length})
+                        </h4>
+                        <ObjectUploader
+                          maxNumberOfFiles={5}
+                          maxFileSize={50 * 1024 * 1024} // 50MB
+                          onGetUploadParameters={handleGetUploadParameters}
+                          onComplete={handleFileUploadComplete(project.notionId || project.id)}
+                          buttonClassName="h-8 px-3 text-xs bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          <Upload className="h-3 w-3 mr-1" />
+                          Attach Files
+                        </ObjectUploader>
+                      </div>
+
+                      {/* File List */}
+                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                        {(projectAttachments[project.notionId || project.id] || []).map((file, index) => {
+                          const FileIcon = getFileIcon(file.type);
+                          return (
+                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                  <FileIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {file.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {formatFileSize(file.size)} • {file.type || 'Unknown type'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 ml-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => window.open(file.url, '_blank')}
+                                  className="h-8 w-8 p-0 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                >
+                                  <Download className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => navigator.clipboard.writeText(file.url)}
+                                  className="h-8 w-8 p-0 text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
+                                >
+                                  <LinkIcon className="h-3 w-3" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleRemoveAttachment(project.notionId || project.id, file.name)}
+                                  className="h-8 w-8 p-0 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {(projectAttachments[project.notionId || project.id] || []).length === 0 && (
+                          <div className="text-center py-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                            <File className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">No files attached</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                              Click "Attach Files" to add project documentation, images, or resources
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {uploadingFiles[project.notionId || project.id] && (
+                        <div className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          <p className="text-sm text-blue-600 dark:text-blue-400">Uploading files...</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action Buttons */}

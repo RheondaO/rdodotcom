@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { authenticateUser, requireAuth, requireAdmin, adminLogin, adminLogout, type AuthenticatedRequest } from "./auth";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { 
   getNotionDatabases, 
   findDatabaseByTitle, 
@@ -2052,6 +2053,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error updating QA testing record:", error);
       res.status(500).json({ error: error.message || "Failed to update QA testing record" });
+    }
+  });
+
+  // Object Storage routes for project documentation files
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(
+        req.path,
+      );
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error checking object access:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  app.post("/api/objects/upload", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    res.json({ uploadURL });
+  });
+
+  app.put("/api/project-documents", async (req, res) => {
+    if (!req.body.documentURL) {
+      return res.status(400).json({ error: "documentURL is required" });
+    }
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = objectStorageService.normalizeObjectEntityPath(
+        req.body.documentURL,
+      );
+
+      // Here you could update database with the document path for the specific project
+      // For now, we'll just return the normalized path
+
+      res.status(200).json({
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting project document:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
