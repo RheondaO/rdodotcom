@@ -59,7 +59,9 @@ import {
   ExternalLink,
   Tag,
   Folder,
-  MessageSquare
+  MessageSquare,
+  Layers,
+  ListTodo
 } from "lucide-react";
 
 // Mock data generation for prompt templates
@@ -248,7 +250,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   // Authentication
   const { isAuthenticated, isAdmin } = useAuth();
   
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "library">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "documentation" | "library">("overview");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -886,6 +888,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
             { key: "projects", label: "Projects", icon: Code2 },
             { key: "tasks", label: "Tasks", icon: CheckSquare },
             { key: "testing", label: "Testing & QA", icon: AlertCircle },
+            { key: "documentation", label: "Documentation", icon: FileText },
             { key: "library", label: "Library", icon: Folder }
           ].map((tab) => {
             const Icon = tab.icon;
@@ -2123,6 +2126,250 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               <AlertCircle className="h-3 w-3" />
               Records can only be created when logged in as the admin. Please log in to continue.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Documentation View */}
+      {activeView === "documentation" && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Project Documentation</h2>
+              <p className="text-sm text-muted-foreground dark:text-gray-400">
+                Documentation directly correlated with AI App Development projects
+              </p>
+            </div>
+            <Button 
+              onClick={() => setShowNewProjectForm(true)}
+              className="bg-gradient-to-r from-blue-400 to-indigo-500 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Documentation
+            </Button>
+          </div>
+
+          {/* Project Filter for Documentation */}
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Search documentation..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select value={selectedProject || 'all'} onValueChange={(value) => setSelectedProject(value === 'all' ? null : value)}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Filter by project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Projects</SelectItem>
+                      {projects.map((project) => (
+                        <SelectItem key={project.notionId || project.id} value={project.notionId || project.id}>
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Documentation Grid */}
+          <div className="grid grid-cols-1 gap-6">
+            {projects
+              .filter(project => {
+                if (!selectedProject) return true;
+                return (project.notionId || project.id) === selectedProject;
+              })
+              .filter(project => {
+                if (!searchQuery) return true;
+                return project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
+              })
+              .map((project) => (
+              <Card key={project.notionId || project.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                        <FileText className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-xl flex items-center gap-2">
+                          {project.name}
+                          <Badge className={getStatusColor(project.status)}>
+                            {(project.status || 'Unknown').replace('_', ' ')}
+                          </Badge>
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1">
+                          {project.description || 'No description available'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Project Overview */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                          <Code2 className="h-4 w-4 text-blue-500" />
+                          Project Type
+                        </h4>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {project.projectType || project.type || 'Not specified'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-green-500" />
+                          Timeline
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {project.startDate ? format(new Date(project.startDate), 'MMM dd, yyyy') : 'Not set'}
+                          {project.endDate && ` - ${format(new Date(project.endDate), 'MMM dd, yyyy')}`}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                          <CheckSquare className="h-4 w-4 text-purple-500" />
+                          Progress
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {tasks.filter(t => t.projectId === (project.notionId || project.id) && t.status === 'done').length} / {tasks.filter(t => t.projectId === (project.notionId || project.id)).length} tasks completed
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Tech Stack */}
+                    {(project.techStack || project.tags) && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                          <Layers className="h-4 w-4 text-orange-500" />
+                          Technology Stack
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {(project.techStack ? project.techStack.split(',') : project.tags || []).map((tech: string, index: number) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {tech.trim()}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Project Links */}
+                    {(project.repositoryUrl || project.deploymentUrl) && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                          <ExternalLink className="h-4 w-4 text-indigo-500" />
+                          Project Links
+                        </h4>
+                        <div className="flex gap-3">
+                          {project.repositoryUrl && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.open(project.repositoryUrl, '_blank')}
+                              className="flex items-center gap-2"
+                            >
+                              <GitBranch className="h-3 w-3" />
+                              Repository
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          )}
+                          {project.deploymentUrl && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.open(project.deploymentUrl, '_blank')}
+                              className="flex items-center gap-2"
+                            >
+                              <Globe className="h-3 w-3" />
+                              Live Demo
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Related Tasks Preview */}
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <ListTodo className="h-4 w-4 text-pink-500" />
+                        Related Tasks ({tasks.filter(t => t.projectId === (project.notionId || project.id)).length})
+                      </h4>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {tasks.filter(t => t.projectId === (project.notionId || project.id)).slice(0, 3).map((task) => (
+                          <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-xs">
+                            <span className="font-medium truncate flex-1">{task.title || task.name}</span>
+                            <Badge className={getStatusColor(task.status)} variant="outline">
+                              {(task.status || 'Unknown').replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        ))}
+                        {tasks.filter(t => t.projectId === (project.notionId || project.id)).length === 0 && (
+                          <p className="text-xs text-muted-foreground text-center py-2">
+                            No tasks found for this project
+                          </p>
+                        )}
+                        {tasks.filter(t => t.projectId === (project.notionId || project.id)).length > 3 && (
+                          <p className="text-xs text-muted-foreground text-center">
+                            ... and {tasks.filter(t => t.projectId === (project.notionId || project.id)).length - 3} more tasks
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setModalProject(project);
+                          setShowProjectModal(true);
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <Eye className="h-3 w-3" />
+                        View Details
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {/* Empty State */}
+            {projects.length === 0 && (
+              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+                <CardContent className="p-12 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FileText className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Documentation Available</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">
+                    Start by creating projects in the Projects tab to generate documentation automatically.
+                  </p>
+                  <Button
+                    onClick={() => setActiveView("projects")}
+                    className="bg-gradient-to-r from-blue-400 to-indigo-500 text-white"
+                  >
+                    <Code2 className="h-4 w-4 mr-2" />
+                    Go to Projects
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       )}
