@@ -2407,93 +2407,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       </div>
                     </div>
 
-                    {/* Project Documentation Attachments */}
-                    <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                          <Paperclip className="h-4 w-4 text-blue-500" />
-                          Project Documents ({(projectAttachments[project.notionId || project.id] || []).length})
-                        </h4>
-                        <ObjectUploader
-                          maxNumberOfFiles={5}
-                          maxFileSize={50 * 1024 * 1024} // 50MB
-                          onGetUploadParameters={handleGetUploadParameters}
-                          onComplete={handleFileUploadComplete(project.notionId || project.id)}
-                          buttonClassName="h-8 px-3 text-xs bg-blue-500 hover:bg-blue-600 text-white"
-                        >
-                          <Upload className="h-3 w-3 mr-1" />
-                          Attach Files
-                        </ObjectUploader>
-                      </div>
-
-                      {/* File List */}
-                      <div className="space-y-2 max-h-40 overflow-y-auto">
-                        {(projectAttachments[project.notionId || project.id] || []).map((file, index) => {
-                          const FileIcon = getFileIcon(file.type);
-                          return (
-                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                  <FileIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {file.name}
-                                  </p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    {formatFileSize(file.size)} • {file.type || 'Unknown type'}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 ml-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => window.open(file.url, '_blank')}
-                                  className="h-8 w-8 p-0 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-                                >
-                                  <Download className="h-3 w-3" />
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => navigator.clipboard.writeText(file.url)}
-                                  className="h-8 w-8 p-0 text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
-                                >
-                                  <LinkIcon className="h-3 w-3" />
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => handleRemoveAttachment(project.notionId || project.id, file.name)}
-                                  className="h-8 w-8 p-0 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          );
-                        })}
-
-                        {(projectAttachments[project.notionId || project.id] || []).length === 0 && (
-                          <div className="text-center py-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
-                            <File className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">No files attached</p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500">
-                              Click "Attach Files" to add project documentation, images, or resources
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {uploadingFiles[project.notionId || project.id] && (
-                        <div className="flex items-center gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          <p className="text-sm text-blue-600 dark:text-blue-400">Uploading files...</p>
-                        </div>
-                      )}
-                    </div>
-
                     {/* Action Buttons */}
                     <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <Button 
@@ -3494,6 +3407,119 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   </CardContent>
                 </Card>
               )}
+
+              {/* Project Documentation Attachments */}
+              <Card className="bg-white/50 dark:bg-gray-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Paperclip className="h-4 w-4 text-blue-500" />
+                    Project Documents ({(projectAttachments[modalProject.notionId || modalProject.id] || []).length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Upload Section */}
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-muted-foreground">
+                        Attach files to organize project documentation, images, and resources
+                      </p>
+                      <ObjectUploader
+                        maxNumberOfFiles={5}
+                        maxFileSize={50 * 1024 * 1024} // 50MB
+                        onGetUploadParameters={handleGetUploadParameters}
+                        onComplete={handleFileUploadComplete(modalProject.notionId || modalProject.id)}
+                        buttonClassName="h-9 px-4 text-sm bg-blue-500 hover:bg-blue-600 text-white"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Attach Files
+                      </ObjectUploader>
+                    </div>
+
+                    {/* File List */}
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {(projectAttachments[modalProject.notionId || modalProject.id] || []).map((file, index) => {
+                        const FileIcon = getFileIcon(file.type);
+                        return (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                <FileIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                  {file.name}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {formatFileSize(file.size)} • {file.type || 'Unknown type'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 ml-3">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => window.open(file.url, '_blank')}
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                title="Download file"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(file.url);
+                                  toast({ title: "Success", description: "File link copied to clipboard" });
+                                }}
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400"
+                                title="Copy link"
+                              >
+                                <LinkIcon className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleRemoveAttachment(modalProject.notionId || modalProject.id, file.name)}
+                                className="h-8 w-8 p-0 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                                title="Remove file"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {(projectAttachments[modalProject.notionId || modalProject.id] || []).length === 0 && (
+                        <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                          <File className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                          <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">No files attached</h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                            Start by uploading project documentation, images, or resources
+                          </p>
+                          <ObjectUploader
+                            maxNumberOfFiles={5}
+                            maxFileSize={50 * 1024 * 1024}
+                            onGetUploadParameters={handleGetUploadParameters}
+                            onComplete={handleFileUploadComplete(modalProject.notionId || modalProject.id)}
+                            buttonClassName="h-8 px-3 text-xs bg-blue-500 hover:bg-blue-600 text-white"
+                          >
+                            <Upload className="h-3 w-3 mr-1" />
+                            Upload First File
+                          </ObjectUploader>
+                        </div>
+                      )}
+                    </div>
+
+                    {uploadingFiles[modalProject.notionId || modalProject.id] && (
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Uploading files...</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Related Tasks Preview */}
               <Card className="bg-white/50 dark:bg-gray-800/50">
