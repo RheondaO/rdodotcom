@@ -1993,8 +1993,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/ai-development/projects/:notionId/documents", requireAuth, async (req, res) => {
     try {
       const { documents } = req.body;
-      const project = await updateProjectDocuments(req.params.notionId, documents);
-      res.json(project);
+      console.log("📄 Updating documents for project:", req.params.notionId);
+      const result = await updateProjectDocuments(req.params.notionId, documents || []);
+      res.json({ success: true, documents: documents });
     } catch (error: any) {
       console.error("Error updating project documents:", error);
       res.status(500).json({ error: error.message || "Failed to update project documents" });
@@ -2008,19 +2009,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error deleting AI development project:", error);
       res.status(500).json({ error: error.message || "Failed to delete AI development project" });
-    }
-  });
-
-  // Update project documents
-  app.patch("/api/ai-development/projects/:notionId/documents", requireAuth, async (req, res) => {
-    try {
-      const { documents } = req.body;
-      console.log("📄 Updating documents for project:", req.params.notionId);
-      const result = await updateProjectDocuments(req.params.notionId, documents || []);
-      res.json({ success: true, documents: documents });
-    } catch (error: any) {
-      console.error("Error updating project documents:", error);
-      res.status(500).json({ error: error.message || "Failed to update project documents" });
     }
   });
 
