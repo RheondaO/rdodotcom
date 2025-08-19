@@ -2070,7 +2070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Object Storage routes for project documentation files
+  // Object Storage routes for project documentation files (public access)
   app.get("/objects/:objectPath(*)", async (req, res) => {
     const objectStorageService = new ObjectStorageService();
     try {
@@ -2087,10 +2087,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/objects/upload", async (req, res) => {
-    const objectStorageService = new ObjectStorageService();
-    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-    res.json({ uploadURL });
+  // Move upload endpoint outside /api namespace to avoid authentication requirement
+  app.post("/upload/objects", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error generating upload URL:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
+    }
   });
 
   app.put("/api/project-documents", async (req, res) => {

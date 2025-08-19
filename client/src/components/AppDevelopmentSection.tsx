@@ -745,21 +745,59 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   };
 
   // File upload handlers for project documentation
-  // Handle file upload to Notion Documents field
+  // Handle file upload to Object Storage, then update Notion Documents field
   const handleFileUpload = async (projectId: string, files: FileList) => {
     try {
       setUploadingFiles(prev => ({ ...prev, [projectId]: true }));
 
-      // For now, we'll create file objects that Notion can handle
-      // In a real implementation, files would be uploaded to a file hosting service first
-      const newDocuments = Array.from(files).map(file => ({
-        name: file.name,
-        type: "file",
-        file: {
-          url: `placeholder://uploaded/${file.name}`, // This would be a real URL in production
-          expiry_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
+      // Upload each file to object storage first
+      const uploadPromises = Array.from(files).map(async (file) => {
+        try {
+          // Get presigned URL for upload
+          const uploadResponse = await fetch('/upload/objects', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to get upload URL');
+          }
+          
+          const { uploadURL } = await uploadResponse.json();
+          
+          // Upload file to object storage
+          const fileUploadResponse = await fetch(uploadURL, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': file.type || 'application/octet-stream'
+            },
+            body: file
+          });
+          
+          if (!fileUploadResponse.ok) {
+            throw new Error(`Failed to upload ${file.name}`);
+          }
+          
+          // Extract object path from upload URL for serving
+          const urlObj = new URL(uploadURL);
+          const objectPath = urlObj.pathname;
+          const serveUrl = `/objects${objectPath.split('/.private')[1]}`;
+          
+          return {
+            name: file.name,
+            type: "external",
+            external: {
+              url: `${window.location.origin}${serveUrl}`
+            }
+          };
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          throw error;
         }
-      }));
+      });
+
+      // Wait for all uploads to complete
+      const newDocuments = await Promise.all(uploadPromises);
 
       // Get current project documents
       const currentProject = projects?.find((p: any) => p.notionId === projectId);
@@ -778,12 +816,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       
       toast({ 
         title: "Success", 
-        description: `Successfully uploaded ${files.length} file(s) to Notion` 
+        description: `Successfully uploaded ${files.length} file(s) to object storage and updated Notion` 
       });
     } catch (error) {
       console.error('Error uploading files:', error);
       setUploadingFiles(prev => ({ ...prev, [projectId]: false }));
-      toast({ title: "Error", description: "Failed to upload files", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to upload files to storage", variant: "destructive" });
     }
   };
 
