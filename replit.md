@@ -22,6 +22,12 @@ Preferred communication style: Simple, everyday language.
 - **Rule**: When editing one content studio, the other must remain unchanged
 
 ## Recent Changes
+- **August 20, 2025**: ✅ **COMPLETED** - Deployment Health Check Optimization
+  - **ADDED**: Dedicated `/health` endpoint for deployment health checks (responds in <5ms)
+  - **ADDED**: Root `/` endpoint with JSON support for basic health verification
+  - **IMPLEMENTED**: 2-second caching for `/api/public/active-timer` endpoint to reduce database load
+  - **PERFORMANCE**: Reduced active timer API calls from 915ms to 1ms with caching
+  - **DEPLOYMENT**: Fixed health check timeouts during deployment promotion process
 - **August 18, 2025**: ✅ **COMPLETED** - Project Management List Display Fix
 - **PAGINATION FIX**: Implemented proper Notion API pagination to fetch all records (was limited to first 100)
 - **TYPE FILTER FIX**: Added "web" to allowed project types filter to display all project types from AIDEVPROJECTS database

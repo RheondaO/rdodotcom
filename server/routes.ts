@@ -83,7 +83,31 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Apply authentication middleware to all routes
+  // Health check endpoint - MUST be before authentication middleware
+  // This endpoint is used by deployment systems to verify the app is running
+  app.get("/health", (req, res) => {
+    res.status(200).json({ 
+      status: "healthy",
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Root endpoint for basic health check - also before authentication
+  app.get("/", (req, res) => {
+    // If it's an API request, return JSON
+    if (req.headers.accept?.includes('application/json')) {
+      res.json({ 
+        status: "ok",
+        service: "Belle Journal API",
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      // Otherwise, let Vite handle the request (will serve the React app)
+      res.sendStatus(200);
+    }
+  });
+  
+  // Apply authentication middleware to all routes AFTER health checks
   app.use(authenticateUser);
 
   // Timer debug routes for cross-device troubleshooting
@@ -206,8 +230,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cache for public active timer to reduce database load during deployment
+  let publicTimerCache: { data: any; timestamp: number } | null = null;
+  const CACHE_DURATION = 2000; // Cache for 2 seconds
+
   app.get("/api/public/active-timer", async (req, res) => {
     try {
+      // Check cache first to reduce database load
+      if (publicTimerCache && Date.now() - publicTimerCache.timestamp < CACHE_DURATION) {
+        res.json(publicTimerCache.data);
+        return;
+      }
+
       console.log("📱 Getting active timer for public view");
 
       // Try database first for production reliability
@@ -224,6 +258,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (elapsedSeconds >= totalDurationSeconds && dbActiveSession.isActive) {
             await storage.stopTimerSession(dbActiveSession.id);
             console.log("⏰ Timer completed full duration, marked as inactive");
+            // Cache the null result
+            publicTimerCache = { data: null, timestamp: Date.now() };
             res.json(null);
             return;
           }
@@ -235,6 +271,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           console.log("✅ Found active database timer session for public view:", sessionWithUpdatedTime.id);
+          // Cache the result
+          publicTimerCache = { data: sessionWithUpdatedTime, timestamp: Date.now() };
           res.json(sessionWithUpdatedTime);
           return;
         }
@@ -265,11 +303,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               console.log("✅ Found active Notion timer session for public view:", activeSession.id);
               
-              res.json({
+              const responseData = {
                 ...activeSession,
                 remainingTime: updatedRemainingTime,
                 lastSync: now.toISOString()
-              });
+              };
+              // Cache the result
+              publicTimerCache = { data: responseData, timestamp: Date.now() };
+              res.json(responseData);
               return;
             }
           }
@@ -280,6 +321,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // No active session found
       console.log("📱 No active timer session found for public view");
+      // Cache the null result
+      publicTimerCache = { data: null, timestamp: Date.now() };
       res.json(null);
     } catch (error) {
       console.error("Error getting public active timer:", error);
