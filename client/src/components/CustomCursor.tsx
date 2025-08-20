@@ -79,43 +79,47 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       animationRef.current = requestAnimationFrame(updateCursor);
     };
 
-    // Elegant letter trailing with directional flow and staggered lerp motion
+    // Elegant letter trailing with perfect chain-following effect
     const updateLetterTrail = (cursorX: number, cursorY: number) => {
-      // Detect movement direction
-      const deltaX = cursorX - previousPosition.current.x;
-      const movingRight = deltaX >= 0;
-      
-      // Update previous position for next frame
-      previousPosition.current = { x: cursorX, y: cursorY };
+      const trailSpacing = 42; // Space between letters in the trail
       
       trailRef.current = trailRef.current.map((letter, index) => {
-        const spacing = 36;
-        let targetX;
+        let targetX, targetY;
         
-        if (movingRight) {
-          // Moving right: M leads, letters trail behind (left of cursor)
-          targetX = cursorX - 50 - (index * spacing);
+        if (index === 0) {
+          // First letter (M) follows cursor directly
+          targetX = cursorX - 30;
+          targetY = cursorY - 50;
         } else {
-          // Moving left: M still leads closest to cursor, others follow to the right
-          targetX = cursorX + 50 + (index * spacing);
+          // Each subsequent letter follows the previous one
+          const prevLetter = trailRef.current[index - 1];
+          const angle = Math.atan2(
+            cursorY - prevLetter.y,
+            cursorX - prevLetter.x
+          );
+          
+          // Position behind the previous letter in chain
+          targetX = prevLetter.x - trailSpacing * Math.cos(angle);
+          targetY = prevLetter.y - trailSpacing * Math.sin(angle);
         }
         
-        const targetY = cursorY - 50;
+        // Smooth easing - first letter fastest, progressive slowdown
+        const easingFactor = index === 0 ? 0.2 : 0.1;
         
-        // Progressive lerp speed - first letter fastest, each subsequent letter slower
-        const baseLerpSpeed = 0.22;
-        const lerpDelay = index * 0.015;
-        const lerpSpeed = Math.max(0.07, baseLerpSpeed - lerpDelay);
+        // Apply easing to create smooth following motion
+        const newX = letter.x + (targetX - letter.x) * easingFactor;
+        const newY = letter.y + (targetY - letter.y) * easingFactor;
         
-        // Smooth interpolation with easing
-        const newX = letter.x + (targetX - letter.x) * lerpSpeed;
-        const newY = letter.y + (targetY - letter.y) * lerpSpeed;
+        // Calculate velocity for dynamic effects
+        const velocity = Math.sqrt(
+          Math.pow(targetX - letter.x, 2) + 
+          Math.pow(targetY - letter.y, 2)
+        );
         
-        // Dynamic effects based on movement velocity
-        const velocity = Math.sqrt(Math.pow(targetX - letter.x, 2) + Math.pow(targetY - letter.y, 2));
-        const scale = 0.85 + Math.min(0.4, velocity * 0.008);
-        const rotation = Math.sin(Date.now() * 0.001 + index) * (velocity * 0.1);
-        const opacity = letter.letter === ' ' ? 0 : Math.max(0.6, 1 - velocity * 0.001);
+        // Dynamic visual effects
+        const scale = 0.9 + Math.min(0.3, velocity * 0.005);
+        const rotation = Math.sin(Date.now() * 0.001 + index * 0.5) * 2;
+        const opacity = letter.letter === ' ' ? 0 : Math.max(0.7, 1 - velocity * 0.002);
         
         return {
           ...letter,

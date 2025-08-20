@@ -1,0 +1,176 @@
+  function startAnimation() {
+    heading.style.visibility = "hidden";
+    letterElements = [];
+    velocities = [];
+    text.split("").forEach((char, index) => {
+      const span = document.createElement("span");
+      span.textContent = char;
+      span.classList.add("sprite-letter");
+      const rect = heading.getBoundingClientRect();
+      const absoluteLeft = rect.left + window.scrollX + index * 20;
+      const absoluteTop = rect.top + window.scrollY;
+      span.style.left = `${absoluteLeft}px`;
+      span.style.top = `${absoluteTop}px`;
+      span.style.display = "block";
+      span.setAttribute("aria-hidden", "true");
+      document.body.appendChild(span);
+      letterElements.push(span);
+      if (index < text.length - 1) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 8 + 4;
+        velocities.push({ x: Math.cos(angle) * speed, y: Math.sin(angle) * speed });
+      } else {
+        velocities.push({ x: 0.2, y: 0.2 });
+      }
+    });
+    moveLetters();
+    setTimeout(() => {
+      stopExplosionMovement();
+      activateTrailingEffect();
+      startWiggleAnimation();
+    }, 2000);
+  }
+  function moveLetters() {
+    if (!letterElements.length) return;
+    letterElements.forEach((letter, index) => {
+      const rect = letter.getBoundingClientRect();
+      let currentX = parseFloat(letter.style.left || rect.left);
+      let currentY = parseFloat(letter.style.top || rect.top);
+      velocities[index].x *= decelerationFactor;
+      velocities[index].y *= decelerationFactor;
+      currentX += velocities[index].x;
+      currentY += velocities[index].y;
+      if (currentX <= 0 || currentX >= screenWidth - rect.width) {
+        velocities[index].x *= -1;
+        currentX = Math.max(0, Math.min(currentX, screenWidth - rect.width));
+      }
+      if (currentY <= 0 || currentY >= screenHeight - rect.height) {
+        velocities[index].y *= -1;
+        currentY = Math.max(0, Math.min(currentY, screenHeight - rect.height));
+      }
+      letter.style.left = `${currentX}px`;
+      letter.style.top = `${currentY}px`;
+    });
+    animationFrameId = requestAnimationFrame(moveLetters);
+  }
+  function stopExplosionMovement() {
+    letterElements.forEach((letter, index) => {
+      velocities[index] = { x: 0, y: 0 };
+      const rect = letter.getBoundingClientRect();
+      letter.style.left = `${rect.left + window.scrollX}px`;
+      letter.style.top = `${rect.top + window.scrollY}px`;
+    });
+  }
+  function activateTrailingEffect() {
+    const mouseMoveHandler = (event) => {
+      lastMouseX = event.pageX;
+      lastMouseY = event.pageY;
+      if (!lastLetterFollow) {
+        const lastLetter = letterElements[letterElements.length - 1];
+        if (lastLetter) {
+          const rect = lastLetter.getBoundingClientRect();
+          if (
+            lastMouseX >= rect.left + window.scrollX &&
+            lastMouseX <= rect.right + window.scrollX &&
+            lastMouseY >= rect.top + window.scrollY &&
+            lastMouseY <= rect.bottom + window.scrollY
+          ) {
+            lastLetterFollow = true;
+            lastLetter.classList.remove("wiggle");
+            speechBubble.style.display = "none";
+            speechBubble.setAttribute("aria-hidden", "true");
+          }
+        }
+      }
+      if (!isCursorMoving) {
+        isCursorMoving = true;
+      }
+      clearTimeout(stopTimeout);
+      stopTimeout = setTimeout(() => {
+        isCursorMoving = false;
+      }, 100);
+    };
+    document.addEventListener("mousemove", mouseMoveHandler);
+    function animateLetters() {
+      if (!letterElements.length) return;
+      letterElements.forEach((letter, index) => {
+        if (index === 0 && !isCursorMoving) return;
+        if (index === letterElements.length - 1 && !lastLetterFollow) return;
+        let targetX, targetY;
+        if (index === 0) {
+          targetX = lastMouseX;
+          targetY = lastMouseY;
+        } else {
+          const prevLetter = letterElements[index - 1];
+          if (prevLetter) {
+            const prevPos = prevLetter.getBoundingClientRect();
+            const angle = Math.atan2(lastMouseY - (prevPos.top + window.scrollY), lastMouseX - (prevPos.left + window.scrollX));
+            targetX = prevPos.left + window.scrollX - trailSpacing * Math.cos(angle);
+            targetY = prevPos.top + window.scrollY - trailSpacing * Math.sin(angle);
+          }
+        }
+        const currentX = parseFloat(letter.style.left || targetX);
+        const currentY = parseFloat(letter.style.top || targetY);
+        const easingFactor = isCursorMoving ? 0.2 : 0.1;
+        letter.style.left = currentX + (targetX - currentX) * easingFactor + "px";
+        letter.style.top = currentY + (targetY - currentY) * easingFactor + "px";
+      });
+      animationFrameId = requestAnimationFrame(animateLetters);
+    }
+    animateLetters();
+  }
+  function startWiggleAnimation() {
+    const lastLetter = letterElements[letterElements.length - 1];
+    if (lastLetter) {
+      lastLetter.classList.add("wiggle");
+      const rect = lastLetter.getBoundingClientRect();
+      speechBubble.style.left = `${rect.left + rect.width + 10 + window.scrollX}px`;
+      speechBubble.style.top = `${rect.top - speechBubble.offsetHeight - 10 + window.scrollY}px`;
+      speechBubble.style.display = "block";
+      speechBubble.setAttribute("aria-hidden", "false");
+    }
+  }
+  function stopAnimation() {
+    letterElements.forEach(letter => letter.remove());
+    letterElements = [];
+    velocities = [];
+    animationTriggered = false;
+    lastLetterFollow = false;
+    isCursorMoving = false;
+    heading.style.visibility = "visible";
+    speechBubble.style.display = "none";
+    clearTimeout(stopTimeout);
+    cancelAnimationFrame(animationFrameId);
+    document.removeEventListener("mousemove", activateTrailingEffect.mouseMoveHandler);
+  }
+});
+</script><script>
+(function() {
+// Example Data
+    const data = [
+        { time: 0, flux: -23.4 },
+        { time: 1, flux: -22.1 },
+        { time: 2, flux: -13.9 },
+        { time: 3, flux: -13.3 },
+        { time: 4, flux: -7.2 },
+        { time: 5, flux: -5.1 },
+        { time: 6, flux: -4.6 },
+        { time: 7, flux: -1.4 },
+        { time: 8, flux: 2.4 },
+        { time: 9, flux: 11.1 },
+        { time: 10, flux: 14.5 },
+        { time: 11, flux: 21.9 },
+        { time: 12, flux: 19.4 },
+        { time: 13, flux: 21.1 },
+        { time: 14, flux: 21.7 },
+        { time: 15, flux: 17.4 },
+        { time: 16, flux: 19.3 },
+        { time: 17, flux: 16.5 },
+        { time: 18, flux: 9.5 },
+        { time: 19, flux: -5.8 },
+        { time: 20, flux: -12.1 },
+        { time: 21, flux: -28.5 },
+        { time: 22, flux: -29.1 },
+        { time: 23, flux: -28.7 },
+        { time: 24, flux: -27.0 }
+    ];
