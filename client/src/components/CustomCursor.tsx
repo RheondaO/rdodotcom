@@ -8,6 +8,8 @@ interface CustomCursorProps {
 interface TextTrailPoint {
   x: number;
   y: number;
+  targetX: number;
+  targetY: number;
   letter: string;
   opacity: number;
   id: number;
@@ -60,19 +62,39 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       animationRef.current = requestAnimationFrame(updateCursor);
     };
 
-    // Text following cursor for About page
+    // Text following cursor for About page with Lerp
     const updateTextTrail = (x: number, y: number) => {
-      // Create letters that follow cursor at fixed positions
-      const letters = textLetters.map((letter, index) => ({
-        x: x - 120 + (index * 18), // Letters spread horizontally behind cursor
-        y: y - 30, // Above the cursor
-        letter: letter,
-        opacity: 1,
-        id: index
-      }));
+      // Initialize trail if empty
+      if (trailRef.current.length === 0) {
+        trailRef.current = textLetters.map((letter, index) => ({
+          x: x - 120 + (index * 18),
+          y: y - 30,
+          targetX: x - 120 + (index * 18),
+          targetY: y - 30,
+          letter: letter,
+          opacity: 1,
+          id: index
+        }));
+      } else {
+        // Update target positions and lerp current positions
+        trailRef.current = trailRef.current.map((point, index) => {
+          const targetX = x - 120 + (index * 18);
+          const targetY = y - 30;
+          
+          // Linear interpolation with different speeds for each letter
+          const lerpSpeed = 0.08 + (index * 0.01); // Each letter slightly slower
+          
+          return {
+            ...point,
+            targetX,
+            targetY,
+            x: point.x + (targetX - point.x) * lerpSpeed,
+            y: point.y + (targetY - point.y) * lerpSpeed
+          };
+        });
+      }
       
-      trailRef.current = letters;
-      setTextTrail([...letters]);
+      setTextTrail([...trailRef.current]);
     };
 
     // Mouse move handler
