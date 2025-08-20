@@ -60,43 +60,19 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       animationRef.current = requestAnimationFrame(updateCursor);
     };
 
-    // Text trail management for About page
+    // Text following cursor for About page
     const updateTextTrail = (x: number, y: number) => {
-      const currentTime = Date.now();
+      // Create letters that follow cursor at fixed positions
+      const letters = textLetters.map((letter, index) => ({
+        x: x - 120 + (index * 18), // Letters spread horizontally behind cursor
+        y: y - 30, // Above the cursor
+        letter: letter,
+        opacity: 1,
+        id: index
+      }));
       
-      // Add new letter to trail every few pixels of movement
-      const lastPoint = trailRef.current[trailRef.current.length - 1];
-      const distance = lastPoint ? 
-        Math.sqrt(Math.pow(x - lastPoint.x, 2) + Math.pow(y - lastPoint.y, 2)) : 
-        30;
-      
-      if (distance > 25) { // Add letter every 25 pixels
-        const letterIndex = trailRef.current.length % textLetters.length;
-        const newPoint: TextTrailPoint = {
-          x: x - 40, // Offset behind cursor
-          y: y - 10,
-          letter: textLetters[letterIndex],
-          opacity: 1,
-          id: nextIdRef.current++
-        };
-        
-        trailRef.current.push(newPoint);
-        
-        // Limit trail length
-        if (trailRef.current.length > 50) {
-          trailRef.current.shift();
-        }
-      }
-      
-      // Update opacity and remove old points
-      trailRef.current = trailRef.current
-        .map(point => ({
-          ...point,
-          opacity: Math.max(0, point.opacity - 0.02)
-        }))
-        .filter(point => point.opacity > 0);
-      
-      setTextTrail([...trailRef.current]);
+      trailRef.current = letters;
+      setTextTrail([...letters]);
     };
 
     // Mouse move handler
