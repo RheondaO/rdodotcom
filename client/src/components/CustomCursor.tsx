@@ -87,9 +87,9 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
         let targetX, targetY;
         
         if (index === 0) {
-          // First letter (M) follows cursor directly with minimal offset
-          targetX = cursorX - 25;
-          targetY = cursorY - 45;
+          // First letter (M) follows cursor with more spacing to avoid hiding
+          targetX = cursorX - 45;
+          targetY = cursorY - 60;
         } else {
           // Each subsequent letter follows the previous one
           const prevLetter = trailRef.current[index - 1];
