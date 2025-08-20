@@ -62,8 +62,8 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       const dx = targetPosition.current.x - cursorPosition.x;
       const dy = targetPosition.current.y - cursorPosition.y;
       
-      // Smooth cursor movement with responsive easing
-      const easing = 0.25;
+      // Smooth cursor movement with fast responsive easing
+      const easing = 0.35;
       const newPosition = {
         x: cursorPosition.x + dx * easing,
         y: cursorPosition.y + dy * easing
@@ -81,15 +81,15 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
 
     // Elegant letter trailing with perfect chain-following effect
     const updateLetterTrail = (cursorX: number, cursorY: number) => {
-      const trailSpacing = 42; // Space between letters in the trail
+      const trailSpacing = 38; // Tighter spacing for smoother flow
       
       trailRef.current = trailRef.current.map((letter, index) => {
         let targetX, targetY;
         
         if (index === 0) {
-          // First letter (M) follows cursor directly
-          targetX = cursorX - 30;
-          targetY = cursorY - 50;
+          // First letter (M) follows cursor directly with minimal offset
+          targetX = cursorX - 25;
+          targetY = cursorY - 45;
         } else {
           // Each subsequent letter follows the previous one
           const prevLetter = trailRef.current[index - 1];
@@ -103,8 +103,8 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
           targetY = prevLetter.y - trailSpacing * Math.sin(angle);
         }
         
-        // Smooth easing - first letter fastest, progressive slowdown
-        const easingFactor = index === 0 ? 0.2 : 0.1;
+        // Much faster easing for smoother, more responsive motion
+        const easingFactor = index === 0 ? 0.35 : 0.18 + (index * 0.002);
         
         // Apply easing to create smooth following motion
         const newX = letter.x + (targetX - letter.x) * easingFactor;
@@ -116,10 +116,10 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
           Math.pow(targetY - letter.y, 2)
         );
         
-        // Dynamic visual effects
-        const scale = 0.9 + Math.min(0.3, velocity * 0.005);
-        const rotation = Math.sin(Date.now() * 0.001 + index * 0.5) * 2;
-        const opacity = letter.letter === ' ' ? 0 : Math.max(0.7, 1 - velocity * 0.002);
+        // Dynamic visual effects - smoother and more subtle
+        const scale = 0.95 + Math.min(0.15, velocity * 0.003);
+        const rotation = Math.sin(Date.now() * 0.0008 + index * 0.3) * 1.5;
+        const opacity = letter.letter === ' ' ? 0 : Math.max(0.85, 1 - velocity * 0.001);
         
         return {
           ...letter,
@@ -242,7 +242,7 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
             userSelect: 'none',
             textShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
             filter: 'drop-shadow(0 6px 12px rgba(102, 126, 234, 0.25))',
-            transition: 'all 0.08s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'transform 0.05s linear, opacity 0.1s ease-out',
             letterSpacing: '3px',
             willChange: 'transform, opacity'
           }}
