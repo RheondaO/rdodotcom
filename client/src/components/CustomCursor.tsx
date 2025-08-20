@@ -25,6 +25,7 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
   
   const cursorRef = useRef<HTMLDivElement>(null);
   const targetPosition = useRef({ x: 0, y: 0 });
+  const previousPosition = useRef({ x: 0, y: 0 });
   const animationRef = useRef<number>();
   const trailRef = useRef<LetterTrailPoint[]>([]);
   
@@ -78,15 +79,30 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       animationRef.current = requestAnimationFrame(updateCursor);
     };
 
-    // Elegant letter trailing with staggered lerp and brush stroke motion
+    // Elegant letter trailing with directional flow and staggered lerp motion
     const updateLetterTrail = (cursorX: number, cursorY: number) => {
+      // Detect movement direction
+      const deltaX = cursorX - previousPosition.current.x;
+      const movingRight = deltaX >= 0;
+      
+      // Update previous position for next frame
+      previousPosition.current = { x: cursorX, y: cursorY };
+      
       trailRef.current = trailRef.current.map((letter, index) => {
-        // Calculate target position - M leads, others follow behind
         const spacing = 36;
-        const targetX = cursorX - 50 - (index * spacing); // M closest to cursor, others trail behind
+        let targetX;
+        
+        if (movingRight) {
+          // Moving right: M leads, letters trail behind (left of cursor)
+          targetX = cursorX - 50 - (index * spacing);
+        } else {
+          // Moving left: letters flow in reading order (right of cursor)
+          targetX = cursorX + 50 + (index * spacing);
+        }
+        
         const targetY = cursorY - 50;
         
-        // Progressive lerp speed - M fastest, each letter progressively slower
+        // Progressive lerp speed - first letter fastest, each subsequent letter slower
         const baseLerpSpeed = 0.22;
         const lerpDelay = index * 0.015;
         const lerpSpeed = Math.max(0.07, baseLerpSpeed - lerpDelay);
