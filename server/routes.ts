@@ -91,21 +91,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString()
     });
   });
-
-  // Root endpoint for basic health check - also before authentication
-  app.get("/", (req, res) => {
-    // If it's an API request, return JSON
-    if (req.headers.accept?.includes('application/json')) {
-      res.json({ 
-        status: "ok",
-        service: "Belle Journal API",
-        timestamp: new Date().toISOString()
-      });
-    } else {
-      // Otherwise, let Vite handle the request (will serve the React app)
-      res.sendStatus(200);
-    }
-  });
   
   // Apply authentication middleware to all routes AFTER health checks
   app.use(authenticateUser);
