@@ -89,20 +89,31 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
         if (index === 0) {
           // First letter (M) follows cursor on the right side with spacing
           targetX = cursorX + 45;
-          targetY = cursorY - 30;
+          targetY = cursorY - 10;
         } else {
           // Each subsequent letter follows the previous one
           const prevLetter = trailRef.current[index - 1];
           
-          // Calculate angle from cursor to previous letter for smooth chain
-          const angle = Math.atan2(
-            prevLetter.y - cursorY,
-            prevLetter.x - cursorX
+          // Calculate velocity to determine if moving or still
+          const velocity = Math.sqrt(
+            Math.pow(cursorX - prevLetter.x, 2) + 
+            Math.pow(cursorY - prevLetter.y, 2)
           );
           
-          // Position each letter further along the chain
-          targetX = prevLetter.x + trailSpacing * Math.cos(angle);
-          targetY = prevLetter.y + trailSpacing * Math.sin(angle);
+          if (velocity < 5) {
+            // When still or moving slowly, arrange horizontally
+            targetX = cursorX + 45 + (index * trailSpacing);
+            targetY = cursorY - 10;
+          } else {
+            // When moving, maintain chain-following behavior
+            const angle = Math.atan2(
+              prevLetter.y - cursorY,
+              prevLetter.x - cursorX
+            );
+            
+            targetX = prevLetter.x + trailSpacing * Math.cos(angle);
+            targetY = prevLetter.y + trailSpacing * Math.sin(angle);
+          }
         }
         
         // Much faster easing for smoother, more responsive motion
