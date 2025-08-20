@@ -81,15 +81,15 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
     // Elegant letter trailing with staggered lerp and brush stroke motion
     const updateLetterTrail = (cursorX: number, cursorY: number) => {
       trailRef.current = trailRef.current.map((letter, index) => {
-        // Calculate target position with elegant spacing
-        const spacing = 36; // Increased spacing for elegance
-        const targetX = cursorX - 220 + (index * spacing);
+        // Calculate target position - M leads, others follow behind
+        const spacing = 36;
+        const targetX = cursorX - 50 - (index * spacing); // M closest to cursor, others trail behind
         const targetY = cursorY - 50;
         
-        // Progressive lerp speed - each letter lags more than the previous
-        const baseLerpSpeed = 0.18;
-        const lerpDelay = index * 0.012;
-        const lerpSpeed = Math.max(0.06, baseLerpSpeed - lerpDelay);
+        // Progressive lerp speed - M fastest, each letter progressively slower
+        const baseLerpSpeed = 0.22;
+        const lerpDelay = index * 0.015;
+        const lerpSpeed = Math.max(0.07, baseLerpSpeed - lerpDelay);
         
         // Smooth interpolation with easing
         const newX = letter.x + (targetX - letter.x) * lerpSpeed;
@@ -224,7 +224,6 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
             filter: 'drop-shadow(0 6px 12px rgba(102, 126, 234, 0.25))',
             transition: 'all 0.08s cubic-bezier(0.4, 0, 0.2, 1)',
             letterSpacing: '3px',
-            textStroke: '1px rgba(102, 126, 234, 0.1)',
             willChange: 'transform, opacity'
           }}
         >
