@@ -30,6 +30,8 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
   const trailRef = useRef<LetterTrailPoint[]>([]);
   
   const isAboutPage = location === '/about';
+  const isLandingPage = location === '/';
+  const showTrailingLetters = isAboutPage || isLandingPage;
   const textLetters = ['M', 'A', 'K', 'I', 'N', 'G', ' ', 'I', 'T', ' ', 'R', 'E', 'A', 'L'];
 
   useEffect(() => {
@@ -42,8 +44,8 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
     const cursor = cursorRef.current;
     if (!cursor) return;
 
-    // Initialize letter trail for About page
-    if (isAboutPage && trailRef.current.length === 0) {
+    // Initialize letter trail for About page and Landing page
+    if (showTrailingLetters && trailRef.current.length === 0) {
       trailRef.current = textLetters.map((letter, index) => ({
         x: 0,
         y: 0,
@@ -71,8 +73,8 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       
       setCursorPosition(newPosition);
 
-      // Update letter trail on About page with brush stroke effect
-      if (isAboutPage) {
+      // Update letter trail on About page and Landing page with brush stroke effect
+      if (showTrailingLetters) {
         updateLetterTrail(newPosition.x, newPosition.y);
       }
 
@@ -196,15 +198,15 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       document.body.style.cursor = 'auto';
       document.documentElement.style.cursor = 'auto';
     };
-  }, [enabled, cursorPosition, isAboutPage]);
+  }, [enabled, cursorPosition, showTrailingLetters]);
 
-  // Clear trail when leaving About page
+  // Clear trail when leaving pages with trailing letters
   useEffect(() => {
-    if (!isAboutPage) {
+    if (!showTrailingLetters) {
       trailRef.current = [];
       setLetterTrail([]);
     }
-  }, [isAboutPage]);
+  }, [showTrailingLetters]);
 
   if (!enabled) return null;
 
@@ -233,8 +235,8 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
 
   return (
     <>
-      {/* Gorgeous letter trail for About page */}
-      {isAboutPage && letterTrail.map((letter) => (
+      {/* Gorgeous letter trail for About page and Landing page */}
+      {showTrailingLetters && letterTrail.map((letter) => (
         <div
           key={letter.id}
           style={{
