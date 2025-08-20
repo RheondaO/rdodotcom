@@ -96,8 +96,10 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
           // Moving right: M leads, letters trail behind (left of cursor)
           targetX = cursorX - 50 - (index * spacing);
         } else {
-          // Moving left: letters flow in reading order (right of cursor)
-          targetX = cursorX + 50 + (index * spacing);
+          // Moving left: letters flow in reading order with proper spacing (right of cursor)
+          // Reverse the index so M appears closest to cursor when moving left
+          const reverseIndex = textLetters.length - 1 - index;
+          targetX = cursorX + 50 + (reverseIndex * spacing);
         }
         
         const targetY = cursorY - 50;
