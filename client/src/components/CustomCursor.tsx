@@ -5,48 +5,64 @@ interface CustomCursorProps {
   enabled?: boolean;
 }
 
-interface TextTrailPoint {
+interface LetterTrailPoint {
   x: number;
   y: number;
   targetX: number;
   targetY: number;
   letter: string;
   opacity: number;
+  scale: number;
+  rotation: number;
   id: number;
 }
 
 export function CustomCursor({ enabled = true }: CustomCursorProps) {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const [isClicking, setIsClicking] = useState(false);
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const animationRef = useRef<number>();
-  const targetPosition = useRef({ x: 0, y: 0 });
   const [location] = useLocation();
-  const [textTrail, setTextTrail] = useState<TextTrailPoint[]>([]);
-  const trailRef = useRef<TextTrailPoint[]>([]);
-  const nextIdRef = useRef(0);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [isClicking, setIsClicking] = useState(false);
+  const [letterTrail, setLetterTrail] = useState<LetterTrailPoint[]>([]);
   
-  // Check if we're on the About page (meet the admin page)
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const targetPosition = useRef({ x: 0, y: 0 });
+  const animationRef = useRef<number>();
+  const trailRef = useRef<LetterTrailPoint[]>([]);
+  
   const isAboutPage = location === '/about';
-  
-  // Text to display in trail
-  const trailText = "Making it Real";
-  const textLetters = trailText.split('');
+  const textLetters = ['M', 'A', 'K', 'I', 'N', 'G', ' ', 'I', 'T', ' ', 'R', 'E', 'A', 'L'];
 
   useEffect(() => {
     if (!enabled) return;
 
+    // Hide default cursor globally
+    document.body.style.cursor = 'none';
+    document.documentElement.style.cursor = 'none';
+
     const cursor = cursorRef.current;
     if (!cursor) return;
 
-    // Smooth cursor movement with easing
+    // Initialize letter trail for About page
+    if (isAboutPage && trailRef.current.length === 0) {
+      trailRef.current = textLetters.map((letter, index) => ({
+        x: 0,
+        y: 0,
+        targetX: 0,
+        targetY: 0,
+        letter: letter,
+        opacity: letter === ' ' ? 0 : 1,
+        scale: 1,
+        rotation: 0,
+        id: index
+      }));
+    }
+
+    // 60 FPS animation loop with requestAnimationFrame
     const updateCursor = () => {
       const dx = targetPosition.current.x - cursorPosition.x;
       const dy = targetPosition.current.y - cursorPosition.y;
       
-      // Easing factor (0.1 = smooth, 1 = instant)
-      const easing = 0.15;
-      
+      // Smooth cursor movement with responsive easing
+      const easing = 0.25;
       const newPosition = {
         x: cursorPosition.x + dx * easing,
         y: cursorPosition.y + dy * easing
@@ -54,85 +70,84 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       
       setCursorPosition(newPosition);
 
-      // Update text trail on About page
+      // Update letter trail on About page with brush stroke effect
       if (isAboutPage) {
-        updateTextTrail(newPosition.x, newPosition.y);
+        updateLetterTrail(newPosition.x, newPosition.y);
       }
 
       animationRef.current = requestAnimationFrame(updateCursor);
     };
 
-    // Text following cursor for About page with Lerp
-    const updateTextTrail = (x: number, y: number) => {
-      // Initialize trail if empty
-      if (trailRef.current.length === 0) {
-        trailRef.current = textLetters.map((letter, index) => ({
-          x: x - 120 + (index * 18),
-          y: y - 30,
-          targetX: x - 120 + (index * 18),
-          targetY: y - 30,
-          letter: letter,
-          opacity: 1,
-          id: index
-        }));
-      } else {
-        // Update target positions and lerp current positions
-        trailRef.current = trailRef.current.map((point, index) => {
-          const targetX = x - 120 + (index * 18);
-          const targetY = y - 30;
-          
-          // Linear interpolation with different speeds for each letter
-          const lerpSpeed = 0.08 + (index * 0.01); // Each letter slightly slower
-          
-          return {
-            ...point,
-            targetX,
-            targetY,
-            x: point.x + (targetX - point.x) * lerpSpeed,
-            y: point.y + (targetY - point.y) * lerpSpeed
-          };
-        });
-      }
+    // Elegant letter trailing with staggered lerp and brush stroke motion
+    const updateLetterTrail = (cursorX: number, cursorY: number) => {
+      trailRef.current = trailRef.current.map((letter, index) => {
+        // Calculate target position with elegant spacing
+        const spacing = 36; // Increased spacing for elegance
+        const targetX = cursorX - 220 + (index * spacing);
+        const targetY = cursorY - 50;
+        
+        // Progressive lerp speed - each letter lags more than the previous
+        const baseLerpSpeed = 0.18;
+        const lerpDelay = index * 0.012;
+        const lerpSpeed = Math.max(0.06, baseLerpSpeed - lerpDelay);
+        
+        // Smooth interpolation with easing
+        const newX = letter.x + (targetX - letter.x) * lerpSpeed;
+        const newY = letter.y + (targetY - letter.y) * lerpSpeed;
+        
+        // Dynamic effects based on movement velocity
+        const velocity = Math.sqrt(Math.pow(targetX - letter.x, 2) + Math.pow(targetY - letter.y, 2));
+        const scale = 0.85 + Math.min(0.4, velocity * 0.008);
+        const rotation = Math.sin(Date.now() * 0.001 + index) * (velocity * 0.1);
+        const opacity = letter.letter === ' ' ? 0 : Math.max(0.6, 1 - velocity * 0.001);
+        
+        return {
+          ...letter,
+          x: newX,
+          y: newY,
+          targetX,
+          targetY,
+          scale,
+          rotation,
+          opacity
+        };
+      });
       
-      setTextTrail([...trailRef.current]);
+      setLetterTrail([...trailRef.current]);
     };
 
-    // Mouse move handler
+    // Enhanced event handlers
     const handleMouseMove = (e: MouseEvent) => {
       targetPosition.current = { x: e.clientX, y: e.clientY };
     };
 
-    // Mouse down handler
     const handleMouseDown = () => {
       setIsClicking(true);
     };
 
-    // Mouse up handler
     const handleMouseUp = () => {
       setIsClicking(false);
     };
 
-    // Mouse leave handler (hide cursor when leaving window)
     const handleMouseLeave = () => {
-      cursor.style.opacity = '0';
+      if (cursor) cursor.style.opacity = '0';
     };
 
-    // Mouse enter handler (show cursor when entering window)
     const handleMouseEnter = () => {
-      cursor.style.opacity = '1';
+      if (cursor) cursor.style.opacity = '1';
     };
 
-    // Add event listeners
-    document.addEventListener('mousemove', handleMouseMove);
+    // Add event listeners with passive options for performance
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('mouseleave', handleMouseLeave);
     document.addEventListener('mouseenter', handleMouseEnter);
 
-    // Start animation loop
+    // Start 60 FPS animation
     animationRef.current = requestAnimationFrame(updateCursor);
 
-    // Cleanup
+    // Cleanup function
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
@@ -143,69 +158,81 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      
+      // Restore default cursor
+      document.body.style.cursor = 'auto';
+      document.documentElement.style.cursor = 'auto';
     };
-  }, [enabled, cursorPosition]);
+  }, [enabled, cursorPosition, isAboutPage]);
 
-  // Clear text trail when leaving About page
+  // Clear trail when leaving About page
   useEffect(() => {
     if (!isAboutPage) {
       trailRef.current = [];
-      setTextTrail([]);
+      setLetterTrail([]);
     }
   }, [isAboutPage]);
 
   if (!enabled) return null;
 
-  // Choose cursor images based on the page
-  const getCursorImages = () => {
+  // Cursor configuration based on page
+  const getCursorConfig = () => {
     if (isAboutPage) {
       return {
-        normal: '/cursor-admin-move.png',
-        click: '/cursor-admin-click.png',
-        size: 70, // Larger for admin face
+        image: '/cursor-admin-move.png',
+        clickImage: '/cursor-admin-click.png',
+        size: 70,
         offsetX: 35,
         offsetY: 45
       };
     } else {
       return {
-        normal: '/cursor-move.png',
-        click: '/cursor-click.png',
-        size: 60, // Standard Godzilla size
+        image: '/cursor-move.png',
+        clickImage: '/cursor-click.png',
+        size: 60,
         offsetX: 30,
         offsetY: 40
       };
     }
   };
 
-  const cursorConfig = getCursorImages();
+  const cursorConfig = getCursorConfig();
 
   return (
     <>
-      {/* Text trail for About page */}
-      {isAboutPage && textTrail.map((point) => (
+      {/* Gorgeous letter trail for About page */}
+      {isAboutPage && letterTrail.map((letter) => (
         <div
-          key={point.id}
+          key={letter.id}
           style={{
             position: 'fixed',
-            left: point.x,
-            top: point.y,
+            left: letter.x,
+            top: letter.y,
             pointerEvents: 'none',
             zIndex: 9998,
-            fontSize: '16px',
-            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
-            fontWeight: '600',
-            color: '#9333ea',
-            opacity: point.opacity,
+            fontSize: '42px',
+            fontFamily: 'Georgia, "Times New Roman", Times, serif',
+            fontWeight: 'bold',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            opacity: letter.opacity,
+            transform: `scale(${letter.scale}) rotate(${letter.rotation}deg)`,
             userSelect: 'none',
-            textShadow: '0 0 4px rgba(147, 51, 234, 0.3)',
-            transition: 'opacity 0.1s ease-out'
+            textShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
+            filter: 'drop-shadow(0 6px 12px rgba(102, 126, 234, 0.25))',
+            transition: 'all 0.08s cubic-bezier(0.4, 0, 0.2, 1)',
+            letterSpacing: '3px',
+            textStroke: '1px rgba(102, 126, 234, 0.1)',
+            willChange: 'transform, opacity'
           }}
         >
-          {point.letter}
+          {letter.letter}
         </div>
       ))}
       
-      {/* Main cursor */}
+      {/* Custom cursor head image */}
       <div
         ref={cursorRef}
         className="custom-cursor"
@@ -215,19 +242,19 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
           top: cursorPosition.y - cursorConfig.offsetY,
           width: `${cursorConfig.size}px`,
           height: `${cursorConfig.size}px`,
-          backgroundImage: `url(${isClicking ? cursorConfig.click : cursorConfig.normal})`,
+          backgroundImage: `url(${isClicking ? cursorConfig.clickImage : cursorConfig.image})`,
           backgroundSize: 'contain',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
           pointerEvents: 'none',
           zIndex: 9999,
-          transition: 'opacity 0.2s ease',
           opacity: 1,
-          transform: isClicking ? 'scale(0.85) rotate(5deg)' : 'scale(1)',
-          transitionProperty: 'transform',
-          transitionDuration: '0.15s',
-          transitionTimingFunction: 'ease-out',
-          filter: isClicking ? 'brightness(1.2)' : 'brightness(1)'
+          transform: isClicking ? 'scale(0.92) rotate(2deg)' : 'scale(1)',
+          transition: 'transform 0.12s cubic-bezier(0.4, 0, 0.2, 1)',
+          filter: isClicking 
+            ? 'brightness(1.15) drop-shadow(0 0 15px rgba(255,255,255,0.4))' 
+            : 'drop-shadow(0 4px 12px rgba(0,0,0,0.25))',
+          willChange: 'transform'
         }}
       />
     </>
