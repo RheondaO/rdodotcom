@@ -17,6 +17,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
+import { JiraIntegration } from "./JiraIntegration";
 import { 
   Code2, 
   Monitor, 
@@ -256,7 +257,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   // Authentication
   const { isAuthenticated, isAdmin } = useAuth();
   
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "documentation" | "library">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "documentation" | "library" | "jira">("overview");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -1041,7 +1042,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
             { key: "tasks", label: "Tasks", icon: CheckSquare },
             { key: "testing", label: "Testing & QA", icon: AlertCircle },
             { key: "documentation", label: "Documentation", icon: FileText },
-            { key: "library", label: "Library", icon: Folder }
+            { key: "library", label: "Library", icon: Folder },
+            { key: "jira", label: "Jira", icon: GitBranch }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -2716,6 +2718,13 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               Records can only be created when logged in as the admin. Please log in to continue.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Jira Integration View */}
+      {activeView === "jira" && (
+        <div className="space-y-6">
+          <JiraIntegration />
         </div>
       )}
 

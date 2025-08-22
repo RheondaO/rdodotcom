@@ -423,6 +423,11 @@ export interface IStorage {
   getHabitsAnalytics(startDate: string, endDate: string): Promise<any>;
   getGoalsAnalytics(period: string, startDate: string, endDate: string): Promise<any>;
   getHealthAnalytics(startDate: string, endDate: string): Promise<any>;
+
+  // Jira Sync Mappings
+  getJiraSyncMappings(): Promise<any[]>;
+  saveJiraSyncMapping(mapping: any): Promise<void>;
+  deleteJiraSyncMapping(belleJournalId: string): Promise<void>;
   getProductivityAnalytics(startDate: string, endDate: string): Promise<any>;
   getPublicStats(): Promise<any>;
   getPublicRecentContent(): Promise<any>;
@@ -482,6 +487,7 @@ export class MemStorage implements IStorage {
   private priceHistory: Map<number, PriceHistory> = new Map();
   private investmentTransactions: Map<number, InvestmentTransaction> = new Map();
   private purchases: Map<number, Purchase> = new Map();
+  private jiraSyncMappings: Map<string, any> = new Map();
   private currentId = 1;
 
   constructor() {
@@ -2226,6 +2232,19 @@ export class MemStorage implements IStorage {
         parseFloat(snapshot.netWorth) - parseFloat(snapshots[snapshots.indexOf(snapshot) - 1]?.netWorth || "0") : 0
     }));
   }
+
+  // Jira Sync Mappings
+  async getJiraSyncMappings(): Promise<any[]> {
+    return Array.from(this.jiraSyncMappings.values());
+  }
+
+  async saveJiraSyncMapping(mapping: any): Promise<void> {
+    this.jiraSyncMappings.set(mapping.belleJournalId, mapping);
+  }
+
+  async deleteJiraSyncMapping(belleJournalId: string): Promise<void> {
+    this.jiraSyncMappings.delete(belleJournalId);
+  }
 }
 
 // Database Storage for Blog System using direct SQL queries
@@ -3196,6 +3215,11 @@ export class DatabaseStorage implements IStorage {
   async getProductivityAnalytics(startDate: string, endDate: string) { return this.memStorage.getProductivityAnalytics(startDate, endDate); }
   async getPublicStats() { return this.memStorage.getPublicStats(); }
   async getPublicRecentContent() { return this.memStorage.getPublicRecentContent(); }
+  
+  // Jira Sync Mappings
+  async getJiraSyncMappings() { return this.memStorage.getJiraSyncMappings(); }
+  async saveJiraSyncMapping(mapping: any) { return this.memStorage.saveJiraSyncMapping(mapping); }
+  async deleteJiraSyncMapping(belleJournalId: string) { return this.memStorage.deleteJiraSyncMapping(belleJournalId); }
 }
 
 export const storage = new DatabaseStorage();

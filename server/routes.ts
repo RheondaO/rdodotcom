@@ -17,6 +17,7 @@ import {
 } from "./notion";
 import timerRoutes from "./timer-routes-new";
 import fitnessRoutes from "./fitness-routes";
+import jiraRoutes from "./jira-routes";
 import { 
   getAIDevProjects, 
   createAIDevProject, 
@@ -2152,6 +2153,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount Timer routes
   app.use("/api/timer", timerRoutes);
+
+  // Mount Jira routes
+  app.use("/api/jira", jiraRoutes);
 
   // Mount Fitness routes
   app.use("/api", fitnessRoutes);
