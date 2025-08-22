@@ -17,7 +17,6 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
-import { JiraIntegration } from "./JiraIntegration";
 import { 
   Code2, 
   Monitor, 
@@ -257,7 +256,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   // Authentication
   const { isAuthenticated, isAdmin } = useAuth();
   
-  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "documentation" | "library" | "jira">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "documentation" | "library">("overview");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -1042,8 +1041,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
             { key: "tasks", label: "Tasks", icon: CheckSquare },
             { key: "testing", label: "Testing & QA", icon: AlertCircle },
             { key: "documentation", label: "Documentation", icon: FileText },
-            { key: "library", label: "Library", icon: Folder },
-            { key: "jira", label: "Jira", icon: GitBranch }
+            { key: "library", label: "Library", icon: Folder }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -1724,6 +1722,32 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               >
                 <Plus className="h-4 w-4 mr-2" />
                 New Task
+              </Button>
+              
+              {/* Jira Integration */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const response = await apiRequest('POST', '/api/jira/sync/from-jira', {});
+                    toast({
+                      title: "Jira Sync Complete",
+                      description: "Tasks imported from Jira successfully"
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['/api/ai-development/tasks'] });
+                  } catch (error: any) {
+                    toast({
+                      title: "Sync Failed",
+                      description: error.message,
+                      variant: "destructive"
+                    });
+                  }
+                }}
+                title="Import tasks from Jira"
+              >
+                <GitBranch className="h-4 w-4 mr-1" />
+                Sync Jira
               </Button>
               
               {selectedProject && (
@@ -2721,12 +2745,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         </div>
       )}
 
-      {/* Jira Integration View */}
-      {activeView === "jira" && (
-        <div className="space-y-6">
-          <JiraIntegration />
-        </div>
-      )}
+
 
       {/* New Project Form Modal */}
       <Dialog open={showNewProjectForm} onOpenChange={setShowNewProjectForm}>
