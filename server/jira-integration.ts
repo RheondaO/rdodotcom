@@ -69,14 +69,19 @@ export class JiraIntegrationService {
   private config: JiraConfig;
 
   constructor() {
+    // Use the provided scoped API token if available, otherwise fall back to environment variables
+    const scopedToken = 'ATATT3xFfGF0gfyW7g8H0FiOqGUZLBu4__bREKsW-qmDNaC6POQXLyvv620mkP6_iuqH-XC6IBDjlRd9VQDaz8Gg7NNeBHGMNaEM_AHiAzcjYcoe4ULx85PC7EenMvItJ4W0t003myN0oGAj_fTLKF45bnEHoxDA4OBdc21ELWd2UbC4qR8PozM=E2B9F503';
+    
     this.config = {
-      domain: process.env.JIRA_DOMAIN || '',
-      email: process.env.JIRA_EMAIL || '',
-      apiToken: process.env.JIRA_API_TOKEN || ''
+      domain: 'https://rheondasaasogletree.atlassian.net',
+      email: process.env.JIRA_EMAIL || 'rheondao@gmail.com',
+      apiToken: scopedToken || process.env.JIRA_API_TOKEN || ''
     };
 
     if (!this.config.domain || !this.config.email || !this.config.apiToken) {
-      console.warn('⚠️ Jira integration not configured. Missing required environment variables.');
+      console.warn('⚠️ Jira integration not configured. Missing required configuration.');
+    } else {
+      console.log('✅ Jira integration configured with scoped API token');
     }
 
     // Create axios instance with auth headers
