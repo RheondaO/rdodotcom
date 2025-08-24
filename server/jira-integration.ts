@@ -69,19 +69,16 @@ export class JiraIntegrationService {
   private config: JiraConfig;
 
   constructor() {
-    // Use the provided scoped API token if available, otherwise fall back to environment variables
-    const scopedToken = 'ATATT3xFfGF0gfyW7g8H0FiOqGUZLBu4__bREKsW-qmDNaC6POQXLyvv620mkP6_iuqH-XC6IBDjlRd9VQDaz8Gg7NNeBHGMNaEM_AHiAzcjYcoe4ULx85PC7EenMvItJ4W0t003myN0oGAj_fTLKF45bnEHoxDA4OBdc21ELWd2UbC4qR8PozM=E2B9F503';
-    
     this.config = {
-      domain: 'https://rheondasaasogletree.atlassian.net',
+      domain: process.env.JIRA_DOMAIN || 'https://rheondasaasogletree.atlassian.net',
       email: process.env.JIRA_EMAIL || 'rheondao@gmail.com',
-      apiToken: scopedToken || process.env.JIRA_API_TOKEN || ''
+      apiToken: process.env.JIRA_API_TOKEN || ''
     };
 
     if (!this.config.domain || !this.config.email || !this.config.apiToken) {
-      console.warn('⚠️ Jira integration not configured. Missing required configuration.');
+      console.warn('⚠️ Jira integration not configured. Missing required environment variables.');
     } else {
-      console.log('✅ Jira integration configured with scoped API token');
+      console.log('✅ Jira integration configured with API token');
     }
 
     // Create axios instance with auth headers
@@ -153,8 +150,14 @@ export class JiraIntegrationService {
         projectTypeKey: data.projectTypeKey 
       });
 
-      // First check if user has permission to create projects
+      // Get current user to set as project lead
+      let currentUser: any;
       try {
+        const userResponse = await this.client.get('/myself');
+        currentUser = userResponse.data;
+        console.log('👤 Current user:', currentUser.displayName, '(', currentUser.accountId, ')');
+        
+        // Also check permissions if possible
         const permissions = await this.checkUserPermissions();
         if (!permissions.canCreateProjects && !permissions.isJiraAdmin) {
           throw new Error('You do not have permission to create projects in Jira. Please contact your Jira administrator to grant you the "Create Projects" permission. Your current Jira user: ' + this.config.email);
@@ -179,8 +182,12 @@ export class JiraIntegrationService {
         payload.description = data.description;
       }
 
+      // Set project lead - use provided leadAccountId or current user
       if (data.leadAccountId) {
         payload.leadAccountId = data.leadAccountId;
+      } else if (currentUser?.accountId) {
+        payload.leadAccountId = currentUser.accountId;
+        console.log('📋 Setting project lead to current user:', currentUser.displayName);
       }
 
       console.log('📦 Sending payload to Jira API:', payload);
