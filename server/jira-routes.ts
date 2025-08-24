@@ -24,6 +24,21 @@ router.get('/status', requireAuth, async (req, res) => {
   }
 });
 
+// Check user permissions in Jira
+router.get('/permissions', requireAuth, async (req, res) => {
+  try {
+    if (!jiraService.isConfigured()) {
+      return res.status(400).json({ error: 'Jira integration not configured' });
+    }
+    
+    const permissions = await jiraService.checkUserPermissions();
+    res.json(permissions);
+  } catch (error: any) {
+    console.error('Error checking permissions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all Jira projects
 router.get('/projects', requireAuth, async (req, res) => {
   try {

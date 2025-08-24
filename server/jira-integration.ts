@@ -80,8 +80,11 @@ export class JiraIntegrationService {
     }
 
     // Create axios instance with auth headers
+    // Ensure domain doesn't include protocol
+    const domain = this.config.domain.replace(/^https?:\/\//, '');
+    
     this.client = axios.create({
-      baseURL: `https://${this.config.domain}/rest/api/3`,
+      baseURL: `https://${domain}/rest/api/3`,
       headers: {
         'Authorization': `Basic ${Buffer.from(`${this.config.email}:${this.config.apiToken}`).toString('base64')}`,
         'Accept': 'application/json',
@@ -92,6 +95,31 @@ export class JiraIntegrationService {
 
   isConfigured(): boolean {
     return !!(this.config.domain && this.config.email && this.config.apiToken);
+  }
+
+  // Check user permissions in Jira
+  async checkUserPermissions(): Promise<any> {
+    try {
+      const response = await this.client.get('/mypermissions', {
+        params: {
+          permissions: 'ADMINISTER,CREATE_PROJECTS,BROWSE_PROJECTS,ADMINISTER_PROJECTS'
+        }
+      });
+      
+      const permissions = response.data.permissions;
+      const result = {
+        canCreateProjects: permissions.CREATE_PROJECTS?.havePermission || false,
+        canAdministerProjects: permissions.ADMINISTER_PROJECTS?.havePermission || false,
+        canBrowseProjects: permissions.BROWSE_PROJECTS?.havePermission || false,
+        isJiraAdmin: permissions.ADMINISTER?.havePermission || false,
+      };
+      
+      console.log('🔐 Jira permissions check:', result);
+      return result;
+    } catch (error: any) {
+      console.error('Error checking Jira permissions:', error.message);
+      throw new Error(`Failed to check Jira permissions: ${error.message}`);
+    }
   }
 
   // Get all projects from Jira
@@ -119,6 +147,16 @@ export class JiraIntegrationService {
         key: data.key, 
         projectTypeKey: data.projectTypeKey 
       });
+
+      // First check if user has permission to create projects
+      try {
+        const permissions = await this.checkUserPermissions();
+        if (!permissions.canCreateProjects && !permissions.isJiraAdmin) {
+          throw new Error('You do not have permission to create projects in Jira. Please contact your Jira administrator to grant you the "Create Projects" permission. Your current Jira user: ' + this.config.email);
+        }
+      } catch (permError) {
+        console.log('⚠️ Could not verify permissions, attempting to create project anyway...');
+      }
 
       // Validate project key (must be uppercase, 2-10 characters, alphanumeric)
       const projectKey = data.key.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 10);
@@ -173,7 +211,7 @@ export class JiraIntegrationService {
       }
       
       if (error.response?.status === 403) {
-        throw new Error('You do not have permission to create projects in Jira.');
+        throw new Error('You do not have permission to create projects in Jira. You need Jira admin or project creation permissions. Please contact your Jira administrator to grant you the "Create Projects" permission.');
       }
       
       throw new Error(`Failed to create Jira project: ${error.response?.data?.errorMessages?.[0] || error.response?.data?.message || error.message}`);
