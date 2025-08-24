@@ -2,7 +2,7 @@
 
 ## Overview
 
-Belle Journal is a comprehensive digital wellness and productivity platform designed to help users track various aspects of their lives, including health, habits, productivity, finances, and content creation. It aims to provide reliable AI responses and analytics by prioritizing data integrity across all its features. The platform is built with a modern web stack, featuring a React frontend, Express backend, and leverages Notion for primary data storage. The project envisions significant market potential as a robust tool for personal and professional organization, with ambitions to continually integrate advanced features for enhanced user experience and data-driven insights.
+Belle Journal is a digital wellness and productivity platform designed to track health, habits, productivity, finances, and content creation. It provides reliable AI responses and analytics by prioritizing data integrity. The platform uses a React frontend, Express backend, and Notion for primary data storage, aiming to be a robust tool for personal and professional organization with continuous integration of advanced features and data-driven insights.
 
 ## User Preferences
 
@@ -21,78 +21,6 @@ Preferred communication style: Simple, everyday language.
 - **ContentManagementSuite**: Simplified neutral gray design, handles mini-game blocks and @rotationonly content
 - **Rule**: When editing one content studio, the other must remain unchanged
 
-## Recent Changes
-- **August 22, 2025**: ✅ **COMPLETED** - Jira Integration Implementation
-  - **ADDED**: Complete Jira API integration service with full CRUD operations for issues, projects, and comments
-  - **IMPLEMENTED**: Bidirectional sync service between Belle Journal and Jira with mapping storage
-  - **CREATED**: Comprehensive API routes at `/api/jira/*` for all Jira operations
-  - **INTEGRATED**: Jira sync buttons directly into Tasks tab for seamless workflow
-  - **CONFIGURED**: Authentication with Jira using provided API credentials (JIRA_DOMAIN=rheondasaasogletree.atlassian.net, JIRA_EMAIL=rheondao@gmail.com, JIRA_API_TOKEN)
-  - **DESIGN DECISION**: Integrated Jira functionality into existing tabs rather than separate tab for better workflow
-  - **FEATURE**: Tasks with "Testing" status automatically appear in Testing & QA tab when synced from Jira
-  - **STATUS**: Integration fully functional, awaiting Jira projects to sync. User created "Belle Journal" project in Jira but API not yet showing projects (may need permissions or time to propagate)
-- **August 20, 2025**: ✅ **COMPLETED** - Deployment Health Check Optimization
-  - **ADDED**: Dedicated `/health` endpoint for deployment health checks (responds in <5ms)
-  - **ADDED**: Root `/` endpoint with JSON support for basic health verification
-  - **IMPLEMENTED**: 2-second caching for `/api/public/active-timer` endpoint to reduce database load
-  - **PERFORMANCE**: Reduced active timer API calls from 915ms to 1ms with caching
-  - **DEPLOYMENT**: Fixed health check timeouts during deployment promotion process
-- **August 18, 2025**: ✅ **COMPLETED** - Project Management List Display Fix
-- **PAGINATION FIX**: Implemented proper Notion API pagination to fetch all records (was limited to first 100)
-- **TYPE FILTER FIX**: Added "web" to allowed project types filter to display all project types from AIDEVPROJECTS database
-- **FUNCTIONS UPDATED**: Fixed both getAIDevProjects() and getAIDevProjectsByType() with pagination loops
-- **FRONTEND FIX**: Updated AppDevelopmentSection filter to include "web" type projects alongside "web application", "api backend", "mobile app", "desktop app", "library", "tool", "Project"
-- **VERIFIED**: All 4 active records now properly displayed in Project Management list
-- **August 18, 2025**: ✅ **COMPLETED** - Complete Finance Management Admin Validation Implementation
-- **FINALIZED TRANSITION**: All Belle Journal components now use functional admin validation pattern instead of read-only restrictions
-- **FINANCE COMPONENTS UPDATED**: BudgetManagement and InvestmentTracking components fully transitioned to admin validation
-- **MUTATION HANDLERS**: Added admin validation checks to all finance creation mutations (budgets, expenses, debts, investments, portfolios, accounts, transactions)
-- **UI CONSISTENCY**: Removed all isReadOnly conditional logic and disabled states from finance section buttons and forms
-- **ERROR HANDLING**: Implemented consistent "Records can only be created when logged in as the admin. Please log in to continue." error messages for non-admin users
-- **TECHNICAL RESOLUTION**: Fixed all TypeScript errors, removed interface props, and added proper useAuth/useToast imports
-- **SHOPPING SECTION**: Fixed font consistency by ensuring Shopping List and Purchase Planner use identical typography styling
-- **August 18, 2025**: ✅ **COMPLETED** - Complete Removal of Read-Only Restrictions & Admin Warning Implementation
-- **FULL TRANSITION**: Belle Journal is now completely open functionality for all users
-- **REMOVED**: All disabled={isReadOnly} restrictions from AppDevelopmentSection, ContentPipelineSection, GrocerySection, GoalsSection, BlogContentStudio
-- **UPDATED**: Component interfaces no longer include isReadOnly props
-- **ENHANCED**: All buttons, forms, and interactive elements are now fully functional for everyone
-- **ADMIN MESSAGING**: Consistent "Records can only be created when logged in as the admin. Please log in to continue." toast messages across all form submission handlers
-- **WARNING NOTICES**: Added small gray warning text "(!) Admin login required to create {item}" at bottom of AI App Development lists (projects, tasks, test items)
-- **IMPORTS**: Fixed missing useAuth and useToast hook imports in GoalsSection, GrocerySection, and BlogContentStudio
-- **VERIFIED**: All TypeScript errors resolved and components properly updated
-- **August 18, 2025**: ✅ **COMPLETED** - AIDEVQATESTING Notion Database Integration
-- **IMPLEMENTATION**: Created complete QA testing integration with server routes, API endpoints, and data models
-- **FEATURES**: Full CRUD operations for QA testing records (fetch, create, update), comprehensive QA testing data model with test types, status tracking, priority levels
-- **API ENDPOINTS**: `/api/ai-development/qa-testing` (GET, POST, PATCH) with proper error handling and logging
-- **DATA MODEL**: QATestingRecord interface with 25+ fields including test cases, environments, browsers, devices, assignments, severity levels
-- **FRONTEND INTEGRATION**: ✅ **COMPLETED** - Fixed field mapping issues and project name resolution
-- **RESOLVED ISSUES**: Test titles displaying correctly, test types showing properly, project names resolved instead of "No Project"
-- **REAL-TIME DATA**: Testing & QA section now displays live Notion data with 3 active test records including "REWIND TIME", "put the ga in qa", and "testing qa ga testing"
-- **August 18, 2025**: ✅ **COMPLETED** - TaskCount Field Integration for Project Dashboard
-- **RESOLVED**: Dashboard now correctly displays task counts from TaskCount field in AIDEVPROJECTS Notion database
-- **IMPLEMENTATION**: Added taskCount property to API integration and frontend components
-- **VERIFIED**: Project Portfolio Overview section successfully uses Notion TaskCount values instead of calculated counts
-- **August 18, 2025**: ✅ **COMPLETED** - ProjectLength Integration for Average Project Duration
-- **REPLACED**: "Time Tracked" metric with "Average Length of Projects" using ProjectLength field from AIDEVPROJECTS
-- **CALCULATION**: Updated statistics to calculate average project length across all projects
-- **DISPLAY**: Updated Development Insights section to show project length metrics instead of time tracking
-- **August 18, 2025**: ✅ **COMPLETED** - Custom Godzilla Cursor Implementation
-- **UPDATED**: Replaced purple cursor with user-provided Godzilla image for fun, unique experience
-- **SPECIAL FEATURE**: About page (/about) uses admin face image as 70px cursor instead of Godzilla
-- **FEATURES**: 60px Godzilla cursor site-wide, 70px admin face cursor on About page
-- **TECHNICAL**: React component with RAF animation loop, page-aware cursor switching, completely hides system cursor
-- **ASSETS**: Godzilla images (cursor-move.png, cursor-click.png) and admin face images (cursor-admin-move.png, cursor-admin-click.png) in client/public/
-- **ANIMATIONS**: Scale down to 0.85x and 5-degree rotation on click with brightness increase
-- **August 17, 2025**: ✅ **COMPLETED** - AI App Development Tasks Integration fully working
-- **RESOLVED**: Added dedicated tasks database query (`/api/ai-development/tasks`) 
-- **RESOLVED**: Fixed task creation to use correct API endpoint instead of projects endpoint
-- **RESOLVED**: Updated frontend to fetch existing Notion tasks using separate query
-- **RESOLVED**: Fixed TypeScript errors in app-development-notion.ts library function
-- **VERIFIED**: Tasks API working correctly - existing tasks being fetched from Notion (confirmed via curl test)
-- **FIELD REFERENCE**: Task title field name is consistently **"title"** across frontend form, API, and Notion integration
-- **FINAL FIX**: ProjectId field mapping completely resolved - fixed relation field handling and frontend display logic
-- **PRODUCTION VERIFIED**: Tasks now show correct project names instead of "No Project" in production interface
-
 ## System Architecture
 
 ### Frontend Architecture
@@ -101,7 +29,8 @@ Preferred communication style: Simple, everyday language.
 - **UI Library**: Radix UI components with Tailwind CSS (shadcn/ui design system)
 - **State Management**: TanStack Query (React Query) for server state
 - **Routing**: Wouter
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS, consistent dark mode (`#17111d`)
+- **UI/UX Decisions**: Multi-view dashboard, collapsible sidebar, modal system, Recharts for data visualization, responsive design, custom Godzilla cursor (admin face cursor on About page).
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js
@@ -110,51 +39,41 @@ Preferred communication style: Simple, everyday language.
 - **Fallback Storage**: In-memory MemStorage system for Notion unavailability
 - **Session Management**: Express sessions with in-memory store
 - **Authentication**: Simple admin-based authentication
+- **API Structure**: RESTful API design with `/api` prefix, authentication middleware, CRUD operations.
 
-### Data Storage Solutions
-- **Primary Persistent Storage**: Notion databases (PRODUCTIVITYTASKS, PRODUCTIVITYTIMEBLOCKS, PRODUCTIVITYTIMERSESSIONS)
-- **Local Fallback**: MemStorage for temporary data
-- **Session Storage**: In-memory session store for authentication
-- **Data Models**: TypeScript interfaces with Drizzle ORM schemas
-- **Blogging Content Studio**: Complete blogging workflow with posts, ideas, and calendar management.
+### System Design Choices
+- **Data Flow**: React components (TanStack Query) -> Express routes (business logic, storage) -> In-memory storage/Notion -> JSON responses.
+- **Data Models**: TypeScript interfaces with Drizzle ORM schemas.
+- **Authentication & Authorization**: Admin login, protected routes, 24-hour session persistence. All components use functional admin validation instead of read-only restrictions.
+- **SEO Implementation**: Dynamic SEO Head component, structured data (JSON-LD), comprehensive meta tags, sitemap.xml, robots.txt.
 
-### Key Components & Features
-- **Daily Entry System**: Tracking for health, productivity, and wellness.
-- **Habit Tracking**: Monitoring habits with streak counting.
+### Core Features & Technical Implementations
+- **Daily Entry System**: Tracking health, productivity, wellness.
+- **Habit Tracking**: Streak counting.
 - **Goal Management**: Setting and tracking personal goals.
-- **Task Management**: Todo lists with date-based organization.
-- **Finance Tracking**: Income, expenses, and bill management.
-- **Content Management**: Creation pipeline for social media and digital content.
+- **Task Management**: Todo lists with date-based organization, Jira integration for project and task management.
+- **Finance Tracking**: Income, expenses, bill, budget, and investment management with analytics.
+- **Content Management**: Creation pipeline for social media and digital content, including a comprehensive blogging workflow and a separate CMS for mini-game blocks.
 - **Health Monitoring**: Water intake, exercise, meals, sleep, and wellness metrics.
 - **Productivity Tools**: Time blocking, focus sessions, and work tracking.
-- **User Interface**: Multi-view dashboard, collapsible sidebar, modal system, Recharts for data visualization, responsive design.
-- **Authentication & Authorization**: Admin login, protected routes, 24-hour session persistence.
-- **Data Flow**: React components (TanStack Query) -> Express routes (business logic, storage) -> In-memory storage/Notion -> JSON responses.
-- **API Structure**: RESTful API design with `/api` prefix, authentication middleware, CRUD operations.
-- **Comprehensive Focus Timer System**: Integrated with time blocks, offering Focus, Pomodoro, Deep Work, and Flow State modes. Features include interactive circular display, session tracking, audio notifications, and real-time progress bars.
-- **Time Block Scheduling**: Comprehensive UI with modal forms, smart suggested time slots, real-time status detection, and duration calculations.
-- **Advanced Financial Management System**: Budget tracking, investment tracking, bill management, income tracking, and financial analytics.
-- **Content Management Suite (CMS)**: Simplified neutral gray design for mini-game blocks and @rotationonly content. Features include brand category filtering and interactive effects.
-- **SEO Implementation**: Dynamic SEO Head component, structured data (JSON-LD), comprehensive meta tags, sitemap.xml, robots.txt.
-- **System-Wide Dark Mode**: Consistent dark mode styling using custom color `#17111d` across all components.
+- **Comprehensive Focus Timer System**: Integrated with time blocks, offering Focus, Pomodoro, Deep Work, and Flow State modes with interactive display, session tracking, and audio notifications.
+- **Time Block Scheduling**: UI with modal forms, smart suggested time slots, real-time status detection, and duration calculations.
+- **Real-time Updates**: Critical across all widgets, with optimistic updates and "Saving..." indicators.
+- **Deployment Health**: `/health` and `/` endpoints for quick response times, 2-second caching for `/api/public/active-timer`.
 
 ## External Dependencies
 
-### Core Dependencies
-- **@tanstack/react-query**: Server state management
-- **@radix-ui/react-***: UI component primitives
-- **express**: Web server framework
-- **typescript**: Type safety
-- **zod**: Runtime type validation
-
-### Development Dependencies
-- **tsx**: TypeScript execution
-- **vite**: Frontend build tool
-- **vitest**: Testing framework
-- **tailwindcss**: Utility-first CSS framework
-
-### Third-party Integrations
-- **Notion**: Primary persistent database for core application data (PRODUCTIVITYTASKS, PRODUCTIVITYTIMEBLOCKS, PRODUCTIVITYTIMERSESSIONS).
+- **Notion**: Primary persistent database for core application data (e.g., PRODUCTIVITYTASKS, PRODUCTIVITYTIMEBLOCKS, PRODUCTIVITYTIMERSESSIONS, AIDEVPROJECTS, AIDEVQATESTING).
+- **Jira API**: Integrated for comprehensive CRUD operations on issues, projects, and comments, including bidirectional sync.
 - **Replit**: Development environment integration.
-- **Web Standards**: Utilizes modern web APIs and standards.
 - **Recharts**: Data visualization library.
+- **Web Standards**: Utilizes modern web APIs and standards.
+- **@tanstack/react-query**: Server state management.
+- **@radix-ui/react-***: UI component primitives.
+- **express**: Web server framework.
+- **typescript**: Type safety.
+- **zod**: Runtime type validation.
+- **tsx**: TypeScript execution.
+- **vite**: Frontend build tool.
+- **vitest**: Testing framework.
+- **tailwindcss**: Utility-first CSS framework.

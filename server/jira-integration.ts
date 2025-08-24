@@ -114,6 +114,12 @@ export class JiraIntegrationService {
     leadAccountId?: string;
   }): Promise<JiraProject> {
     try {
+      console.log('🚀 Creating Jira project with data:', { 
+        name: data.name, 
+        key: data.key, 
+        projectTypeKey: data.projectTypeKey 
+      });
+
       // Validate project key (must be uppercase, 2-10 characters, alphanumeric)
       const projectKey = data.key.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 10);
       if (projectKey.length < 2) {
@@ -123,8 +129,7 @@ export class JiraIntegrationService {
       const payload: any = {
         key: projectKey,
         name: data.name,
-        projectTypeKey: data.projectTypeKey || 'business',
-        projectTemplate: data.projectTypeKey === 'software' ? 'com.pyxis.greenhopper.jira:gh-simplified-agility-kanban' : 'com.atlassian.jira-core-project-templates:jira-core-simplified-process-control'
+        projectTypeKey: data.projectTypeKey || 'business'
       };
 
       if (data.description) {
@@ -135,22 +140,43 @@ export class JiraIntegrationService {
         payload.leadAccountId = data.leadAccountId;
       }
 
+      console.log('📦 Sending payload to Jira API:', payload);
+
       const response = await this.client.post('/project', payload);
       console.log(`✅ Successfully created Jira project: ${response.data.name} (${response.data.key})`);
       return response.data;
     } catch (error: any) {
-      console.error('Error creating Jira project:', error.response?.data || error.message);
+      console.error('❌ Error creating Jira project:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        errors: error.response?.data?.errors,
+        errorMessages: error.response?.data?.errorMessages
+      });
+      
       // Provide more helpful error messages
       if (error.response?.status === 400) {
-        const errors = error.response.data.errors;
+        const errors = error.response.data?.errors;
         if (errors?.projectKey) {
           throw new Error(`Invalid project key: ${errors.projectKey}`);
         }
         if (errors?.projectName) {
           throw new Error(`Invalid project name: ${errors.projectName}`);
         }
+        if (errors?.projectTypeKey) {
+          throw new Error(`Invalid project type: ${errors.projectTypeKey}`);
+        }
       }
-      throw new Error(`Failed to create Jira project: ${error.response?.data?.errorMessages?.[0] || error.message}`);
+      
+      if (error.response?.status === 401) {
+        throw new Error('Jira authentication failed. Please check your API credentials.');
+      }
+      
+      if (error.response?.status === 403) {
+        throw new Error('You do not have permission to create projects in Jira.');
+      }
+      
+      throw new Error(`Failed to create Jira project: ${error.response?.data?.errorMessages?.[0] || error.response?.data?.message || error.message}`);
     }
   }
 

@@ -417,9 +417,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       projectTypeKey: string;
       description: string;
     }) => {
+      console.log("📤 Sending Jira project creation request:", data);
       return apiRequest('POST', '/api/jira/projects', data);
     },
-    onSuccess: (response) => {
+    onSuccess: (response: any) => {
+      console.log("✅ Jira project created successfully:", response);
       toast({ 
         title: "Success", 
         description: `Jira project "${response.name}" created successfully with key ${response.key}` 
@@ -428,22 +430,46 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       // Optionally refresh Jira projects list if needed
     },
     onError: (error: any) => {
-      console.log("🚨 Jira project creation error:", error);
-      const message = error?.message || "Failed to create Jira project";
-      if (message.includes("Authentication") || message.includes("401")) {
+      console.error("🚨 Jira project creation error:", error);
+      const message = error?.message || error?.error || "Failed to create Jira project";
+      
+      // Handle different error scenarios
+      if (message.includes("authentication") || message.includes("401")) {
         toast({ 
           title: "Authentication Required", 
           description: "Please log in as admin to create Jira projects", 
           variant: "destructive" 
         });
-      } else if (message.includes("Invalid project key")) {
+      } else if (message.includes("permission") || message.includes("403")) {
+        toast({ 
+          title: "Permission Denied", 
+          description: "You don't have permission to create projects in Jira. Please check your Jira account settings.", 
+          variant: "destructive" 
+        });
+      } else if (message.includes("project key")) {
         toast({ 
           title: "Invalid Project Key", 
-          description: "Project key must be 2-10 uppercase letters", 
+          description: message, 
+          variant: "destructive" 
+        });
+      } else if (message.includes("project type")) {
+        toast({ 
+          title: "Invalid Project Type", 
+          description: "The selected project type may not be available in your Jira instance", 
+          variant: "destructive" 
+        });
+      } else if (message.includes("not configured")) {
+        toast({ 
+          title: "Jira Not Configured", 
+          description: "Jira integration is not properly configured. Please check your API credentials.", 
           variant: "destructive" 
         });
       } else {
-        toast({ title: "Error", description: message, variant: "destructive" });
+        toast({ 
+          title: "Error Creating Project", 
+          description: message, 
+          variant: "destructive" 
+        });
       }
     }
   });
@@ -3055,10 +3081,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
             const projectData = {
               name: formData.get('name') as string,
               key: formData.get('key') as string,
-              projectTypeKey: formData.get('projectTypeKey') as string,
-              description: formData.get('description') as string,
+              projectTypeKey: formData.get('projectTypeKey') as string || 'business',
+              description: formData.get('description') as string || '',
             };
             
+            console.log('Form submission data:', projectData);
             createJiraProjectMutation.mutate(projectData);
           }} className="space-y-4">
             <div className="space-y-4">
@@ -3090,7 +3117,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               
               <div>
                 <Label htmlFor="jira-type">Project Type</Label>
-                <Select name="projectTypeKey" defaultValue="business">
+                <input type="hidden" name="projectTypeKey" id="projectTypeKey-hidden" defaultValue="business" />
+                <Select 
+                  defaultValue="business"
+                  onValueChange={(value) => {
+                    const hiddenInput = document.getElementById('projectTypeKey-hidden') as HTMLInputElement;
+                    if (hiddenInput) hiddenInput.value = value;
+                  }}
+                >
                   <SelectTrigger id="jira-type">
                     <SelectValue placeholder="Select project type" />
                   </SelectTrigger>
