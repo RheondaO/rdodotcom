@@ -259,6 +259,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "documentation" | "library">("overview");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
+  const [showJiraProjectForm, setShowJiraProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [showTestItemForm, setShowTestItemForm] = useState(false);
   const { toast } = useToast();
@@ -400,6 +401,45 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         toast({ 
           title: "Authentication Required", 
           description: "Please log in as admin to create projects", 
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Error", description: message, variant: "destructive" });
+      }
+    }
+  });
+
+  // Jira project creation mutation
+  const createJiraProjectMutation = useMutation({
+    mutationFn: (data: {
+      name: string;
+      key: string;
+      projectTypeKey: string;
+      description: string;
+    }) => {
+      return apiRequest('POST', '/api/jira/projects', data);
+    },
+    onSuccess: (response) => {
+      toast({ 
+        title: "Success", 
+        description: `Jira project "${response.name}" created successfully with key ${response.key}` 
+      });
+      setShowJiraProjectForm(false);
+      // Optionally refresh Jira projects list if needed
+    },
+    onError: (error: any) => {
+      console.log("🚨 Jira project creation error:", error);
+      const message = error?.message || "Failed to create Jira project";
+      if (message.includes("Authentication") || message.includes("401")) {
+        toast({ 
+          title: "Authentication Required", 
+          description: "Please log in as admin to create Jira projects", 
+          variant: "destructive" 
+        });
+      } else if (message.includes("Invalid project key")) {
+        toast({ 
+          title: "Invalid Project Key", 
+          description: "Project key must be 2-10 uppercase letters", 
           variant: "destructive" 
         });
       } else {
@@ -1369,6 +1409,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               >
                 <Plus className="h-4 w-4 mr-2" />
                 New Project
+              </Button>
+              
+              <Button 
+                onClick={() => setShowJiraProjectForm(true)}
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+              >
+                <GitBranch className="h-4 w-4 mr-2" />
+                Create Jira Project
               </Button>
             </div>
           </div>
@@ -2992,6 +3040,115 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Jira Project Creation Dialog */}
+      <Dialog open={showJiraProjectForm} onOpenChange={setShowJiraProjectForm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-blue-600 dark:text-blue-400">Create Jira Project</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const projectData = {
+              name: formData.get('name') as string,
+              key: formData.get('key') as string,
+              projectTypeKey: formData.get('projectTypeKey') as string,
+              description: formData.get('description') as string,
+            };
+            
+            createJiraProjectMutation.mutate(projectData);
+          }} className="space-y-4">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="jira-name">Project Name</Label>
+                <Input 
+                  id="jira-name"
+                  name="name"
+                  placeholder="My New Project" 
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="jira-key">Project Key</Label>
+                <Input 
+                  id="jira-key"
+                  name="key"
+                  placeholder="MNP" 
+                  maxLength={10}
+                  required
+                  className="uppercase"
+                  onChange={(e) => e.target.value = e.target.value.toUpperCase()}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  2-10 uppercase letters, will be used as issue prefix (e.g., MNP-1)
+                </p>
+              </div>
+              
+              <div>
+                <Label htmlFor="jira-type">Project Type</Label>
+                <Select name="projectTypeKey" defaultValue="business">
+                  <SelectTrigger id="jira-type">
+                    <SelectValue placeholder="Select project type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="business">
+                      <div className="flex flex-col">
+                        <span className="font-medium">Business</span>
+                        <span className="text-xs text-muted-foreground">For business teams and projects</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="software">
+                      <div className="flex flex-col">
+                        <span className="font-medium">Software</span>
+                        <span className="text-xs text-muted-foreground">For software development teams</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="jira-description">Description (Optional)</Label>
+                <Textarea 
+                  id="jira-description"
+                  name="description"
+                  placeholder="Describe your project..." 
+                  rows={3}
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <Button 
+                type="submit" 
+                disabled={createJiraProjectMutation.isPending}
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+              >
+                {createJiraProjectMutation.isPending ? (
+                  <>
+                    <Activity className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <GitBranch className="h-4 w-4 mr-2" />
+                    Create Jira Project
+                  </>
+                )}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowJiraProjectForm(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
 

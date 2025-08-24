@@ -105,6 +105,55 @@ export class JiraIntegrationService {
     }
   }
 
+  // Create a new Jira project
+  async createProject(data: {
+    name: string;
+    key: string;
+    projectTypeKey?: string;
+    description?: string;
+    leadAccountId?: string;
+  }): Promise<JiraProject> {
+    try {
+      // Validate project key (must be uppercase, 2-10 characters, alphanumeric)
+      const projectKey = data.key.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 10);
+      if (projectKey.length < 2) {
+        throw new Error('Project key must be at least 2 characters long');
+      }
+
+      const payload: any = {
+        key: projectKey,
+        name: data.name,
+        projectTypeKey: data.projectTypeKey || 'business',
+        projectTemplate: data.projectTypeKey === 'software' ? 'com.pyxis.greenhopper.jira:gh-simplified-agility-kanban' : 'com.atlassian.jira-core-project-templates:jira-core-simplified-process-control'
+      };
+
+      if (data.description) {
+        payload.description = data.description;
+      }
+
+      if (data.leadAccountId) {
+        payload.leadAccountId = data.leadAccountId;
+      }
+
+      const response = await this.client.post('/project', payload);
+      console.log(`✅ Successfully created Jira project: ${response.data.name} (${response.data.key})`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error creating Jira project:', error.response?.data || error.message);
+      // Provide more helpful error messages
+      if (error.response?.status === 400) {
+        const errors = error.response.data.errors;
+        if (errors?.projectKey) {
+          throw new Error(`Invalid project key: ${errors.projectKey}`);
+        }
+        if (errors?.projectName) {
+          throw new Error(`Invalid project name: ${errors.projectName}`);
+        }
+      }
+      throw new Error(`Failed to create Jira project: ${error.response?.data?.errorMessages?.[0] || error.message}`);
+    }
+  }
+
   // Get issues for a project
   async getProjectIssues(projectKey: string, maxResults: number = 50): Promise<JiraIssue[]> {
     try {

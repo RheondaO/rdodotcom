@@ -39,6 +39,33 @@ router.get('/projects', requireAuth, async (req, res) => {
   }
 });
 
+// Create a new Jira project
+router.post('/projects', requireAuth, async (req, res) => {
+  try {
+    if (!jiraService.isConfigured()) {
+      return res.status(400).json({ error: 'Jira integration not configured' });
+    }
+    
+    const { name, key, projectTypeKey, description } = req.body;
+    
+    if (!name || !key) {
+      return res.status(400).json({ error: 'Project name and key are required' });
+    }
+    
+    const project = await jiraService.createProject({
+      name,
+      key,
+      projectTypeKey,
+      description
+    });
+    
+    res.json(project);
+  } catch (error: any) {
+    console.error('Error creating Jira project:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get issues for a specific project
 router.get('/projects/:projectKey/issues', requireAuth, async (req, res) => {
   try {
