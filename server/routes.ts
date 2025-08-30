@@ -393,6 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
   // Auth status endpoint
   app.get("/api/auth/status", (req: AuthenticatedRequest, res) => {
     res.json({ 

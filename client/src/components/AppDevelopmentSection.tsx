@@ -2677,24 +2677,34 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         <ListTodo className="h-4 w-4 text-pink-500" />
                         Related Epics ({(() => {
-                          // Filter epics for this Jira project
-                          const relatedEpics = jiraIssues?.filter(issue => 
-                            (issue.issueType?.toLowerCase() === 'epic' || 
-                             issue.issueType?.toLowerCase().includes('epic')) &&
-                            issue.projectKey === project.key
-                          ) || [];
+                          // Filter epics for this Jira project - handle different epic naming conventions
+                          const relatedEpics = jiraIssues?.filter(issue => {
+                            const issueType = issue.issueType?.toLowerCase() || '';
+                            const isEpicType = issueType === 'epic' || 
+                                             issueType.includes('epic') || 
+                                             issueType === 'feature' ||
+                                             issueType === 'theme' ||
+                                             issueType === 'initiative' ||
+                                             (issueType.includes('story') && issueType.includes('epic'));
+                            return isEpicType && issue.projectKey === project.key;
+                          }) || [];
                           
                           return relatedEpics.length;
-                        })()})
+                        })()}
                       </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {(() => {
-                          // Filter epics for this Jira project
-                          const relatedEpics = jiraIssues?.filter(issue => 
-                            (issue.issueType?.toLowerCase() === 'epic' || 
-                             issue.issueType?.toLowerCase().includes('epic')) &&
-                            issue.projectKey === project.key
-                          ) || [];
+                          // Filter epics for this Jira project - handle different epic naming conventions
+                          const relatedEpics = jiraIssues?.filter(issue => {
+                            const issueType = issue.issueType?.toLowerCase() || '';
+                            const isEpicType = issueType === 'epic' || 
+                                             issueType.includes('epic') || 
+                                             issueType === 'feature' ||
+                                             issueType === 'theme' ||
+                                             issueType === 'initiative' ||
+                                             (issueType.includes('story') && issueType.includes('epic'));
+                            return isEpicType && issue.projectKey === project.key;
+                          }) || [];
                           
                           if (relatedEpics.length === 0) {
                             return (
