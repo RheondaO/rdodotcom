@@ -2578,18 +2578,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
           {/* Documentation Grid */}
           <div className="grid grid-cols-1 gap-6">
-            {projects
-              .filter(project => {
-                if (!selectedProject) return true;
-                return (project.id || project.id) === selectedProject;
-              })
-              .filter(project => {
+            {jiraProjects
+              ?.filter(project => {
                 if (!searchQuery) return true;
                 return project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       (project.description && (typeof project.description === 'string' ? project.description : project.description?.content || '').toLowerCase().includes(searchQuery.toLowerCase()));
+                       (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
               })
               .map((project) => (
-              <Card key={project.id || project.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+              <Card key={project.key} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4 flex-1">
@@ -2599,15 +2595,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-xl flex items-center gap-2">
                           {project.name}
-                          <Badge className={getStatusColor(project.status)}>
-                            {(project.status || 'Unknown').replace('_', ' ')}
+                          <Badge variant="secondary" className="text-xs">
+                            {project.key}
                           </Badge>
                         </CardTitle>
                         <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1">
-                          {typeof project.description === 'object' && project.description?.content ? 
-                            project.description.content : 
-                            (project.description || 'No description available')
-                          }
+                          {project.description || 'No description available'}
                         </p>
                       </div>
                     </div>
@@ -2623,100 +2616,72 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           Project Type
                         </h4>
                         <p className="text-sm text-muted-foreground capitalize">
-                          {project.projectType || project.projectType || 'Not specified'}
+                          {project.projectTypeKey || 'Standard Project'}
                         </p>
                       </div>
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-green-500" />
-                          Timeline
+                          Project Key
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {project.startDate ? format(new Date(project.startDate), 'MMM dd, yyyy') : 'Not set'}
-                          {project.endDate && ` - ${format(new Date(project.endDate), 'MMM dd, yyyy')}`}
+                          {project.key}
                         </p>
                       </div>
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                           <CheckSquare className="h-4 w-4 text-purple-500" />
-                          Progress
+                          Issues Progress
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {tasks.filter(t => t.projectId === (project.id || project.id) && t.status === 'done').length} / {tasks.filter(t => t.projectId === (project.id || project.id)).length} tasks completed
+                          {(() => {
+                            const projectIssues = jiraIssues?.filter(issue => issue.projectKey === project.key) || [];
+                            const completedIssues = projectIssues.filter(issue => 
+                              issue.status === 'completed' || issue.status === 'done' || 
+                              (typeof issue.status === 'string' && issue.status.toLowerCase().includes('done'))
+                            );
+                            return `${completedIssues.length} / ${projectIssues.length} issues completed`;
+                          })()}
                         </p>
                       </div>
                     </div>
 
-                    {/* Tech Stack */}
-                    {(project.techStack || project.tags) && (
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                          <Layers className="h-4 w-4 text-orange-500" />
-                          Technology Stack
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {(project.techStack ? project.techStack.split(',') : project.tags || []).map((tech: string, index: number) => (
+                    {/* Project Components */}
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <Layers className="h-4 w-4 text-orange-500" />
+                        Project Components
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(() => {
+                          const projectIssues = jiraIssues?.filter(issue => issue.projectKey === project.key) || [];
+                          const uniqueComponents = [...new Set(
+                            projectIssues.flatMap(issue => issue.labels || [])
+                          )];
+                          
+                          if (uniqueComponents.length === 0) {
+                            return <p className="text-xs text-muted-foreground">No components labeled</p>;
+                          }
+                          
+                          return uniqueComponents.slice(0, 5).map((component, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
-                              {tech.trim()}
+                              {component}
                             </Badge>
-                          ))}
-                        </div>
+                          ));
+                        })()}
                       </div>
-                    )}
-
-                    {/* Project Links */}
-                    {project.url && (
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                          <ExternalLink className="h-4 w-4 text-indigo-500" />
-                          Project Links
-                        </h4>
-                        <div className="flex gap-3">
-                          {project.url && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => window.open(project.url, '_blank')}
-                              className="flex items-center gap-2"
-                            >
-                              <GitBranch className="h-3 w-3" />
-                              Repository
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
-                          )}
-                          {false && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {/*placeholder*/}}
-                              className="flex items-center gap-2"
-                            >
-                              <Globe className="h-3 w-3" />
-                              Live Demo
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                    </div>
 
                     {/* Related Epics from Jira */}
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         <ListTodo className="h-4 w-4 text-pink-500" />
                         Related Epics ({(() => {
-                          // Find matching Jira project for this local project
-                          const matchingJiraProject = jiraProjects?.find(jp => 
-                            jp.name.toLowerCase().includes(project.name.toLowerCase()) ||
-                            project.name.toLowerCase().includes(jp.name.toLowerCase()) ||
-                            jp.key === project.key
-                          );
-                          
-                          // Filter epics for this project
+                          // Filter epics for this Jira project
                           const relatedEpics = jiraIssues?.filter(issue => 
                             (issue.issueType?.toLowerCase() === 'epic' || 
                              issue.issueType?.toLowerCase().includes('epic')) &&
-                            (matchingJiraProject ? issue.projectKey === matchingJiraProject.key : false)
+                            issue.projectKey === project.key
                           ) || [];
                           
                           return relatedEpics.length;
@@ -2724,18 +2689,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {(() => {
-                          // Find matching Jira project for this local project
-                          const matchingJiraProject = jiraProjects?.find(jp => 
-                            jp.name.toLowerCase().includes(project.name.toLowerCase()) ||
-                            project.name.toLowerCase().includes(jp.name.toLowerCase()) ||
-                            jp.key === project.key
-                          );
-                          
-                          // Filter epics for this project
+                          // Filter epics for this Jira project
                           const relatedEpics = jiraIssues?.filter(issue => 
                             (issue.issueType?.toLowerCase() === 'epic' || 
                              issue.issueType?.toLowerCase().includes('epic')) &&
-                            (matchingJiraProject ? issue.projectKey === matchingJiraProject.key : false)
+                            issue.projectKey === project.key
                           ) || [];
                           
                           if (relatedEpics.length === 0) {
