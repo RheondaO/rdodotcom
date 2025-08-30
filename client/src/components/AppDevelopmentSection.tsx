@@ -286,9 +286,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Fetch all projects from Jira
   const { data: jiraProjects = [], isLoading: isLoadingProjects, error: projectsError, isError: isProjectsError } = useQuery({
-    queryKey: ['/api/jira/projects'],
+    queryKey: ['/api/public/jira/projects'],
     queryFn: async () => {
-      const response = await fetch('/api/jira/projects', {
+      const response = await fetch('/api/public/jira/projects', {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -306,9 +306,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Fetch all issues from Jira (as tasks)
   const { data: jiraIssues = [], isLoading: isLoadingTasks, error: tasksError, isError: isTasksError } = useQuery({
-    queryKey: ['/api/jira/issues'],
+    queryKey: ['/api/public/jira/issues'],
     queryFn: async () => {
-      const response = await fetch('/api/jira/issues', {
+      const response = await fetch('/api/public/jira/issues', {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -326,9 +326,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Fetch QA Testing issues from Jira (filtered by issue type)
   const { data: jiraTestIssues = [], isLoading: isLoadingQATesting, error: qaTestingError, isError: isQATestingError } = useQuery({
-    queryKey: ['/api/jira/issues?type=test'],
+    queryKey: ['/api/public/jira/issues?type=test'],
     queryFn: async () => {
-      const response = await fetch('/api/jira/issues', {
+      const response = await fetch('/api/public/jira/issues', {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -445,7 +445,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       return apiRequest('POST', '/api/jira/projects', data);
     },
     onSuccess: (response: any) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/jira/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/public/jira/projects'] });
       toast({ 
         title: "Success", 
         description: `Jira project "${response.name}" created successfully with key ${response.key}` 

@@ -18,6 +18,7 @@ import {
 import timerRoutes from "./timer-routes-new";
 import fitnessRoutes from "./fitness-routes";
 import jiraRoutes from "./jira-routes";
+import { jiraService } from "./jira-integration";
 import { 
   getAIDevProjects, 
   createAIDevProject, 
@@ -220,6 +221,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   let publicTimerCache: { data: any; timestamp: number } | null = null;
   const CACHE_DURATION = 2000; // Cache for 2 seconds
 
+  // Cache for public Jira data
+  let publicJiraProjectsCache: { data: any; timestamp: number } | null = null;
+  let publicJiraIssuesCache: { data: any; timestamp: number } | null = null;
+  const JIRA_CACHE_DURATION = 10000; // Cache for 10 seconds
+
   app.get("/api/public/active-timer", async (req, res) => {
     try {
       // Check cache first to reduce database load
@@ -313,6 +319,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error getting public active timer:", error);
       res.status(500).json({ error: "Failed to get active timer" });
+    }
+  });
+
+  // Public Jira endpoints (no authentication required for read access)
+  app.get("/api/public/jira/projects", async (req, res) => {
+    try {
+      // Check cache first to reduce load
+      if (publicJiraProjectsCache && Date.now() - publicJiraProjectsCache.timestamp < JIRA_CACHE_DURATION) {
+        res.json(publicJiraProjectsCache.data);
+        return;
+      }
+
+      if (!jiraService.isConfigured()) {
+        return res.status(400).json({ error: 'Jira integration not configured' });
+      }
+      
+      const projects = await jiraService.getProjects();
+      // Cache the result
+      publicJiraProjectsCache = { data: projects, timestamp: Date.now() };
+      res.json(projects);
+    } catch (error: any) {
+      console.error('Error fetching public Jira projects:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/public/jira/issues", async (req, res) => {
+    try {
+      // Check cache first to reduce load
+      if (publicJiraIssuesCache && Date.now() - publicJiraIssuesCache.timestamp < JIRA_CACHE_DURATION) {
+        res.json(publicJiraIssuesCache.data);
+        return;
+      }
+
+      if (!jiraService.isConfigured()) {
+        return res.status(400).json({ error: 'Jira integration not configured' });
+      }
+      
+      const { maxResults = 100 } = req.query;
+      const issues = await jiraService.searchIssues('', parseInt(maxResults as string));
+      // Cache the result
+      publicJiraIssuesCache = { data: issues, timestamp: Date.now() };
+      res.json(issues);
+    } catch (error: any) {
+      console.error('Error fetching public Jira issues:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/public/jira/projects/:projectKey/issues", async (req, res) => {
+    try {
+      if (!jiraService.isConfigured()) {
+        return res.status(400).json({ error: 'Jira integration not configured' });
+      }
+      
+      const { projectKey } = req.params;
+      const { maxResults = 50 } = req.query;
+      
+      const issues = await jiraService.getProjectIssues(
+        projectKey, 
+        parseInt(maxResults as string)
+      );
+      
+      res.json(issues);
+    } catch (error: any) {
+      console.error('Error fetching public project issues:', error);
+      res.status(500).json({ error: error.message });
     }
   });
 
