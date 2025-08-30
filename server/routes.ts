@@ -358,7 +358,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { maxResults = 100 } = req.query;
-      const issues = await jiraService.searchIssues('', parseInt(maxResults as string));
+      const rawIssues = await jiraService.searchIssues('', parseInt(maxResults as string));
+      // Convert to internal format to properly handle description objects
+      const issues = rawIssues.map(issue => jiraService.convertToInternalFormat(issue));
       // Cache the result
       publicJiraIssuesCache = { data: issues, timestamp: Date.now() };
       res.json(issues);
@@ -377,10 +379,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { projectKey } = req.params;
       const { maxResults = 50 } = req.query;
       
-      const issues = await jiraService.getProjectIssues(
+      const rawIssues = await jiraService.getProjectIssues(
         projectKey, 
         parseInt(maxResults as string)
       );
+      // Convert to internal format to properly handle description objects
+      const issues = rawIssues.map(issue => jiraService.convertToInternalFormat(issue));
       
       res.json(issues);
     } catch (error: any) {

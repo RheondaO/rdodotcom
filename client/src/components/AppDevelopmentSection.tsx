@@ -367,40 +367,41 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     priority: 'medium' // Default priority, can be customized
   }));
   
-  // Map Jira issues to tasks format
+  // Use properly converted Jira data (already processed by backend)
   const tasks = jiraIssues.map((issue: any) => ({
-    id: issue.id,
-    key: issue.key,
-    title: issue.fields.summary,
-    description: typeof issue.fields.description === 'object' && issue.fields.description?.content ? issue.fields.description.content : (issue.fields.description || ''),
-    status: issue.fields.status.name,
-    priority: issue.fields.priority?.name || 'Medium',
-    projectKey: issue.fields.project.key,
-    projectName: issue.fields.project.name,
-    assignee: issue.fields.assignee?.displayName || '',
-    dueDate: issue.fields.duedate,
-    issueType: issue.fields.issuetype.name,
-    createdAt: issue.fields.created,
-    updatedAt: issue.fields.updated,
-    labels: issue.fields.labels || [],
-    storyPoints: issue.fields.customfield_10014 || null
+    id: issue.jiraId || issue.id,
+    key: issue.jiraKey || issue.key,
+    title: issue.title,
+    description: issue.description || '',
+    status: issue.status,
+    priority: issue.priority || 'Medium',
+    projectKey: issue.projectKey,
+    projectName: issue.projectName,
+    assignee: issue.assignee || '',
+    dueDate: issue.dueDate,
+    issueType: issue.issueType,
+    createdAt: issue.createdAt,
+    updatedAt: issue.updatedAt,
+    labels: issue.labels || [],
+    storyPoints: issue.storyPoints || null
   }));
   
-  // Map test issues to test items format
+  // Use properly converted Jira test data (already processed by backend)
   const testItems = jiraTestIssues.map((issue: any) => ({
-    id: issue.id,
-    key: issue.key,
-    title: issue.fields.summary,
-    description: typeof issue.fields.description === 'object' && issue.fields.description?.content ? issue.fields.description.content : (issue.fields.description || ''),
-    status: issue.fields.status.name,
-    priority: issue.fields.priority?.name || 'Medium',
-    projectKey: issue.fields.project.key,
-    projectName: issue.fields.project.name,
-    testType: issue.fields.issuetype.name,
-    assignee: issue.fields.assignee?.displayName || '',
-    createdAt: issue.fields.created,
-    updatedAt: issue.fields.updated,
-    labels: issue.fields.labels || []
+    id: issue.jiraId || issue.id,
+    key: issue.jiraKey || issue.key,
+    title: issue.title,
+    name: issue.title, // Use title as name for consistency
+    description: issue.description || '',
+    status: issue.status,
+    priority: issue.priority || 'Medium',
+    projectKey: issue.projectKey,
+    projectName: issue.projectName,
+    testType: issue.issueType,
+    assignee: issue.assignee || '',
+    createdAt: issue.createdAt,
+    updatedAt: issue.updatedAt,
+    labels: issue.labels || []
   }));
   
   // Keep prompt templates from AI Dev items for now
@@ -1913,12 +1914,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               ) : (
                                 <div>
                                   <div className="font-semibold text-gray-900 dark:text-white">{task.title || task.title}</div>
-                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                                    {typeof task.description === 'object' && task.description?.content ? 
-                                      task.description.content : 
-                                      (task.description || 'No description')
-                                    }
-                                  </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{task.description || 'No description'}</div>
                                 </div>
                               )}
                             </div>
@@ -2258,12 +2254,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               ) : (
                                 <div>
                                   <div className="font-semibold text-gray-900 dark:text-white">{testItem.name}</div>
-                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                                    {typeof testItem.description === 'object' && testItem.description?.content ? 
-                                      testItem.description.content : 
-                                      (testItem.description || 'No description')
-                                    }
-                                  </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{testItem.description || 'No description'}</div>
                                 </div>
                               )}
                             </div>
