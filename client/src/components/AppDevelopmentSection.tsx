@@ -66,6 +66,7 @@ import {
   Download,
   Paperclip,
   File,
+  FileX,
   Link as LinkIcon
 } from "lucide-react";
 
@@ -2496,6 +2497,69 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Related List - Recently Updated Projects */}
+          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-blue-500" />
+                <CardTitle className="text-lg text-gray-900 dark:text-white">Recently Updated Projects</CardTitle>
+              </div>
+              <p className="text-sm text-muted-foreground dark:text-gray-400">
+                Last 3 projects with recent activity
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {projects
+                  .filter(project => project.updatedAt) // Only projects with update timestamps
+                  .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) // Sort by most recent first
+                  .slice(0, 3) // Take only first 3
+                  .map((project) => (
+                    <div key={project.id || project.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-gray-900 dark:text-white truncate">{project.name}</p>
+                          <Badge className={getStatusColor(project.status)}>
+                            {(project.status || 'Unknown').replace('_', ' ')}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-4 mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            Updated {format(new Date(project.updatedAt), 'MMM dd, yyyy')}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {tasks.filter(t => t.projectId === (project.id || project.id) && t.status === 'done').length} / {tasks.filter(t => t.projectId === (project.id || project.id)).length} tasks
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedProject(project.id || project.id);
+                            setActiveView("projects");
+                          }}
+                          className="text-blue-600 hover:text-blue-700"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                {projects.filter(project => project.updatedAt).length === 0 && (
+                  <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                    <FileX className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm">No recently updated projects found</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
