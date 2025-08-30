@@ -354,7 +354,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const projects = jiraProjects.map((project: any) => ({
     id: project.id,
     name: project.name,
-    description: project.description || '',
+    description: typeof project.description === 'object' && project.description?.content ? project.description.content : (project.description || ''),
     key: project.key,
     projectType: project.projectTypeKey,
     lead: project.lead?.displayName || '',
@@ -1523,7 +1523,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               ) : (
                                 <div>
                                   <div className="font-semibold text-gray-900 dark:text-white">{project.name}</div>
-                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{project.description}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                                    {typeof project.description === 'object' && project.description?.content ? 
+                                      project.description.content : 
+                                      (project.description || 'No description')
+                                    }
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -1908,7 +1913,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               ) : (
                                 <div>
                                   <div className="font-semibold text-gray-900 dark:text-white">{task.title || task.title}</div>
-                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{task.description}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                                    {typeof task.description === 'object' && task.description?.content ? 
+                                      task.description.content : 
+                                      (task.description || 'No description')
+                                    }
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -2504,7 +2514,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               .filter(project => {
                 if (!searchQuery) return true;
                 return project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                       (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
+                       (project.description && (typeof project.description === 'string' ? project.description : project.description?.content || '').toLowerCase().includes(searchQuery.toLowerCase()));
               })
               .map((project) => (
               <Card key={project.id || project.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
@@ -2522,7 +2532,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           </Badge>
                         </CardTitle>
                         <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1">
-                          {project.description || 'No description available'}
+                          {typeof project.description === 'object' && project.description?.content ? 
+                            project.description.content : 
+                            (project.description || 'No description available')
+                          }
                         </p>
                       </div>
                     </div>
