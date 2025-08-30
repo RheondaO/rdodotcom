@@ -2700,31 +2700,75 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       </div>
                     )}
 
-                    {/* Related Tasks Preview */}
+                    {/* Related Epics from Jira */}
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         <ListTodo className="h-4 w-4 text-pink-500" />
-                        Related Tasks ({tasks.filter(t => t.projectId === (project.id || project.id)).length})
+                        Related Epics ({(() => {
+                          // Find matching Jira project for this local project
+                          const matchingJiraProject = jiraProjects?.find(jp => 
+                            jp.name.toLowerCase().includes(project.name.toLowerCase()) ||
+                            project.name.toLowerCase().includes(jp.name.toLowerCase()) ||
+                            jp.key === project.key
+                          );
+                          
+                          // Filter epics for this project
+                          const relatedEpics = jiraIssues?.filter(issue => 
+                            (issue.issueType?.toLowerCase() === 'epic' || 
+                             issue.issueType?.toLowerCase().includes('epic')) &&
+                            (matchingJiraProject ? issue.projectKey === matchingJiraProject.key : false)
+                          ) || [];
+                          
+                          return relatedEpics.length;
+                        })()})
                       </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {tasks.filter(t => t.projectId === (project.id || project.id)).slice(0, 3).map((task) => (
-                          <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-xs">
-                            <span className="font-medium truncate flex-1">{task.title || task.title}</span>
-                            <Badge className={getStatusColor(task.status)} variant="outline">
-                              {(task.status || 'Unknown').replace('_', ' ')}
-                            </Badge>
-                          </div>
-                        ))}
-                        {tasks.filter(t => t.projectId === (project.id || project.id)).length === 0 && (
-                          <p className="text-xs text-muted-foreground text-center py-2">
-                            No tasks found for this project
-                          </p>
-                        )}
-                        {tasks.filter(t => t.projectId === (project.id || project.id)).length > 3 && (
-                          <p className="text-xs text-muted-foreground text-center">
-                            ... and {tasks.filter(t => t.projectId === (project.id || project.id)).length - 3} more tasks
-                          </p>
-                        )}
+                        {(() => {
+                          // Find matching Jira project for this local project
+                          const matchingJiraProject = jiraProjects?.find(jp => 
+                            jp.name.toLowerCase().includes(project.name.toLowerCase()) ||
+                            project.name.toLowerCase().includes(jp.name.toLowerCase()) ||
+                            jp.key === project.key
+                          );
+                          
+                          // Filter epics for this project
+                          const relatedEpics = jiraIssues?.filter(issue => 
+                            (issue.issueType?.toLowerCase() === 'epic' || 
+                             issue.issueType?.toLowerCase().includes('epic')) &&
+                            (matchingJiraProject ? issue.projectKey === matchingJiraProject.key : false)
+                          ) || [];
+                          
+                          if (relatedEpics.length === 0) {
+                            return (
+                              <p className="text-xs text-muted-foreground text-center py-2">
+                                No epics found for this project
+                              </p>
+                            );
+                          }
+                          
+                          return (
+                            <>
+                              {relatedEpics.slice(0, 3).map((epic) => (
+                                <div key={epic.key || epic.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-xs">
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {epic.key || epic.jiraKey}
+                                    </Badge>
+                                    <span className="font-medium truncate">{epic.title}</span>
+                                  </div>
+                                  <Badge className={getStatusColor(epic.status)} variant="outline">
+                                    {(epic.status || 'Unknown').replace('_', ' ')}
+                                  </Badge>
+                                </div>
+                              ))}
+                              {relatedEpics.length > 3 && (
+                                <p className="text-xs text-muted-foreground text-center">
+                                  ... and {relatedEpics.length - 3} more epics
+                                </p>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
 
