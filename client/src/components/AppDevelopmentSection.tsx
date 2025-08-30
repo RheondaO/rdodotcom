@@ -147,18 +147,12 @@ const generateMockPrompts = (): PromptTemplate[] => [
 ];
 
 // Form Schemas
+// Jira project schema
 const newProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
+  key: z.string().min(2, "Project key is required (2-10 uppercase letters)").max(10).regex(/^[A-Z]+$/, "Project key must be uppercase letters only"),
   description: z.string().optional(),
-  status: z.enum(["planning", "in_progress", "testing", "deployed", "on_hold"]),
-  projectType: z.enum(["web", "mobile", "desktop", "api", "library", "tool"]),
-  repositoryUrl: z.string().optional(),
-  deploymentUrl: z.string().optional(),
-  targetDate: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  techStack: z.string().optional(),
-  priority: z.enum(["low", "medium", "high"]).optional()
+  projectTypeKey: z.enum(["software", "service_desk", "business"]).default("software")
 });
 
 const newTaskSchema = z.object({
@@ -259,7 +253,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "documentation" | "library">("overview");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
-  const [showJiraProjectForm, setShowJiraProjectForm] = useState(false);
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const [showTestItemForm, setShowTestItemForm] = useState(false);
   const { toast } = useToast();
@@ -289,14 +282,19 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
 
-  // Fetch all AI Development projects from AIDEVPROJECTS database
-  const { data: allAIDevItems = [], isLoading: isLoadingProjects, error: projectsError, isError: isProjectsError } = useQuery({
-    queryKey: ['/api/ai-development/projects'],
+  // Fetch all projects from Jira
+  const { data: jiraProjects = [], isLoading: isLoadingProjects, error: projectsError, isError: isProjectsError } = useQuery({
+    queryKey: ['/api/jira/projects'],
     queryFn: async () => {
-      const response = await fetch('/api/ai-development/projects', {
+      const response = await fetch('/api/jira/projects', {
         credentials: 'include'
       });
       if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400 && errorData.error === 'Jira integration not configured') {
+          console.warn('Jira integration not configured');
+          return [];
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
@@ -304,14 +302,19 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     select: (data: any[]) => data || []
   });
 
-  // Fetch AI Development tasks from dedicated tasks database
-  const { data: tasksData = [], isLoading: isLoadingTasks, error: tasksError, isError: isTasksError } = useQuery({
-    queryKey: ['/api/ai-development/tasks'],
+  // Fetch all issues from Jira (as tasks)
+  const { data: jiraIssues = [], isLoading: isLoadingTasks, error: tasksError, isError: isTasksError } = useQuery({
+    queryKey: ['/api/jira/issues'],
     queryFn: async () => {
-      const response = await fetch('/api/ai-development/tasks', {
+      const response = await fetch('/api/jira/issues', {
         credentials: 'include'
       });
       if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400 && errorData.error === 'Jira integration not configured') {
+          console.warn('Jira integration not configured');
+          return [];
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
@@ -319,31 +322,87 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     select: (data: any[]) => data || []
   });
 
-  // Fetch QA Testing data from dedicated AIDEVQATESTING database
-  const { data: qaTestingData = [], isLoading: isLoadingQATesting, error: qaTestingError, isError: isQATestingError } = useQuery({
-    queryKey: ['/api/ai-development/qa-testing'],
+  // Fetch QA Testing issues from Jira (filtered by issue type)
+  const { data: jiraTestIssues = [], isLoading: isLoadingQATesting, error: qaTestingError, isError: isQATestingError } = useQuery({
+    queryKey: ['/api/jira/issues?type=test'],
     queryFn: async () => {
-      const response = await fetch('/api/ai-development/qa-testing', {
+      const response = await fetch('/api/jira/issues', {
         credentials: 'include'
       });
       if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400 && errorData.error === 'Jira integration not configured') {
+          console.warn('Jira integration not configured');
+          return [];
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();
+      const allIssues = await response.json();
+      // Filter for test-related issues
+      return allIssues.filter((issue: any) => 
+        issue.fields.issuetype.name.toLowerCase().includes('test') ||
+        issue.fields.issuetype.name.toLowerCase().includes('bug') ||
+        issue.fields.labels?.some((label: string) => label.toLowerCase().includes('test'))
+      );
     },
     select: (data: any[]) => data || []
   });
   
-  // Filter projects by type from AIDEVPROJECTS database
-  const projects = allAIDevItems.filter(item => 
-    ['web application', 'web', 'api backend', 'mobile app', 'desktop app', 'library', 'tool', 'Project'].includes(item.type)
-  );
+  // Map Jira projects to internal format
+  const projects = jiraProjects.map((project: any) => ({
+    id: project.id,
+    name: project.name,
+    description: project.description || '',
+    key: project.key,
+    projectType: project.projectTypeKey,
+    lead: project.lead?.displayName || '',
+    url: project.self,
+    avatarUrl: project.avatarUrls?.['48x48'] || '',
+    category: project.projectCategory?.name || '',
+    startDate: null, // Jira doesn't have start/end dates by default
+    endDate: null,
+    status: 'active', // Map from Jira project status if available
+    priority: 'medium' // Default priority, can be customized
+  }));
   
-  // Use tasks from dedicated tasks database
-  const tasks = tasksData;
-  // Use QA testing data from dedicated AIDEVQATESTING database
-  const testItems = qaTestingData;
-  const promptTemplates = allAIDevItems.filter(item => item.type === 'Library Prompt');
+  // Map Jira issues to tasks format
+  const tasks = jiraIssues.map((issue: any) => ({
+    id: issue.id,
+    key: issue.key,
+    title: issue.fields.summary,
+    description: issue.fields.description || '',
+    status: issue.fields.status.name,
+    priority: issue.fields.priority?.name || 'Medium',
+    projectKey: issue.fields.project.key,
+    projectName: issue.fields.project.name,
+    assignee: issue.fields.assignee?.displayName || '',
+    dueDate: issue.fields.duedate,
+    issueType: issue.fields.issuetype.name,
+    createdAt: issue.fields.created,
+    updatedAt: issue.fields.updated,
+    labels: issue.fields.labels || [],
+    storyPoints: issue.fields.customfield_10014 || null
+  }));
+  
+  // Map test issues to test items format
+  const testItems = jiraTestIssues.map((issue: any) => ({
+    id: issue.id,
+    key: issue.key,
+    title: issue.fields.summary,
+    description: issue.fields.description || '',
+    status: issue.fields.status.name,
+    priority: issue.fields.priority?.name || 'Medium',
+    projectKey: issue.fields.project.key,
+    projectName: issue.fields.project.name,
+    testType: issue.fields.issuetype.name,
+    assignee: issue.fields.assignee?.displayName || '',
+    createdAt: issue.fields.created,
+    updatedAt: issue.fields.updated,
+    labels: issue.fields.labels || []
+  }));
+  
+  // Keep prompt templates from AI Dev items for now
+  const promptTemplates = generateMockPrompts(); // Use mock data for prompts
 
   const isLoading = isLoadingProjects || isLoadingTasks || isLoadingQATesting;
   const error = projectsError || tasksError || qaTestingError;
@@ -372,68 +431,30 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     return typeMapping[projectType] || 'Project';
   };
 
-  // Mutations
+  // Create project in Jira
   const createProjectMutation = useMutation({
-    mutationFn: (data: NewProjectForm) => {
-      const mappedType = mapProjectTypeToDBType(data.projectType);
-      console.log("🔄 Frontend mapping:", { 
-        original: data.projectType, 
-        mapped: mappedType 
-      });
-      
-      return apiRequest('POST', '/api/ai-development/projects', {
-        ...data,
-        type: mappedType,
-        actualHours: 0,
-        isActive: true,
-        tags: data.techStack ? data.techStack.split(',').map(s => s.trim()) : []
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/ai-development/projects'] });
-      toast({ title: "Success", description: "Project created successfully" });
-      setShowNewProjectForm(false);
-    },
-    onError: (error: any) => {
-      console.log("🚨 Project creation error:", error);
-      const message = error?.message || "Failed to create project";
-      if (message.includes("Authentication") || message.includes("401")) {
-        toast({ 
-          title: "Authentication Required", 
-          description: "Please log in as admin to create projects", 
-          variant: "destructive" 
-        });
-      } else {
-        toast({ title: "Error", description: message, variant: "destructive" });
-      }
-    }
-  });
-
-  // Jira project creation mutation
-  const createJiraProjectMutation = useMutation({
     mutationFn: (data: {
       name: string;
       key: string;
       projectTypeKey: string;
       description: string;
     }) => {
-      console.log("📤 Sending Jira project creation request:", data);
+      console.log("📤 Creating Jira project:", data);
       return apiRequest('POST', '/api/jira/projects', data);
     },
     onSuccess: (response: any) => {
-      console.log("✅ Jira project created successfully:", response);
+      queryClient.invalidateQueries({ queryKey: ['/api/jira/projects'] });
       toast({ 
         title: "Success", 
         description: `Jira project "${response.name}" created successfully with key ${response.key}` 
       });
-      setShowJiraProjectForm(false);
-      // Optionally refresh Jira projects list if needed
+      setShowNewProjectForm(false);
+      projectForm.reset();
     },
     onError: (error: any) => {
       console.error("🚨 Jira project creation error:", error);
       const message = error?.message || error?.error || "Failed to create Jira project";
       
-      // Handle different error scenarios
       if (message.includes("authentication") || message.includes("401")) {
         toast({ 
           title: "Authentication Required", 
@@ -444,18 +465,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         toast({ 
           title: "Permission Denied", 
           description: "You don't have permission to create projects in Jira. Please check your Jira account settings.", 
-          variant: "destructive" 
-        });
-      } else if (message.includes("project key")) {
-        toast({ 
-          title: "Invalid Project Key", 
-          description: message, 
-          variant: "destructive" 
-        });
-      } else if (message.includes("project type")) {
-        toast({ 
-          title: "Invalid Project Type", 
-          description: "The selected project type may not be available in your Jira instance", 
           variant: "destructive" 
         });
       } else if (message.includes("not configured")) {
@@ -473,6 +482,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       }
     }
   });
+
+  // Removed duplicate Jira mutation - using single createProjectMutation above
 
   const createTaskMutation = useMutation({
     mutationFn: (data: NewTaskForm) => {
@@ -552,9 +563,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const projectForm = useForm<NewProjectForm>({
     resolver: zodResolver(newProjectSchema),
     defaultValues: {
-      status: "planning",
-      projectType: "web",
-      priority: "medium"
+      name: "",
+      key: "",
+      description: "",
+      projectTypeKey: "software"
     }
   });
 
@@ -586,7 +598,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       });
       return;
     }
-    createProjectMutation.mutate(data);
+    createProjectMutation.mutate(data as any);
   };
 
   const onSubmitTask = (data: NewTaskForm) => {
