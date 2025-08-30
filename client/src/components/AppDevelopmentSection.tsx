@@ -615,14 +615,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Task management functions
   const startEditingTask = (task: any) => {
-    setEditingTask(task.notionId || task.id);
+    setEditingTask(task.id || task.id);
     setEditingTaskValues({
-      title: task.name || task.title,
+      title: task.title || task.title,
       description: task.description,
       status: task.status,
-      category: task.category,
+      category: task.issueType,
       priority: task.priority,
-      projectId: task.projectId
+      projectId: task.projectKey
     });
   };
 
@@ -658,7 +658,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         category: data.testType,
         status: 'Not Started',
         priority: data.priority,
-        projectName: projects.find(p => p.notionId === data.projectId)?.name || '',
+        projectName: projects.find(p => p.key === data.projectId)?.name || '',
         testEnvironment: 'Development'
       }),
     onSuccess: () => {
@@ -725,13 +725,13 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Enhanced utility functions for editing and management
   const startEditingProject = (project: any) => {
-    setEditingProject(project.notionId);
+    setEditingProject(project.id);
     setEditingValues({
       name: project.name,
       description: project.description,
       status: project.status,
       priority: project.priority || 'medium',
-      type: project.type,
+      type: project.projectType,
       startDate: project.startDate || '',
       endDate: project.endDate || ''
     });
@@ -780,7 +780,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       type: testItem.type,
       status: testItem.status,
       priority: testItem.priority,
-      projectId: testItem.projectId
+      projectId: testItem.projectKey
     });
   };
 
@@ -888,7 +888,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       const newDocuments = await Promise.all(uploadPromises);
 
       // Get current project documents
-      const currentProject = projects?.find((p: any) => p.notionId === projectId);
+      const currentProject = projects?.find((p: any) => p.id === projectId);
       const existingDocuments = currentProject?.documents || [];
 
       // Add new documents to existing ones
@@ -918,7 +918,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   const handleRemoveDocument = async (projectId: string, documentIndex: number) => {
     try {
-      const currentProject = projects?.find((p: any) => p.notionId === projectId);
+      const currentProject = projects?.find((p: any) => p.id === projectId);
       const existingDocuments = currentProject?.documents || [];
       
       // Remove document at specified index
@@ -974,16 +974,16 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   );
 
   // Define derived data first
-  const activeProjects = projects.filter(p => p.isActive);
+  const activeProjects = projects.filter(p => p.status === 'active');
   const testingTasks = tasks.filter(t => t.status === 'testing');
 
   // Apply project filter first, then selected project filter
-  const baseFilteredTasks = taskProjectFilter === 'all' ? tasks : tasks.filter(t => t.projectId === taskProjectFilter);
-  const projectTasks = selectedProject ? baseFilteredTasks.filter(t => t.projectId === selectedProject) : baseFilteredTasks;
+  const baseFilteredTasks = taskProjectFilter === 'all' ? tasks : tasks.filter(t => t.projectKey === taskProjectFilter);
+  const projectTasks = selectedProject ? baseFilteredTasks.filter(t => t.projectKey === selectedProject) : baseFilteredTasks;
 
   const sortedTasks = [...projectTasks].sort((a, b) => {
     switch (sortBy) {
-      case 'name': return (a.name || a.title).localeCompare(b.name || b.title);
+      case 'name': return (a.title || '').localeCompare(b.title || '');
       case 'status': return a.status.localeCompare(b.status);
       default: return 0;
     }
@@ -1007,7 +1007,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   // Statistics calculations
   const projectStats = {
     total: projects.length,
-    active: projects.filter(p => p.isActive).length,
+    active: projects.filter(p => p.status === 'active').length,
     completed: projects.filter(p => p.status === 'deployed').length,
     avgTaskCompletion: tasks.length > 0 ? Math.round(tasks.filter(t => t.status === 'done').length / tasks.length * 100) : 0,
     inProgress: projects.filter(p => p.status === 'in_progress').length,
@@ -1033,7 +1033,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   // Test items filtering - use notionId to match projects
   const filteredTestItems = testItems.filter(testItem => {
     if (!selectedTestProject) return true;
-    return testItem.projectId === selectedTestProject;
+    return testItem.projectKey === selectedTestProject;
   });
 
   // Prompt library helper functions
@@ -1223,7 +1223,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               <CardContent>
                 <div className="space-y-4">
                   {projects.slice(0, 4).map((project) => (
-                    <div key={project.notionId || project.id} className="p-4 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div key={project.id || project.id} className="p-4 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-lg flex items-center justify-center">
@@ -1256,11 +1256,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           </div>
                           <div className="flex items-center gap-2">
                             <GitCommit className="h-4 w-4 text-green-500" />
-                            <span>{project.taskCount || 0} tasks</span>
+                            <span>0 tasks</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Bug className="h-4 w-4 text-orange-500" />
-                            <span>{testItems.filter(t => t.projectId === project.notionId).length} QA</span>
+                            <span>{testItems.filter(t => t.projectKey === project.key).length} QA</span>
                           </div>
                         </div>
                         
@@ -1277,22 +1277,22 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                             <Eye className="h-3 w-3 mr-1" />
                             View
                           </Button>
-                          {project.repositoryUrl && (
+                          {project.url && (
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => window.open(project.repositoryUrl, '_blank')}
+                              onClick={() => window.open(project.url, '_blank')}
                               className="text-xs"
                             >
                               <GitBranch className="h-3 w-3 mr-1" />
                               Repo
                             </Button>
                           )}
-                          {project.deploymentUrl && (
+                          {false && (
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => window.open(project.deploymentUrl, '_blank')}
+                              onClick={() => {/*placeholder*/}}
                               className="text-xs"
                             >
                               <ExternalLink className="h-3 w-3 mr-1" />
@@ -1318,14 +1318,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               <CardContent>
                 <div className="space-y-3">
                   {tasks.slice(0, 5).map((task) => (
-                    <div key={task.notionId || task.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-lg">
+                    <div key={task.id || task.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-lg">
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
-                        {getTaskCategoryIcon(task.category)}
+                        {getTaskCategoryIcon(task.issueType)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{task.title}</p>
                         <p className="text-xs text-muted-foreground dark:text-gray-400">
-                          {projects.find(p => p.notionId === task.projectId)?.name} • {task.category}
+                          {projects.find(p => p.key === task.projectKey)?.name} • {task.issueType}
                         </p>
                       </div>
                       <Badge className={getStatusColor(task.status)} variant="outline">
@@ -1443,18 +1443,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               
               <Button 
                 onClick={() => setShowNewProjectForm(true)}
-                className="bg-gradient-to-r from-purple-400 to-indigo-500 text-white"
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 New Project
-              </Button>
-              
-              <Button 
-                onClick={() => setShowJiraProjectForm(true)}
-                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-              >
-                <GitBranch className="h-4 w-4 mr-2" />
-                Create Jira Project
               </Button>
             </div>
           </div>
@@ -1491,14 +1483,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredProjects.map((project) => (
-                      <tr key={project.notionId || project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                      <tr key={project.id || project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
-                              {getProjectIcon(project.type || 'web')}
+                              {getProjectIcon(project.projectType || 'web')}
                             </div>
                             <div className="flex-1 min-w-0">
-                              {editingProject === project.notionId ? (
+                              {editingProject === project.id ? (
                                 <div className="space-y-2">
                                   <Input
                                     value={editingValues.name || ''}
@@ -1524,10 +1516,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.notionId ? (
+                          {editingProject === project.id ? (
                             <Select 
-                              value={editingValues.type || project.type} 
-                              onValueChange={(value) => setEditingValues({...editingValues, type: value})}
+                              value={editingValues.type || project.projectType} 
+                              onValueChange={(value) => setEditingValues({...editingValues, projectType: value})}
                             >
                               <SelectTrigger className="w-32">
                                 <SelectValue />
@@ -1573,12 +1565,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                             </Select>
                           ) : (
                             <span className="text-sm text-gray-900 dark:text-white capitalize">
-                              {(project.type || 'Unknown').replace('_', ' ')}
+                              {(project.projectType || 'Unknown').replace('_', ' ')}
                             </span>
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.notionId ? (
+                          {editingProject === project.id ? (
                             <Select 
                               value={editingValues.status || project.status} 
                               onValueChange={(value) => setEditingValues({...editingValues, status: value})}
@@ -1601,7 +1593,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.notionId ? (
+                          {editingProject === project.id ? (
                             <Select 
                               value={editingValues.priority || project.priority} 
                               onValueChange={(value) => setEditingValues({...editingValues, priority: value})}
@@ -1628,7 +1620,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.notionId ? (
+                          {editingProject === project.id ? (
                             <Input
                               type="date"
                               value={editingValues.startDate || ''}
@@ -1642,7 +1634,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingProject === project.notionId ? (
+                          {editingProject === project.id ? (
                             <Input
                               type="date"
                               value={editingValues.endDate || ''}
@@ -1657,11 +1649,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            {editingProject === project.notionId ? (
+                            {editingProject === project.id ? (
                               <div className="flex gap-1">
                                 <Button 
                                   size="sm" 
-                                  onClick={() => saveProjectEdit(project.notionId)}
+                                  onClick={() => saveProjectEdit(project.id)}
                                   className="bg-green-500 hover:bg-green-600 text-white"
                                 >
                                   <Save className="h-3 w-3" />
@@ -1686,7 +1678,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                 <Button 
                                   size="sm" 
                                   variant="ghost" 
-                                  onClick={() => deleteProject(project.notionId)}
+                                  onClick={() => deleteProject(project.id)}
                                   className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
                                   <Trash2 className="h-3 w-3" />
@@ -1759,7 +1751,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 {selectedProject 
                   ? `${projectTasks.length} tasks in ${projects.find(p => p.id === selectedProject)?.name || 'selected project'}` 
                   : taskProjectFilter !== 'all'
-                    ? `${baseFilteredTasks.length} tasks in ${projects.find(p => p.notionId === taskProjectFilter)?.name || 'selected project'} • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
+                    ? `${baseFilteredTasks.length} tasks in ${projects.find(p => p.id === taskProjectFilter)?.name || 'selected project'} • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
                     : `${baseFilteredTasks.length} total tasks • ${taskStats.inProgress} in progress • ${taskStats.completed} completed`
                 }
               </p>
@@ -1773,7 +1765,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 <SelectContent>
                   <SelectItem value="all">All Projects</SelectItem>
                   {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.notionId}>
+                    <SelectItem key={project.id} value={project.id}>
                       {project.name}
                     </SelectItem>
                   ))}
@@ -1876,14 +1868,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredTasks.map((task) => (
-                      <tr key={task.notionId || task.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                      <tr key={task.id || task.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
-                              {getTaskCategoryIcon(task.category)}
+                              {getTaskCategoryIcon(task.issueType)}
                             </div>
                             <div className="flex-1 min-w-0">
-                              {editingTask === (task.notionId || task.id) ? (
+                              {editingTask === (task.id || task.id) ? (
                                 <div className="space-y-2">
                                   <Input
                                     value={editingTaskValues.title || ''}
@@ -1901,7 +1893,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                 </div>
                               ) : (
                                 <div>
-                                  <div className="font-semibold text-gray-900 dark:text-white">{task.name || task.title}</div>
+                                  <div className="font-semibold text-gray-900 dark:text-white">{task.title || task.title}</div>
                                   <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{task.description}</div>
                                 </div>
                               )}
@@ -1909,9 +1901,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          {editingTask === (task.notionId || task.id) ? (
+                          {editingTask === (task.id || task.id) ? (
                             <Select 
-                              value={editingTaskValues.projectId || task.projectId} 
+                              value={editingTaskValues.projectId || task.projectKey} 
                               onValueChange={(value) => setEditingTaskValues({...editingTaskValues, projectId: value})}
                             >
                               <SelectTrigger className="w-32">
@@ -1927,14 +1919,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                             </Select>
                           ) : (
                             <span className="text-sm text-gray-900 dark:text-white">
-                              {projects.find(p => p.notionId === task.projectId)?.name || 'No Project'}
+                              {projects.find(p => p.key === task.projectKey)?.name || 'No Project'}
                             </span>
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingTask === (task.notionId || task.id) ? (
+                          {editingTask === (task.id || task.id) ? (
                             <Select 
-                              value={editingTaskValues.category || task.category} 
+                              value={editingTaskValues.category || task.issueType} 
                               onValueChange={(value) => setEditingTaskValues({...editingTaskValues, category: value})}
                             >
                               <SelectTrigger className="w-32">
@@ -1949,12 +1941,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                             </Select>
                           ) : (
                             <Badge variant="outline" className="text-xs capitalize">
-                              {task.category}
+                              {task.issueType}
                             </Badge>
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingTask === (task.notionId || task.id) ? (
+                          {editingTask === (task.id || task.id) ? (
                             <Select 
                               value={editingTaskValues.status || task.status} 
                               onValueChange={(value) => setEditingTaskValues({...editingTaskValues, status: value})}
@@ -1977,7 +1969,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {editingTask === (task.notionId || task.id) ? (
+                          {editingTask === (task.id || task.id) ? (
                             <Select 
                               value={editingTaskValues.priority || task.priority} 
                               onValueChange={(value) => setEditingTaskValues({...editingTaskValues, priority: value})}
@@ -2003,11 +1995,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            {editingTask === (task.notionId || task.id) ? (
+                            {editingTask === (task.id || task.id) ? (
                               <div className="flex gap-1">
                                 <Button 
                                   size="sm" 
-                                  onClick={() => saveTaskEdit(task.notionId || task.id)}
+                                  onClick={() => saveTaskEdit(task.id || task.id)}
                                   className="bg-green-500 hover:bg-green-600 text-white"
                                 >
                                   <Save className="h-3 w-3" />
@@ -2032,7 +2024,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                 <Button 
                                   size="sm" 
                                   variant="ghost" 
-                                  onClick={() => deleteTask(task.notionId || task.id)}
+                                  onClick={() => deleteTask(task.id || task.id)}
                                   className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
                                   <Trash2 className="h-3 w-3" />
@@ -2112,7 +2104,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               <h2 className="text-2xl font-bold text-[#4b5563] dark:text-white">Testing & Quality Assurance</h2>
               <p className="text-sm text-muted-foreground dark:text-gray-400">
                 {selectedTestProject 
-                  ? `Testing tasks for ${projects.find(p => p.notionId === selectedTestProject)?.name || 'selected project'}` 
+                  ? `Testing tasks for ${projects.find(p => p.id === selectedTestProject)?.name || 'selected project'}` 
                   : `${testItems.length} total test items • ${testItems.filter(t => t.status === 'in_progress').length} in progress`
                 }
               </p>
@@ -2126,7 +2118,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 <SelectContent>
                   <SelectItem value="all">All Projects</SelectItem>
                   {projects.map((project) => (
-                    <SelectItem key={project.notionId} value={project.notionId}>
+                    <SelectItem key={project.id} value={project.id}>
                       {project.name}
                     </SelectItem>
                   ))}
@@ -2172,7 +2164,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredTestItems.map((testItem) => (
-                      <tr key={testItem.notionId || testItem.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                      <tr key={testItem.id || testItem.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-red-400 to-orange-500 rounded-xl flex items-center justify-center">
@@ -2207,7 +2199,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         <td className="px-6 py-4">
                           {editingTestItem === testItem.id ? (
                             <Select 
-                              value={editingTestValues.projectId || testItem.projectId} 
+                              value={editingTestValues.projectId || testItem.projectKey} 
                               onValueChange={(value) => setEditingTestValues({...editingTestValues, projectId: value})}
                             >
                               <SelectTrigger className="w-32">
@@ -2223,7 +2215,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                             </Select>
                           ) : (
                             <span className="text-sm text-gray-900 dark:text-white">
-                              {projects.find(p => p.notionId === testItem.projectId)?.name || testItem.projectName || 'No Project'}
+                              {projects.find(p => p.key === testItem.projectKey)?.name || testItem.projectName || 'No Project'}
                             </span>
                           )}
                         </td>
@@ -2433,7 +2425,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     <SelectContent>
                       <SelectItem value="all">All Projects</SelectItem>
                       {projects.map((project) => (
-                        <SelectItem key={project.notionId || project.id} value={project.notionId || project.id}>
+                        <SelectItem key={project.id || project.id} value={project.id || project.id}>
                           {project.name}
                         </SelectItem>
                       ))}
@@ -2449,7 +2441,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
             {projects
               .filter(project => {
                 if (!selectedProject) return true;
-                return (project.notionId || project.id) === selectedProject;
+                return (project.id || project.id) === selectedProject;
               })
               .filter(project => {
                 if (!searchQuery) return true;
@@ -2457,7 +2449,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                        (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
               })
               .map((project) => (
-              <Card key={project.notionId || project.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+              <Card key={project.id || project.id} className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4 flex-1">
@@ -2488,7 +2480,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           Project Type
                         </h4>
                         <p className="text-sm text-muted-foreground capitalize">
-                          {project.projectType || project.type || 'Not specified'}
+                          {project.projectType || project.projectType || 'Not specified'}
                         </p>
                       </div>
                       <div className="space-y-2">
@@ -2507,7 +2499,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           Progress
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {tasks.filter(t => t.projectId === (project.notionId || project.id) && t.status === 'done').length} / {tasks.filter(t => t.projectId === (project.notionId || project.id)).length} tasks completed
+                          {tasks.filter(t => t.projectId === (project.id || project.id) && t.status === 'done').length} / {tasks.filter(t => t.projectId === (project.id || project.id)).length} tasks completed
                         </p>
                       </div>
                     </div>
@@ -2530,18 +2522,18 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     )}
 
                     {/* Project Links */}
-                    {(project.repositoryUrl || project.deploymentUrl) && (
+                    {project.url && (
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                           <ExternalLink className="h-4 w-4 text-indigo-500" />
                           Project Links
                         </h4>
                         <div className="flex gap-3">
-                          {project.repositoryUrl && (
+                          {project.url && (
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => window.open(project.repositoryUrl, '_blank')}
+                              onClick={() => window.open(project.url, '_blank')}
                               className="flex items-center gap-2"
                             >
                               <GitBranch className="h-3 w-3" />
@@ -2549,11 +2541,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               <ExternalLink className="h-3 w-3" />
                             </Button>
                           )}
-                          {project.deploymentUrl && (
+                          {false && (
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => window.open(project.deploymentUrl, '_blank')}
+                              onClick={() => {/*placeholder*/}}
                               className="flex items-center gap-2"
                             >
                               <Globe className="h-3 w-3" />
@@ -2569,25 +2561,25 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         <ListTodo className="h-4 w-4 text-pink-500" />
-                        Related Tasks ({tasks.filter(t => t.projectId === (project.notionId || project.id)).length})
+                        Related Tasks ({tasks.filter(t => t.projectId === (project.id || project.id)).length})
                       </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {tasks.filter(t => t.projectId === (project.notionId || project.id)).slice(0, 3).map((task) => (
+                        {tasks.filter(t => t.projectId === (project.id || project.id)).slice(0, 3).map((task) => (
                           <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-xs">
-                            <span className="font-medium truncate flex-1">{task.title || task.name}</span>
+                            <span className="font-medium truncate flex-1">{task.title || task.title}</span>
                             <Badge className={getStatusColor(task.status)} variant="outline">
                               {(task.status || 'Unknown').replace('_', ' ')}
                             </Badge>
                           </div>
                         ))}
-                        {tasks.filter(t => t.projectId === (project.notionId || project.id)).length === 0 && (
+                        {tasks.filter(t => t.projectId === (project.id || project.id)).length === 0 && (
                           <p className="text-xs text-muted-foreground text-center py-2">
                             No tasks found for this project
                           </p>
                         )}
-                        {tasks.filter(t => t.projectId === (project.notionId || project.id)).length > 3 && (
+                        {tasks.filter(t => t.projectId === (project.id || project.id)).length > 3 && (
                           <p className="text-xs text-muted-foreground text-center">
-                            ... and {tasks.filter(t => t.projectId === (project.notionId || project.id)).length - 3} more tasks
+                            ... and {tasks.filter(t => t.projectId === (project.id || project.id)).length - 3} more tasks
                           </p>
                         )}
                       </div>
@@ -3081,8 +3073,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         </DialogContent>
       </Dialog>
 
-      {/* Jira Project Creation Dialog */}
-      <Dialog open={showJiraProjectForm} onOpenChange={setShowJiraProjectForm}>
+      {/* Jira Project Creation Dialog - Removed as we are using single form */}
+      {/* <Dialog open={false} onOpenChange={() => {}}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-blue-600 dark:text-blue-400">Create Jira Project</DialogTitle>
@@ -3189,14 +3181,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => setShowJiraProjectForm(false)}
+                onClick={() => {}}
               >
                 Cancel
               </Button>
             </div>
           </form>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* New Task Form Modal */}
       <Dialog open={showNewTaskForm} onOpenChange={setShowNewTaskForm}>
@@ -3236,7 +3228,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         </FormControl>
                         <SelectContent>
                           {projects.map((project, index) => (
-                            <SelectItem key={project.notionId || `task-project-${index}`} value={project.notionId || index.toString()}>
+                            <SelectItem key={project.id || `task-project-${index}`} value={project.id || index.toString()}>
                               {project.name || 'Untitled Project'}
                             </SelectItem>
                           ))}
@@ -3565,7 +3557,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     <div className="flex items-center justify-center gap-2 mb-1">
                       <GitCommit className="h-4 w-4 text-green-500" />
                       <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {modalProject.taskCount || 0}
+                        { 0}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground">Tasks</p>
@@ -3574,7 +3566,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     <div className="flex items-center justify-center gap-2 mb-1">
                       <Bug className="h-4 w-4 text-orange-500" />
                       <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {testItems.filter(t => t.projectId === modalProject.notionId).length}
+                        {testItems.filter(t => t.projectKey === modalProject.key).length}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground">QA Items</p>
@@ -3638,8 +3630,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Is Active:</span>
-                      <Badge variant={modalProject.isActive ? "default" : "secondary"}>
-                        {modalProject.isActive ? 'Active' : 'Inactive'}
+                      <Badge variant={modalProject.status === 'active' ? "default" : "secondary"}>
+                        {modalProject.status === 'active' ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center">
@@ -3653,7 +3645,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </div>
 
               {/* Project Links */}
-              {(modalProject.repositoryUrl || modalProject.deploymentUrl) && (
+              {modalProject.url && (
                 <Card className="bg-white/50 dark:bg-gray-800/50">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -3663,11 +3655,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   </CardHeader>
                   <CardContent>
                     <div className="flex gap-3">
-                      {modalProject.repositoryUrl && (
+                      {modalProject.url && (
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => window.open(modalProject.repositoryUrl, '_blank')}
+                          onClick={() => window.open(modalProject.url, '_blank')}
                           className="flex items-center gap-2"
                         >
                           <GitBranch className="h-4 w-4" />
@@ -3675,11 +3667,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           <ExternalLink className="h-3 w-3" />
                         </Button>
                       )}
-                      {modalProject.deploymentUrl && (
+                      {false && (
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => window.open(modalProject.deploymentUrl, '_blank')}
+                          onClick={() => {/*placeholder*/}}
                           className="flex items-center gap-2"
                         >
                           <Globe className="h-4 w-4" />
@@ -3718,7 +3710,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Paperclip className="h-4 w-4 text-blue-500" />
-                    Project Documents ({(modalProject.documents || []).length})
+                    Project Documents (0)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -3738,24 +3730,24 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           accept="*/*"
                           onChange={(e) => {
                             if (e.target.files && e.target.files.length > 0) {
-                              handleFileUpload(modalProject.notionId || modalProject.id, e.target.files);
+                              handleFileUpload(modalProject.id, e.target.files);
                               e.target.value = ''; // Reset input
                             }
                           }}
                           className="hidden"
-                          id={`file-upload-${modalProject.notionId || modalProject.id}`}
+                          id={`file-upload-${modalProject.id}`}
                         />
                         <Button
                           variant="default"
                           size="sm"
                           onClick={() => {
-                            const input = document.getElementById(`file-upload-${modalProject.notionId || modalProject.id}`) as HTMLInputElement;
+                            const input = document.getElementById(`file-upload-${modalProject.id}`) as HTMLInputElement;
                             input?.click();
                           }}
-                          disabled={uploadingFiles[modalProject.notionId || modalProject.id]}
+                          disabled={uploadingFiles[modalProject.id]}
                           className="h-9 px-4 text-sm bg-blue-500 hover:bg-blue-600 text-white"
                         >
-                          {uploadingFiles[modalProject.notionId || modalProject.id] ? (
+                          {uploadingFiles[modalProject.id] ? (
                             <>
                               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                               Uploading...
@@ -3772,7 +3764,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
                     {/* File List */}
                     <div className="space-y-3 max-h-64 overflow-y-auto">
-                      {(modalProject.documents || []).map((doc: any, index: number) => {
+                      {[].map((doc: any, index: number) => {
                         const fileName = doc.name || doc.file?.name || 'Unknown File';
                         // Handle both direct URLs and external object structure
                         let fileUrl = '#';
@@ -3831,7 +3823,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               <Button 
                                 variant="ghost" 
                                 size="sm"
-                                onClick={() => handleRemoveDocument(modalProject.notionId || modalProject.id, index)}
+                                onClick={() => handleRemoveDocument(modalProject.id, index)}
                                 className="h-8 w-8 p-0 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
                                 title="Remove document"
                               >
@@ -3842,7 +3834,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         );
                       })}
 
-                      {(!modalProject.documents || modalProject.documents.length === 0) && (
+                      {true && (
                         <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
                           <File className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                           <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">No documents attached</h3>
@@ -3859,18 +3851,18 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               accept="*/*"
                               onChange={(e) => {
                                 if (e.target.files && e.target.files.length > 0) {
-                                  handleFileUpload(modalProject.notionId || modalProject.id, e.target.files);
+                                  handleFileUpload(modalProject.id, e.target.files);
                                   e.target.value = '';
                                 }
                               }}
                               className="hidden"
-                              id={`file-upload-empty-${modalProject.notionId || modalProject.id}`}
+                              id={`file-upload-empty-${modalProject.id}`}
                             />
                             <Button
                               variant="default"
                               size="sm"
                               onClick={() => {
-                                const input = document.getElementById(`file-upload-empty-${modalProject.notionId || modalProject.id}`) as HTMLInputElement;
+                                const input = document.getElementById(`file-upload-empty-${modalProject.id}`) as HTMLInputElement;
                                 input?.click();
                               }}
                               className="h-8 px-3 text-xs bg-blue-500 hover:bg-blue-600 text-white"
@@ -3883,7 +3875,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       )}
                     </div>
 
-                    {uploadingFiles[modalProject.notionId || modalProject.id] && (
+                    {uploadingFiles[modalProject.id] && (
                       <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
                         <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">Uploading files...</p>
@@ -3898,12 +3890,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <CheckSquare className="h-4 w-4 text-green-500" />
-                    Related Tasks ({tasks.filter(t => t.projectId === modalProject.notionId).length})
+                    Related Tasks ({tasks.filter(t => t.projectKey === modalProject.key).length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {tasks.filter(t => t.projectId === modalProject.notionId).slice(0, 5).map((task) => (
+                    {tasks.filter(t => t.projectKey === modalProject.key).slice(0, 5).map((task) => (
                       <div key={task.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
                         <span className="text-sm font-medium truncate flex-1">{task.title}</span>
                         <Badge className={getStatusColor(task.status)} variant="outline">
@@ -3911,14 +3903,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         </Badge>
                       </div>
                     ))}
-                    {tasks.filter(t => t.projectId === modalProject.notionId).length === 0 && (
+                    {tasks.filter(t => t.projectKey === modalProject.key).length === 0 && (
                       <p className="text-sm text-muted-foreground text-center py-4">
                         No tasks found for this project
                       </p>
                     )}
-                    {tasks.filter(t => t.projectId === modalProject.notionId).length > 5 && (
+                    {tasks.filter(t => t.projectKey === modalProject.key).length > 5 && (
                       <p className="text-xs text-muted-foreground text-center">
-                        ... and {tasks.filter(t => t.projectId === modalProject.notionId).length - 5} more tasks
+                        ... and {tasks.filter(t => t.projectKey === modalProject.key).length - 5} more tasks
                       </p>
                     )}
                   </div>
