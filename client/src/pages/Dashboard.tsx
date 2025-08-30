@@ -11,7 +11,7 @@ import GoalsSection from "../components/GoalsSection";
 import ReportsSection from "../components/ReportsSection";
 import DashboardHome from "../components/DashboardHome";
 import SiteMapSection from "../components/SiteMapSection";
-import { UnifiedJiraSection } from "../components/UnifiedJiraSection";
+import AppDevelopmentSection from "../components/AppDevelopmentSection";
 import ContentManagementSuite from "../components/ContentManagementSuite";
 import ContentCreationSection from "../components/ContentCreationSection";
 import BlogContentStudio from "../components/BlogContentStudio";
@@ -282,7 +282,7 @@ function Dashboard() {
           {activeView === "groceries" && <GrocerySection />}
           {activeView === "content" && <ContentManagementSuite selectedDate={selectedDate} />}
           {activeView === "rotationonly" && <ContentCreationSection selectedDate={selectedDate} />}
-          {activeView === "apps" && <UnifiedJiraSection />}
+          {activeView === "apps" && <AppDevelopmentSection selectedDate={selectedDate} />}
           {activeView === "blog-studio" && <BlogContentStudio />}
           {activeView === "notion" && <NotionIntegration />}
           {activeView === "sitemap" && (

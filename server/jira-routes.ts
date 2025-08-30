@@ -81,49 +81,6 @@ router.post('/projects', requireAuth, async (req, res) => {
   }
 });
 
-// Get all Jira issues
-router.get('/issues', async (req, res) => {
-  try {
-    if (!jiraService.isConfigured()) {
-      return res.status(400).json({ error: 'Jira integration not configured' });
-    }
-    
-    const issues = await jiraService.getIssues();
-    res.json(issues);
-  } catch (error: any) {
-    console.error('Error fetching Jira issues:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Create a new Jira issue
-router.post('/issues', requireAuth, async (req, res) => {
-  try {
-    if (!jiraService.isConfigured()) {
-      return res.status(400).json({ error: 'Jira integration not configured' });
-    }
-    
-    const { projectKey, summary, description, issueType, priority } = req.body;
-    
-    if (!projectKey || !summary || !issueType) {
-      return res.status(400).json({ error: 'Project key, summary, and issue type are required' });
-    }
-    
-    const issue = await jiraService.createIssue({
-      projectKey,
-      summary,
-      description,
-      issueType,
-      priority
-    });
-    
-    res.json(issue);
-  } catch (error: any) {
-    console.error('Error creating Jira issue:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // Get issues for a specific project
 router.get('/projects/:projectKey/issues', requireAuth, async (req, res) => {
   try {
