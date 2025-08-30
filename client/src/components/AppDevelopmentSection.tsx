@@ -2258,7 +2258,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                               ) : (
                                 <div>
                                   <div className="font-semibold text-gray-900 dark:text-white">{testItem.name}</div>
-                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{testItem.description}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                                    {typeof testItem.description === 'object' && testItem.description?.content ? 
+                                      testItem.description.content : 
+                                      (testItem.description || 'No description')
+                                    }
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -2789,7 +2794,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg truncate">{template.title}</CardTitle>
                         <p className="text-sm text-muted-foreground dark:text-gray-400">
-                          {template.description}
+                          {typeof template.description === 'object' && template.description?.content ? 
+                            template.description.content : 
+                            (template.description || 'No description')
+                          }
                         </p>
                       </div>
                     </div>
@@ -3610,7 +3618,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 </div>
                 
                 {modalProject.description && (
-                  <p className="text-gray-700 dark:text-gray-300 mb-4">{modalProject.description}</p>
+                  <p className="text-gray-700 dark:text-gray-300 mb-4">
+                    {typeof modalProject.description === 'object' && modalProject.description?.content ? 
+                      modalProject.description.content : 
+                      (modalProject.description || 'No description')
+                    }
+                  </p>
                 )}
                 
                 {/* Key Metrics */}
