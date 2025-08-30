@@ -2501,7 +2501,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
             </CardContent>
           </Card>
 
-          {/* Related List - Recently Updated Projects */}
+          {/* Related List - Recently Updated Jira Projects */}
           <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -2509,55 +2509,67 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 <CardTitle className="text-lg text-gray-900 dark:text-white">Recently Updated Projects</CardTitle>
               </div>
               <p className="text-sm text-muted-foreground dark:text-gray-400">
-                Last 3 projects with recent activity
+                Last 3 Jira projects with recent activity
               </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {projects
-                  .filter(project => project.updatedAt) // Only projects with update timestamps
-                  .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()) // Sort by most recent first
-                  .slice(0, 3) // Take only first 3
-                  .map((project) => (
-                    <div key={project.id || project.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <FileText className="h-4 w-4 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-gray-900 dark:text-white truncate">{project.name}</p>
-                          <Badge className={getStatusColor(project.status)}>
-                            {(project.status || 'Unknown').replace('_', ' ')}
-                          </Badge>
+                {isLoadingProjects ? (
+                  <div className="text-center py-6">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                    <p className="text-sm text-gray-500">Loading Jira projects...</p>
+                  </div>
+                ) : jiraProjects && jiraProjects.length > 0 ? (
+                  jiraProjects
+                    .slice(0, 3) // Take first 3 projects from Jira
+                    .map((project: any) => {
+                      // Count related issues for this project
+                      const projectIssues = jiraIssues?.filter((issue: any) => issue.projectKey === project.key) || [];
+                      const completedIssues = projectIssues.filter((issue: any) => 
+                        issue.status === 'completed' || issue.status === 'done' || 
+                        (typeof issue.status === 'string' && issue.status.toLowerCase().includes('done'))
+                      );
+
+                      return (
+                        <div key={project.key} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                          <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-4 w-4 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-900 dark:text-white truncate">{project.name}</p>
+                              <Badge variant="secondary" className="text-xs">
+                                {project.key}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1">
+                              <p className="text-xs text-muted-foreground">
+                                Project Type: {project.projectTypeKey || 'Standard'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {completedIssues.length} / {projectIssues.length} issues
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setActiveView("projects");
+                              }}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 mt-1">
-                          <p className="text-xs text-muted-foreground">
-                            Updated {format(new Date(project.updatedAt), 'MMM dd, yyyy')}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {tasks.filter(t => t.projectId === (project.id || project.id) && t.status === 'done').length} / {tasks.filter(t => t.projectId === (project.id || project.id)).length} tasks
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedProject(project.id || project.id);
-                            setActiveView("projects");
-                          }}
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                {projects.filter(project => project.updatedAt).length === 0 && (
+                      );
+                    })
+                ) : (
                   <div className="text-center py-6 text-gray-500 dark:text-gray-400">
                     <FileX className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm">No recently updated projects found</p>
+                    <p className="text-sm">No Jira projects found</p>
                   </div>
                 )}
               </div>
