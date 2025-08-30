@@ -274,6 +274,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const [editingTestValues, setEditingTestValues] = useState<any>({});
   const [sortBy, setSortBy] = useState<'name' | 'status' | 'progress' | 'priority'>('name');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [currentTaskPage, setCurrentTaskPage] = useState(1);
+  const [tasksPerPage] = useState(10);
   const [taskFilter, setTaskFilter] = useState<string>('all');
   const [taskProjectFilter, setTaskProjectFilter] = useState<string>('all');
   const [selectedTestProject, setSelectedTestProject] = useState<string | null>(null);
@@ -1029,6 +1031,18 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     if (taskFilter === 'all') return true;
     return task.status === taskFilter;
   });
+
+  // Pagination logic for tasks
+  const totalTasks = filteredTasks.length;
+  const totalTaskPages = Math.ceil(totalTasks / tasksPerPage);
+  const startTaskIndex = (currentTaskPage - 1) * tasksPerPage;
+  const endTaskIndex = startTaskIndex + tasksPerPage;
+  const paginatedTasks = filteredTasks.slice(startTaskIndex, endTaskIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentTaskPage(1);
+  }, [taskFilter, taskProjectFilter]);
 
   // Test items filtering - use notionId to match projects
   const filteredTestItems = testItems.filter(testItem => {
@@ -1867,7 +1881,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredTasks.map((task) => (
+                    {paginatedTasks.map((task) => (
                       <tr key={task.id || task.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -2082,6 +2096,50 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   </tbody>
                 </table>
               </div>
+              
+              {/* Task Pagination Controls */}
+              {totalTaskPages > 1 && (
+                <div className="flex items-center justify-between px-6 py-3 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span>
+                      Showing {startTaskIndex + 1}-{Math.min(endTaskIndex, totalTasks)} of {totalTasks} tasks
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentTaskPage(currentTaskPage - 1)}
+                      disabled={currentTaskPage === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      ‹
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalTaskPages }, (_, i) => i + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant={currentTaskPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentTaskPage(page)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentTaskPage(currentTaskPage + 1)}
+                      disabled={currentTaskPage === totalTaskPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      ›
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
           
