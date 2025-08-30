@@ -266,6 +266,24 @@ export class JiraIntegrationService {
     }
   }
 
+  // Get all issues from all projects
+  async getIssues(maxResults: number = 100): Promise<JiraIssue[]> {
+    try {
+      const jql = `ORDER BY updated DESC`;
+      const response = await this.client.get('/search', {
+        params: {
+          jql,
+          maxResults,
+          fields: 'summary,description,status,assignee,priority,project,issuetype,created,updated,duedate,labels,components'
+        }
+      });
+      return response.data.issues;
+    } catch (error: any) {
+      console.error('Error fetching all issues:', error.message);
+      throw new Error(`Failed to fetch all issues: ${error.message}`);
+    }
+  }
+
   // Get a single issue by key
   async getIssue(issueKey: string): Promise<JiraIssue> {
     try {

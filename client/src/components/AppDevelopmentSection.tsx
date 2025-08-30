@@ -146,55 +146,36 @@ const generateMockPrompts = (): PromptTemplate[] => [
   }
 ];
 
-// Form Schemas
+// Form Schemas - Unified Jira-based
 const newProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
+  key: z.string().min(2, "Project key must be at least 2 characters").max(10, "Project key must be 10 characters or less"),
   description: z.string().optional(),
-  status: z.enum(["planning", "in_progress", "testing", "deployed", "on_hold"]),
-  projectType: z.enum(["web", "mobile", "desktop", "api", "library", "tool"]),
-  repositoryUrl: z.string().optional(),
-  deploymentUrl: z.string().optional(),
-  targetDate: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  techStack: z.string().optional(),
-  priority: z.enum(["low", "medium", "high"]).optional()
+  projectTypeKey: z.enum(["business", "software", "service_desk"]).default("business"),
+  leadAccountId: z.string().optional()
 });
 
 const newTaskSchema = z.object({
-  projectId: z.string().min(1, "Project is required"),
-  title: z.string().min(1, "Task title is required"),
+  projectKey: z.string().min(1, "Project is required"),
+  summary: z.string().min(1, "Task summary is required"),
   description: z.string().optional(),
-  status: z.enum(["todo", "in_progress", "review", "testing", "done"]),
-  category: z.enum(["feature", "bug", "improvement", "documentation"]),
-  priority: z.enum(["low", "medium", "high"]).optional()
-});
-
-const newPromptSchema = z.object({
-  title: z.string().min(1, "Prompt title is required"),
-  description: z.string().min(1, "Description is required"),
-  category: z.enum(["code_generation", "debugging", "documentation", "database", "web_design", "mobile", "social_media", "custom"]),
-  language: z.string().optional(),
-  framework: z.string().optional(),
-  prompt: z.string().min(10, "Prompt must be at least 10 characters"),
-  tags: z.string().optional()
+  issueType: z.enum(["Story", "Task", "Bug", "Epic"]).default("Task"),
+  priority: z.enum(["Lowest", "Low", "Medium", "High", "Highest"]).default("Medium"),
+  assigneeId: z.string().optional()
 });
 
 const testItemSchema = z.object({
-  projectId: z.string().min(1, "Project is required"),
-  title: z.string().min(1, "Test item title is required"),
+  projectKey: z.string().min(1, "Project is required"),
+  summary: z.string().min(1, "Test item summary is required"),
   description: z.string().optional(),
-  testType: z.enum(["unit", "integration", "ui", "performance", "security", "manual"]),
-  priority: z.enum(["low", "medium", "high", "critical"]),
-  expectedResult: z.string().optional(),
-  testSteps: z.string().optional(),
-  automatedTest: z.boolean().optional()
+  testType: z.enum(["Unit Test", "Integration Test", "UI Test", "Performance Test", "Security Test", "Manual Test"]).default("Manual Test"),
+  priority: z.enum(["Lowest", "Low", "Medium", "High", "Highest"]).default("Medium"),
+  assigneeId: z.string().optional()
 });
 
 type NewProjectForm = z.infer<typeof newProjectSchema>;
 type NewTaskForm = z.infer<typeof newTaskSchema>;
 type TestItemForm = z.infer<typeof testItemSchema>;
-type NewPromptForm = z.infer<typeof newPromptSchema>;
 
 interface AppProject {
   id: number;

@@ -21,6 +21,16 @@ Preferred communication style: Simple, everyday language.
 - **ContentManagementSuite**: Simplified neutral gray design, handles mini-game blocks and @rotationonly content
 - **Rule**: When editing one content studio, the other must remain unchanged
 
+### Unified Jira Integration Requirements
+- **Critical User Requirement**: ALL projects, tasks, and test items must be Jira-integrated with unified creation (no separate Jira/default buttons)
+- **Status-driven Workflow**: Tasks automatically move between tabs based on Jira status changes
+  - Tasks with status "To Do", "In Progress", "Implementing" appear in Tasks tab
+  - Tasks with status "QA Testing", "Testing" appear in Testing & QA tab  
+  - Tasks with status "Done" and type "Test" move out of Testing & QA tab
+  - Documentation items appear across all tabs based on labels/type
+- **UI Structure**: Maintain 6 columns per tab with Jira-appropriate column headers
+- **Component**: UnifiedJiraSection.tsx replaces AppDevelopmentSection.tsx entirely
+
 ## System Architecture
 
 ### Frontend Architecture
