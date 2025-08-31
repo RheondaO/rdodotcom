@@ -4079,6 +4079,78 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Related Epics from Jira */}
+              <Card className="bg-white/50 dark:bg-gray-800/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <ListTodo className="h-4 w-4 text-pink-500" />
+                    Related Epics ({(() => {
+                      // Filter epics for this Jira project using JQL-style logic: Project = modalProject.key
+                      const relatedEpics = jiraIssues?.filter(issue => {
+                        const issueType = issue.issueType?.toLowerCase() || '';
+                        const isEpicType = issueType === 'epic' || 
+                                         issueType.includes('epic') || 
+                                         issueType === 'feature' ||
+                                         issueType === 'theme' ||
+                                         issueType === 'initiative' ||
+                                         (issueType.includes('story') && issueType.includes('epic'));
+                        return isEpicType && issue.projectKey === modalProject.key;
+                      }) || [];
+                      
+                      return relatedEpics.length;
+                    })()})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {(() => {
+                      // Filter epics for this Jira project using JQL-style logic: Project = modalProject.key
+                      const relatedEpics = jiraIssues?.filter(issue => {
+                        const issueType = issue.issueType?.toLowerCase() || '';
+                        const isEpicType = issueType === 'epic' || 
+                                         issueType.includes('epic') || 
+                                         issueType === 'feature' ||
+                                         issueType === 'theme' ||
+                                         issueType === 'initiative' ||
+                                         (issueType.includes('story') && issueType.includes('epic'));
+                        return isEpicType && issue.projectKey === modalProject.key;
+                      }) || [];
+                      
+                      if (relatedEpics.length === 0) {
+                        return (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            No epics found for this project
+                          </p>
+                        );
+                      }
+                      
+                      return (
+                        <>
+                          {relatedEpics.slice(0, 5).map((epic) => (
+                            <div key={epic.key || epic.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <Badge variant="secondary" className="text-xs">
+                                  {epic.key || epic.jiraKey}
+                                </Badge>
+                                <span className="text-sm font-medium truncate">{epic.title}</span>
+                              </div>
+                              <Badge className={getStatusColor(epic.status)} variant="outline">
+                                {(epic.status || 'Unknown').replace('_', ' ')}
+                              </Badge>
+                            </div>
+                          ))}
+                          {relatedEpics.length > 5 && (
+                            <p className="text-xs text-muted-foreground text-center">
+                              ... and {relatedEpics.length - 5} more epics
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </DialogContent>
