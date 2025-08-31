@@ -2707,10 +2707,27 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           }) || [];
                           
                           if (relatedEpics.length === 0) {
+                            // Debug: Show what issue types are actually available for this project
+                            const projectIssues = jiraIssues?.filter(i => i.projectKey === project.key) || [];
+                            const availableTypes = [...new Set(projectIssues.map(i => i.issueType))];
+                            
                             return (
-                              <p className="text-xs text-muted-foreground text-center py-2">
-                                No epics found for this project
-                              </p>
+                              <div className="text-center py-2">
+                                <p className="text-xs text-muted-foreground">
+                                  No epics found for this project
+                                </p>
+                                <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                  <div>Debug Info:</div>
+                                  <div>Project: {project.key}</div>
+                                  <div>Total Issues: {projectIssues.length}</div>
+                                  <div>Available Types: {availableTypes.join(', ') || 'None'}</div>
+                                  {projectIssues.length > 0 && (
+                                    <div className="mt-1">
+                                      Sample Issue: {projectIssues[0]?.title} (Type: {projectIssues[0]?.issueType})
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             );
                           }
                           
@@ -4118,10 +4135,27 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       }) || [];
                       
                       if (relatedEpics.length === 0) {
+                        // Debug: Show what issue types are actually available for this project
+                        const projectIssues = jiraIssues?.filter(i => i.projectKey === modalProject.key) || [];
+                        const availableTypes = [...new Set(projectIssues.map(i => i.issueType))];
+                        
                         return (
-                          <p className="text-sm text-muted-foreground text-center py-4">
-                            No epics found for this project
-                          </p>
+                          <div className="text-center py-4">
+                            <p className="text-sm text-muted-foreground">
+                              No epics found for this project
+                            </p>
+                            <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                              <div>Debug Info:</div>
+                              <div>Project: {modalProject.key}</div>
+                              <div>Total Issues: {projectIssues.length}</div>
+                              <div>Available Types: {availableTypes.join(', ') || 'None'}</div>
+                              {projectIssues.length > 0 && (
+                                <div className="mt-1">
+                                  Sample Issue: {projectIssues[0]?.title} (Type: {projectIssues[0]?.issueType})
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         );
                       }
                       
