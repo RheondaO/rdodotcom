@@ -2677,8 +2677,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         <ListTodo className="h-4 w-4 text-pink-500" />
                         Related Epics ({(() => {
-                          // Filter epics for this Jira project - handle different epic naming conventions
-                          const relatedEpics = jiraIssues?.filter(issue => {
+                          // Use two-step filtering for exact count match  
+                          const projectIssues = jiraIssues?.filter(i => i.projectKey === project.key) || [];
+                          const relatedEpics = projectIssues.filter(issue => {
                             const issueType = issue.issueType?.toLowerCase() || '';
                             const isEpicType = issueType === 'epic' || 
                                              issueType.includes('epic') || 
@@ -2686,16 +2687,17 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                              issueType === 'theme' ||
                                              issueType === 'initiative' ||
                                              (issueType.includes('story') && issueType.includes('epic'));
-                            return isEpicType && issue.projectKey === project.key;
-                          }) || [];
+                            return isEpicType;
+                          });
                           
                           return relatedEpics.length;
                         })()}
                       </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {(() => {
-                          // Filter epics for this Jira project - handle different epic naming conventions
-                          const relatedEpics = jiraIssues?.filter(issue => {
+                          // Use two-step filtering for exact count match  
+                          const projectIssues = jiraIssues?.filter(i => i.projectKey === project.key) || [];
+                          const relatedEpics = projectIssues.filter(issue => {
                             const issueType = issue.issueType?.toLowerCase() || '';
                             const isEpicType = issueType === 'epic' || 
                                              issueType.includes('epic') || 
@@ -2703,8 +2705,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                              issueType === 'theme' ||
                                              issueType === 'initiative' ||
                                              (issueType.includes('story') && issueType.includes('epic'));
-                            return isEpicType && issue.projectKey === project.key;
-                          }) || [];
+                            return isEpicType;
+                          });
                           
                           if (relatedEpics.length === 0) {
                             // Debug: Show what issue types are actually available for this project
