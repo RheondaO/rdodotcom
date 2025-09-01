@@ -4107,9 +4107,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <ListTodo className="h-4 w-4 text-pink-500" />
                     Related Epics ({(() => {
-                      // Use exact JQL logic: project = "RDOC" AND type = Epic ORDER BY created DESC
+                      // Filter for any epics from current project
                       const relatedEpics = jiraIssues?.filter(issue => {
-                        return issue.projectKey === "RDOC" && issue.issueType === "Epic";
+                        // Look for Epic type OR issues that contain 'epic' in the type name
+                        const issueType = issue.issueType?.toLowerCase() || '';
+                        const isEpic = issueType === 'epic' || issueType.includes('epic');
+                        return isEpic && issue.projectKey === modalProject.key;
                       }).sort((a, b) => {
                         // ORDER BY created DESC
                         const dateA = new Date(a.created || 0);
@@ -4124,9 +4127,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                 <CardContent>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {(() => {
-                      // Use exact JQL logic: project = "RDOC" AND type = Epic ORDER BY created DESC
+                      // Filter for any epics from current project
                       const relatedEpics = jiraIssues?.filter(issue => {
-                        return issue.projectKey === "RDOC" && issue.issueType === "Epic";
+                        // Look for Epic type OR issues that contain 'epic' in the type name
+                        const issueType = issue.issueType?.toLowerCase() || '';
+                        const isEpic = issueType === 'epic' || issueType.includes('epic');
+                        return isEpic && issue.projectKey === modalProject.key;
                       }).sort((a, b) => {
                         // ORDER BY created DESC
                         const dateA = new Date(a.created || 0);
