@@ -2677,9 +2677,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         <ListTodo className="h-4 w-4 text-pink-500" />
                         Related Epics ({(() => {
-                          // Use exact JQL logic: project = "RDOC" AND type = Epic ORDER BY created DESC
+                          // Filter for any epics from current project
                           const relatedEpics = jiraIssues?.filter(issue => {
-                            return issue.projectKey === "RDOC" && issue.issueType === "Epic";
+                            // Look for Epic type OR issues that contain 'epic' in the type name
+                            const issueType = issue.issueType?.toLowerCase() || '';
+                            const isEpic = issueType === 'epic' || issueType.includes('epic');
+                            return isEpic && issue.projectKey === project.key;
                           }).sort((a, b) => {
                             // ORDER BY created DESC
                             const dateA = new Date(a.created || 0);
@@ -2692,9 +2695,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {(() => {
-                          // Use exact JQL logic: project = "RDOC" AND type = Epic ORDER BY created DESC
+                          // Filter for any epics from current project
                           const relatedEpics = jiraIssues?.filter(issue => {
-                            return issue.projectKey === "RDOC" && issue.issueType === "Epic";
+                            // Look for Epic type OR issues that contain 'epic' in the type name
+                            const issueType = issue.issueType?.toLowerCase() || '';
+                            const isEpic = issueType === 'epic' || issueType.includes('epic');
+                            return isEpic && issue.projectKey === project.key;
                           }).sort((a, b) => {
                             // ORDER BY created DESC
                             const dateA = new Date(a.created || 0);
@@ -2703,23 +2709,25 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           }) || [];
                           
                           if (relatedEpics.length === 0) {
-                            // Debug: Show what issue types are actually available for RDOC project
-                            const rdocIssues = jiraIssues?.filter(i => i.projectKey === "RDOC") || [];
-                            const availableTypes = [...new Set(rdocIssues.map(i => i.issueType))];
+                            // Debug: Show what issue types are actually available for this project
+                            const projectIssues = jiraIssues?.filter(i => i.projectKey === project.key) || [];
+                            const allProjects = [...new Set(jiraIssues?.map(i => i.projectKey) || [])];
+                            const availableTypes = [...new Set(projectIssues.map(i => i.issueType))];
                             
                             return (
                               <div className="text-center py-2">
                                 <p className="text-xs text-muted-foreground">
-                                  No epics found (looking for project = "RDOC" AND type = "Epic")
+                                  No epics found for this project
                                 </p>
                                 <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                                  <div>Debug Info:</div>
-                                  <div>Project: RDOC (filtering for this specific project)</div>
-                                  <div>Total RDOC Issues: {rdocIssues.length}</div>
-                                  <div>Available Types: {availableTypes.join(', ') || 'None'}</div>
-                                  {rdocIssues.length > 0 && (
+                                  <div><strong>Debug Info:</strong></div>
+                                  <div>Current Project: {project.key}</div>
+                                  <div>All Available Projects: {allProjects.join(', ') || 'None'}</div>
+                                  <div>Issues in {project.key}: {projectIssues.length}</div>
+                                  <div>Types in {project.key}: {availableTypes.join(', ') || 'None'}</div>
+                                  {projectIssues.length > 0 && (
                                     <div className="mt-1">
-                                      Sample Issue: {rdocIssues[0]?.title} (Type: {rdocIssues[0]?.issueType})
+                                      Sample: {projectIssues[0]?.title} (Type: {projectIssues[0]?.issueType})
                                     </div>
                                   )}
                                 </div>
@@ -4127,23 +4135,25 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       }) || [];
                       
                       if (relatedEpics.length === 0) {
-                        // Debug: Show what issue types are actually available for RDOC project
-                        const rdocIssues = jiraIssues?.filter(i => i.projectKey === "RDOC") || [];
-                        const availableTypes = [...new Set(rdocIssues.map(i => i.issueType))];
+                        // Debug: Show what issue types are actually available for this project
+                        const projectIssues = jiraIssues?.filter(i => i.projectKey === modalProject.key) || [];
+                        const allProjects = [...new Set(jiraIssues?.map(i => i.projectKey) || [])];
+                        const availableTypes = [...new Set(projectIssues.map(i => i.issueType))];
                         
                         return (
                           <div className="text-center py-4">
                             <p className="text-sm text-muted-foreground">
-                              No epics found (looking for project = "RDOC" AND type = "Epic")
+                              No epics found for this project
                             </p>
                             <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                              <div>Debug Info:</div>
-                              <div>Project: RDOC (filtering for this specific project)</div>
-                              <div>Total RDOC Issues: {rdocIssues.length}</div>
-                              <div>Available Types: {availableTypes.join(', ') || 'None'}</div>
-                              {rdocIssues.length > 0 && (
+                              <div><strong>Debug Info:</strong></div>
+                              <div>Current Project: {modalProject.key}</div>
+                              <div>All Available Projects: {allProjects.join(', ') || 'None'}</div>
+                              <div>Issues in {modalProject.key}: {projectIssues.length}</div>
+                              <div>Types in {modalProject.key}: {availableTypes.join(', ') || 'None'}</div>
+                              {projectIssues.length > 0 && (
                                 <div className="mt-1">
-                                  Sample Issue: {rdocIssues[0]?.title} (Type: {rdocIssues[0]?.issueType})
+                                  Sample: {projectIssues[0]?.title} (Type: {projectIssues[0]?.issueType})
                                 </div>
                               )}
                             </div>
