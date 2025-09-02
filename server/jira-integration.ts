@@ -509,7 +509,7 @@ export class JiraIntegrationService {
       jiraId: jiraIssue.id,
       title: jiraIssue.fields.summary,
       description: this.extractTextFromDescription(jiraIssue.fields.description),
-      status: this.mapJiraStatus(jiraIssue.fields.status.name),
+      status: jiraIssue.fields.status.name,
       priority: jiraIssue.fields.priority?.name || 'Medium',
       projectKey: jiraIssue.fields.project.key,
       projectName: jiraIssue.fields.project.name,

@@ -688,17 +688,27 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   };
 
   const getStatusColor = (status: string) => {
-    const colors = {
-      planning: "bg-blue-100 text-blue-800 dark:bg-[#17111d]/30 dark:text-blue-400",
-      in_progress: "bg-yellow-100 text-yellow-800 dark:bg-[#17111d]/30 dark:text-yellow-400",
-      testing: "bg-purple-100 text-purple-800 dark:bg-[#17111d]/30 dark:text-purple-400",
-      deployed: "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400",
-      on_hold: "bg-gray-100 text-gray-800 dark:bg-[#17111d]/30 dark:text-gray-400",
-      todo: "bg-gray-100 text-gray-800 dark:bg-[#17111d]/30 dark:text-gray-400",
-      review: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-      done: "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400"
-    };
-    return colors[status as keyof typeof colors] || colors.planning;
+    const statusLower = status?.toLowerCase() || '';
+    
+    // Handle original Jira statuses
+    if (statusLower.includes('done') || statusLower.includes('resolved') || statusLower.includes('closed') || statusLower.includes('completed')) {
+      return "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400";
+    }
+    if (statusLower.includes('progress') || statusLower.includes('development') || statusLower.includes('review')) {
+      return "bg-yellow-100 text-yellow-800 dark:bg-[#17111d]/30 dark:text-yellow-400";
+    }
+    if (statusLower.includes('blocked') || statusLower.includes('hold')) {
+      return "bg-red-100 text-red-800 dark:bg-[#17111d]/30 dark:text-red-400";
+    }
+    if (statusLower.includes('testing') || statusLower.includes('qa')) {
+      return "bg-purple-100 text-purple-800 dark:bg-[#17111d]/30 dark:text-purple-400";
+    }
+    if (statusLower.includes('deployed') || statusLower.includes('live')) {
+      return "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400";
+    }
+    
+    // Default for todo-like statuses (including "not started", "to do", "open", etc.)
+    return "bg-gray-100 text-gray-800 dark:bg-[#17111d]/30 dark:text-gray-400";
   };
 
 
