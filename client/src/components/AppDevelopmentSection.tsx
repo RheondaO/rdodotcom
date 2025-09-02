@@ -1362,6 +1362,37 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           (typeof issue.status === 'string' && issue.status.toLowerCase().includes('done'))
                         );
 
+                        // Calculate last update time: project update time or most recent issue update
+                        const getLastUpdateTime = () => {
+                          // If project has update time, use that
+                          if (project.updated) {
+                            return new Date(project.updated);
+                          }
+                          
+                          // Otherwise, find the most recent issue update for this project
+                          const sortedIssues = projectIssues
+                            .filter(issue => issue.updated)
+                            .sort((a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime());
+                          
+                          return sortedIssues.length > 0 ? new Date(sortedIssues[0].updated) : null;
+                        };
+
+                        const lastUpdateTime = getLastUpdateTime();
+                        const formatLastUpdate = (date: Date | null) => {
+                          if (!date) return 'No updates';
+                          
+                          const now = new Date();
+                          const diffInMs = now.getTime() - date.getTime();
+                          const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+                          const diffInDays = Math.floor(diffInHours / 24);
+                          
+                          if (diffInHours < 1) return 'Less than 1 hour ago';
+                          if (diffInHours < 24) return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+                          if (diffInDays < 7) return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+                          
+                          return date.toLocaleDateString();
+                        };
+
                         return (
                           <div key={project.key} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -1380,6 +1411,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   {completedIssues.length} / {projectIssues.length} issues
+                                </p>
+                              </div>
+                              <div className="mt-1">
+                                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  Last Update: {formatLastUpdate(lastUpdateTime)}
                                 </p>
                               </div>
                             </div>
