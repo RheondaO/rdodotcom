@@ -1333,37 +1333,75 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </CardContent>
             </Card>
 
-            {/* Task Activity Feed */}
+            {/* Recently Updated Projects */}
             <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
               <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-[#4b5563] dark:text-white">
-                  <CheckCircle className="h-5 w-5" />
-                  Recent Task Activity
-                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-blue-500" />
+                  <CardTitle className="text-lg text-gray-900 dark:text-white">Recently Updated Projects</CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground dark:text-gray-400">
+                  Last 3 Jira projects with recent activity
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {tasks.slice(0, 5).map((task) => (
-                    <div key={task.id || task.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-lg">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg flex items-center justify-center">
-                        {getTaskCategoryIcon(task.issueType)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{task.title}</p>
-                        <p className="text-xs text-muted-foreground dark:text-gray-400">
-                          {projects.find(p => p.key === task.projectKey)?.name} • {task.issueType}
-                        </p>
-                      </div>
-                      <Badge className={getStatusColor(task.status)} variant="outline">
-                        {(task.status || 'Unknown').replace('_', ' ')}
-                      </Badge>
+                  {isLoadingProjects ? (
+                    <div className="text-center py-6">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                      <p className="text-sm text-gray-500">Loading Jira projects...</p>
                     </div>
-                  ))}
-                  
-                  {tasks.length === 0 && (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      <CheckSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>No tasks yet. Create your first project to get started!</p>
+                  ) : jiraProjects && jiraProjects.length > 0 ? (
+                    jiraProjects
+                      .slice(0, 3) // Take first 3 projects from Jira
+                      .map((project: any) => {
+                        // Count related issues for this project
+                        const projectIssues = jiraIssues?.filter((issue: any) => issue.projectKey === project.key) || [];
+                        const completedIssues = projectIssues.filter((issue: any) => 
+                          issue.status === 'completed' || issue.status === 'done' || 
+                          (typeof issue.status === 'string' && issue.status.toLowerCase().includes('done'))
+                        );
+
+                        return (
+                          <div key={project.key} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                            <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FileText className="h-4 w-4 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-gray-900 dark:text-white truncate">{project.name}</p>
+                                <Badge variant="secondary" className="text-xs">
+                                  {project.key}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-4 mt-1">
+                                <p className="text-xs text-muted-foreground">
+                                  Project Type: {project.projectTypeKey || 'Standard'}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {completedIssues.length} / {projectIssues.length} issues
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setActiveView("projects");
+                                }}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })
+                  ) : (
+                    <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                      <FileX className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm">No Jira projects found</p>
                     </div>
                   )}
                 </div>
@@ -2511,80 +2549,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
             </CardContent>
           </Card>
 
-          {/* Related List - Recently Updated Jira Projects */}
-          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-500" />
-                <CardTitle className="text-lg text-gray-900 dark:text-white">Recently Updated Projects</CardTitle>
-              </div>
-              <p className="text-sm text-muted-foreground dark:text-gray-400">
-                Last 3 Jira projects with recent activity
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {isLoadingProjects ? (
-                  <div className="text-center py-6">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                    <p className="text-sm text-gray-500">Loading Jira projects...</p>
-                  </div>
-                ) : jiraProjects && jiraProjects.length > 0 ? (
-                  jiraProjects
-                    .slice(0, 3) // Take first 3 projects from Jira
-                    .map((project: any) => {
-                      // Count related issues for this project
-                      const projectIssues = jiraIssues?.filter((issue: any) => issue.projectKey === project.key) || [];
-                      const completedIssues = projectIssues.filter((issue: any) => 
-                        issue.status === 'completed' || issue.status === 'done' || 
-                        (typeof issue.status === 'string' && issue.status.toLowerCase().includes('done'))
-                      );
-
-                      return (
-                        <div key={project.key} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-                          <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <FileText className="h-4 w-4 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium text-gray-900 dark:text-white truncate">{project.name}</p>
-                              <Badge variant="secondary" className="text-xs">
-                                {project.key}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-4 mt-1">
-                              <p className="text-xs text-muted-foreground">
-                                Project Type: {project.projectTypeKey || 'Standard'}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {completedIssues.length} / {projectIssues.length} issues
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setActiveView("projects");
-                              }}
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })
-                ) : (
-                  <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-                    <FileX className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm">No Jira projects found</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Documentation Grid */}
           <div className="grid grid-cols-1 gap-6">
