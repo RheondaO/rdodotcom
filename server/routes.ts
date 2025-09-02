@@ -391,6 +391,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public AI Development Projects endpoint (no authentication required for read access)
+  app.get("/api/public/ai-development/projects", async (req, res) => {
+    try {
+      const { type } = req.query;
+      let projects;
+      
+      if (type) {
+        projects = await getAIDevProjectsByType(type as string);
+      } else {
+        projects = await getAIDevProjects();
+      }
+      
+      res.json(projects);
+    } catch (error: any) {
+      console.error("Error fetching public AI development projects:", error);
+      res.status(500).json({ error: error.message || "Failed to fetch AI development projects" });
+    }
+  });
+
 
   // Auth status endpoint
   app.get("/api/auth/status", (req: AuthenticatedRequest, res) => {

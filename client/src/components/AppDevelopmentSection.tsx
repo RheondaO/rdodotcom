@@ -285,7 +285,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
 
   // Fetch all projects from Jira
-  const { data: jiraProjects = [], isLoading: isLoadingProjects, error: projectsError, isError: isProjectsError } = useQuery({
+  const { data: jiraProjects = [], isLoading: isLoadingJiraProjects, error: jiraProjectsError, isError: isJiraProjectsError } = useQuery({
     queryKey: ['/api/public/jira/projects'],
     queryFn: async () => {
       const response = await fetch('/api/public/jira/projects', {
@@ -303,6 +303,27 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     },
     select: (data: any[]) => data || []
   });
+
+  // Fetch all projects from Notion AIDEVPROJECTS database
+  const { data: notionProjects = [], isLoading: isLoadingNotionProjects, error: notionProjectsError, isError: isNotionProjectsError } = useQuery({
+    queryKey: ['/api/public/ai-development/projects'],
+    queryFn: async () => {
+      const response = await fetch('/api/public/ai-development/projects', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('📊 Projects from Notion AIDEVPROJECTS:', data.length);
+      return data;
+    },
+    select: (data: any[]) => data || []
+  });
+
+  const isLoadingProjects = isLoadingJiraProjects || isLoadingNotionProjects;
+  const projectsError = jiraProjectsError || notionProjectsError;
+  const isProjectsError = isJiraProjectsError || isNotionProjectsError;
 
   // Fetch all issues from Jira (as tasks)
   const { data: jiraIssues = [], isLoading: isLoadingTasks, error: tasksError, isError: isTasksError } = useQuery({
@@ -350,8 +371,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     select: (data: any[]) => data || []
   });
   
-  // Map Jira projects to internal format
-  const projects = jiraProjects.map((project: any) => ({
+  // Combine both Jira and Notion projects
+  const jiraProjectsMapped = jiraProjects.map((project: any) => ({
     id: project.id,
     name: project.name,
     description: typeof project.description === 'object' && project.description?.content ? project.description.content : (project.description || ''),
@@ -363,9 +384,15 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     category: project.projectCategory?.name || '',
     startDate: null, // Jira doesn't have start/end dates by default
     endDate: null,
-    status: 'active', // Map from Jira project status if available
-    priority: 'medium' // Default priority, can be customized
+    status: 'not_started', // Map Jira projects to Belle Journal default status
+    priority: 'medium', // Default priority, can be customized
+    source: 'jira'
   }));
+  
+  const projects = [
+    ...jiraProjectsMapped,
+    ...notionProjects.map(p => ({ ...p, source: 'notion' }))
+  ];
   
   // Use properly converted Jira data (already processed by backend)
   const tasks = jiraIssues.map((issue: any) => ({
@@ -447,6 +474,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     },
     onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/public/jira/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/public/ai-development/projects'] });
       toast({ 
         title: "Success", 
         description: `Jira project "${response.name}" created successfully with key ${response.key}` 
@@ -518,6 +546,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/public/jira/issues'] });
       queryClient.invalidateQueries({ queryKey: ['/api/public/jira/projects'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/public/ai-development/projects'] });
       toast({ title: "Success", description: "Task created successfully in Jira" });
       setShowNewTaskForm(false);
       taskForm.reset();
@@ -1057,8 +1086,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     completed: baseFilteredTasks.filter(t => t.status === 'done').length,
     inProgress: baseFilteredTasks.filter(t => t.status === 'in_progress').length,
     todo: baseFilteredTasks.filter(t => t.status === 'todo').length,
-    bugs: baseFilteredTasks.filter(t => t.category === 'bug').length,
-    features: baseFilteredTasks.filter(t => t.category === 'feature').length
+    bugs: baseFilteredTasks.filter(t => t.issueType === 'bug').length,
+    features: baseFilteredTasks.filter(t => t.issueType === 'feature').length
   };
 
   // Filter for active work only (in-progress items)
