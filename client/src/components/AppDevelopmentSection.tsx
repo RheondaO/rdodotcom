@@ -2714,30 +2714,42 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           }) || [];
                           
                           if (relatedEpics.length === 0) {
-                            // Debug: Show what issue types are actually available for this project
-                            const projectIssues = jiraIssues?.filter(i => i.projectKey === project.key) || [];
-                            const allProjects = [...new Set(jiraIssues?.map(i => i.projectKey) || [])];
-                            const availableTypes = [...new Set(projectIssues.map(i => i.issueType))];
-                            
-                            return (
-                              <div className="text-center py-2">
-                                <p className="text-xs text-muted-foreground">
-                                  No epics found for this project
-                                </p>
-                                <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                                  <div><strong>Debug Info:</strong></div>
-                                  <div>Current Project: {project.key}</div>
-                                  <div>All Available Projects: {allProjects.join(', ') || 'None'}</div>
-                                  <div>Issues in {project.key}: {projectIssues.length}</div>
-                                  <div>Types in {project.key}: {availableTypes.join(', ') || 'None'}</div>
-                                  {projectIssues.length > 0 && (
-                                    <div className="mt-1">
-                                      Sample: {projectIssues[0]?.title} (Type: {projectIssues[0]?.issueType})
-                                    </div>
-                                  )}
+                            // Only show debug info for RDOC project, simple message for others
+                            if (project.key === 'RDOC') {
+                              // Debug: Show what issue types are actually available for this project
+                              const projectIssues = jiraIssues?.filter(i => i.projectKey === project.key) || [];
+                              const allProjects = [...new Set(jiraIssues?.map(i => i.projectKey) || [])];
+                              const availableTypes = [...new Set(projectIssues.map(i => i.issueType))];
+                              
+                              return (
+                                <div className="text-center py-2">
+                                  <p className="text-xs text-muted-foreground">
+                                    No epics found for this project
+                                  </p>
+                                  <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                    <div><strong>Debug Info:</strong></div>
+                                    <div>Current Project: {project.key}</div>
+                                    <div>All Available Projects: {allProjects.join(', ') || 'None'}</div>
+                                    <div>Issues in {project.key}: {projectIssues.length}</div>
+                                    <div>Types in {project.key}: {availableTypes.join(', ') || 'None'}</div>
+                                    {projectIssues.length > 0 && (
+                                      <div className="mt-1">
+                                        Sample: {projectIssues[0]?.title} (Type: {projectIssues[0]?.issueType})
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            );
+                              );
+                            } else {
+                              // Simple empty message for non-RDOC projects
+                              return (
+                                <div className="text-center py-2">
+                                  <p className="text-xs text-muted-foreground">
+                                    No related epics
+                                  </p>
+                                </div>
+                              );
+                            }
                           }
                           
                           return (
@@ -4146,30 +4158,42 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       }) || [];
                       
                       if (relatedEpics.length === 0) {
-                        // Debug: Show what issue types are actually available for this project
-                        const projectIssues = jiraIssues?.filter(i => i.projectKey === modalProject.key) || [];
-                        const allProjects = [...new Set(jiraIssues?.map(i => i.projectKey) || [])];
-                        const availableTypes = [...new Set(projectIssues.map(i => i.issueType))];
-                        
-                        return (
-                          <div className="text-center py-4">
-                            <p className="text-sm text-muted-foreground">
-                              No epics found for this project
-                            </p>
-                            <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                              <div><strong>Debug Info:</strong></div>
-                              <div>Current Project: {modalProject.key}</div>
-                              <div>All Available Projects: {allProjects.join(', ') || 'None'}</div>
-                              <div>Issues in {modalProject.key}: {projectIssues.length}</div>
-                              <div>Types in {modalProject.key}: {availableTypes.join(', ') || 'None'}</div>
-                              {projectIssues.length > 0 && (
-                                <div className="mt-1">
-                                  Sample: {projectIssues[0]?.title} (Type: {projectIssues[0]?.issueType})
-                                </div>
-                              )}
+                        // Only show debug info for RDOC project, simple message for others
+                        if (modalProject.key === 'RDOC') {
+                          // Debug: Show what issue types are actually available for this project
+                          const projectIssues = jiraIssues?.filter(i => i.projectKey === modalProject.key) || [];
+                          const allProjects = [...new Set(jiraIssues?.map(i => i.projectKey) || [])];
+                          const availableTypes = [...new Set(projectIssues.map(i => i.issueType))];
+                          
+                          return (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-muted-foreground">
+                                No epics found for this project
+                              </p>
+                              <div className="text-xs text-gray-500 mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                <div><strong>Debug Info:</strong></div>
+                                <div>Current Project: {modalProject.key}</div>
+                                <div>All Available Projects: {allProjects.join(', ') || 'None'}</div>
+                                <div>Issues in {modalProject.key}: {projectIssues.length}</div>
+                                <div>Types in {modalProject.key}: {availableTypes.join(', ') || 'None'}</div>
+                                {projectIssues.length > 0 && (
+                                  <div className="mt-1">
+                                    Sample: {projectIssues[0]?.title} (Type: {projectIssues[0]?.issueType})
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        );
+                          );
+                        } else {
+                          // Simple empty message for non-RDOC projects
+                          return (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-muted-foreground">
+                                No related epics
+                              </p>
+                            </div>
+                          );
+                        }
                       }
                       
                       return (
