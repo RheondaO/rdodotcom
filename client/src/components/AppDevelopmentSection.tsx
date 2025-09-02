@@ -69,7 +69,24 @@ import {
   FileX,
   Link as LinkIcon
 } from "lucide-react";
-import gemstonesImage from "@assets/gemstoness_1756852595675.jpg";
+
+// Import individual gemstone images
+import gem1 from "@assets/1_1756855669762.png";
+import gem2 from "@assets/2_1756855669763.png";
+import gem3 from "@assets/3_1756855669764.png";
+import gem4 from "@assets/4_1756855669764.png";
+import gem5 from "@assets/5_1756855669765.png";
+import gem6 from "@assets/6_1756855669765.png";
+import gem7 from "@assets/7_1756855669765.png";
+import gem8 from "@assets/8_1756855669766.png";
+import gem9 from "@assets/9_1756855669766.png";
+import gem10 from "@assets/10_1756855669767.png";
+import gem11 from "@assets/11_1756855669767.png";
+import gem12 from "@assets/12_1756855669768.png";
+import gem13 from "@assets/13_1756855669768.png";
+import gem14 from "@assets/14_1756855669769.png";
+import gem15 from "@assets/15_1756855669769.png";
+import gem16 from "@assets/16_1756855669760.png";
 
 
 // Mock data generation for prompt templates
@@ -763,56 +780,66 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
 
 
-  // Gemstone mapping for each project based on projectKey or name
-  const getProjectGemstone = (project: any) => {
-    const gemstoneMap = {
-      'AGENT': 'diamond', // Diamond for AI projects
-      'ATLA': 'sapphire', // Blue sapphire for Confluence
-      'NEWS': 'emerald', // Emerald for media projects
-      'OBVI': 'ruby', // Ruby for obvious/clear projects
-      'RDOC': 'amethyst', // Purple amethyst for documentation
-      'SNOW': 'aquamarine', // Light blue for ServiceNow
-      'TASD': 'topaz', // Golden topaz for task management
-      'DOCZ': 'tourmaline', // Green tourmaline for docs
-      'VIEW': 'garnet', // Red garnet for view boards
-      'CODE': 'peridot' // Green peridot for code repos
-    };
+  // Array of all available gemstone images
+  const availableGemstones = [
+    gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, 
+    gem9, gem10, gem11, gem12, gem13, gem14, gem15, gem16
+  ];
+
+  // Create a shuffled but consistent assignment for this session
+  const createGemAssignments = () => {
+    // Use a simple hash of the date for consistent daily shuffling
+    const today = new Date().toDateString();
+    const hash = today.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
     
-    // Extract project key from tags or projectKey field
-    const projectKey = project.projectKey || project.tags?.find((tag: string) => 
-      ['AGENT', 'ATLA', 'NEWS', 'OBVI', 'RDOC', 'SNOW', 'TASD', 'DOCZ', 'VIEW', 'CODE'].includes(tag)
-    );
+    // Create shuffled array based on hash
+    const shuffled = [...availableGemstones];
+    let currentIndex = shuffled.length;
+    let temporaryValue, randomIndex;
     
-    const gemType = gemstoneMap[projectKey as keyof typeof gemstoneMap] || 'diamond';
+    // Use hash as seed for consistent shuffle
+    let seed = Math.abs(hash);
+    while (currentIndex !== 0) {
+      seed = (seed * 9301 + 49297) % 233280; // Simple PRNG
+      randomIndex = Math.floor((seed / 233280) * currentIndex);
+      currentIndex -= 1;
+      temporaryValue = shuffled[currentIndex];
+      shuffled[currentIndex] = shuffled[randomIndex];
+      shuffled[randomIndex] = temporaryValue;
+    }
     
-    // Return a CSS background positioned gemstone in natural shape
-    return (
-      <div 
-        className="w-full h-full bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url(${gemstonesImage})`,
-          backgroundPosition: getGemstonePosition(gemType),
-          backgroundSize: '600% 400%'
-        }}
-      />
-    );
+    return shuffled;
   };
 
-  // Position mapping for different gemstones in the image
-  const getGemstonePosition = (gemType: string) => {
-    const positions = {
-      'diamond': '0% 0%',     // Top-left: Diamond cut
-      'emerald': '40% 0%',    // Top: Emerald Colombia  
-      'ruby': '60% 0%',       // Top: Ruby carved Burma
-      'sapphire': '80% 0%',   // Top-right: Sapphire Kashmir
-      'aquamarine': '0% 25%', // Second row left: Aquamarine Brazil
-      'amethyst': '20% 25%',  // Second row: Amethyst green Brazil
-      'topaz': '40% 25%',     // Second row: Morganite rose beryl
-      'tourmaline': '60% 25%', // Second row: Kunzite
-      'garnet': '80% 25%',    // Second row right: Cat's eye
-      'peridot': '0% 50%'     // Third row left: Peridot
-    };
-    return positions[gemType] || positions['diamond'];
+  // Get assigned gemstone for a project
+  const getProjectGemstone = (project: any) => {
+    const shuffledGems = createGemAssignments();
+    
+    // Extract project identifier (prefer projectKey, then notionId, then id)
+    const projectId = project.projectKey || project.notionId || project.id || 'default';
+    
+    // Create consistent index based on project identifier
+    const projectHash = projectId.toString().split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    
+    // Get gem index (ensure it's within bounds)
+    const gemIndex = Math.abs(projectHash) % shuffledGems.length;
+    const selectedGem = shuffledGems[gemIndex];
+    
+    // Return the individual gemstone image
+    return (
+      <img 
+        src={selectedGem}
+        alt="Project gemstone"
+        className="w-full h-full object-contain"
+        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+      />
+    );
   };
 
   const getTaskCategoryIcon = (category: string) => {
