@@ -435,17 +435,40 @@ export class JiraIntegrationService {
     }
   }
 
-  // Search issues with JQL
+  // Search issues with JQL - with pagination support
   async searchIssues(jql: string, maxResults: number = 50): Promise<JiraIssue[]> {
     try {
-      const response = await this.client.get('/search', {
-        params: {
-          jql,
-          maxResults,
-          fields: 'summary,description,status,assignee,priority,project,issuetype,created,updated,duedate,labels,components'
+      console.log(`🔍 Jira JQL Query: "${jql}" with maxResults: ${maxResults}`);
+      
+      let allIssues: JiraIssue[] = [];
+      let startAt = 0;
+      const pageSize = 100; // Jira's typical max per page
+      
+      while (true) {
+        const response = await this.client.get('/search', {
+          params: {
+            jql: jql || '',
+            maxResults: pageSize,
+            startAt,
+            fields: 'summary,description,status,assignee,priority,project,issuetype,created,updated,duedate,labels,components'
+          }
+        });
+        
+        const issues = response.data.issues;
+        allIssues = allIssues.concat(issues);
+        
+        console.log(`📊 Page ${Math.floor(startAt / pageSize) + 1}: Got ${issues.length} issues (${allIssues.length}/${response.data.total} total)`);
+        
+        // Stop if we've got all issues or reached our limit
+        if (issues.length < pageSize || allIssues.length >= response.data.total || allIssues.length >= maxResults) {
+          break;
         }
-      });
-      return response.data.issues;
+        
+        startAt += pageSize;
+      }
+      
+      console.log(`✅ Jira API: Retrieved ${allIssues.length} total issues`);
+      return allIssues.slice(0, maxResults); // Respect the maxResults limit
     } catch (error: any) {
       console.error('Error searching Jira issues:', error.message);
       throw new Error(`Failed to search Jira issues: ${error.message}`);
