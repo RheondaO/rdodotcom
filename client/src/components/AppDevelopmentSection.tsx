@@ -1340,9 +1340,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                   <Clock className="h-5 w-5 text-blue-500" />
                   <CardTitle className="text-lg text-gray-900 dark:text-white">Recently Updated Projects</CardTitle>
                 </div>
-                <p className="text-sm text-muted-foreground dark:text-gray-400">
-                  Last 3 Jira projects with recent activity
-                </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -1394,16 +1391,24 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                         };
 
                         return (
-                          <div key={project.key} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                          <div key={project.key} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
                             <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
                               <FileText className="h-4 w-4 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium text-gray-900 dark:text-white truncate">{project.name}</p>
-                                <Badge variant="secondary" className="text-xs">
-                                  {project.key}
-                                </Badge>
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-gray-900 dark:text-white truncate">{project.name}</p>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {project.key}
+                                  </Badge>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {formatLastUpdate(lastUpdateTime)}
+                                  </p>
+                                </div>
                               </div>
                               <div className="flex items-center gap-4 mt-1">
                                 <p className="text-xs text-muted-foreground">
@@ -1413,19 +1418,13 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                                   {completedIssues.length} / {projectIssues.length} issues
                                 </p>
                               </div>
-                              <div className="mt-1">
-                                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  Last Update: {formatLastUpdate(lastUpdateTime)}
-                                </p>
-                              </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
-                                  setActiveView("projects");
+                                  setActiveView("documentation");
                                 }}
                                 className="text-blue-600 hover:text-blue-700"
                               >
