@@ -75,47 +75,47 @@ const gemstoneAnimationStyles = `
   @keyframes gemShakeSwivel {
     0% { 
       transform: rotate(0deg) translateX(0) translateY(0); 
-      filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+      filter: brightness(1.0) contrast(1.0) saturate(1.0);
     }
     10% { 
       transform: rotate(2deg) translateX(1px) translateY(0); 
-      filter: brightness(0) saturate(100%) invert(37%) sepia(61%) saturate(3878%) hue-rotate(356deg) brightness(114%) contrast(107%);
+      filter: brightness(1.1) contrast(1.1) saturate(1.1);
     }
     20% { 
       transform: rotate(-1deg) translateX(-1px) translateY(1px); 
-      filter: brightness(0) saturate(100%) invert(17%) sepia(41%) saturate(1878%) hue-rotate(336deg) brightness(94%) contrast(87%);
+      filter: brightness(0.9) contrast(0.9) saturate(0.9);
     }
     30% { 
       transform: rotate(3deg) translateX(0) translateY(-1px); 
-      filter: brightness(0) saturate(100%) invert(47%) sepia(71%) saturate(4878%) hue-rotate(366deg) brightness(124%) contrast(117%);
+      filter: brightness(1.2) contrast(1.2) saturate(1.2);
     }
     40% { 
       transform: rotate(-2deg) translateX(1px) translateY(0); 
-      filter: brightness(0) saturate(100%) invert(7%) sepia(31%) saturate(878%) hue-rotate(326deg) brightness(84%) contrast(77%);
+      filter: brightness(0.8) contrast(0.8) saturate(0.8);
     }
     50% { 
       transform: rotate(0deg) translateX(0) translateY(1px); 
-      filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+      filter: brightness(1.0) contrast(1.0) saturate(1.0);
     }
     60% { 
       transform: rotate(1deg) translateX(-1px) translateY(0); 
-      filter: brightness(0) saturate(100%) invert(37%) sepia(61%) saturate(3878%) hue-rotate(356deg) brightness(114%) contrast(107%);
+      filter: brightness(1.1) contrast(1.1) saturate(1.1);
     }
     70% { 
       transform: rotate(-3deg) translateX(0) translateY(-1px); 
-      filter: brightness(0) saturate(100%) invert(17%) sepia(41%) saturate(1878%) hue-rotate(336deg) brightness(94%) contrast(87%);
+      filter: brightness(0.9) contrast(0.9) saturate(0.9);
     }
     80% { 
       transform: rotate(2deg) translateX(1px) translateY(1px); 
-      filter: brightness(0) saturate(100%) invert(47%) sepia(71%) saturate(4878%) hue-rotate(366deg) brightness(124%) contrast(117%);
+      filter: brightness(1.2) contrast(1.2) saturate(1.2);
     }
     90% { 
       transform: rotate(-1deg) translateX(-1px) translateY(0); 
-      filter: brightness(0) saturate(100%) invert(7%) sepia(31%) saturate(878%) hue-rotate(326deg) brightness(84%) contrast(77%);
+      filter: brightness(0.8) contrast(0.8) saturate(0.8);
     }
     100% { 
       transform: rotate(0deg) translateX(0) translateY(0); 
-      filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+      filter: brightness(1.0) contrast(1.0) saturate(1.0);
     }
   }
   
@@ -130,12 +130,12 @@ const gemstoneAnimationStyles = `
     height: 100px;
     position: relative;
     z-index: 30;
-    filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%) drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
   }
   
   .gem-animation:hover {
     animation: gemShakeSwivel 0.8s ease-in-out infinite;
-    filter: brightness(0) saturate(100%) invert(67%) sepia(91%) saturate(6878%) hue-rotate(386deg) brightness(180%) contrast(160%) drop-shadow(0 0 15px rgba(255,255,255,0.9)) drop-shadow(0 0 30px rgba(255,255,255,0.6)) drop-shadow(0 0 45px rgba(255,255,255,0.3)) !important;
+    filter: brightness(1.3) contrast(1.2) saturate(1.4) drop-shadow(0 0 15px rgba(255,255,255,0.9)) drop-shadow(0 0 30px rgba(255,255,255,0.6)) drop-shadow(0 0 45px rgba(255,255,255,0.3)) !important;
     transform: scale(1.15) !important;
     transition: all 0.3s ease-in-out;
   }
