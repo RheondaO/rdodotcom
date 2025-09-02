@@ -357,7 +357,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Jira integration not configured' });
       }
       
-      const rawIssues = await jiraService.searchIssues('', 1000);
+      // Get all issues - comprehensive query
+      const rawIssues = await jiraService.searchIssues('(project = RDOC OR project = SNOW) ORDER BY created DESC', 1000);
       // Convert to internal format to properly handle description objects
       const issues = rawIssues.map(issue => jiraService.convertToInternalFormat(issue));
       // Cache the result

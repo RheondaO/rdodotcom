@@ -2677,11 +2677,16 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                       <h4 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         <ListTodo className="h-4 w-4 text-pink-500" />
                         Related Epics ({(() => {
-                          // Filter for any epics from current project
+                          // Filter for any epics from current project - broader search
                           const relatedEpics = jiraIssues?.filter(issue => {
-                            // Look for Epic type OR issues that contain 'epic' in the type name
+                            // Look for Epic type OR any issue type that could be epic-related
                             const issueType = issue.issueType?.toLowerCase() || '';
-                            const isEpic = issueType === 'epic' || issueType.includes('epic');
+                            const title = issue.title?.toLowerCase() || '';
+                            const isEpic = issueType === 'epic' || 
+                                          issueType.includes('epic') ||
+                                          title.includes('epic') ||
+                                          issueType === 'initiative' ||
+                                          issueType === 'theme';
                             return isEpic && issue.projectKey === project.key;
                           }).sort((a, b) => {
                             // ORDER BY created DESC
