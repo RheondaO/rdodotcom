@@ -389,10 +389,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     source: 'jira'
   }));
   
-  const projects = [
-    ...jiraProjectsMapped,
-    ...notionProjects.map(p => ({ ...p, source: 'notion' }))
-  ];
+  // Use only Notion-stored projects (includes both native Notion projects and mirrored Jira projects)
+  // This avoids duplicates while maintaining unique identification via projectKey field
+  const projects = notionProjects.map(p => ({ ...p, source: p.tags.includes('jira') ? 'jira' : 'notion' }));
   
   // Use properly converted Jira data (already processed by backend)
   const tasks = jiraIssues.map((issue: any) => ({
