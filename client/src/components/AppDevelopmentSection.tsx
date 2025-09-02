@@ -831,13 +831,17 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     const gemIndex = Math.abs(projectHash) % shuffledGems.length;
     const selectedGem = shuffledGems[gemIndex];
     
-    // Return the individual gemstone image
+    // Return the individual gemstone image with transparent background
     return (
       <img 
         src={selectedGem}
         alt="Project gemstone"
         className="w-full h-full object-contain"
-        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+        style={{ 
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1)) brightness(1.2) contrast(1.1)',
+          mixBlendMode: 'screen',
+          backgroundColor: 'transparent'
+        }}
       />
     );
   };
