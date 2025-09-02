@@ -120,6 +120,7 @@ export async function getAIDevProjects() {
                 notes: properties.Notes?.rich_text?.[0]?.plain_text || "",
                 repositoryUrl: properties.RepositoryUrl?.url || "",
                 deploymentUrl: properties.DeploymentUrl?.url || "",
+                projectKey: properties.ProjectKey?.rich_text?.[0]?.plain_text || "", // Jira project key for unique identification
                 promptFile: properties.PromptFile?.files || [],
                 documents: properties.Documents?.files || [],
                 isActive: properties.IsActive?.checkbox || false,
@@ -229,6 +230,13 @@ export async function createAIDevProject(itemData: any) {
 
         if (itemData.deploymentUrl) {
             properties.DeploymentUrl = { url: itemData.deploymentUrl };
+        }
+
+        // Store Jira project key for unique identification and linkage
+        if (itemData.projectKey) {
+            properties.ProjectKey = {
+                rich_text: [{ text: { content: itemData.projectKey } }]
+            };
         }
 
         if (itemData.notes) {
@@ -535,6 +543,7 @@ export async function mirrorJiraProjectsToNotion() {
                 type: 'Project', 
                 status: 'Planning', // Use Notion database status format
                 priority: 'Medium',  // Use proper case for Notion
+                projectKey: jiraProject.key, // Store Jira project key for unique identification
                 repositoryUrl: '', // Jira doesn't have this by default
                 deploymentUrl: '',
                 techStack: jiraProject.projectTypeKey ? [jiraProject.projectTypeKey] : [],
