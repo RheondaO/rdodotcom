@@ -2696,7 +2696,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           }) || [];
                           
                           return relatedEpics.length;
-                        })()}
+                        })()})}
                       </h4>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {(() => {
