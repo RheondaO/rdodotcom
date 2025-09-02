@@ -357,8 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Jira integration not configured' });
       }
       
-      const { maxResults = 100 } = req.query;
-      const rawIssues = await jiraService.searchIssues('', parseInt(maxResults as string));
+      const rawIssues = await jiraService.searchIssues('', 1000);
       // Convert to internal format to properly handle description objects
       const issues = rawIssues.map(issue => jiraService.convertToInternalFormat(issue));
       // Cache the result
@@ -377,11 +376,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { projectKey } = req.params;
-      const { maxResults = 50 } = req.query;
-      
       const rawIssues = await jiraService.getProjectIssues(
         projectKey, 
-        parseInt(maxResults as string)
+        1000
       );
       // Convert to internal format to properly handle description objects
       const issues = rawIssues.map(issue => jiraService.convertToInternalFormat(issue));
