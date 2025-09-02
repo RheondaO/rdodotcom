@@ -25,7 +25,8 @@ import {
   updateAIDevProject, 
   deleteAIDevProject, 
   getAIDevProjectsByType,
-  updateProjectDocuments
+  updateProjectDocuments,
+  mirrorJiraProjectsToNotion
 } from "./aidevprojects-integration";
 import { 
   fetchQATestingRecords, 

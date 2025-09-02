@@ -1,4 +1,5 @@
 import { notion } from "./notion";
+import { jiraService } from "./jira-integration";
 
 // Extract the database ID from the Notion database URL
 function extractDatabaseIdFromUrl(databaseUrl: string): string {
@@ -495,5 +496,84 @@ export async function updateProjectDocuments(projectId: string, documents: any[]
     } catch (error) {
         console.error("Error updating project documents in Notion:", error);
         throw new Error("Failed to update project documents in Notion");
+    }
+}
+
+/**
+ * Mirror Jira projects to AIDEVPROJECTS Notion database
+ */
+export async function mirrorJiraProjectsToNotion() {
+    try {
+        console.log("🔄 Starting Jira projects mirroring to Notion...");
+        
+        // Fetch Jira projects
+        const jiraProjects = await jiraService.getProjects();
+        console.log(`📊 Found ${jiraProjects.length} Jira projects to mirror`);
+        
+        // Get existing Notion projects to avoid duplicates
+        const existingProjects = await getAIDevProjects();
+        const existingKeys = new Set(existingProjects.map(p => p.projectName || p.name));
+        console.log(`📋 Found ${existingProjects.length} existing Notion projects`);
+        
+        const results = [];
+        let mirrored = 0;
+        let skipped = 0;
+        
+        for (const jiraProject of jiraProjects) {
+            // Check if project already exists in Notion
+            const projectIdentifier = jiraProject.key || jiraProject.name;
+            if (existingKeys.has(projectIdentifier)) {
+                console.log(`⏭️  Skipping ${projectIdentifier} - already exists in Notion`);
+                skipped++;
+                continue;
+            }
+            
+            // Transform Jira project to Notion format
+            const notionProjectData = {
+                name: jiraProject.name,
+                description: jiraProject.description || `Jira project: ${jiraProject.name} (${jiraProject.key})`,
+                type: 'Project', 
+                status: 'Planning', // Use Notion database status format
+                priority: 'Medium',  // Use proper case for Notion
+                repositoryUrl: '', // Jira doesn't have this by default
+                deploymentUrl: '',
+                techStack: jiraProject.projectTypeKey ? [jiraProject.projectTypeKey] : [],
+                tags: ['jira', 'mirrored'],
+                isActive: true
+            };
+            
+            try {
+                const result = await createAIDevProject(notionProjectData);
+                console.log(`✅ Mirrored ${jiraProject.key} to Notion`);
+                results.push({
+                    jiraKey: jiraProject.key,
+                    jiraName: jiraProject.name,
+                    notionId: result.notionId,
+                    status: 'success'
+                });
+                mirrored++;
+            } catch (error: any) {
+                console.error(`❌ Failed to mirror ${jiraProject.key}:`, error.message);
+                results.push({
+                    jiraKey: jiraProject.key,
+                    jiraName: jiraProject.name,
+                    status: 'error',
+                    error: error.message
+                });
+            }
+        }
+        
+        console.log(`🎉 Mirroring complete: ${mirrored} mirrored, ${skipped} skipped`);
+        return {
+            success: true,
+            mirrored,
+            skipped,
+            total: jiraProjects.length,
+            results
+        };
+        
+    } catch (error: any) {
+        console.error("❌ Error mirroring Jira projects to Notion:", error);
+        throw new Error(`Failed to mirror Jira projects: ${error.message}`);
     }
 }

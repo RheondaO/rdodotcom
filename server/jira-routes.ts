@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { jiraService } from './jira-integration';
 import { jiraSyncService } from './jira-sync';
 import { requireAuth } from './auth';
+import { mirrorJiraProjectsToNotion } from './aidevprojects-integration';
 
 const router = Router();
 
@@ -287,6 +288,23 @@ router.post('/search', requireAuth, async (req, res) => {
     res.json(issues);
   } catch (error: any) {
     console.error('Error searching issues:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Mirror Jira projects to Notion AIDEVPROJECTS database
+router.post('/mirror-projects', requireAuth, async (req, res) => {
+  try {
+    if (!jiraService.isConfigured()) {
+      return res.status(400).json({ error: 'Jira integration not configured' });
+    }
+    
+    console.log("🔄 API call to mirror Jira projects to Notion...");
+    const result = await mirrorJiraProjectsToNotion();
+    
+    res.json(result);
+  } catch (error: any) {
+    console.error('Error mirroring Jira projects to Notion:', error);
     res.status(500).json({ error: error.message });
   }
 });
