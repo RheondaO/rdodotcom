@@ -124,11 +124,15 @@ const gemstoneAnimationStyles = `
     transform-origin: center center;
     background: transparent !important;
     backdrop-filter: none;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
   }
   
   .gem-animation:hover {
-    animation: gemShakeSwivel 1s ease-in-out infinite;
-    filter: brightness(0) saturate(100%) invert(67%) sepia(91%) saturate(6878%) hue-rotate(386deg) brightness(144%) contrast(137%) drop-shadow(0 0 10px rgba(255,255,255,0.6)) !important;
+    animation: gemShakeSwivel 0.8s ease-in-out infinite;
+    filter: brightness(0) saturate(100%) invert(67%) sepia(91%) saturate(6878%) hue-rotate(386deg) brightness(180%) contrast(160%) drop-shadow(0 0 15px rgba(255,255,255,0.9)) drop-shadow(0 0 30px rgba(255,255,255,0.6)) drop-shadow(0 0 45px rgba(255,255,255,0.3)) !important;
+    transform: scale(1.15) !important;
+    transition: all 0.3s ease-in-out;
   }
 `;
 
