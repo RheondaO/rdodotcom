@@ -70,6 +70,73 @@ import {
   Link as LinkIcon
 } from "lucide-react";
 
+// CSS for gemstone animations
+const gemstoneAnimationStyles = `
+  @keyframes gemShakeSwivel {
+    0% { 
+      transform: rotate(0deg) translateX(0) translateY(0); 
+      filter: invert(1) hue-rotate(180deg) brightness(1.5) contrast(1.2) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+    }
+    10% { 
+      transform: rotate(2deg) translateX(1px) translateY(0); 
+      filter: invert(1) hue-rotate(185deg) brightness(1.6) contrast(1.3) drop-shadow(0 3px 10px rgba(0,0,0,0.25));
+    }
+    20% { 
+      transform: rotate(-1deg) translateX(-1px) translateY(1px); 
+      filter: invert(1) hue-rotate(175deg) brightness(1.4) contrast(1.1) drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+    }
+    30% { 
+      transform: rotate(3deg) translateX(0) translateY(-1px); 
+      filter: invert(1) hue-rotate(190deg) brightness(1.7) contrast(1.4) drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+    }
+    40% { 
+      transform: rotate(-2deg) translateX(1px) translateY(0); 
+      filter: invert(1) hue-rotate(170deg) brightness(1.3) contrast(1.0) drop-shadow(0 1px 4px rgba(0,0,0,0.1));
+    }
+    50% { 
+      transform: rotate(0deg) translateX(0) translateY(1px); 
+      filter: invert(1) hue-rotate(180deg) brightness(1.5) contrast(1.2) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+    }
+    60% { 
+      transform: rotate(1deg) translateX(-1px) translateY(0); 
+      filter: invert(1) hue-rotate(185deg) brightness(1.6) contrast(1.3) drop-shadow(0 3px 10px rgba(0,0,0,0.25));
+    }
+    70% { 
+      transform: rotate(-3deg) translateX(0) translateY(-1px); 
+      filter: invert(1) hue-rotate(175deg) brightness(1.4) contrast(1.1) drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+    }
+    80% { 
+      transform: rotate(2deg) translateX(1px) translateY(1px); 
+      filter: invert(1) hue-rotate(190deg) brightness(1.7) contrast(1.4) drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+    }
+    90% { 
+      transform: rotate(-1deg) translateX(-1px) translateY(0); 
+      filter: invert(1) hue-rotate(170deg) brightness(1.3) contrast(1.0) drop-shadow(0 1px 4px rgba(0,0,0,0.1));
+    }
+    100% { 
+      transform: rotate(0deg) translateX(0) translateY(0); 
+      filter: invert(1) hue-rotate(180deg) brightness(1.5) contrast(1.2) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+    }
+  }
+  
+  .gem-animation {
+    animation: gemShakeSwivel 3s ease-in-out infinite;
+    transform-origin: center center;
+  }
+  
+  .gem-animation:hover {
+    animation: gemShakeSwivel 1s ease-in-out infinite;
+    filter: invert(1) hue-rotate(200deg) brightness(1.8) contrast(1.5) drop-shadow(0 5px 15px rgba(0,0,0,0.4)) !important;
+  }
+`;
+
+// Inject styles into document head
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = gemstoneAnimationStyles;
+  document.head.appendChild(styleSheet);
+}
+
 // Import individual gemstone images
 import gem1 from "@assets/1_1756855669762.png";
 import gem2 from "@assets/2_1756855669763.png";
@@ -831,16 +898,17 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     const gemIndex = Math.abs(projectHash) % shuffledGems.length;
     const selectedGem = shuffledGems[gemIndex];
     
-    // Return the individual gemstone image with transparent background
+    // Return the individual gemstone image with transparent background and animations
     return (
       <img 
         src={selectedGem}
         alt="Project gemstone"
-        className="w-full h-full object-contain"
+        className="w-full h-full object-contain gem-animation"
         style={{ 
-          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1)) brightness(1.2) contrast(1.1)',
-          mixBlendMode: 'screen',
-          backgroundColor: 'transparent'
+          filter: 'invert(1) hue-rotate(180deg) brightness(1.5) contrast(1.2) drop-shadow(0 2px 8px rgba(0,0,0,0.2))',
+          mixBlendMode: 'multiply',
+          backgroundColor: 'transparent',
+          animation: 'gemShakeSwivel 3s ease-in-out infinite'
         }}
       />
     );
