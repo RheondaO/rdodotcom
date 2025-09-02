@@ -75,58 +75,60 @@ const gemstoneAnimationStyles = `
   @keyframes gemShakeSwivel {
     0% { 
       transform: rotate(0deg) translateX(0) translateY(0); 
-      filter: invert(1) hue-rotate(180deg) brightness(1.5) contrast(1.2) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+      filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
     }
     10% { 
       transform: rotate(2deg) translateX(1px) translateY(0); 
-      filter: invert(1) hue-rotate(185deg) brightness(1.6) contrast(1.3) drop-shadow(0 3px 10px rgba(0,0,0,0.25));
+      filter: brightness(0) saturate(100%) invert(37%) sepia(61%) saturate(3878%) hue-rotate(356deg) brightness(114%) contrast(107%);
     }
     20% { 
       transform: rotate(-1deg) translateX(-1px) translateY(1px); 
-      filter: invert(1) hue-rotate(175deg) brightness(1.4) contrast(1.1) drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+      filter: brightness(0) saturate(100%) invert(17%) sepia(41%) saturate(1878%) hue-rotate(336deg) brightness(94%) contrast(87%);
     }
     30% { 
       transform: rotate(3deg) translateX(0) translateY(-1px); 
-      filter: invert(1) hue-rotate(190deg) brightness(1.7) contrast(1.4) drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+      filter: brightness(0) saturate(100%) invert(47%) sepia(71%) saturate(4878%) hue-rotate(366deg) brightness(124%) contrast(117%);
     }
     40% { 
       transform: rotate(-2deg) translateX(1px) translateY(0); 
-      filter: invert(1) hue-rotate(170deg) brightness(1.3) contrast(1.0) drop-shadow(0 1px 4px rgba(0,0,0,0.1));
+      filter: brightness(0) saturate(100%) invert(7%) sepia(31%) saturate(878%) hue-rotate(326deg) brightness(84%) contrast(77%);
     }
     50% { 
       transform: rotate(0deg) translateX(0) translateY(1px); 
-      filter: invert(1) hue-rotate(180deg) brightness(1.5) contrast(1.2) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+      filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
     }
     60% { 
       transform: rotate(1deg) translateX(-1px) translateY(0); 
-      filter: invert(1) hue-rotate(185deg) brightness(1.6) contrast(1.3) drop-shadow(0 3px 10px rgba(0,0,0,0.25));
+      filter: brightness(0) saturate(100%) invert(37%) sepia(61%) saturate(3878%) hue-rotate(356deg) brightness(114%) contrast(107%);
     }
     70% { 
       transform: rotate(-3deg) translateX(0) translateY(-1px); 
-      filter: invert(1) hue-rotate(175deg) brightness(1.4) contrast(1.1) drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+      filter: brightness(0) saturate(100%) invert(17%) sepia(41%) saturate(1878%) hue-rotate(336deg) brightness(94%) contrast(87%);
     }
     80% { 
       transform: rotate(2deg) translateX(1px) translateY(1px); 
-      filter: invert(1) hue-rotate(190deg) brightness(1.7) contrast(1.4) drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+      filter: brightness(0) saturate(100%) invert(47%) sepia(71%) saturate(4878%) hue-rotate(366deg) brightness(124%) contrast(117%);
     }
     90% { 
       transform: rotate(-1deg) translateX(-1px) translateY(0); 
-      filter: invert(1) hue-rotate(170deg) brightness(1.3) contrast(1.0) drop-shadow(0 1px 4px rgba(0,0,0,0.1));
+      filter: brightness(0) saturate(100%) invert(7%) sepia(31%) saturate(878%) hue-rotate(326deg) brightness(84%) contrast(77%);
     }
     100% { 
       transform: rotate(0deg) translateX(0) translateY(0); 
-      filter: invert(1) hue-rotate(180deg) brightness(1.5) contrast(1.2) drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+      filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
     }
   }
   
   .gem-animation {
     animation: gemShakeSwivel 3s ease-in-out infinite;
     transform-origin: center center;
+    background: transparent !important;
+    backdrop-filter: none;
   }
   
   .gem-animation:hover {
     animation: gemShakeSwivel 1s ease-in-out infinite;
-    filter: invert(1) hue-rotate(200deg) brightness(1.8) contrast(1.5) drop-shadow(0 5px 15px rgba(0,0,0,0.4)) !important;
+    filter: brightness(0) saturate(100%) invert(67%) sepia(91%) saturate(6878%) hue-rotate(386deg) brightness(144%) contrast(137%) drop-shadow(0 0 10px rgba(255,255,255,0.6)) !important;
   }
 `;
 
@@ -905,8 +907,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         alt="Project gemstone"
         className="w-full h-full object-contain gem-animation"
         style={{ 
-          filter: 'invert(1) hue-rotate(180deg) brightness(1.5) contrast(1.2) drop-shadow(0 2px 8px rgba(0,0,0,0.2))',
-          mixBlendMode: 'multiply',
+          filter: 'brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%)',
+          mixBlendMode: 'normal',
           backgroundColor: 'transparent',
           animation: 'gemShakeSwivel 3s ease-in-out infinite'
         }}
