@@ -82,6 +82,26 @@ const gemstoneAnimationStyles = `
   @keyframes gemFloat {
     0%, 100% { 
       transform: translateY(0px) scale(1) rotateX(0deg); 
+      filter: brightness(1.0) drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+    }
+    25% { 
+      transform: translateY(-4px) scale(1.02) rotateX(2deg); 
+      filter: brightness(1.1) drop-shadow(0 10px 20px rgba(0,0,0,0.12));
+    }
+    50% { 
+      transform: translateY(-8px) scale(1.05) rotateX(0deg); 
+      filter: brightness(1.2) drop-shadow(0 12px 24px rgba(0,0,0,0.1));
+    }
+    75% { 
+      transform: translateY(-4px) scale(1.02) rotateX(-2deg); 
+      filter: brightness(1.1) drop-shadow(0 10px 20px rgba(0,0,0,0.12));
+    }
+  }
+
+  /* Dark mode float animation with deeper shadows */
+  @keyframes gemFloatDark {
+    0%, 100% { 
+      transform: translateY(0px) scale(1) rotateX(0deg); 
       filter: brightness(1.0) drop-shadow(0 12px 24px rgba(0,0,0,0.5));
     }
     25% { 
@@ -125,6 +145,26 @@ const gemstoneAnimationStyles = `
   @keyframes gemPulse {
     0%, 100% { 
       transform: scale(1) rotate(0deg); 
+      filter: brightness(1.0) drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+    }
+    25% { 
+      transform: scale(1.08) rotate(1deg); 
+      filter: brightness(1.15) drop-shadow(0 0 12px rgba(255,255,255,0.2));
+    }
+    50% { 
+      transform: scale(1.15) rotate(0deg); 
+      filter: brightness(1.3) drop-shadow(0 0 20px rgba(255,255,255,0.4));
+    }
+    75% { 
+      transform: scale(1.08) rotate(-1deg); 
+      filter: brightness(1.15) drop-shadow(0 0 12px rgba(255,255,255,0.2));
+    }
+  }
+
+  /* Dark mode pulse animation */
+  @keyframes gemPulseDark {
+    0%, 100% { 
+      transform: scale(1) rotate(0deg); 
       filter: brightness(1.0) drop-shadow(0 12px 24px rgba(0,0,0,0.5));
     }
     25% { 
@@ -165,13 +205,19 @@ const gemstoneAnimationStyles = `
     height: 120px;
     position: relative;
     z-index: 30;
-    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5)) drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    /* Light mode shadows - softer and lighter */
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15)) drop-shadow(0 3px 6px rgba(0,0,0,0.1));
     will-change: transform, filter;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     perspective: 1000px;
     image-rendering: crisp-edges;
     image-rendering: -webkit-optimize-contrast;
+  }
+
+  /* Dark mode shadows - deeper and more dramatic */
+  .dark .gem-animation {
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5)) drop-shadow(0 4px 8px rgba(0,0,0,0.3));
   }
 
   .gem-shake { animation: gemShakeSwivel 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -182,6 +228,10 @@ const gemstoneAnimationStyles = `
   .gem-pulse { animation: gemPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
   .gem-figure8 { animation: gemFigure8 6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite; }
   .gem-sway { animation: gemSway 4.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite; }
+
+  /* Dark mode specific animations */
+  .dark .gem-float { animation: gemFloatDark 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite; }
+  .dark .gem-pulse { animation: gemPulseDark 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
   
   /* Performance optimization for container */
   .gem-container {
@@ -190,14 +240,24 @@ const gemstoneAnimationStyles = `
   }
   
   .gem-animation:hover {
+    /* Light mode hover effects */
+    filter: brightness(1.4) contrast(1.3) saturate(1.5) 
+            drop-shadow(0 0 15px rgba(255,255,255,0.8)) 
+            drop-shadow(0 0 30px rgba(255,255,255,0.5)) 
+            drop-shadow(0 0 45px rgba(255,255,255,0.3))
+            drop-shadow(0 12px 24px rgba(0,0,0,0.25)) !important;
+    transform: scale(1.2) translateY(-4px) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation-duration: 0.6s !important;
+  }
+
+  /* Dark mode hover effects - more intense */
+  .dark .gem-animation:hover {
     filter: brightness(1.4) contrast(1.3) saturate(1.5) 
             drop-shadow(0 0 20px rgba(255,255,255,0.9)) 
             drop-shadow(0 0 40px rgba(255,255,255,0.7)) 
             drop-shadow(0 0 60px rgba(255,255,255,0.4))
             drop-shadow(0 16px 32px rgba(0,0,0,0.6)) !important;
-    transform: scale(1.2) translateY(-4px) !important;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    animation-duration: 0.6s !important;
   }
   
   .gem-animation:active {
