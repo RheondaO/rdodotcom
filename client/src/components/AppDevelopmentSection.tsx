@@ -991,9 +991,9 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Create a shuffled but consistent assignment for this session
   const createGemAssignments = () => {
-    // Use a simple hash of the date for consistent daily shuffling
-    const today = new Date().toDateString();
-    const hash = today.split('').reduce((a, b) => {
+    // Use a fixed seed for completely stable assignments across all sessions
+    const fixedSeed = 'BelleJournalGemstones2025';
+    const hash = fixedSeed.split('').reduce((a, b) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
     }, 0);
