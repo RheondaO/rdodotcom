@@ -937,7 +937,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     const animationIndex = Math.abs(projectHash) % animationClasses.length;
     const selectedAnimation = animationClasses[animationIndex];
     
-    // Return the individual gemstone image with unique animation
+    // Return the individual gemstone image with unique animation and click handler
     return (
       <img 
         src={selectedGem}
@@ -946,6 +946,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         style={{ 
           mixBlendMode: 'normal',
           backgroundColor: 'transparent'
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedProject(project.projectKey || project.notionId || project.id);
+          setActiveView('projects');
         }}
       />
     );
