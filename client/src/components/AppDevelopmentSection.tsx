@@ -889,6 +889,15 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Task management functions
   const startEditingTask = (task: any) => {
+    // Cancel any existing edits first
+    setEditingProject(null);
+    setEditingTestItem(null);
+    setEditingPrompt(null);
+    setEditingValues({});
+    setEditingTestValues({});
+    setEditingPromptValues({});
+    
+    // Start editing this task
     setEditingTask(task.id || task.id);
     setEditingTaskValues({
       title: task.title || task.title,
@@ -1099,6 +1108,15 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Enhanced utility functions for editing and management
   const startEditingProject = (project: any) => {
+    // Cancel any existing edits first
+    setEditingTask(null);
+    setEditingTestItem(null);
+    setEditingPrompt(null);
+    setEditingTaskValues({});
+    setEditingTestValues({});
+    setEditingPromptValues({});
+    
+    // Start editing this project
     setEditingProject(project.id);
     setEditingValues({
       name: project.name,
@@ -1130,7 +1148,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const cancelEdit = () => {
     setEditingProject(null);
     setEditingTask(null);
+    setEditingTestItem(null);
+    setEditingPrompt(null);
     setEditingValues({});
+    setEditingTaskValues({});
+    setEditingTestValues({});
+    setEditingPromptValues({});
   };
 
   const deleteProject = async (projectId: string) => {
@@ -1147,11 +1170,20 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Testing functions
   const startEditingTestItem = (testItem: any) => {
+    // Cancel any existing edits first
+    setEditingProject(null);
+    setEditingTask(null);
+    setEditingPrompt(null);
+    setEditingValues({});
+    setEditingTaskValues({});
+    setEditingPromptValues({});
+    
+    // Start editing this test item
     setEditingTestItem(testItem.id);
     setEditingTestValues({
       title: testItem.title,
       description: testItem.description,
-      type: testItem.type,
+      testType: testItem.testType,
       status: testItem.status,
       priority: testItem.priority,
       projectId: testItem.projectKey
