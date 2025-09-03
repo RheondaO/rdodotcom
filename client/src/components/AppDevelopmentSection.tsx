@@ -983,10 +983,10 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
 
 
-  // Array of all available gemstone images
+  // Array of all available gemstone images (excluding gemstoness)
   const availableGemstones = [
     gem1, gem2, gem3, gem4, gem5, gem6, gem7, gem8, 
-    gem9, gem10, gem11, gem12, gem13, gem14, gem15, gem16
+    gem9, gem10, gem12, gem13, gem14, gem15, gem16
   ];
 
   // Create a shuffled but consistent assignment for this session
