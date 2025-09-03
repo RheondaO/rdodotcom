@@ -1017,28 +1017,27 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     return shuffled;
   };
 
-  // Get assigned gemstone for a project with duplicate prevention
+  // Get assigned gemstone for a project with strict duplicate prevention
   const getProjectGemstone = (project: any) => {
     const shuffledGems = createGemAssignments();
     
     // Extract project identifier (prefer projectKey, then notionId, then id)
     const projectId = project.projectKey || project.notionId || project.id || 'default';
     
-    // Create consistent index based on project identifier
-    const projectHash = projectId.toString().split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    
-    // For duplicate prevention, use project's position in the filtered list
+    // Get all current projects to ensure uniqueness
     const currentProjects = projects || [];
+    
+    // Find this project's position in the list
     const projectIndex = currentProjects.findIndex(p => 
       (p.projectKey || p.notionId || p.id) === projectId
     );
     
-    // Combine hash with index to ensure uniqueness across visible projects
-    const uniqueIndex = (Math.abs(projectHash) + projectIndex) % shuffledGems.length;
-    const selectedGem = shuffledGems[uniqueIndex];
+    // If project not found or index is invalid, use a fallback
+    const safeIndex = projectIndex >= 0 ? projectIndex : 0;
+    
+    // Directly assign gems by index to ensure no duplicates
+    // Each project gets the next available gem in sequence
+    const selectedGem = shuffledGems[safeIndex % shuffledGems.length];
     
     // Array of animation classes for unique motion effects
     const animationClasses = [
@@ -1046,8 +1045,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       'gem-wobble', 'gem-pulse', 'gem-figure8', 'gem-sway'
     ];
     
-    // Select animation based on unique index for consistency
-    const animationIndex = uniqueIndex % animationClasses.length;
+    // Select animation based on project index for consistency
+    const animationIndex = safeIndex % animationClasses.length;
     const selectedAnimation = animationClasses[animationIndex];
     
     // Return the individual gemstone image with unique animation and click handler
