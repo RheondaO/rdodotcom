@@ -960,25 +960,41 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
   const getStatusColor = (status: string) => {
     const statusLower = status?.toLowerCase() || '';
     
-    // Handle original Jira statuses
-    if (statusLower.includes('done') || statusLower.includes('resolved') || statusLower.includes('closed') || statusLower.includes('completed')) {
-      return "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400";
+    // Belle Journal project statuses with distinct, modern colors
+    switch (statusLower) {
+      case 'active':
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700";
+      case 'not_started':
+        return "bg-slate-100 text-slate-700 dark:bg-slate-800/40 dark:text-slate-300 border border-slate-200 dark:border-slate-600";
+      case 'inactive':
+        return "bg-gray-100 text-gray-700 dark:bg-gray-800/40 dark:text-gray-300 border border-gray-200 dark:border-gray-600";
+      case 'on_hold':
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-700";
+      case 'completed':
+        return "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-700";
+      case 'archived':
+        return "bg-zinc-100 text-zinc-700 dark:bg-zinc-800/40 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-600";
+      case 'planning':
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-700";
+      case 'in_progress':
+        return "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300 border border-violet-200 dark:border-violet-700";
+      case 'testing':
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200 dark:border-purple-700";
+      case 'deployed':
+        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700";
+      default:
+        // Handle legacy Jira statuses for backward compatibility
+        if (statusLower.includes('done') || statusLower.includes('resolved') || statusLower.includes('closed')) {
+          return "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-700";
+        }
+        if (statusLower.includes('progress') || statusLower.includes('development') || statusLower.includes('review')) {
+          return "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300 border border-violet-200 dark:border-violet-700";
+        }
+        if (statusLower.includes('blocked')) {
+          return "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border border-red-200 dark:border-red-700";
+        }
+        return "bg-gray-100 text-gray-700 dark:bg-gray-800/40 dark:text-gray-300 border border-gray-200 dark:border-gray-600";
     }
-    if (statusLower.includes('progress') || statusLower.includes('development') || statusLower.includes('review')) {
-      return "bg-yellow-100 text-yellow-800 dark:bg-[#17111d]/30 dark:text-yellow-400";
-    }
-    if (statusLower.includes('blocked') || statusLower.includes('hold')) {
-      return "bg-red-100 text-red-800 dark:bg-[#17111d]/30 dark:text-red-400";
-    }
-    if (statusLower.includes('testing') || statusLower.includes('qa')) {
-      return "bg-purple-100 text-purple-800 dark:bg-[#17111d]/30 dark:text-purple-400";
-    }
-    if (statusLower.includes('deployed') || statusLower.includes('live')) {
-      return "bg-green-100 text-green-800 dark:bg-[#17111d]/30 dark:text-green-400";
-    }
-    
-    // Default for todo-like statuses (including "not started", "to do", "open", etc.)
-    return "bg-gray-100 text-gray-800 dark:bg-[#17111d]/30 dark:text-gray-400";
   };
 
 
