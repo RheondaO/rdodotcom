@@ -73,54 +73,63 @@ import {
 // CSS for gemstone animations
 const gemstoneAnimationStyles = `
   @keyframes gemShakeSwivel {
-    0% { 
-      transform: rotate(0deg) translateX(0) translateY(0); 
-      filter: brightness(1.0) contrast(1.0) saturate(1.0);
-    }
-    10% { 
-      transform: rotate(2deg) translateX(1px) translateY(0); 
-      filter: brightness(1.1) contrast(1.1) saturate(1.1);
-    }
-    20% { 
-      transform: rotate(-1deg) translateX(-1px) translateY(1px); 
-      filter: brightness(0.9) contrast(0.9) saturate(0.9);
-    }
-    30% { 
-      transform: rotate(3deg) translateX(0) translateY(-1px); 
-      filter: brightness(1.2) contrast(1.2) saturate(1.2);
-    }
-    40% { 
-      transform: rotate(-2deg) translateX(1px) translateY(0); 
-      filter: brightness(0.8) contrast(0.8) saturate(0.8);
-    }
-    50% { 
-      transform: rotate(0deg) translateX(0) translateY(1px); 
-      filter: brightness(1.0) contrast(1.0) saturate(1.0);
-    }
-    60% { 
-      transform: rotate(1deg) translateX(-1px) translateY(0); 
-      filter: brightness(1.1) contrast(1.1) saturate(1.1);
-    }
-    70% { 
-      transform: rotate(-3deg) translateX(0) translateY(-1px); 
-      filter: brightness(0.9) contrast(0.9) saturate(0.9);
-    }
-    80% { 
-      transform: rotate(2deg) translateX(1px) translateY(1px); 
-      filter: brightness(1.2) contrast(1.2) saturate(1.2);
-    }
-    90% { 
-      transform: rotate(-1deg) translateX(-1px) translateY(0); 
-      filter: brightness(0.8) contrast(0.8) saturate(0.8);
-    }
-    100% { 
-      transform: rotate(0deg) translateX(0) translateY(0); 
-      filter: brightness(1.0) contrast(1.0) saturate(1.0);
-    }
+    0%, 100% { transform: rotate(0deg) translateX(0) translateY(0); }
+    25% { transform: rotate(2deg) translateX(2px) translateY(-1px); }
+    50% { transform: rotate(-1deg) translateX(-1px) translateY(1px); }
+    75% { transform: rotate(1deg) translateX(1px) translateY(-2px); }
+  }
+
+  @keyframes gemFloat {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-8px) scale(1.05); }
+  }
+
+  @keyframes gemSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(90deg) scale(1.1); }
+    50% { transform: rotate(180deg) scale(1); }
+    75% { transform: rotate(270deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  @keyframes gemBounce {
+    0%, 100% { transform: translateY(0px) scaleY(1); }
+    25% { transform: translateY(-10px) scaleY(1.1); }
+    50% { transform: translateY(-15px) scaleY(0.95); }
+    75% { transform: translateY(-5px) scaleY(1.05); }
+  }
+
+  @keyframes gemWobble {
+    0%, 100% { transform: rotate(0deg) translateX(0); }
+    15% { transform: rotate(-5deg) translateX(-3px); }
+    30% { transform: rotate(3deg) translateX(3px); }
+    45% { transform: rotate(-2deg) translateX(-2px); }
+    60% { transform: rotate(4deg) translateX(2px); }
+    75% { transform: rotate(-1deg) translateX(-1px); }
+  }
+
+  @keyframes gemPulse {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(2deg); }
+    50% { transform: scale(1.2) rotate(0deg); }
+    75% { transform: scale(1.1) rotate(-2deg); }
+  }
+
+  @keyframes gemFigure8 {
+    0% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+    25% { transform: translateX(5px) translateY(-8px) rotate(90deg); }
+    50% { transform: translateX(0px) translateY(-16px) rotate(180deg); }
+    75% { transform: translateX(-5px) translateY(-8px) rotate(270deg); }
+    100% { transform: translateX(0px) translateY(0px) rotate(360deg); }
+  }
+
+  @keyframes gemSway {
+    0%, 100% { transform: rotate(0deg) translateX(0px); }
+    33% { transform: rotate(10deg) translateX(3px); }
+    66% { transform: rotate(-10deg) translateX(-3px); }
   }
   
   .gem-animation {
-    animation: gemShakeSwivel 3s ease-in-out infinite;
     transform-origin: center center;
     background: transparent !important;
     backdrop-filter: none;
@@ -132,12 +141,21 @@ const gemstoneAnimationStyles = `
     z-index: 30;
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
   }
+
+  .gem-shake { animation: gemShakeSwivel 3s ease-in-out infinite; }
+  .gem-float { animation: gemFloat 4s ease-in-out infinite; }
+  .gem-spin { animation: gemSpin 5s linear infinite; }
+  .gem-bounce { animation: gemBounce 2.5s ease-in-out infinite; }
+  .gem-wobble { animation: gemWobble 3.5s ease-in-out infinite; }
+  .gem-pulse { animation: gemPulse 3s ease-in-out infinite; }
+  .gem-figure8 { animation: gemFigure8 6s ease-in-out infinite; }
+  .gem-sway { animation: gemSway 4.5s ease-in-out infinite; }
   
   .gem-animation:hover {
-    animation: gemShakeSwivel 0.8s ease-in-out infinite;
     filter: brightness(1.3) contrast(1.2) saturate(1.4) drop-shadow(0 0 15px rgba(255,255,255,0.9)) drop-shadow(0 0 30px rgba(255,255,255,0.6)) drop-shadow(0 0 45px rgba(255,255,255,0.3)) !important;
     transform: scale(1.15) !important;
     transition: all 0.3s ease-in-out;
+    animation-duration: 0.8s !important;
   }
 `;
 
@@ -909,12 +927,22 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     const gemIndex = Math.abs(projectHash) % shuffledGems.length;
     const selectedGem = shuffledGems[gemIndex];
     
-    // Return the individual gemstone image with transparent background and animations
+    // Array of animation classes for unique motion effects
+    const animationClasses = [
+      'gem-shake', 'gem-float', 'gem-spin', 'gem-bounce', 
+      'gem-wobble', 'gem-pulse', 'gem-figure8', 'gem-sway'
+    ];
+    
+    // Select animation based on the same hash for consistency
+    const animationIndex = Math.abs(projectHash) % animationClasses.length;
+    const selectedAnimation = animationClasses[animationIndex];
+    
+    // Return the individual gemstone image with unique animation
     return (
       <img 
         src={selectedGem}
         alt="Project gemstone"
-        className="w-full h-full object-contain gem-animation"
+        className={`w-full h-full object-contain gem-animation ${selectedAnimation}`}
         style={{ 
           mixBlendMode: 'normal',
           backgroundColor: 'transparent'
