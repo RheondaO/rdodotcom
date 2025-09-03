@@ -1077,8 +1077,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         }}
         onClick={(e) => {
           e.stopPropagation();
-          setSelectedProject(project.projectKey || project.notionId || project.id);
-          setActiveView('projects');
+          setModalProject(project);
+          setShowProjectModal(true);
         }}
       />
     );
