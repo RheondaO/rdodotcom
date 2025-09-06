@@ -236,7 +236,7 @@ export default function Donate() {
                 Support My Work
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-300">
-                Your support helps me continue building and improving Belle Journal. Every donation, no matter the size, makes a difference!
+                Your support helps me continue building and improving Belle Journal. Every donation, no matter the size, makes a difference! Pay securely with your card, Apple Pay, or Cash App Pay.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
