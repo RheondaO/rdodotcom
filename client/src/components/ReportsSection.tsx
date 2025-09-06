@@ -6,7 +6,7 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, TrendingDown, Calendar, Target, Award, Lightbulb } from 'lucide-react';
+import { TrendingUp, TrendingDown, Calendar, Target, Award, Lightbulb, BarChart as BarChartIcon } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, subDays } from 'date-fns';
 
 interface ReportsSectionProps {}
@@ -355,6 +355,51 @@ const COLORS = ['#8B5CF6', '#06D6A0', '#FFD23F', '#EE6C4D'];
                       </p>
                     </div>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* AI Development Analytics Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-[#4b5563] dark:text-white">
+                  <BarChartIcon className="h-5 w-5" />
+                  AI Development Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Target className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium text-blue-900 dark:text-blue-100">Project Health</span>
+                    </div>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      Projects with active development and deployment status
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Calendar className="h-5 w-5 text-green-600" />
+                      <span className="font-medium text-green-900 dark:text-green-100">Development Velocity</span>
+                    </div>
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      Average project completion time and development speed metrics
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Target className="h-5 w-5 text-purple-600" />
+                      <span className="font-medium text-purple-900 dark:text-purple-100">Focus Areas</span>
+                    </div>
+                    <p className="text-sm text-purple-700 dark:text-purple-300">
+                      Current development priorities and task distribution
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

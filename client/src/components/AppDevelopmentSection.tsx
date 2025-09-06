@@ -1565,26 +1565,11 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Active Projects</p>
-                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{projectStats.active}</p>
-                    <p className="text-xs text-muted-foreground dark:text-gray-500">of {projectStats.total} total</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Stories Completed Yesterday</p>
+                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{taskStats.completed}</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">vs {taskStats.inProgress} in progress</p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
-                    <Code2 className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Tasks Progress</p>
-                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">{taskStats.completed}</p>
-                    <p className="text-xs text-muted-foreground dark:text-gray-500">{taskStats.inProgress} in progress</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
                     <CheckSquare className="h-6 w-6 text-white" />
                   </div>
                 </div>
@@ -1595,17 +1580,12 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Avg Project Length</p>
-                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{projectStats.avgLength}</p>
-                    <p className="text-xs text-muted-foreground dark:text-gray-500">
-                      {projectStats.total > 0 ? 
-                        `based on ${projectStats.total} projects` :
-                        'No projects available'
-                      }
-                    </p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Active Stories Today</p>
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">{taskStats.inProgress}</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">{taskStats.todo} scheduled</p>
                   </div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
-                    <Clock className="h-6 w-6 text-white" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                    <Clock4 className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -1615,9 +1595,29 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400">Avg Task Completion Rate</p>
-                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{projectStats.avgTaskCompletion}%</p>
-                    <p className="text-xs text-muted-foreground dark:text-gray-500">{taskStats.completed} of {taskStats.total} tasks done</p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">Stories Due Tomorrow</p>
+                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{taskStats.todo}</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">
+                      {taskStats.total > 0 ? 
+                        `${taskStats.total} total tasks` :
+                        'No upcoming tasks'
+                      }
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400">This Week's Velocity</p>
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{Math.round((taskStats.completed / Math.max(taskStats.total, 1)) * 100)}%</p>
+                    <p className="text-xs text-muted-foreground dark:text-gray-500">{taskStats.completed} of {taskStats.total} completed</p>
                   </div>
                   <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
                     <TrendingUp className="h-6 w-6 text-white" />
@@ -1876,59 +1876,6 @@ Generated by: Belle Journal - AI App Development & Coding
             </Card>
           </div>
 
-          {/* Productivity Insights */}
-          <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-[#4b5563] dark:text-white">
-                <BarChart3 className="h-5 w-5" />
-                Development Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Star className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-900 dark:text-blue-100">Project Health</span>
-                  </div>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    {projectStats.completed > 0 ? 
-                      `${projectStats.completed} projects deployed successfully` :
-                      'No projects completed yet - keep pushing forward!'
-                    }
-                  </p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Clock4 className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-green-900 dark:text-green-100">Project Length</span>
-                  </div>
-                  <p className="text-sm text-green-700 dark:text-green-300">
-                    {projectStats.avgLength > 0 ?
-                      `Average project length is ${projectStats.avgLength} days` :
-                      'Set project lengths to see duration metrics'
-                    }
-                  </p>
-                </div>
-
-                <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Target className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium text-purple-900 dark:text-purple-100">Focus Areas</span>
-                  </div>
-                  <p className="text-sm text-purple-700 dark:text-purple-300">
-                    {taskStats.features > taskStats.bugs ?
-                      `Building features (${taskStats.features} vs ${taskStats.bugs} bugs)` :
-                      taskStats.bugs > 0 ?
-                      `Focus on bug fixes (${taskStats.bugs} pending)` :
-                      'Ready for feature development'
-                    }
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       )}
 
