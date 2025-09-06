@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import Stripe from "stripe";
 import { authenticateUser, requireAuth, requireAdmin, adminLogin, adminLogout, type AuthenticatedRequest } from "./auth";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { 
@@ -84,6 +85,14 @@ import {
   insertPurchaseSchema
 } from "@shared/schema";
 
+// Initialize Stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Health check endpoint - MUST be before authentication middleware
@@ -94,8 +103,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString()
     });
   });
+
+  // Stripe payment route - BEFORE authentication middleware so it's publicly accessible
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount } = req.body;
+      
+      if (!amount || amount < 1) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          source: "belle_journal_donation",
+          timestamp: new Date().toISOString()
+        }
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error("Stripe payment intent error:", error);
+      res
+        .status(500)
+        .json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
   
-  // Apply authentication middleware to all routes AFTER health checks
+  // Apply authentication middleware to all routes AFTER health checks and public payment routes
   app.use(authenticateUser);
 
   // Timer debug routes for cross-device troubleshooting
