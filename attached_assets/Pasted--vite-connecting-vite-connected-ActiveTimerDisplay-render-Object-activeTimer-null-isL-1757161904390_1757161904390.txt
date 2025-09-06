@@ -1,0 +1,41 @@
+[vite] connecting...
+[vite] connected.
+🔄 ActiveTimerDisplay render: 
+Object {activeTimer: null, isLoading: true, isFetched: false, error: undefined, hasData: false}
+🔄 ActiveTimerDisplay render: 
+Object {activeTimer: null, isLoading: true, isFetched: false, error: undefined, hasData: false}
+🔄 ActiveTimerDisplay render: 
+Object {activeTimer: null, isLoading: true, isFetched: false, error: undefined, hasData: false}
+🔄 ActiveTimerDisplay render: 
+Object {activeTimer: null, isLoading: true, isFetched: false, error: undefined, hasData: false}
+🔄 ActiveTimerDisplay render: 
+Object {activeTimer: null, isLoading: false, isFetched: true, error: undefined, hasData: false}
+🔍 ActiveTimerDisplay: No active timer found 
+Object {error: null, debugInfo: {…}}
+🔄 ActiveTimerDisplay render: 
+Object {activeTimer: null, isLoading: false, isFetched: true, error: undefined, hasData: false}
+🔍 ActiveTimerDisplay: No active timer found 
+Object {error: null, debugInfo: {…}}
+📊 Projects from Notion AIDEVPROJECTS: 10
+Warning: Each child in a list should have a unique &quot;key&quot; prop.
+
+Check the render method of `AppDevelopmentSection`. See https://reactjs.org/link/warning-keys for more information.
+    at _c11 (https://0aa35238-2b8f-4988-a1bf-c091084ca81d-00-1sf737yibdhq1.riker.replit.dev/src/components/ui/select.tsx:208:13)
+    at AppDevelopmentSection (https://0aa35238-2b8f-4988-a1bf-c091084ca81d-00-1sf737yibdhq1.riker.replit.dev/src/components/AppDevelopmentSection.tsx:395:49)
+    at div
+    at main
+    at div
+    at Dashboard (https://0aa35238-2b8f-4988-a1bf-c091084ca81d-00-1sf737yibdhq1.riker.replit.dev/src/pages/Dashboard.tsx:44:39)
+    at Route (https://0aa35238-2b8f-4988-a1bf-c091084ca81d-00-1sf737yibdhq1.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=2f240c66:323:16)
+    at Switch (https://0aa35238-2b8f-4988-a1bf-c091084ca81d-00-1sf737yibdhq1.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=2f240c66:379:17)
+    at ThemeProvider (https://0aa35238-2b8f-4988-a1bf-c091084ca81d-00-1sf737yibdhq1.riker.replit.dev/src/hooks/use-theme.tsx:21:3)
+    at QueryClientProvider (https://0aa35238-2b8f-4988-a1bf-c091084ca81d-00-1sf737yibdhq1.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=2f240c66:2805:3)
+    at App
+📊 Projects from Notion AIDEVPROJECTS: 10
+[vite] hot updated: /src/components/AppDevelopmentSection.tsx
+[vite] hot updated: /src/index.css?v=ALYGTjfTcUqY_qbfba59
+🔍 Debug for RDOC project:
+- Jira project key: RDOC
+- Notion projects count: 10
+- Notion project keys: 
+(10) ["", "", "", "", "", "", "", "", "", ""]
