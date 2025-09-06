@@ -75,7 +75,7 @@ const DonationForm = () => {
 
 export default function Donate() {
   const [clientSecret, setClientSecret] = useState("");
-  const [selectedAmount, setSelectedAmount] = useState(25);
+  const [selectedAmount, setSelectedAmount] = useState(50);
   const [customAmount, setCustomAmount] = useState("");
   const [isCustom, setIsCustom] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -84,7 +84,7 @@ export default function Donate() {
   const urlParams = new URLSearchParams(window.location.search);
   const isSuccess = urlParams.get('success') === 'true';
 
-  const predefinedAmounts = [10, 25, 50, 100];
+  const predefinedAmounts = [10, 50, 100, 500];
 
   const createPaymentIntent = async (amount: number) => {
     setIsLoading(true);
