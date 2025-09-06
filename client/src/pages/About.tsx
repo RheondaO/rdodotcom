@@ -120,6 +120,12 @@ export default function About() {
                       Read the Blog
                     </Button>
                   </Link>
+                  <Link href="/donate">
+                    <Button variant="outline" className="border-pink-200 text-pink-600 hover:bg-pink-50">
+                      <Award className="mr-2 h-4 w-4" />
+                      Support My Work
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
