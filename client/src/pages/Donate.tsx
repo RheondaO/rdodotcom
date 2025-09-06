@@ -89,8 +89,7 @@ export default function Donate() {
   const createPaymentIntent = async (amount: number) => {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/create-payment-intent", { amount });
-      const data = await response.json();
+      const data = await apiRequest("POST", "/api/create-payment-intent", { amount });
       setClientSecret(data.clientSecret);
     } catch (error) {
       console.error('Error creating payment intent:', error);
