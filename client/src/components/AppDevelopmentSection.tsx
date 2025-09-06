@@ -16,7 +16,9 @@ import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { format } from "date-fns";
+import { format, subDays, addDays } from "date-fns";
+import { useTodos } from "@/hooks/use-todos";
+import { useDailyData } from "@/hooks/use-daily-data";
 import { 
   Code2, 
   Monitor, 
@@ -471,6 +473,16 @@ interface PromptTemplate {
 export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSectionProps) {
   // Authentication
   const { isAuthenticated, isAdmin } = useAuth();
+  
+  // Date-specific data queries
+  const dateString = format(selectedDate, 'yyyy-MM-dd');
+  const yesterdayString = format(subDays(selectedDate, 1), 'yyyy-MM-dd');
+  const tomorrowString = format(addDays(selectedDate, 1), 'yyyy-MM-dd');
+  
+  const { data: todayTodos = [] } = useTodos(dateString);
+  const { data: yesterdayTodos = [] } = useTodos(yesterdayString);
+  const { data: tomorrowTodos = [] } = useTodos(tomorrowString);
+  const { data: dailyEntry } = useDailyData(dateString);
   
   const [activeView, setActiveView] = useState<"overview" | "projects" | "tasks" | "testing" | "documentation" | "library">("overview");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
