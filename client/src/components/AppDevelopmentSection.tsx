@@ -1430,11 +1430,17 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     withStartDate: projects.filter(p => p.startDate).length
   };
 
+  // Daily Activity Stats based on selected date
   const taskStats = {
-    total: baseFilteredTasks.length,
-    completed: baseFilteredTasks.filter(t => t.status === 'done').length,
-    inProgress: baseFilteredTasks.filter(t => t.status === 'in_progress').length,
-    todo: baseFilteredTasks.filter(t => t.status === 'todo').length,
+    // Yesterday's completed todos
+    completed: yesterdayTodos.filter(t => t.isCompleted).length,
+    // Today's active/in-progress todos
+    inProgress: todayTodos.filter(t => !t.isCompleted).length,
+    // Tomorrow's scheduled todos
+    todo: tomorrowTodos.length,
+    // Total todos for selected date
+    total: todayTodos.length,
+    // Legacy fields for compatibility
     bugs: baseFilteredTasks.filter(t => t.issueType === 'bug').length,
     features: baseFilteredTasks.filter(t => t.issueType === 'feature').length
   };
