@@ -34,7 +34,7 @@ const DonationForm = () => {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: window.location.origin + "/donate?success=true",
+        return_url: `${window.location.protocol}//${window.location.host}/donate?success=true`,
       },
     });
 
