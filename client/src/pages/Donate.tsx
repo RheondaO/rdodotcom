@@ -56,9 +56,6 @@ const DonationForm = () => {
           wallets: {
             applePay: 'auto',
             googlePay: 'never'
-          },
-          fields: {
-            billingDetails: 'never'
           }
         }}
       />
