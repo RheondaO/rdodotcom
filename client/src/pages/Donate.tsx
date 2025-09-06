@@ -56,7 +56,14 @@ const DonationForm = () => {
           paymentMethodOrder: ['card', 'apple_pay', 'cashapp'],
           wallets: {
             applePay: 'auto',
-            googlePay: 'never'
+            googlePay: 'never',
+            amazonPay: 'never'
+          },
+          paymentMethodCreation: 'manual',
+          paymentMethodConfiguration: {
+            displayPreference: {
+              preference: 'none'
+            }
           }
         }}
       />
