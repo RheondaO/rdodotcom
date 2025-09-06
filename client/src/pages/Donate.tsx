@@ -75,7 +75,7 @@ const DonationForm = () => {
 
 export default function Donate() {
   const [clientSecret, setClientSecret] = useState("");
-  const [selectedAmount, setSelectedAmount] = useState(50);
+  const [selectedAmount, setSelectedAmount] = useState(10);
   const [customAmount, setCustomAmount] = useState("");
   const [isCustom, setIsCustom] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
