@@ -53,7 +53,6 @@ const DonationForm = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <PaymentElement 
         options={{
-          paymentMethodTypes: ['card', 'apple_pay', 'cashapp'],
           wallets: {
             applePay: 'auto',
             googlePay: 'never'
