@@ -51,7 +51,15 @@ const DonationForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      <PaymentElement 
+        options={{
+          paymentMethodOrder: ['card'],
+          wallets: {
+            applePay: 'never',
+            googlePay: 'never'
+          }
+        }}
+      />
       <Button 
         type="submit" 
         disabled={!stripe || isProcessing}
