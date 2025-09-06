@@ -4,6 +4,7 @@ import AuthCheck from "./pages/AuthCheck";
 import About from "./pages/About";
 import RheondaOgletreeBlog from "./pages/RheondaOgletreeBlog";
 import PublicView from "./pages/PublicView";
+import Donate from "./pages/Donate";
 
 import NotFoundPage from "./pages/not-found";
 import { ThemeProvider } from "./hooks/use-theme";
@@ -66,6 +67,9 @@ function App() {
           </Route>
           <Route path="/blog">
             <RheondaOgletreeBlog />
+          </Route>
+          <Route path="/donate">
+            <Donate />
           </Route>
           <Route path="/">
             <PublicView />
