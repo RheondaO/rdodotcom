@@ -57,23 +57,23 @@ const CheckoutForm = ({ amount }: { amount: number }) => {
   };
 
   const getPaymentElementOptions = () => {
-    // For $10 - show Affirm to demonstrate payment method control
+    // For $10 - show Google Pay to demonstrate payment method control (even though we normally disable it)
     if (amount === 10) {
       return {
-        paymentMethodTypes: ['card', 'affirm', 'apple_pay', 'cashapp'],
+        paymentMethodTypes: ['card', 'google_pay', 'apple_pay', 'cashapp'],
         wallets: {
-          applePay: 'auto',
-          googlePay: 'never'
+          applePay: 'auto' as const,
+          googlePay: 'auto' as const
         }
       };
     }
     
-    // For other amounts - show only enabled methods (no Amazon Pay/Klarna)
+    // For other amounts - show only your preferred methods (no Google Pay/Amazon Pay/Klarna)
     return {
       paymentMethodTypes: ['card', 'apple_pay', 'cashapp'],
       wallets: {
-        applePay: 'auto', 
-        googlePay: 'never'
+        applePay: 'auto' as const, 
+        googlePay: 'never' as const
       }
     };
   };
