@@ -329,6 +329,7 @@ export default function Donate() {
                         colorPrimary: '#9333ea',
                       },
                       rules: {
+                        // Hide tabs
                         '.Tab[data-testid*="affirm"]': {
                           display: 'none !important'
                         },
@@ -338,6 +339,7 @@ export default function Donate() {
                         '.Tab[data-testid*="amazon"]': {
                           display: 'none !important'
                         },
+                        // Hide any element containing these names
                         '[data-testid*="affirm"]': {
                           display: 'none !important'
                         },
@@ -347,6 +349,7 @@ export default function Donate() {
                         '[data-testid*="amazon"]': {
                           display: 'none !important'
                         },
+                        // Hide payment method selectors
                         '.PaymentMethodSelector--affirm': {
                           display: 'none !important'
                         },
@@ -354,6 +357,29 @@ export default function Donate() {
                           display: 'none !important'
                         },
                         '.PaymentMethodSelector--amazon_pay': {
+                          display: 'none !important'
+                        },
+                        // Hide horizontal card layouts for Klarna specifically
+                        '[class*="klarna"]': {
+                          display: 'none !important'
+                        },
+                        '[class*="Klarna"]': {
+                          display: 'none !important'
+                        },
+                        '.PaymentMethodCard--klarna': {
+                          display: 'none !important'
+                        },
+                        '.PaymentMethodCard[data-payment-method-type="klarna"]': {
+                          display: 'none !important'
+                        },
+                        '.HorizontalPaymentMethod--klarna': {
+                          display: 'none !important'
+                        },
+                        // Target cards containing "Klarna" text
+                        '.PaymentMethodCard:has([aria-label*="Klarna"])': {
+                          display: 'none !important'
+                        },
+                        '.PaymentMethodCard:has([alt*="Klarna"])': {
                           display: 'none !important'
                         }
                       }
