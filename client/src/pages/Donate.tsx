@@ -56,9 +56,31 @@ const CheckoutForm = ({ amount }: { amount: number }) => {
     setIsSubmitting(false);
   };
 
+  const getPaymentElementOptions = () => {
+    // For $10 - show Affirm to demonstrate payment method control
+    if (amount === 10) {
+      return {
+        paymentMethodTypes: ['card', 'affirm', 'apple_pay', 'cashapp'],
+        wallets: {
+          applePay: 'auto',
+          googlePay: 'never'
+        }
+      };
+    }
+    
+    // For other amounts - show only enabled methods (no Amazon Pay/Klarna)
+    return {
+      paymentMethodTypes: ['card', 'apple_pay', 'cashapp'],
+      wallets: {
+        applePay: 'auto', 
+        googlePay: 'never'
+      }
+    };
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      <PaymentElement options={getPaymentElementOptions()} />
       <Button 
         type="submit" 
         disabled={!stripe || isSubmitting}
