@@ -324,7 +324,39 @@ export default function Donate() {
                   options={{ 
                     clientSecret,
                     appearance: {
-                      theme: 'stripe'
+                      theme: 'stripe',
+                      variables: {
+                        colorPrimary: '#9333ea',
+                      },
+                      rules: {
+                        '.Tab[data-testid*="affirm"]': {
+                          display: 'none !important'
+                        },
+                        '.Tab[data-testid*="klarna"]': {
+                          display: 'none !important'
+                        },
+                        '.Tab[data-testid*="amazon"]': {
+                          display: 'none !important'
+                        },
+                        '[data-testid*="affirm"]': {
+                          display: 'none !important'
+                        },
+                        '[data-testid*="klarna"]': {
+                          display: 'none !important'
+                        },
+                        '[data-testid*="amazon"]': {
+                          display: 'none !important'
+                        },
+                        '.PaymentMethodSelector--affirm': {
+                          display: 'none !important'
+                        },
+                        '.PaymentMethodSelector--klarna': {
+                          display: 'none !important'
+                        },
+                        '.PaymentMethodSelector--amazon_pay': {
+                          display: 'none !important'
+                        }
+                      }
                     }
                   }}
                   key={clientSecret} // Force remount when clientSecret changes
