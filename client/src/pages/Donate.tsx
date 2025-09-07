@@ -57,9 +57,24 @@ const CheckoutForm = ({ amount }: { amount: number }) => {
   };
 
   const getPaymentElementOptions = () => {
-    // For $10 - show Google Pay to demonstrate payment method control (even though we normally disable it)
+    // Base configuration that explicitly blocks unwanted payment methods
+    const baseOptions = {
+      wallets: {
+        applePay: 'auto' as const,
+        googlePay: 'never' as const
+      },
+      // Explicitly disable unwanted payment methods
+      paymentMethodCreation: 'manual' as const,
+      layout: {
+        type: 'tabs' as const,
+        defaultCollapsed: false
+      }
+    };
+
+    // For $10 - show Google Pay to test control
     if (amount === 10) {
       return {
+        ...baseOptions,
         paymentMethodTypes: ['card', 'google_pay', 'apple_pay', 'cashapp'],
         wallets: {
           applePay: 'auto' as const,
@@ -68,13 +83,10 @@ const CheckoutForm = ({ amount }: { amount: number }) => {
       };
     }
     
-    // For other amounts - show only your preferred methods (no Google Pay/Amazon Pay/Klarna)
+    // For all other amounts - strict allowlist only
     return {
-      paymentMethodTypes: ['card', 'apple_pay', 'cashapp'],
-      wallets: {
-        applePay: 'auto' as const, 
-        googlePay: 'never' as const
-      }
+      ...baseOptions,
+      paymentMethodTypes: ['card', 'apple_pay', 'cashapp']
     };
   };
 
