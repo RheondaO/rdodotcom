@@ -9,18 +9,17 @@ import { ArrowLeft, Heart, Award, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import SEOHead from "../components/SEOHead";
 
-// Make sure to call `loadStripe` outside of a component's render to avoid
-// recreating the `Stripe` object on every render.
+// Initialize Stripe outside component
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const DonationForm = () => {
+const CheckoutForm = ({ amount }: { amount: number }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,24 +28,32 @@ const DonationForm = () => {
       return;
     }
 
-    setIsProcessing(true);
+    setIsSubmitting(true);
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.protocol}//${window.location.host}/donate?success=true`,
-      },
-    });
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.protocol}//${window.location.host}/donate?success=true`,
+        },
+      });
 
-    if (error) {
+      if (error) {
+        toast({
+          title: "Payment Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
       toast({
-        title: "Payment Failed",
-        description: error.message,
+        title: "Payment Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     }
 
-    setIsProcessing(false);
+    setIsSubmitting(false);
   };
 
   return (
@@ -54,10 +61,10 @@ const DonationForm = () => {
       <PaymentElement />
       <Button 
         type="submit" 
-        disabled={!stripe || isProcessing}
+        disabled={!stripe || isSubmitting}
         className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
       >
-        {isProcessing ? (
+        {isSubmitting ? (
           <>
             <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
             Processing...
@@ -65,7 +72,7 @@ const DonationForm = () => {
         ) : (
           <>
             <Heart className="mr-2 h-4 w-4" />
-            Complete Donation
+            Complete Donation - ${amount}
           </>
         )}
       </Button>
@@ -75,49 +82,51 @@ const DonationForm = () => {
 
 export default function Donate() {
   const [clientSecret, setClientSecret] = useState("");
-  const [selectedAmount, setSelectedAmount] = useState(10);
-  const [customAmount, setCustomAmount] = useState("");
-  const [isCustom, setIsCustom] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [donationAmount, setDonationAmount] = useState(10);
+  const [customInput, setCustomInput] = useState("");
+  const [isCustomAmount, setIsCustomAmount] = useState(false);
+  const [isCreatingPayment, setIsCreatingPayment] = useState(false);
 
   // Check for success parameter
   const urlParams = new URLSearchParams(window.location.search);
   const isSuccess = urlParams.get('success') === 'true';
 
-  const predefinedAmounts = [10, 50, 100, 500];
+  const amounts = [10, 50, 100, 500];
 
-  const createPaymentIntent = async (amount: number) => {
-    setIsLoading(true);
+  const createNewPayment = async (amount: number) => {
+    setIsCreatingPayment(true);
     try {
-      const data = await apiRequest("POST", "/api/create-payment-intent", { amount });
-      setClientSecret(data.clientSecret);
+      const response = await apiRequest("POST", "/api/create-payment-intent", { amount });
+      setClientSecret(response.clientSecret);
     } catch (error) {
-      console.error('Error creating payment intent:', error);
+      console.error('Payment creation error:', error);
     } finally {
-      setIsLoading(false);
+      setIsCreatingPayment(false);
     }
   };
 
-  const handleAmountChange = (amount: number) => {
-    setSelectedAmount(amount);
-    setIsCustom(false);
-    setCustomAmount("");
-    createPaymentIntent(amount);
+  const selectAmount = (amount: number) => {
+    setDonationAmount(amount);
+    setIsCustomAmount(false);
+    setCustomInput("");
+    setClientSecret(""); // Clear current payment
+    createNewPayment(amount);
   };
 
-  const handleCustomAmountSubmit = () => {
-    const amount = parseFloat(customAmount);
+  const applyCustomAmount = () => {
+    const amount = parseFloat(customInput);
     if (amount && amount >= 1) {
-      setSelectedAmount(amount);
-      setIsCustom(true);
-      createPaymentIntent(amount);
+      setDonationAmount(amount);
+      setIsCustomAmount(true);
+      setClientSecret(""); // Clear current payment
+      createNewPayment(amount);
     }
   };
 
+  // Initialize with default amount
   useEffect(() => {
-    // Create PaymentIntent with default amount when page loads
     if (!isSuccess) {
-      createPaymentIntent(selectedAmount);
+      createNewPayment(donationAmount);
     }
   }, []);
 
@@ -130,7 +139,6 @@ export default function Donate() {
           keywords={["donation", "support", "thank you", "Belle Journal"]}
         />
         
-        {/* Header */}
         <header className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
           <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div className="flex items-center space-x-3">
@@ -152,7 +160,6 @@ export default function Donate() {
           </div>
         </header>
 
-        {/* Success Message */}
         <main className="min-h-screen flex items-center justify-center px-6 py-12">
           <Card className="max-w-md mx-auto bg-white/60 dark:bg-[#17111d]/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
             <CardContent className="p-8 text-center">
@@ -194,7 +201,6 @@ export default function Donate() {
         keywords={["donation", "support", "Belle Journal", "Rheonda Ogletree"]}
       />
       
-      {/* Header */}
       <header className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-md border-b border-purple-100 dark:border-purple-800">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
@@ -216,7 +222,6 @@ export default function Donate() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="min-h-screen flex items-center justify-center px-6 py-12">
         <div className="max-w-md mx-auto">
           <Card className="bg-white/60 dark:bg-[#17111d]/60 backdrop-blur-sm shadow-xl border border-purple-200/50 dark:border-purple-800/50">
@@ -228,7 +233,7 @@ export default function Donate() {
                 Support My Work
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-300">
-                Your support helps me continue building and improving Belle Journal. Every donation, no matter the size, makes a difference! Pay securely with your card, Apple Pay, or Cash App Pay.
+                Your support helps me continue building and improving Belle Journal. Every donation makes a difference!
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -236,12 +241,12 @@ export default function Donate() {
               <div>
                 <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Choose an amount:</h3>
                 <div className="grid grid-cols-2 gap-2 mb-4">
-                  {predefinedAmounts.map((amount) => (
+                  {amounts.map((amount) => (
                     <Button
                       key={amount}
-                      variant={selectedAmount === amount && !isCustom ? "default" : "outline"}
-                      onClick={() => handleAmountChange(amount)}
-                      className={selectedAmount === amount && !isCustom 
+                      variant={donationAmount === amount && !isCustomAmount ? "default" : "outline"}
+                      onClick={() => selectAmount(amount)}
+                      className={donationAmount === amount && !isCustomAmount 
                         ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white" 
                         : "border-purple-200 text-purple-600 hover:bg-purple-50"
                       }
@@ -257,13 +262,13 @@ export default function Donate() {
                     type="number"
                     min="1"
                     placeholder="Custom amount"
-                    value={customAmount}
-                    onChange={(e) => setCustomAmount(e.target.value)}
+                    value={customInput}
+                    onChange={(e) => setCustomInput(e.target.value)}
                     className="flex-1 px-3 py-2 border border-purple-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                   <Button 
-                    onClick={handleCustomAmountSubmit}
-                    disabled={!customAmount || parseFloat(customAmount) < 1}
+                    onClick={applyCustomAmount}
+                    disabled={!customInput || parseFloat(customInput) < 1}
                     variant="outline"
                     size="sm"
                     className="border-purple-200 text-purple-600 hover:bg-purple-50"
@@ -274,14 +279,23 @@ export default function Donate() {
               </div>
 
               {/* Payment Form */}
-              {isLoading ? (
+              {isCreatingPayment ? (
                 <div className="text-center py-8">
                   <div className="animate-spin w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full mx-auto mb-4" />
                   <p className="text-gray-600 dark:text-gray-300">Setting up payment...</p>
                 </div>
               ) : clientSecret ? (
-                <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <DonationForm />
+                <Elements 
+                  stripe={stripePromise} 
+                  options={{ 
+                    clientSecret,
+                    appearance: {
+                      theme: 'stripe'
+                    }
+                  }}
+                  key={clientSecret} // Force remount when clientSecret changes
+                >
+                  <CheckoutForm amount={donationAmount} />
                 </Elements>
               ) : (
                 <div className="text-center py-4">
