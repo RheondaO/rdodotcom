@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, Award, BookOpen, Target, TrendingUp, Users, Calendar, Home, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, Award, BookOpen, Target, TrendingUp, Users, Calendar, Home, Sparkles, Star, Lock } from "lucide-react";
 import { Link } from "wouter";
 import SEOHead from "../components/SEOHead";
 import { generatePersonStructuredData, RHEONDA_PERSON_DATA } from "../utils/structuredData";
@@ -120,12 +120,14 @@ export default function About() {
                       Read the Blog
                     </Button>
                   </Link>
-                  <Link href="/donate">
-                    <Button variant="outline" className="border-pink-200 text-pink-600 hover:bg-pink-50">
-                      <Award className="mr-2 h-4 w-4" />
-                      Support My Work
-                    </Button>
-                  </Link>
+                  <Button 
+                    disabled 
+                    variant="outline" 
+                    className="border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed opacity-60 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-500 dark:bg-gray-800 dark:hover:bg-gray-800"
+                  >
+                    <Lock className="mr-2 h-4 w-4" />
+                    Support My Work (Coming Soon)
+                  </Button>
                 </div>
               </CardContent>
             </Card>
