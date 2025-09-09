@@ -59,28 +59,25 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
       }));
     }
 
-    // Optimized 30 FPS animation loop for better performance
+    // 60 FPS animation loop with requestAnimationFrame
     const updateCursor = () => {
       const dx = targetPosition.current.x - cursorPosition.x;
       const dy = targetPosition.current.y - cursorPosition.y;
       
-      // Only update if there's significant movement to reduce unnecessary renders
-      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-        const easing = 0.25; // Reduced easing for less CPU usage
-        const newPosition = {
-          x: cursorPosition.x + dx * easing,
-          y: cursorPosition.y + dy * easing
-        };
-        
-        setCursorPosition(newPosition);
+      // Smooth cursor movement with fast responsive easing
+      const easing = 0.35;
+      const newPosition = {
+        x: cursorPosition.x + dx * easing,
+        y: cursorPosition.y + dy * easing
+      };
+      
+      setCursorPosition(newPosition);
 
-        // Update letter trail only when moving significantly
-        if (showTrailingLetters && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-          updateLetterTrail(newPosition.x, newPosition.y);
-        }
+      // Update letter trail on About page and Landing page with brush stroke effect
+      if (showTrailingLetters) {
+        updateLetterTrail(newPosition.x, newPosition.y);
       }
 
-      // Throttle to ~30 FPS for better performance
       animationRef.current = requestAnimationFrame(updateCursor);
     };
 
@@ -251,13 +248,18 @@ export function CustomCursor({ enabled = true }: CustomCursorProps) {
             fontSize: '42px',
             fontFamily: 'Georgia, "Times New Roman", Times, serif',
             fontWeight: 'bold',
-            color: '#667eea', // Simplified solid color instead of gradient
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
             opacity: letter.opacity,
-            transform: `scale(${letter.scale})`, // Removed rotation for performance
+            transform: `scale(${letter.scale}) rotate(${letter.rotation}deg)`,
             userSelect: 'none',
-            // Removed heavy effects for better performance
-            letterSpacing: '2px',
-            willChange: 'transform'
+            textShadow: '0 8px 32px rgba(102, 126, 234, 0.4)',
+            filter: 'drop-shadow(0 6px 12px rgba(102, 126, 234, 0.25))',
+            transition: 'transform 0.05s linear, opacity 0.1s ease-out',
+            letterSpacing: '3px',
+            willChange: 'transform, opacity'
           }}
         >
           {letter.letter}
