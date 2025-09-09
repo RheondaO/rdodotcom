@@ -54,7 +54,7 @@ export function useUniversalTimer(
   const { data: serverActiveSession, refetch: refetchActiveSession } = useQuery<TimerSession | null>({
     queryKey: ["/api/public/active-timer"],
     enabled: isOpen,
-    refetchInterval: 1000,
+    refetchInterval: 2000, // Reduced from 1000ms for better performance
     staleTime: 0
   });
 
@@ -161,7 +161,7 @@ export function useUniversalTimer(
         } else {
           refetchActiveSession();
         }
-      }, 1000);
+      }, 2000); // Reduced timer frequency for better performance
     }
 
     return () => {

@@ -27,7 +27,7 @@ export function ActiveTimerDisplay() {
       }
       return response.json();
     },
-    refetchInterval: 1000, // Update every second for countdown
+    refetchInterval: 3000, // Update every 3 seconds to reduce load
     refetchOnWindowFocus: true,
   });
 
