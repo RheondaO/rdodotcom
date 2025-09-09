@@ -40,7 +40,7 @@ export default function About() {
 
       {/* Main Content */}
       <main className="min-h-screen flex items-center justify-center px-6 py-12">
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center">
           {/* Sparkles Animation */}
           <div className="relative mb-8">
             <div className="absolute -top-4 -left-4 text-purple-400 animate-pulse">
