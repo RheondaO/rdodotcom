@@ -1656,7 +1656,7 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {projects.slice(0, 4).map((project) => (
+                  {activeProjects.slice(0, 4).map((project) => (
                     <div key={project.notionId || project.id} className="p-4 bg-gradient-to-r from-gray-50 to-white dark:from-[#17111d]/40 dark:to-[#17111d]/60 rounded-xl border border-gray-100 dark:border-gray-700">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
