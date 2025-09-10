@@ -1667,7 +1667,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           </div>
                           <div>
                             <h4 className="font-semibold text-gray-900 dark:text-white">{project.name}</h4>
-                            <p className="text-sm text-muted-foreground dark:text-gray-400 capitalize">{project.projectType} Project</p>
                           </div>
                         </div>
                         <div className="text-right">
