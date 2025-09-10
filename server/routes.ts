@@ -18,7 +18,8 @@ import {
   getNotionActiveGoals,
   createNotionActiveGoal,
   updateNotionActiveGoal,
-  deleteNotionActiveGoal
+  deleteNotionActiveGoal,
+  invalidateNotionGoalsCache
 } from "./notion";
 import timerRoutes from "./timer-routes-new";
 import fitnessRoutes from "./fitness-routes";
@@ -266,6 +267,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   let publicJiraProjectsCache: { data: any; timestamp: number } | null = null;
   let publicJiraIssuesCache: { data: any; timestamp: number } | null = null;
   const JIRA_CACHE_DURATION = 10000; // Cache for 10 seconds
+
+  // Cache for goals data to reduce Notion API calls
+  let goalsCache: { data: any; timestamp: number } | null = null;
+  const GOALS_CACHE_DURATION = 30000; // Cache for 30 seconds
 
   app.get("/api/public/active-timer", async (req, res) => {
     try {
@@ -661,15 +666,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Goals - now with Notion sync
+  // Goals - now with Notion sync and caching for performance
   app.get("/api/goals", async (req, res) => {
+    const startTime = Date.now();
+    
     try {
-      console.log("🎯 Fetching goals with Notion sync");
+      console.log("🎯 Fetching goals with caching optimization");
+      
+      // Check cache first to reduce Notion API calls
+      if (goalsCache && Date.now() - goalsCache.timestamp < GOALS_CACHE_DURATION) {
+        const responseTime = Date.now() - startTime;
+        console.log(`🎯 ⚡ CACHE HIT: Returning cached goals (${goalsCache.data.length} items) in ${responseTime}ms`);
+        res.json(goalsCache.data);
+        return;
+      }
+      
+      console.log("🎯 Cache miss or expired, fetching from Notion...");
       
       // Try to fetch from Notion first, then fallback to local storage
       try {
         const notionGoals = await getNotionActiveGoals();
-        console.log(`🎯 Successfully fetched ${notionGoals.length} goals from Notion`);
+        const responseTime = Date.now() - startTime;
+        console.log(`🎯 Successfully fetched ${notionGoals.length} goals from Notion in ${responseTime}ms`);
         
         // Transform Notion goals to match our local interface
         const transformedGoals = notionGoals.map((goal: any) => ({
@@ -686,14 +704,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           notionId: goal.notionId
         }));
         
+        // Cache the transformed result
+        goalsCache = { data: transformedGoals, timestamp: Date.now() };
+        console.log(`🎯 💾 Cached ${transformedGoals.length} goals for ${GOALS_CACHE_DURATION/1000}s`);
+        
         res.json(transformedGoals);
       } catch (notionError) {
-        console.warn("🎯 Failed to fetch from Notion, falling back to local storage:", notionError);
+        const responseTime = Date.now() - startTime;
+        console.warn(`🎯 Failed to fetch from Notion after ${responseTime}ms, falling back to local storage:`, notionError);
         const localGoals = await storage.getAllGoals();
+        
+        // Cache local goals as fallback (shorter duration)
+        goalsCache = { data: localGoals, timestamp: Date.now() };
         res.json(localGoals);
       }
     } catch (error) {
-      console.error("🎯 Failed to fetch goals:", error);
+      const responseTime = Date.now() - startTime;
+      console.error(`🎯 Failed to fetch goals after ${responseTime}ms:`, error);
       res.status(500).json({ error: "Failed to fetch goals" });
     }
   });
@@ -738,6 +765,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log("🎯 Successfully created goal in Notion:", notionGoal.notionId);
         
+        // Invalidate cache since we added a new goal
+        goalsCache = null;
+        console.log("🎯 🗑️ Cache invalidated after goal creation");
+        
         // Return the Notion goal with notionId as the identifier
         res.json({
           id: notionGoal.notionId,
@@ -755,6 +786,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (notionError) {
         console.warn("🎯 Failed to create in Notion, creating locally:", notionError);
         const localGoal = await storage.createGoal(data);
+        
+        // Invalidate cache since we added a new goal
+        goalsCache = null;
+        console.log("🎯 🗑️ Cache invalidated after local goal creation");
+        
         res.json(localGoal);
       }
     } catch (error) {
@@ -773,6 +809,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await updateNotionActiveGoal(goalId, req.body);
         console.log("🎯 Successfully updated goal in Notion:", goalId);
         
+        // Invalidate cache since we updated a goal
+        goalsCache = null;
+        console.log("🎯 🗑️ Cache invalidated after goal update");
+        
         // Return updated goal data
         res.json({ id: goalId, ...req.body });
       } catch (notionError) {
@@ -782,6 +822,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error("Invalid goal ID for local storage");
         }
         const localGoal = await storage.updateGoal(numericId, req.body);
+        
+        // Invalidate cache since we updated a goal
+        goalsCache = null;
+        console.log("🎯 🗑️ Cache invalidated after local goal update");
+        
         res.json(localGoal);
       }
     } catch (error) {
@@ -799,6 +844,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Try to delete from Notion first (goalId is notionId)
         await deleteNotionActiveGoal(goalId);
         console.log("🎯 Successfully deleted goal from Notion:", goalId);
+        
+        // Invalidate both caches since we deleted a goal
+        goalsCache = null;
+        invalidateNotionGoalsCache();
+        console.log("🎯 🗑️ Caches invalidated after goal deletion");
+        
         res.json({ success: true });
       } catch (notionError) {
         console.warn("🎯 Failed to delete from Notion, deleting locally:", notionError);
@@ -807,6 +858,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error("Invalid goal ID for local storage");
         }
         await storage.deleteGoal(numericId);
+        
+        // Invalidate both caches since we deleted a goal
+        goalsCache = null;
+        invalidateNotionGoalsCache();
+        console.log("🎯 🗑️ Caches invalidated after local goal deletion");
+        
         res.json({ success: true });
       }
     } catch (error) {

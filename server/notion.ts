@@ -1223,19 +1223,43 @@ function inferCategoryFromContext(sessionData: any): string {
     return modeCategories[mode as keyof typeof modeCategories] || 'General';
 }
 
+// Cache for getNotionActiveGoals to improve performance
+let notionGoalsCache: { data: any[]; timestamp: number } | null = null;
+const NOTION_GOALS_CACHE_DURATION = 30000; // 30 seconds
+
 // ACTIVEGOALS Database Functions
-// Get all goals from the ACTIVEGOALS database
+// Get all goals from the ACTIVEGOALS database with caching optimization
 export async function getNotionActiveGoals() {
+    const startTime = Date.now();
+    
     try {
         if (!NOTION_ACTIVEGOALS_DATABASE_ID) {
             throw new Error("NOTION_ACTIVEGOALS_DATABASE_ID is not configured");
         }
         
-        console.log("🎯 Fetching active goals from Notion database:", NOTION_ACTIVEGOALS_DATABASE_ID);
+        // Check internal cache first for even faster response
+        if (notionGoalsCache && Date.now() - notionGoalsCache.timestamp < NOTION_GOALS_CACHE_DURATION) {
+            const responseTime = Date.now() - startTime;
+            console.log(`🎯 ⚡ NOTION CACHE HIT: Returning ${notionGoalsCache.data.length} cached goals in ${responseTime}ms`);
+            return notionGoalsCache.data;
+        }
+        
+        console.log("🎯 Notion cache miss, fetching from database:", NOTION_ACTIVEGOALS_DATABASE_ID);
         
         const response = await notion.databases.query({
             database_id: NOTION_ACTIVEGOALS_DATABASE_ID,
+            // Add optimization for empty databases - limit initial query
+            page_size: 100 // Reasonable limit for goals
         });
+
+        // Early return optimization for empty lists
+        if (!response.results || response.results.length === 0) {
+            const responseTime = Date.now() - startTime;
+            console.log(`🎯 ⚡ EMPTY LIST: No goals found in ${responseTime}ms`);
+            // Cache empty result
+            notionGoalsCache = { data: [], timestamp: Date.now() };
+            return [];
+        }
 
         const goals = response.results.map((page: any) => {
             const properties = page.properties;
@@ -1255,12 +1279,25 @@ export async function getNotionActiveGoals() {
             };
         });
 
-        console.log(`🎯 Retrieved ${goals.length} goals from Notion ACTIVEGOALS`);
+        const responseTime = Date.now() - startTime;
+        console.log(`🎯 Retrieved ${goals.length} goals from Notion ACTIVEGOALS in ${responseTime}ms`);
+        
+        // Cache the result
+        notionGoalsCache = { data: goals, timestamp: Date.now() };
+        console.log(`🎯 💾 Cached ${goals.length} goals in Notion function for ${NOTION_GOALS_CACHE_DURATION/1000}s`);
+        
         return goals;
     } catch (error) {
-        console.error("Error fetching goals from Notion ACTIVEGOALS:", error);
+        const responseTime = Date.now() - startTime;
+        console.error(`Error fetching goals from Notion ACTIVEGOALS after ${responseTime}ms:`, error);
         throw new Error("Failed to fetch goals from Notion ACTIVEGOALS");
     }
+}
+
+// Function to invalidate the Notion goals cache (call after write operations)
+export function invalidateNotionGoalsCache() {
+    notionGoalsCache = null;
+    console.log("🎯 🗑️ Notion goals cache invalidated");
 }
 
 // Create a new goal in the ACTIVEGOALS database
