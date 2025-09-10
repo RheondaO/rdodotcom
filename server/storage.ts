@@ -3220,6 +3220,28 @@ export class DatabaseStorage implements IStorage {
   async getJiraSyncMappings() { return this.memStorage.getJiraSyncMappings(); }
   async saveJiraSyncMapping(mapping: any) { return this.memStorage.saveJiraSyncMapping(mapping); }
   async deleteJiraSyncMapping(belleJournalId: string) { return this.memStorage.deleteJiraSyncMapping(belleJournalId); }
+  
+  // Purchase methods delegation
+  async getAllPurchases() { return this.memStorage.getAllPurchases(); }
+  async getPurchasesByDateRange(startDate: string, endDate: string) { return this.memStorage.getPurchasesByDateRange(startDate, endDate); }
+  async createPurchase(purchase: any) { return this.memStorage.createPurchase(purchase); }
+  async updatePurchase(id: number, updates: any) { return this.memStorage.updatePurchase(id, updates); }
+  async deletePurchase(id: number) { return this.memStorage.deletePurchase(id); }
+  
+  // Analytics methods delegation
+  async getReportsAnalytics(period: string, startDate: string, endDate: string) { return this.memStorage.getReportsAnalytics(period, startDate, endDate); }
+  async getHabitsAnalytics(startDate: string, endDate: string) { return this.memStorage.getHabitsAnalytics(startDate, endDate); }
+  async getGoalsAnalytics(period: string, startDate: string, endDate: string) { return this.memStorage.getGoalsAnalytics(period, startDate, endDate); }
+  async getHealthAnalytics(startDate: string, endDate: string) { return this.memStorage.getHealthAnalytics(startDate, endDate); }
+  async getBudgetAnalytics(period: string, startDate: string, endDate: string) { return this.memStorage.getBudgetAnalytics(period, startDate, endDate); }
+  async calculateDebtPayoffTimelines() { return this.memStorage.calculateDebtPayoffTimelines(); }
+  async getInvestmentPerformance(startDate: string, endDate: string) { return this.memStorage.getInvestmentPerformance(startDate, endDate); }
+  async calculatePortfolioPerformance(portfolioId: number, startDate: string, endDate: string) { return this.memStorage.calculatePortfolioPerformance(portfolioId, startDate, endDate); }
+  async calculateNetWorthOverTime(startDate: string, endDate: string) { return this.memStorage.calculateNetWorthOverTime(startDate, endDate); }
+  
+  // Timer helper method
+  async getTimerSession(id: number) { return this.memStorage.getTimerSession(id); }
+  async storeCompletedTimerSession(sessionData: any) { return this.memStorage.storeCompletedTimerSession(sessionData); }
 }
 
 export const storage = new DatabaseStorage();

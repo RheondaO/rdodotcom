@@ -45,7 +45,7 @@ import {
   createAppDevelopmentProject,
   getAppDevelopmentTestItems,
   createAppDevelopmentTestItem,
-  getAppDevelopmentLibraryItems,
+  getAppDevelopmentLibrary,
   createAppDevelopmentLibraryItem,
   NOTION_AI_DEV_TASKS_DATABASE_ID
 } from "./app-development-notion";
@@ -94,7 +94,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-08-27.basil",
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -289,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Check if timer has exceeded total duration (for count-up timers)
           const totalDurationSeconds = dbActiveSession.totalDuration * 60;
           if (elapsedSeconds >= totalDurationSeconds && dbActiveSession.isActive) {
-            await storage.stopTimerSession(dbActiveSession.id);
+            await storage.updateTimerSession(dbActiveSession.id, { isActive: false });
             console.log("⏰ Timer completed full duration, marked as inactive");
             // Cache the null result
             publicTimerCache = { data: null, timestamp: Date.now() };
@@ -465,15 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", adminLogin);
   app.post("/api/auth/logout", adminLogout);
 
-  // Public read-only routes for dashboard data
-  app.get("/api/goals", async (req, res) => {
-    try {
-      const goals = await storage.getAllGoals();
-      res.json(goals);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch goals" });
-    }
-  });
+  // Public read-only routes for dashboard data - Goals route moved later with Notion sync
 
   app.get("/api/daily-entry/:date", async (req, res) => {
     try {
@@ -1172,7 +1164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/performance-insights", async (req, res) => {
     try {
       const data = insertPerformanceInsightsSchema.parse(req.body);
-      const insight = await storage.createPerformanceInsight(data);
+      const insight = await storage.createPerformanceInsights(data);
       res.json(insight);
     } catch (error) {
       res.status(400).json({ error: "Invalid performance insight data" });
@@ -1882,7 +1874,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/budget-analytics/:month", async (req, res) => {
     try {
       const month = req.params.month;
-      const analytics = await storage.getBudgetAnalytics(month);
+      const analytics = await storage.getBudgetAnalytics(month, `${month}-01`, `${month}-31`);
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch budget analytics" });
@@ -1902,7 +1894,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Mock investment performance data for the period
       const period = req.params.period;
-      const performance = await storage.getInvestmentPerformance();
+      const startDate = req.query.startDate as string || '2024-01-01';
+      const endDate = req.query.endDate as string || new Date().toISOString().split('T')[0];
+      const performance = await storage.getInvestmentPerformance(startDate, endDate);
       res.json(performance || []);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch investment performance" });
@@ -1912,7 +1906,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/portfolio-performance/:portfolioId", async (req, res) => {
     try {
       const portfolioId = parseInt(req.params.portfolioId);
-      const performance = await storage.calculatePortfolioPerformance(portfolioId);
+      const startDate = req.query.startDate as string || '2024-01-01';
+      const endDate = req.query.endDate as string || new Date().toISOString().split('T')[0];
+      const performance = await storage.calculatePortfolioPerformance(portfolioId, startDate, endDate);
       res.json(performance);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch portfolio performance" });
@@ -1951,7 +1947,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasSecret: !!process.env.NOTION_INTEGRATION_SECRET,
         hasUrl: !!process.env.NOTION_PAGE_URL,
         timestamp: new Date().toISOString(),
-        tests: []
+        tests: [] as Array<{
+          name: string;
+          status: string;
+          error?: string;
+          details?: any;
+          code?: any;
+        }>
       };
       
       if (!process.env.NOTION_INTEGRATION_SECRET) {
@@ -1992,7 +1994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             databaseCount: databases.length,
             databases: databases.map(db => ({
               id: db.id,
-              title: db.title?.[0]?.plain_text || 'Unknown'
+              title: (db as any).title?.[0]?.plain_text || 'Unknown'
             }))
           }
         });
@@ -2005,19 +2007,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: { taskCount: tasks.length }
         });
         
-      } catch (error) {
+      } catch (error: any) {
         results.tests.push({
           name: 'Database Connection',
           status: 'FAILED',
           error: error.message,
-          code: error.code,
-          status: error.status
+          code: error.code
         });
       }
       
       res.json(results);
       
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({
         error: 'Production test failed',
         message: error.message
@@ -2193,12 +2194,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isSetup: hasRequiredDbs, 
         databases: databases.map(db => ({
           id: db.id,
-          title: db.title && Array.isArray(db.title) && db.title.length > 0 
-            ? db.title[0].plain_text 
+          title: (db as any).title && Array.isArray((db as any).title) && (db as any).title.length > 0 
+            ? (db as any).title[0].plain_text 
             : "Untitled"
         }))
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error checking Notion setup:", error);
       console.error("Error type:", error.constructor.name);
       console.error("Error message:", error.message);
