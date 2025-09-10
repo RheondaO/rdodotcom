@@ -14,7 +14,11 @@ import {
   NOTION_TASKS_DATABASE_ID,
   NOTION_TIMEBLOCKS_DATABASE_ID,
   NOTION_TIMERSESSIONS_DATABASE_ID,
-  getActiveNotionTimerSession
+  getActiveNotionTimerSession,
+  getNotionActiveGoals,
+  createNotionActiveGoal,
+  updateNotionActiveGoal,
+  deleteNotionActiveGoal
 } from "./notion";
 import timerRoutes from "./timer-routes-new";
 import fitnessRoutes from "./fitness-routes";
@@ -665,23 +669,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Goals
+  // Goals - now with Notion sync
   app.get("/api/goals", async (req, res) => {
     try {
-      const goals = await storage.getAllGoals();
-      res.json(goals);
+      console.log("🎯 Fetching goals with Notion sync");
+      
+      // Try to fetch from Notion first, then fallback to local storage
+      try {
+        const notionGoals = await getNotionActiveGoals();
+        console.log(`🎯 Successfully fetched ${notionGoals.length} goals from Notion`);
+        
+        // Transform Notion goals to match our local interface
+        const transformedGoals = notionGoals.map((goal: any) => ({
+          id: goal.notionId, // Use notionId as the primary identifier
+          title: goal.title,
+          description: goal.description,
+          category: goal.category,
+          targetValue: goal.targetValue,
+          currentValue: goal.currentValue,
+          unit: goal.unit,
+          targetDate: goal.targetDate,
+          isCompleted: goal.isCompleted,
+          createdAt: goal.createdAt,
+          notionId: goal.notionId
+        }));
+        
+        res.json(transformedGoals);
+      } catch (notionError) {
+        console.warn("🎯 Failed to fetch from Notion, falling back to local storage:", notionError);
+        const localGoals = await storage.getAllGoals();
+        res.json(localGoals);
+      }
     } catch (error) {
+      console.error("🎯 Failed to fetch goals:", error);
       res.status(500).json({ error: "Failed to fetch goals" });
     }
   });
 
   app.post("/api/goals", async (req, res) => {
     try {
-      console.log("Received goal data:", req.body);
+      console.log("🎯 Creating goal with Notion sync:", req.body);
       
-      // Check goal limit (5 goals maximum)
-      const existingGoals = await storage.getAllGoals();
-      if (existingGoals.length >= 5) {
+      // Check goal limit (5 goals maximum) - check both Notion and local
+      let existingGoalsCount = 0;
+      try {
+        const notionGoals = await getNotionActiveGoals();
+        existingGoalsCount = notionGoals.length;
+      } catch (notionError) {
+        console.warn("🎯 Could not check Notion goals count, checking local:", notionError);
+        const localGoals = await storage.getAllGoals();
+        existingGoalsCount = localGoals.length;
+      }
+      
+      if (existingGoalsCount >= 5) {
         return res.status(400).json({ 
           error: "Goal limit exceeded", 
           message: "You can only have a maximum of 5 goals at a time." 
@@ -689,31 +729,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const data = insertGoalSchema.parse(req.body);
-      console.log("Parsed goal data:", data);
-      const goal = await storage.createGoal(data);
-      res.json(goal);
+      console.log("🎯 Parsed goal data:", data);
+      
+      try {
+        // Create in Notion first
+        const notionGoal = await createNotionActiveGoal({
+          title: data.title,
+          description: data.description,
+          category: data.category,
+          targetValue: data.targetValue || "0",
+          currentValue: data.currentValue || "0",
+          unit: data.unit,
+          targetDate: data.targetDate,
+          isCompleted: data.isCompleted || false
+        });
+        
+        console.log("🎯 Successfully created goal in Notion:", notionGoal.notionId);
+        
+        // Return the Notion goal with notionId as the identifier
+        res.json({
+          id: notionGoal.notionId,
+          title: notionGoal.title,
+          description: notionGoal.description,
+          category: notionGoal.category,
+          targetValue: notionGoal.targetValue,
+          currentValue: notionGoal.currentValue,
+          unit: notionGoal.unit,
+          targetDate: notionGoal.targetDate,
+          isCompleted: notionGoal.isCompleted,
+          createdAt: notionGoal.createdAt,
+          notionId: notionGoal.notionId
+        });
+      } catch (notionError) {
+        console.warn("🎯 Failed to create in Notion, creating locally:", notionError);
+        const localGoal = await storage.createGoal(data);
+        res.json(localGoal);
+      }
     } catch (error) {
-      console.error("Goal creation error:", error);
+      console.error("🎯 Goal creation error:", error);
       res.status(400).json({ error: "Invalid goal data", details: (error as Error).message });
     }
   });
 
   app.patch("/api/goals/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const goal = await storage.updateGoal(id, req.body);
-      res.json(goal);
+      const goalId = req.params.id;
+      console.log("🎯 Updating goal with Notion sync:", goalId, req.body);
+      
+      try {
+        // Try to update in Notion first (goalId is notionId)
+        await updateNotionActiveGoal(goalId, req.body);
+        console.log("🎯 Successfully updated goal in Notion:", goalId);
+        
+        // Return updated goal data
+        res.json({ id: goalId, ...req.body });
+      } catch (notionError) {
+        console.warn("🎯 Failed to update in Notion, updating locally:", notionError);
+        const numericId = parseInt(goalId);
+        if (isNaN(numericId)) {
+          throw new Error("Invalid goal ID for local storage");
+        }
+        const localGoal = await storage.updateGoal(numericId, req.body);
+        res.json(localGoal);
+      }
     } catch (error) {
+      console.error("🎯 Failed to update goal:", error);
       res.status(500).json({ error: "Failed to update goal" });
     }
   });
 
   app.delete("/api/goals/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      await storage.deleteGoal(id);
-      res.json({ success: true });
+      const goalId = req.params.id;
+      console.log("🎯 Deleting goal with Notion sync:", goalId);
+      
+      try {
+        // Try to delete from Notion first (goalId is notionId)
+        await deleteNotionActiveGoal(goalId);
+        console.log("🎯 Successfully deleted goal from Notion:", goalId);
+        res.json({ success: true });
+      } catch (notionError) {
+        console.warn("🎯 Failed to delete from Notion, deleting locally:", notionError);
+        const numericId = parseInt(goalId);
+        if (isNaN(numericId)) {
+          throw new Error("Invalid goal ID for local storage");
+        }
+        await storage.deleteGoal(numericId);
+        res.json({ success: true });
+      }
     } catch (error) {
+      console.error("🎯 Failed to delete goal:", error);
       res.status(500).json({ error: "Failed to delete goal" });
     }
   });

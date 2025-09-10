@@ -1,53 +1,98 @@
 import { Client } from "@notionhq/client";
 
-// Initialize Notion client with better error handling
-if (!process.env.NOTION_INTEGRATION_SECRET) {
-    console.error("❌ NOTION_INTEGRATION_SECRET is not configured");
-    console.error("Please add your Notion integration secret to environment variables");
+// Use the new Replit Notion integration for authentication
+let connectionSettings: any;
+
+async function getAccessToken() {
+  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
+    return connectionSettings.settings.access_token;
+  }
+  
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY 
+    ? 'repl ' + process.env.REPL_IDENTITY 
+    : process.env.WEB_REPL_RENEWAL 
+    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
+    : null;
+
+  if (!xReplitToken) {
+    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+  }
+
+  connectionSettings = await fetch(
+    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=notion',
+    {
+      headers: {
+        'Accept': 'application/json',
+        'X_REPLIT_TOKEN': xReplitToken
+      }
+    }
+  ).then(res => res.json()).then(data => data.items?.[0]);
+
+  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
+
+  if (!connectionSettings || !accessToken) {
+    throw new Error('Notion not connected');
+  }
+  return accessToken;
 }
 
-if (!process.env.NOTION_TASKS_URL) {
-    console.error("❌ NOTION_TASKS_URL is not configured");
-    console.error("Please add your Notion tasks database URL to environment variables");
+// WARNING: Never cache this client.
+// Access tokens expire, so a new client must be created each time.
+// Always call this function again to get a fresh client.
+async function getUncachableNotionClient() {
+  const accessToken = await getAccessToken();
+  return new Client({ auth: accessToken });
 }
 
-if (!process.env.NOTION_TIMEBLOCKS_URL) {
-    console.error("❌ NOTION_TIMEBLOCKS_URL is not configured"); 
-    console.error("Please add your Notion time blocks database URL to environment variables");
-}
+// Legacy export for backward compatibility
+export const notion = {
+  databases: {
+    query: async (params: any) => {
+      const client = await getUncachableNotionClient();
+      return client.databases.query(params);
+    },
+    retrieve: async (params: any) => {
+      const client = await getUncachableNotionClient();
+      return client.databases.retrieve(params);
+    },
+    create: async (params: any) => {
+      const client = await getUncachableNotionClient();
+      return client.databases.create(params);
+    }
+  },
+  pages: {
+    create: async (params: any) => {
+      const client = await getUncachableNotionClient();
+      return client.pages.create(params);
+    },
+    update: async (params: any) => {
+      const client = await getUncachableNotionClient();
+      return client.pages.update(params);
+    },
+    retrieve: async (params: any) => {
+      const client = await getUncachableNotionClient();
+      return client.pages.retrieve(params);
+    }
+  }
+};
 
-// Log environment variable status (without exposing actual values)
-console.log("🔑 NOTION_INTEGRATION_SECRET configured:", !!process.env.NOTION_INTEGRATION_SECRET);
+// Environment variable logging
 console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);
 console.log("📅 NOTION_TIMEBLOCKS_URL configured:", !!process.env.NOTION_TIMEBLOCKS_URL);
-
-if (process.env.NOTION_INTEGRATION_SECRET) {
-    console.log("🔑 Secret length:", process.env.NOTION_INTEGRATION_SECRET.length);
-    console.log("🔑 Secret starts with:", process.env.NOTION_INTEGRATION_SECRET.substring(0, 10) + "...");
-    
-    // Additional validation
-    if (process.env.NOTION_INTEGRATION_SECRET.length < 40) {
-        console.error("❌ NOTION_INTEGRATION_SECRET seems too short - should be ~50 characters");
-    }
-    
-    if (!process.env.NOTION_INTEGRATION_SECRET.startsWith('ntn_')) {
-        console.error("❌ NOTION_INTEGRATION_SECRET should start with 'ntn_'");
-    }
-}
+console.log("🎯 NOTION_ACTIVEGOALS_URL configured:", !!process.env.NOTION_ACTIVEGOALS_URL);
 
 if (process.env.NOTION_TASKS_URL) {
     console.log("📋 Tasks URL length:", process.env.NOTION_TASKS_URL.length);
-    console.log("📋 Tasks URL domain:", process.env.NOTION_TASKS_URL.includes('notion.so') ? 'notion.so' : 'other');
 }
 
 if (process.env.NOTION_TIMEBLOCKS_URL) {
     console.log("📅 Time Blocks URL length:", process.env.NOTION_TIMEBLOCKS_URL.length);
-    console.log("📅 Time Blocks URL domain:", process.env.NOTION_TIMEBLOCKS_URL.includes('notion.so') ? 'notion.so' : 'other');
 }
 
-export const notion = new Client({
-    auth: process.env.NOTION_INTEGRATION_SECRET!,
-});
+if (process.env.NOTION_ACTIVEGOALS_URL) {
+    console.log("🎯 Active Goals URL length:", process.env.NOTION_ACTIVEGOALS_URL.length);
+}
 
 // Extract the page ID from the Notion page URL
 function extractPageIdFromUrl(pageUrl: string): string {
@@ -62,6 +107,7 @@ function extractPageIdFromUrl(pageUrl: string): string {
 // Extract database IDs with error handling
 let NOTION_DATABASE_ID: string | null = null;
 let NOTION_TIMEBLOCKS_DATABASE_ID: string | null = null;
+let NOTION_ACTIVEGOALS_DATABASE_ID: string | null = null;
 
 export let NOTION_TASKS_DATABASE_ID: string | null = null;
 
@@ -80,6 +126,14 @@ try {
 } catch (error: any) {
     console.error("❌ Failed to extract Time Blocks database ID:", error.message);
     console.error("📅 Time Blocks URL:", process.env.NOTION_TIMEBLOCKS_URL);
+}
+
+try {
+    NOTION_ACTIVEGOALS_DATABASE_ID = process.env.NOTION_ACTIVEGOALS_URL ? extractPageIdFromUrl(process.env.NOTION_ACTIVEGOALS_URL) : null;
+    console.log("🎯 Active Goals database ID extracted:", NOTION_ACTIVEGOALS_DATABASE_ID ? `${NOTION_ACTIVEGOALS_DATABASE_ID.substring(0, 8)}...` : "null");
+} catch (error: any) {
+    console.error("❌ Failed to extract Active Goals database ID:", error.message);
+    console.error("🎯 Active Goals URL:", process.env.NOTION_ACTIVEGOALS_URL);
 }
 
 // Timer Sessions Database ID
@@ -1167,4 +1221,261 @@ function inferCategoryFromContext(sessionData: any): string {
     };
     
     return modeCategories[mode as keyof typeof modeCategories] || 'General';
+}
+
+// ACTIVEGOALS Database Functions
+// Get all goals from the ACTIVEGOALS database
+export async function getNotionActiveGoals() {
+    try {
+        if (!NOTION_ACTIVEGOALS_DATABASE_ID) {
+            throw new Error("NOTION_ACTIVEGOALS_DATABASE_ID is not configured");
+        }
+        
+        console.log("🎯 Fetching active goals from Notion database:", NOTION_ACTIVEGOALS_DATABASE_ID);
+        
+        const response = await notion.databases.query({
+            database_id: NOTION_ACTIVEGOALS_DATABASE_ID,
+        });
+
+        const goals = response.results.map((page: any) => {
+            const properties = page.properties;
+            
+            // Map Notion properties to our Goal interface
+            return {
+                notionId: page.id,
+                title: properties.Name?.title?.[0]?.plain_text || properties.Title?.title?.[0]?.plain_text || "Untitled Goal",
+                description: properties.Description?.rich_text?.[0]?.plain_text || "",
+                category: properties.Category?.select?.name || "personal",
+                targetValue: properties["Target Value"]?.number?.toString() || properties.Target?.number?.toString() || "0",
+                currentValue: properties["Current Value"]?.number?.toString() || properties.Progress?.number?.toString() || "0",
+                unit: properties.Unit?.rich_text?.[0]?.plain_text || properties.Unit?.select?.name || "",
+                targetDate: properties["Target Date"]?.date?.start || properties["Due Date"]?.date?.start || "",
+                isCompleted: properties.Completed?.checkbox || properties["Is Completed"]?.checkbox || false,
+                createdAt: properties["Created Time"]?.created_time ? new Date(properties["Created Time"].created_time) : new Date(),
+            };
+        });
+
+        console.log(`🎯 Retrieved ${goals.length} goals from Notion ACTIVEGOALS`);
+        return goals;
+    } catch (error) {
+        console.error("Error fetching goals from Notion ACTIVEGOALS:", error);
+        throw new Error("Failed to fetch goals from Notion ACTIVEGOALS");
+    }
+}
+
+// Create a new goal in the ACTIVEGOALS database
+export async function createNotionActiveGoal(goalData: {
+    title: string;
+    description?: string;
+    category: string;
+    targetValue: string;
+    currentValue?: string;
+    unit?: string;
+    targetDate?: string;
+    isCompleted?: boolean;
+}) {
+    try {
+        if (!NOTION_ACTIVEGOALS_DATABASE_ID) {
+            throw new Error("NOTION_ACTIVEGOALS_DATABASE_ID is not configured");
+        }
+        
+        console.log("🎯 Creating goal in Notion ACTIVEGOALS:", goalData.title);
+        
+        const properties: any = {
+            Name: {
+                title: [
+                    {
+                        text: {
+                            content: goalData.title
+                        }
+                    }
+                ]
+            }
+        };
+
+        if (goalData.description) {
+            properties.Description = {
+                rich_text: [
+                    {
+                        text: {
+                            content: goalData.description
+                        }
+                    }
+                ]
+            };
+        }
+
+        if (goalData.category) {
+            properties.Category = {
+                select: {
+                    name: goalData.category
+                }
+            };
+        }
+
+        if (goalData.targetValue) {
+            properties["Target Value"] = {
+                number: parseFloat(goalData.targetValue)
+            };
+        }
+
+        if (goalData.currentValue) {
+            properties["Current Value"] = {
+                number: parseFloat(goalData.currentValue)
+            };
+        }
+
+        if (goalData.unit) {
+            properties.Unit = {
+                rich_text: [
+                    {
+                        text: {
+                            content: goalData.unit
+                        }
+                    }
+                ]
+            };
+        }
+
+        if (goalData.targetDate) {
+            properties["Target Date"] = {
+                date: {
+                    start: goalData.targetDate
+                }
+            };
+        }
+
+        if (goalData.isCompleted !== undefined) {
+            properties.Completed = {
+                checkbox: goalData.isCompleted
+            };
+        }
+
+        const response = await notion.pages.create({
+            parent: {
+                database_id: NOTION_ACTIVEGOALS_DATABASE_ID
+            },
+            properties
+        });
+
+        console.log("✅ Successfully created goal in Notion ACTIVEGOALS");
+        return {
+            notionId: response.id,
+            title: goalData.title,
+            description: goalData.description || "",
+            category: goalData.category,
+            targetValue: goalData.targetValue,
+            currentValue: goalData.currentValue || "0",
+            unit: goalData.unit || "",
+            targetDate: goalData.targetDate || "",
+            isCompleted: goalData.isCompleted || false,
+            createdAt: new Date()
+        };
+    } catch (error) {
+        console.error("Error creating goal in Notion ACTIVEGOALS:", error);
+        throw new Error("Failed to create goal in Notion ACTIVEGOALS");
+    }
+}
+
+// Update a goal in the ACTIVEGOALS database
+export async function updateNotionActiveGoal(notionId: string, updates: {
+    title?: string;
+    description?: string;
+    category?: string;
+    targetValue?: string;
+    currentValue?: string;
+    unit?: string;
+    targetDate?: string;
+    isCompleted?: boolean;
+}) {
+    try {
+        if (!NOTION_ACTIVEGOALS_DATABASE_ID) {
+            throw new Error("NOTION_ACTIVEGOALS_DATABASE_ID is not configured");
+        }
+        
+        console.log("🎯 Updating goal in Notion ACTIVEGOALS:", notionId);
+        
+        const properties: any = {};
+        
+        if (updates.title !== undefined) {
+            properties.Name = {
+                title: [{ text: { content: updates.title } }]
+            };
+        }
+        
+        if (updates.description !== undefined) {
+            properties.Description = {
+                rich_text: [{ text: { content: updates.description } }]
+            };
+        }
+        
+        if (updates.category !== undefined) {
+            properties.Category = {
+                select: { name: updates.category }
+            };
+        }
+        
+        if (updates.targetValue !== undefined) {
+            properties["Target Value"] = {
+                number: parseFloat(updates.targetValue)
+            };
+        }
+        
+        if (updates.currentValue !== undefined) {
+            properties["Current Value"] = {
+                number: parseFloat(updates.currentValue)
+            };
+        }
+        
+        if (updates.unit !== undefined) {
+            properties.Unit = {
+                rich_text: [{ text: { content: updates.unit } }]
+            };
+        }
+        
+        if (updates.targetDate !== undefined) {
+            properties["Target Date"] = {
+                date: { start: updates.targetDate }
+            };
+        }
+        
+        if (updates.isCompleted !== undefined) {
+            properties.Completed = {
+                checkbox: updates.isCompleted
+            };
+        }
+
+        await notion.pages.update({
+            page_id: notionId,
+            properties
+        });
+
+        console.log("✅ Successfully updated goal in Notion ACTIVEGOALS");
+        return true;
+    } catch (error) {
+        console.error("Error updating goal in Notion ACTIVEGOALS:", error);
+        throw new Error("Failed to update goal in Notion ACTIVEGOALS");
+    }
+}
+
+// Delete a goal from the ACTIVEGOALS database
+export async function deleteNotionActiveGoal(notionId: string) {
+    try {
+        if (!NOTION_ACTIVEGOALS_DATABASE_ID) {
+            throw new Error("NOTION_ACTIVEGOALS_DATABASE_ID is not configured");
+        }
+        
+        console.log("🎯 Deleting goal from Notion ACTIVEGOALS:", notionId);
+        
+        await notion.pages.update({
+            page_id: notionId,
+            archived: true
+        });
+
+        console.log("✅ Successfully deleted goal from Notion ACTIVEGOALS");
+        return true;
+    } catch (error) {
+        console.error("Error deleting goal from Notion ACTIVEGOALS:", error);
+        throw new Error("Failed to delete goal from Notion ACTIVEGOALS");
+    }
 }
