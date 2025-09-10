@@ -1692,11 +1692,25 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
                           </div>
                           <div className="flex items-center gap-2">
                             <GitCommit className="h-4 w-4 text-green-500" />
-                            <span>0 tasks</span>
+                            <span>{(() => {
+                              const projectKey = project.projectKey || project.key;
+                              return tasks.filter(task => 
+                                task.projectKey === projectKey && 
+                                task.issueType?.toLowerCase() === 'task'
+                              ).length;
+                            })()} tasks</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Bug className="h-4 w-4 text-orange-500" />
-                            <span>{testItems.filter(t => t.projectKey === project.key).length} QA</span>
+                            <span>{(() => {
+                              const projectKey = project.projectKey || project.key;
+                              const qaStatuses = ['qa testing', 'in qa', 'qa', 'testing'];
+                              return tasks.filter(task => 
+                                task.projectKey === projectKey && 
+                                task.issueType?.toLowerCase() === 'story' && 
+                                qaStatuses.includes(task.status?.toLowerCase() || '')
+                              ).length;
+                            })()} QA</span>
                           </div>
                         </div>
                         
