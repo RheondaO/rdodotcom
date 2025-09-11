@@ -53,22 +53,26 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
   // Fetch real goals data from API
   const { data: goals = [] } = useQuery<Goal[]>({
     queryKey: ['/api/goals'],
+    refetchOnWindowFocus: true
   });
   
   // Fetch real medications data from API
   const { data: medications = [] } = useQuery<Medication[]>({
     queryKey: ['/api/medications'],
+    refetchOnWindowFocus: true
   });
 
   // Fetch Mini Game Blocks and Performance Insights for Content Studio
   const { data: miniGameBlocks = [] } = useQuery({
     queryKey: ['/api/mini-game-blocks'],
-    select: (data: any[]) => data || []
+    select: (data: any[]) => data || [],
+    refetchOnWindowFocus: true
   });
 
   const { data: performanceInsights = [] } = useQuery({
     queryKey: ['/api/performance-insights'],
-    select: (data: any[]) => data || []
+    select: (data: any[]) => data || [],
+    refetchOnWindowFocus: true
   });
 
   // Helper function to get category icon

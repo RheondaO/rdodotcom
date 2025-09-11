@@ -54,6 +54,7 @@ export default function ProductivitySection({ selectedDate, isReadOnly = false }
       const response = await apiRequest('GET', `/api/todos/${dateString}`);
       return response.json();
     },
+    refetchOnWindowFocus: true
   });
 
   // Use useState for immediate updates instead of relying on React Query cache

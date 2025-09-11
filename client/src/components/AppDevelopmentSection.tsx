@@ -542,7 +542,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       }
       return response.json();
     },
-    select: (data: any[]) => data || []
+    select: (data: any[]) => data || [],
+    refetchOnWindowFocus: true
   });
 
   // Fetch all projects from Notion AIDEVPROJECTS database
@@ -559,7 +560,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       console.log('📊 Projects from Notion AIDEVPROJECTS:', data.length);
       return data;
     },
-    select: (data: any[]) => data || []
+    select: (data: any[]) => data || [],
+    refetchOnWindowFocus: true
   });
 
   const isLoadingProjects = isLoadingJiraProjects || isLoadingNotionProjects;
@@ -583,7 +585,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       }
       return response.json();
     },
-    select: (data: any[]) => data || []
+    select: (data: any[]) => data || [],
+    refetchOnWindowFocus: true
   });
 
   // Fetch QA Testing issues from Jira (filtered by issue type)
@@ -609,7 +612,8 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
         issue.fields.labels?.some((label: string) => label.toLowerCase().includes('test'))
       );
     },
-    select: (data: any[]) => data || []
+    select: (data: any[]) => data || [],
+    refetchOnWindowFocus: true
   });
   
   // Combine both Jira and Notion projects

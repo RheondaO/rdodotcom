@@ -29,6 +29,7 @@ export default function PurchaseCalendar({}: PurchaseCalendarProps) {
 
   const { data: purchases = [], isLoading } = useQuery<Purchase[]>({
     queryKey: ['/api/purchases'],
+    refetchOnWindowFocus: true
   });
 
   const createPurchaseMutation = useMutation({

@@ -151,14 +151,17 @@ export default function BlogContentStudio() {
 
   const { data: blogPosts, isLoading: postsLoading } = useQuery<BlogPost[]>({
     queryKey: ['/api/blog/posts'],
+    refetchOnWindowFocus: true
   });
 
   const { data: blogIdeas, isLoading: ideasLoading } = useQuery<BlogIdea[]>({
     queryKey: ['/api/blog/ideas'],
+    refetchOnWindowFocus: true
   });
 
   const { data: workflowStatus, isLoading: statusLoading } = useQuery<WorkflowStatus>({
     queryKey: ['/api/blog/workflow-status'],
+    refetchOnWindowFocus: true
   });
 
   const createPostMutation = useMutation({

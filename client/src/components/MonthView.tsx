@@ -53,18 +53,22 @@ export default function MonthView({ selectedDate, onDateChange }: MonthViewProps
   // Fetch real data from APIs
   const { data: goals = [] } = useQuery<Goal[]>({
     queryKey: ['/api/goals'],
+    refetchOnWindowFocus: true
   });
 
   const { data: allTodos = [] } = useQuery<Todo[]>({
     queryKey: ['/api/todos'],
+    refetchOnWindowFocus: true
   });
 
   const { data: medications = [] } = useQuery<Medication[]>({
     queryKey: ['/api/medications'],
+    refetchOnWindowFocus: true
   });
 
   const { data: allTimeBlocks = [] } = useQuery<TimeBlock[]>({
     queryKey: ['/api/time-blocks'],
+    refetchOnWindowFocus: true
   });
 
   // Calculate month statistics
@@ -183,6 +187,7 @@ function MonthlyStats({ monthDays }: MonthlyStatsProps) {
       return results.filter(Boolean);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true
   });
 
   // Calculate statistics from the fetched data

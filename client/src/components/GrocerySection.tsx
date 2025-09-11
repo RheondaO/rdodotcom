@@ -21,6 +21,7 @@ export default function GrocerySection({}: GrocerySectionProps = {}) {
 
   const { data: groceryItems = [], isLoading } = useQuery({
     queryKey: ['/api/grocery-items'],
+    refetchOnWindowFocus: true
   });
 
   const createItemMutation = useMutation({

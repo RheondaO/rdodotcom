@@ -19,6 +19,7 @@ export function useAuth() {
       return response.json();
     },
     retry: false,
+    refetchOnWindowFocus: true
   });
 
   return {

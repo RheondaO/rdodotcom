@@ -23,7 +23,8 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         return { authenticated: false, isAdmin: false };
       }
       return response.json();
-    }
+    },
+    refetchOnWindowFocus: true
   });
 
   if (isLoading) {

@@ -55,7 +55,7 @@ export function useUniversalTimer(
     queryKey: ["/api/public/active-timer"],
     enabled: isOpen,
     refetchInterval: 2000, // Reduced from 1000ms for better performance
-    staleTime: 0
+    staleTime: 0 // Real-time data needs immediate freshness
   });
 
   // Sync server state with local state

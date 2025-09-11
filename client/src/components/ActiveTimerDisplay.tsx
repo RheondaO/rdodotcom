@@ -28,7 +28,7 @@ export function ActiveTimerDisplay() {
       return response.json();
     },
     refetchInterval: 3000, // Update every 3 seconds to reduce load
-    refetchOnWindowFocus: true,
+    staleTime: 0 // Real-time data needs immediate freshness
   });
 
 

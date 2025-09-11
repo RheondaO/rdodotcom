@@ -144,39 +144,51 @@ export default function BudgetManagement() {
 
   // Fetch budget data
   const { data: budgetCategories } = useQuery<BudgetCategory[]>({
-    queryKey: ["/api/budget-categories"],
+    queryKey: ["/api/budget-categories"]
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 
   const { data: budgets } = useQuery<Budget[]>({
-    queryKey: ["/api/budgets"],
+    queryKey: ["/api/budgets"]
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 
   const { data: budgetPeriods } = useQuery<BudgetPeriod[]>({
-    queryKey: ["/api/budget-periods"],
+    queryKey: ["/api/budget-periods"]
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 
   const { data: budgetAlerts } = useQuery<BudgetAlert[]>({
-    queryKey: ["/api/budget-alerts"],
+    queryKey: ["/api/budget-alerts"]
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 
   const { data: spendingTrends } = useQuery<SpendingTrend[]>({
     queryKey: ["/api/spending-trends"],
+    staleTime: 300000 // Heavy analytics - 5 minutes
+    // Uses global defaults: refetchOnWindowFocus: true
   });
 
   const { data: expenses } = useQuery<Expense[]>({
-    queryKey: ["/api/expenses"],
+    queryKey: ["/api/expenses"]
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 
   const { data: debts } = useQuery<Debt[]>({
-    queryKey: ["/api/debts"],
+    queryKey: ["/api/debts"]
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 
   const { data: budgetAnalytics } = useQuery({
     queryKey: ["/api/budget-analytics", selectedPeriod],
+    staleTime: 300000 // Heavy analytics - 5 minutes
+    // Uses global defaults: refetchOnWindowFocus: true
   });
 
   const { data: debtPayoffProjections } = useQuery({
     queryKey: ["/api/debt-payoff-projections"],
+    staleTime: 300000 // Heavy analytics - 5 minutes
+    // Uses global defaults: refetchOnWindowFocus: true
   });
 
   // Mutations

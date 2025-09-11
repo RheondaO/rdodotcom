@@ -148,34 +148,42 @@ export default function InvestmentTracking() {
   // Fetch investment data
   const { data: investments } = useQuery<Investment[]>({
     queryKey: ["/api/investments"],
+    refetchOnWindowFocus: true
   });
 
   const { data: portfolios } = useQuery<Portfolio[]>({
     queryKey: ["/api/portfolios"],
+    refetchOnWindowFocus: true
   });
 
   const { data: portfolioHoldings } = useQuery<PortfolioHolding[]>({
     queryKey: ["/api/portfolio-holdings"],
+    refetchOnWindowFocus: true
   });
 
   const { data: investmentPlatforms } = useQuery<InvestmentPlatform[]>({
     queryKey: ["/api/investment-platforms"],
+    refetchOnWindowFocus: true
   });
 
   const { data: accounts } = useQuery<Account[]>({
     queryKey: ["/api/accounts"],
+    refetchOnWindowFocus: true
   });
 
   const { data: netWorthSnapshots } = useQuery<NetWorthSnapshot[]>({
     queryKey: ["/api/net-worth-snapshots"],
+    refetchOnWindowFocus: true
   });
 
   const { data: investmentTransactions } = useQuery<InvestmentTransaction[]>({
     queryKey: ["/api/investment-transactions"],
+    refetchOnWindowFocus: true
   });
 
   const { data: investmentPerformance } = useQuery({
     queryKey: ["/api/investment-performance", selectedPeriod],
+    refetchOnWindowFocus: true
   });
 
   // Mutations

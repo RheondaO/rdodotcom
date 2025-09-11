@@ -67,6 +67,7 @@ export default function NotionIntegration() {
     queryKey: ["/api/notion/setup"],
     retry: 1,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true
   });
 
   // Get databases
@@ -74,6 +75,7 @@ export default function NotionIntegration() {
     queryKey: ["/api/notion/databases"],
     enabled: setupStatus?.isSetup === true,
     retry: 1,
+    refetchOnWindowFocus: true
   });
 
   // Get tasks
@@ -81,6 +83,7 @@ export default function NotionIntegration() {
     queryKey: ["/api/notion/tasks"],
     enabled: setupStatus?.isSetup === true,
     retry: 1,
+    refetchOnWindowFocus: true
   });
 
   // Create task mutation

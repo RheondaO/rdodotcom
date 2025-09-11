@@ -10,8 +10,8 @@ export function useTodos(date: string) {
       if (!response.ok) throw new Error('Failed to fetch todos');
       return response.json() as Promise<Todo[]>;
     },
-    refetchInterval: 30000,
-    refetchOnWindowFocus: true
+    refetchInterval: 30000
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 }
 

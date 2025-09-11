@@ -134,32 +134,38 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
   // API Queries with comprehensive fitness data
   const { data: workouts = [] } = useQuery<any[]>({
     queryKey: ['/api/workouts', dateString],
-    enabled: !!dateString
+    enabled: !!dateString,
+    refetchOnWindowFocus: true
   });
 
   const { data: bodyWeights = [] } = useQuery<any[]>({
     queryKey: ['/api/body-weights'],
-    enabled: true
+    enabled: true,
+    refetchOnWindowFocus: true
   });
 
   const { data: bodyMeasurements = [] } = useQuery<any[]>({
     queryKey: ['/api/body-measurements'],
-    enabled: true
+    enabled: true,
+    refetchOnWindowFocus: true
   });
 
   const { data: fitnessGoals = [] } = useQuery<any[]>({
     queryKey: ['/api/fitness-goals'],
-    enabled: true
+    enabled: true,
+    refetchOnWindowFocus: true
   });
 
   const { data: nutritionEntries = [] } = useQuery<any[]>({
     queryKey: ['/api/nutrition', dateString],
-    enabled: !!dateString
+    enabled: !!dateString,
+    refetchOnWindowFocus: true
   });
 
   const { data: fitnessAnalytics } = useQuery({
     queryKey: ['/api/fitness-analytics'],
-    enabled: true
+    enabled: true,
+    refetchOnWindowFocus: true
   });
 
   // Calculate performance indicators

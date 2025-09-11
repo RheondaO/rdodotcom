@@ -25,7 +25,8 @@ export default function AuthCheck() {
         return { authenticated: false, isAdmin: false };
       }
       return response.json();
-    }
+    },
+    refetchOnWindowFocus: true
   });
 
   if (isLoading) {

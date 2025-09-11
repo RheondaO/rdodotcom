@@ -92,25 +92,29 @@ export function JiraIntegration() {
   // Check Jira configuration status
   const { data: status, isLoading: statusLoading } = useQuery({
     queryKey: ['/api/jira/status'],
-    enabled: true
+    enabled: true,
+    refetchOnWindowFocus: true
   });
 
   // Fetch Jira projects
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['/api/jira/projects'],
-    enabled: !!status?.configured
+    enabled: !!status?.configured,
+    refetchOnWindowFocus: true
   });
 
   // Fetch issues for selected project
   const { data: issues = [], isLoading: issuesLoading, refetch: refetchIssues } = useQuery({
     queryKey: [`/api/jira/projects/${selectedProject}/issues`],
-    enabled: !!selectedProject && !!status?.configured
+    enabled: !!selectedProject && !!status?.configured,
+    refetchOnWindowFocus: true
   });
 
   // Fetch user's issues
   const { data: myIssues = [], isLoading: myIssuesLoading } = useQuery({
     queryKey: ['/api/jira/my-issues'],
-    enabled: !!status?.configured
+    enabled: !!status?.configured,
+    refetchOnWindowFocus: true
   });
 
   // Sync from Jira to Belle Journal

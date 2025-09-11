@@ -37,7 +37,9 @@ export default function PublicView() {
     queryFn: async () => {
       const response = await fetch('/api/public/stats');
       return response.json();
-    }
+    },
+    staleTime: 300000 // Public stats - 5 minutes (heavy analytics)
+    // Uses global defaults: refetchOnWindowFocus: true
   });
 
   const { data: recentContent } = useQuery<PublicContent[]>({
@@ -46,6 +48,7 @@ export default function PublicView() {
       const response = await fetch('/api/public/recent-content');
       return response.json();
     }
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 
   const handleAdminLoginClick = () => {

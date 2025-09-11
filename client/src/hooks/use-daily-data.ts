@@ -17,8 +17,8 @@ export function useDailyData(date: string) {
       
       return response.json();
     },
-    refetchInterval: 30000,
-    refetchOnWindowFocus: true
+    refetchInterval: 30000
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 }
 

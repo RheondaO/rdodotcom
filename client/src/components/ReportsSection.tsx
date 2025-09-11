@@ -57,7 +57,8 @@ export default function ReportsSection({}: ReportsSectionProps) {
       const response = await fetch(`/api/reports/analytics/${selectedPeriod}?startDate=${dateRange.start}&endDate=${dateRange.end}`);
       if (!response.ok) throw new Error('Failed to fetch analytics');
       return response.json();
-    }
+    },
+    refetchOnWindowFocus: true
   });
 
   const { data: habitsData, isLoading: habitsLoading } = useQuery({
@@ -66,7 +67,8 @@ export default function ReportsSection({}: ReportsSectionProps) {
       const response = await fetch(`/api/reports/habits/${selectedPeriod}?startDate=${dateRange.start}&endDate=${dateRange.end}`);
       if (!response.ok) throw new Error('Failed to fetch habits data');
       return response.json();
-    }
+    },
+    refetchOnWindowFocus: true
   });
 
   const { data: goalsData, isLoading: goalsLoading } = useQuery({
@@ -75,7 +77,8 @@ export default function ReportsSection({}: ReportsSectionProps) {
       const response = await fetch(`/api/reports/goals/${selectedPeriod}?startDate=${dateRange.start}&endDate=${dateRange.end}`);
       if (!response.ok) throw new Error('Failed to fetch goals data');
       return response.json();
-    }
+    },
+    refetchOnWindowFocus: true
   });
 
   const { data: healthData, isLoading: healthLoading } = useQuery({
@@ -84,7 +87,8 @@ export default function ReportsSection({}: ReportsSectionProps) {
       const response = await fetch(`/api/reports/health/${selectedPeriod}?startDate=${dateRange.start}&endDate=${dateRange.end}`);
       if (!response.ok) throw new Error('Failed to fetch health data');
       return response.json();
-    }
+    },
+    refetchOnWindowFocus: true
   });
 
   const { data: productivityData, isLoading: productivityLoading } = useQuery({
@@ -93,7 +97,8 @@ export default function ReportsSection({}: ReportsSectionProps) {
       const response = await fetch(`/api/reports/productivity/${selectedPeriod}?startDate=${dateRange.start}&endDate=${dateRange.end}`);
       if (!response.ok) throw new Error('Failed to fetch productivity data');
       return response.json();
-    }
+    },
+    refetchOnWindowFocus: true
   });
 
   const isLoading = analyticsLoading || habitsLoading || goalsLoading || healthLoading || productivityLoading;

@@ -33,8 +33,8 @@ export function useTimeBlocks(date: string) {
       if (!response.ok) throw new Error('Failed to fetch time blocks');
       return response.json() as Promise<TimeBlock[]>;
     },
-    refetchInterval: 30000,
-    refetchOnWindowFocus: true
+    refetchInterval: 30000
+    // Uses global defaults: refetchOnWindowFocus: true, staleTime: 30000
   });
 }
 
