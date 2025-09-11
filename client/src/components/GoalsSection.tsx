@@ -95,15 +95,21 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   // Delete goal mutation
   const deleteGoalMutation = useMutation({
     mutationFn: async (id: string | number) => {
-      console.log('Making DELETE request for goal ID:', id);
       return apiRequest('DELETE', `/api/goals/${id}`);
     },
     onSuccess: (data) => {
-      console.log('Delete successful:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      toast({
+        title: "Goal Deleted",
+        description: "Your goal has been successfully deleted.",
+      });
     },
     onError: (error) => {
-      console.error('Delete failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete goal. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -139,13 +145,16 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
     }
     
     if (!newGoal.title || !newGoal.targetDate) {
-      console.log("Validation failed:", { title: newGoal.title, targetDate: newGoal.targetDate });
+      toast({
+        title: "Validation Error",
+        description: "Please fill in the goal title and target date.",
+        variant: "destructive",
+      });
       return;
     }
 
     // Check if user has reached the maximum goal limit (5 goals)
     if (goals.length >= 5) {
-      console.log("Maximum goal limit reached");
       toast({
         title: "Goal Limit Reached",
         description: "You can only have a maximum of 5 goals at a time. Delete an existing goal to create a new one.",
@@ -153,8 +162,6 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
       });
       return;
     }
-
-    console.log("Attempting to create goal...");
     createGoalMutation.mutate({
       title: newGoal.title,
       description: newGoal.description || undefined,
@@ -185,7 +192,6 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   };
 
   const deleteGoal = (goalId: string | number) => {
-    console.log('Deleting goal with ID:', goalId);
     deleteGoalMutation.mutate(goalId);
   };
 
@@ -304,7 +310,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
       </div>
 
       {/* Active Goals */}
-      <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl">
+      <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
             <Target className="h-5 w-5 text-pink-600 dark:text-pink-400" />
@@ -323,13 +329,14 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
               <p className="text-gray-500 dark:text-gray-400">No active goals. Create your first goal to get started!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-testid="active-goals-container">
               {activeGoals.map(goal => (
                 <GoalCard
                   key={goal.id}
                   goal={goal}
                   onUpdateProgress={updateGoalProgress}
                   onDelete={deleteGoal}
+                  data-testid={`goal-card-${goal.id}`}
                 />
               ))}
             </div>
@@ -339,7 +346,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
 
       {/* Completed Goals */}
       {completedGoals.length > 0 && (
-        <Card className="bg-white/80 dark:[background-color:#0c0910] backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl">
+        <Card className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border border-pink-200/50 dark:border-pink-800/50 rounded-2xl">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-gray-900 dark:text-white">
               <Trophy className="h-5 w-5 text-yellow-500" />
@@ -370,9 +377,10 @@ interface GoalCardProps {
   onUpdateProgress: (goalId: string | number, newValue: string) => void;
   onDelete: (goalId: string | number) => void;
   isCompleted?: boolean;
+  'data-testid'?: string;
 }
 
-function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: GoalCardProps) {
+function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false, 'data-testid': testId }: GoalCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(goal.currentValue || "0");
   
@@ -395,9 +403,12 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false }: Goa
   };
 
   return (
-    <div className={`bg-white/60 dark:bg-[#17111d]/60 rounded-xl p-4 backdrop-blur-sm border-l-4 ${
-      isCompleted ? 'border-yellow-400' : 'border-pink-400'
-    }`}>
+    <div 
+      className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border-l-4 ${
+        isCompleted ? 'border-yellow-400' : 'border-pink-400'
+      }`}
+      data-testid={testId}
+    >
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
