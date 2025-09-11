@@ -20,7 +20,8 @@ import {
   Flag,
   Edit,
   Trash2,
-  Star
+  Star,
+  RefreshCw
 } from "lucide-react";
 import { format, differenceInDays, isAfter, isBefore, isToday, isYesterday, isTomorrow } from "date-fns";
 import { apiRequest } from "../lib/queryClient";
@@ -47,9 +48,11 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
     return format(selectedDate, 'EEEE');
   };
 
-  // Fetch goals from database
-  const { data: goals = [], isLoading, error, isError } = useQuery<Goal[]>({
+  // Fetch goals from database with real-time updates
+  const { data: goals = [], isLoading, error, isError, refetch, isFetching } = useQuery<Goal[]>({
     queryKey: ['/api/goals'],
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchOnWindowFocus: true, // Refresh when user returns to tab
   });
 
   // Create goal mutation
@@ -89,6 +92,17 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      toast({
+        title: "Goal Updated",
+        description: "Your goal progress has been saved successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update goal progress. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -208,17 +222,32 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
           </p>
         </div>
         
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button 
-              disabled={goals.length >= 5}
-              className={`bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg ${goals.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              New Goal {goals.length >= 5 ? "(5/5)" : `(${goals.length}/5)`}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white dark:bg-[#17111d] border-0 rounded-2xl">
+        <div className="flex items-center space-x-3">
+          {/* Manual Refresh Button */}
+          <Button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            variant="outline"
+            size="sm"
+            className="border-pink-300 dark:border-pink-700 text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20"
+            data-testid="button-refresh-goals"
+          >
+            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            {isFetching ? 'Refreshing...' : 'Refresh'}
+          </Button>
+          
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button 
+                disabled={goals.length >= 5}
+                className={`bg-gradient-to-r from-pink-400 to-purple-500 hover:from-pink-500 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg ${goals.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                data-testid="button-create-goal"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                New Goal {goals.length >= 5 ? "(5/5)" : `(${goals.length}/5)`}
+              </Button>
+              </DialogTrigger>
+            <DialogContent className="bg-white dark:bg-[#17111d] border-0 rounded-2xl">
             <DialogHeader>
               <DialogTitle className="text-gray-900 dark:text-white">Create New Goal</DialogTitle>
             </DialogHeader>
@@ -301,12 +330,14 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
                 onClick={handleCreateGoal} 
                 disabled={createGoalMutation.isPending || !newGoal.title || !newGoal.targetDate}
                 className="w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white disabled:opacity-50"
+                data-testid="button-save-goal"
               >
-                {createGoalMutation.isPending ? "Creating..." : "Create Goal"}
+                {createGoalMutation.isPending ? "Saving..." : "Create Goal"}
               </Button>
             </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Active Goals */}
@@ -318,7 +349,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoading && !goals.length ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500 mx-auto mb-4"></div>
               <p className="text-gray-500 dark:text-gray-400">Loading goals...</p>
@@ -336,6 +367,8 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
                   goal={goal}
                   onUpdateProgress={updateGoalProgress}
                   onDelete={deleteGoal}
+                  isUpdating={updateGoalMutation.isPending}
+                  isDeleting={deleteGoalMutation.isPending}
                   data-testid={`goal-card-${goal.id}`}
                 />
               ))}
@@ -362,6 +395,8 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
                   onUpdateProgress={updateGoalProgress}
                   onDelete={deleteGoal}
                   isCompleted
+                  isUpdating={updateGoalMutation.isPending}
+                  isDeleting={deleteGoalMutation.isPending}
                 />
               ))}
             </div>
@@ -377,10 +412,12 @@ interface GoalCardProps {
   onUpdateProgress: (goalId: string | number, newValue: string) => void;
   onDelete: (goalId: string | number) => void;
   isCompleted?: boolean;
+  isUpdating?: boolean;
+  isDeleting?: boolean;
   'data-testid'?: string;
 }
 
-function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false, 'data-testid': testId }: GoalCardProps) {
+function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false, isUpdating = false, isDeleting = false, 'data-testid': testId }: GoalCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(goal.currentValue || "0");
   
@@ -438,7 +475,9 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false, 'data
               variant="ghost"
               size="sm"
               onClick={() => onDelete(goal.id)}
-              className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
+              disabled={isDeleting}
+              className="h-8 w-8 p-0 text-red-500 hover:text-red-600 disabled:opacity-50"
+              data-testid="button-delete-goal"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -492,9 +531,11 @@ function GoalCard({ goal, onUpdateProgress, onDelete, isCompleted = false, 'data
               <Button
                 onClick={handleSaveProgress}
                 size="sm"
-                className="bg-gradient-to-r from-pink-400 to-purple-500 text-white"
+                disabled={isUpdating}
+                className="bg-gradient-to-r from-pink-400 to-purple-500 text-white disabled:opacity-50"
+                data-testid="button-save-progress"
               >
-                Save
+                {isUpdating ? "Saving..." : "Save"}
               </Button>
               <Button
                 onClick={() => setIsEditing(false)}
