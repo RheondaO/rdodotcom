@@ -77,7 +77,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
 
   // Update goal mutation
   const updateGoalMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Goal> }) => {
+    mutationFn: async ({ id, updates }: { id: string | number; updates: Partial<Goal> }) => {
       return apiRequest('PATCH', `/api/goals/${id}`, updates);
     },
     onSuccess: () => {
@@ -87,7 +87,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
 
   // Delete goal mutation
   const deleteGoalMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string | number) => {
       console.log('Making DELETE request for goal ID:', id);
       return apiRequest('DELETE', `/api/goals/${id}`);
     },
@@ -162,7 +162,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
     });
   };
 
-  const updateGoalProgress = (goalId: number, newValue: string) => {
+  const updateGoalProgress = (goalId: string | number, newValue: string) => {
     const goal = goals.find(g => g.id === goalId);
     if (!goal) return;
     
@@ -179,7 +179,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
     });
   };
 
-  const deleteGoal = (goalId: number) => {
+  const deleteGoal = (goalId: string | number) => {
     console.log('Deleting goal with ID:', goalId);
     deleteGoalMutation.mutate(goalId);
   };
@@ -362,8 +362,8 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
 
 interface GoalCardProps {
   goal: Goal;
-  onUpdateProgress: (goalId: number, newValue: string) => void;
-  onDelete: (goalId: number) => void;
+  onUpdateProgress: (goalId: string | number, newValue: string) => void;
+  onDelete: (goalId: string | number) => void;
   isCompleted?: boolean;
 }
 

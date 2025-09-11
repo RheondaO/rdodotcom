@@ -89,7 +89,7 @@ export interface Purchase {
 }
 
 export interface Goal {
-  id: number;
+  id: string | number; // Support both Notion UUID strings and local number IDs
   title: string;
   description?: string;
   category: string; // health, work, finance, personal
