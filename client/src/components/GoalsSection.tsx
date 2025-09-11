@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -39,6 +39,7 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const { toast } = useToast();
   const { isAdmin } = useAuth();
   
+  
   const getDateLabel = () => {
     if (isToday(selectedDate)) return "Today";
     if (isYesterday(selectedDate)) return "Yesterday";
@@ -47,18 +48,16 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   };
 
   // Fetch goals from database
-  const { data: goals = [], isLoading } = useQuery<Goal[]>({
+  const { data: goals = [], isLoading, error, isError } = useQuery<Goal[]>({
     queryKey: ['/api/goals'],
   });
 
   // Create goal mutation
   const createGoalMutation = useMutation({
     mutationFn: async (goalData: InsertGoal) => {
-      console.log("Sending goal data:", goalData);
       return apiRequest('POST', '/api/goals', goalData);
     },
     onSuccess: (data) => {
-      console.log("Goal created successfully:", data);
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
       setShowCreateDialog(false);
       setNewGoal({
@@ -69,9 +68,17 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
         unit: "",
         targetDate: ""
       });
+      toast({
+        title: "Goal Created",
+        description: "Your goal has been successfully created.",
+      });
     },
     onError: (error) => {
-      console.error("Error creating goal:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create goal. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -121,8 +128,6 @@ export default function GoalsSection({ selectedDate }: GoalsSectionProps) {
   const completedGoals = goals.filter(goal => goal.isCompleted);
 
   const handleCreateGoal = () => {
-    console.log("Create Goal button clicked");
-    console.log("Current goal data:", newGoal);
     
     if (!isAdmin) {
       toast({
