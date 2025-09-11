@@ -17,6 +17,8 @@ export function useDailyData(date: string) {
       
       return response.json();
     },
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true
   });
 }
 

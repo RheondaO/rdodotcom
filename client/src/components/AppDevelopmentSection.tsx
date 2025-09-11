@@ -371,12 +371,20 @@ const generateMockPrompts = (): PromptTemplate[] => [
 ];
 
 // Form Schemas
-// Jira project schema
+// Extended project schema with all form fields
 const newProjectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   key: z.string().min(2, "Project key is required (2-10 uppercase letters)").max(10).regex(/^[A-Z]+$/, "Project key must be uppercase letters only"),
   description: z.string().optional(),
-  projectTypeKey: z.enum(["software", "service_desk", "business"]).default("software")
+  projectTypeKey: z.enum(["software", "service_desk", "business"]).default("software"),
+  status: z.enum(["planning", "in_progress", "testing", "deployed", "on_hold"]).optional(),
+  priority: z.enum(["low", "medium", "high"]).optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  targetDate: z.string().optional(),
+  techStack: z.string().optional(),
+  repositoryUrl: z.string().optional(),
+  deploymentUrl: z.string().optional()
 });
 
 const newTaskSchema = z.object({
@@ -750,8 +758,6 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   const createTaskMutation = useMutation({
     mutationFn: (data: NewTaskForm) => {
-      console.log("🔄 Creating Jira task with data:", data);
-      
       // Map category to Jira issue types
       const issueTypeMap = {
         'feature': 'Story',
@@ -852,7 +858,15 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
       name: "",
       key: "",
       description: "",
-      projectTypeKey: "software"
+      projectTypeKey: "software",
+      status: "planning",
+      priority: "medium",
+      startDate: "",
+      endDate: "",
+      targetDate: "",
+      techStack: "",
+      repositoryUrl: "",
+      deploymentUrl: ""
     }
   });
 

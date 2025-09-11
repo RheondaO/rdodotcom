@@ -32,7 +32,9 @@ export function useTimeBlocks(date: string) {
       const response = await fetch(`/api/time-blocks/${date}`);
       if (!response.ok) throw new Error('Failed to fetch time blocks');
       return response.json() as Promise<TimeBlock[]>;
-    }
+    },
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true
   });
 }
 

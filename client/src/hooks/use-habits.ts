@@ -5,6 +5,8 @@ import type { Habit, InsertHabit } from "@shared/schema";
 export function useHabits() {
   return useQuery<Habit[]>({
     queryKey: ["/api/habits"],
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true
   });
 }
 

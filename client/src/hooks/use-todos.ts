@@ -9,7 +9,9 @@ export function useTodos(date: string) {
       const response = await fetch(`/api/todos/${date}`);
       if (!response.ok) throw new Error('Failed to fetch todos');
       return response.json() as Promise<Todo[]>;
-    }
+    },
+    refetchInterval: 30000,
+    refetchOnWindowFocus: true
   });
 }
 

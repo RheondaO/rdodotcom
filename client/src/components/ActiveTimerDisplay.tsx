@@ -31,14 +31,6 @@ export function ActiveTimerDisplay() {
     refetchOnWindowFocus: true,
   });
 
-  // Debug logging to see what's happening
-  console.log("🔄 ActiveTimerDisplay render:", { 
-    activeTimer: activeTimer ? { id: activeTimer.id, title: activeTimer.title, mode: activeTimer.mode, remainingTime: activeTimer.remainingTime } : null,
-    isLoading, 
-    isFetched, 
-    error: error?.message,
-    hasData: !!activeTimer 
-  });
 
   // Only show loading state on initial load, not on refetches
   if (isLoading && !isFetched) {
@@ -52,10 +44,6 @@ export function ActiveTimerDisplay() {
     );
   }
 
-  // Debug logging for production troubleshooting
-  if (isFetched && !activeTimer) {
-    console.log("🔍 ActiveTimerDisplay: No active timer found", { error, debugInfo: { queryKey: "/api/public/active-timer" } });
-  }
 
   if (!activeTimer) {
     return null; // Don't show anything if no active timer
