@@ -1264,17 +1264,28 @@ export async function getNotionActiveGoals() {
         const goals = response.results.map((page: any) => {
             const properties = page.properties;
             
+            // Try different possible title field names
+            let title = "Untitled Goal";
+            const possibleTitleFields = ["title", "Name", "Title", "Goal", "Goal Name", "Task Name"];
+            
+            for (const fieldName of possibleTitleFields) {
+                if (properties[fieldName]?.title?.[0]?.plain_text) {
+                    title = properties[fieldName].title[0].plain_text;
+                    break;
+                }
+            }
+            
             // Map Notion properties to our Goal interface
             return {
                 notionId: page.id,
-                title: properties.Name?.title?.[0]?.plain_text || properties.Title?.title?.[0]?.plain_text || "Untitled Goal",
-                description: properties.Description?.rich_text?.[0]?.plain_text || "",
-                category: properties.Category?.select?.name || "personal",
-                targetValue: properties["Target Value"]?.number?.toString() || properties.Target?.number?.toString() || "0",
-                currentValue: properties["Current Value"]?.number?.toString() || properties.Progress?.number?.toString() || "0",
-                unit: properties.Unit?.rich_text?.[0]?.plain_text || properties.Unit?.select?.name || "",
-                targetDate: properties["Target Date"]?.date?.start || properties["Due Date"]?.date?.start || "",
-                isCompleted: properties.Completed?.checkbox || properties["Is Completed"]?.checkbox || false,
+                title: title,
+                description: properties.description?.rich_text?.[0]?.plain_text || "",
+                category: properties.category?.multi_select?.[0]?.name || "personal",
+                targetValue: properties.targetValue?.number?.toString() || "0",
+                currentValue: properties.currentValue?.number?.toString() || "0",
+                unit: properties.unit?.rich_text?.[0]?.plain_text || "",
+                targetDate: properties.targetDate?.date?.start || "",
+                isCompleted: properties.isCompleted?.checkbox || false,
                 createdAt: properties["Created Time"]?.created_time ? new Date(properties["Created Time"].created_time) : new Date(),
             };
         });
