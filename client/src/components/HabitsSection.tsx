@@ -87,7 +87,7 @@ export default function HabitsSection({ selectedDate, isReadOnly = false }: Habi
     currentStreak: habit.currentStreak || 0,
     longestStreak: habit.longestStreak || 0,
     isActive: habit.isActive ?? true,
-    createdAt: habit.createdAt?.toISOString() || new Date().toISOString(),
+    createdAt: habit.createdAt ? (typeof habit.createdAt === 'string' ? habit.createdAt : new Date(habit.createdAt).toISOString()) : new Date().toISOString(),
     completedToday: completedHabitIds.includes(habit.id)
   }));
 
