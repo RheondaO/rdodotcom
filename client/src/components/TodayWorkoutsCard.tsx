@@ -26,11 +26,8 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
   const { toast } = useToast();
   const dateString = format(selectedDate, 'yyyy-MM-dd');
 
-  // Format date for display
-  const getDateLabel = () => {
-    if (isToday(selectedDate)) return "Today's Workouts";
-    return `Workouts for ${format(selectedDate, 'EEEE, MMM d')}`;
-  };
+  // Static title since main Belle Journal navigation controls the date
+  const getDateLabel = () => "Today's Workout";
 
   // API Query for workout data
   const { 
