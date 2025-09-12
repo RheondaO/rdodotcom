@@ -13,10 +13,10 @@ interface TodayWorkoutsCardProps {
 }
 
 interface WorkoutResponse {
+  id: string;
   date: string;
   exercises: string;
-  totalDuration?: number;
-  caloriesBurned?: number;
+  notes?: string;
 }
 
 export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: TodayWorkoutsCardProps) {
@@ -33,7 +33,7 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
     error, 
     refetch,
     isRefetching 
-  } = useQuery<WorkoutResponse>({
+  } = useQuery<WorkoutResponse[]>({
     queryKey: ['/api/todays-workouts', dateString],
     queryFn: async () => {
       const response = await fetch(`/api/todays-workouts?date=${dateString}`, {
@@ -63,7 +63,8 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
     }
   }, [error, toast]);
 
-  const exercises = workoutData?.exercises || '';
+  const workouts = workoutData || [];
+  const hasWorkouts = workouts.length > 0;
 
   return (
     <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
@@ -103,7 +104,7 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
         {/* Exercise Content */}
         {!isLoading && !error && (
           <div data-testid="list-exercises">
-            {!exercises || exercises.trim() === '' ? (
+            {!hasWorkouts ? (
               <div className="text-center py-8 text-muted-foreground" data-testid="text-empty-state">
                 <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p className="text-lg font-medium mb-1">No workouts scheduled</p>
@@ -111,30 +112,64 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Workout Summary */}
-                {workoutData && (workoutData.totalDuration || workoutData.caloriesBurned) && (
-                  <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg">
-                    {workoutData.totalDuration && (
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">{workoutData.totalDuration}min</div>
-                        <div className="text-xs text-muted-foreground">Duration</div>
+                {/* Workout Checklists */}
+                {workouts.map((workout, index) => (
+                  <div 
+                    key={workout.id} 
+                    className="p-4 rounded-lg border bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+                  >
+                    {workouts.length > 1 && (
+                      <div className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                        <Dumbbell className="h-4 w-4" />
+                        Workout {index + 1}
                       </div>
                     )}
-                    {workoutData.caloriesBurned && (
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-secondary">{workoutData.caloriesBurned}</div>
-                        <div className="text-xs text-muted-foreground">Calories</div>
+                    
+                    {/* Exercise Checklist */}
+                    <div className="space-y-2">
+                      {workout.exercises.split('\n').map((exercise, exerciseIndex) => {
+                        const trimmedExercise = exercise.trim();
+                        if (!trimmedExercise) return null;
+                        
+                        // Check if it's a checkbox item
+                        const isCheckboxItem = trimmedExercise.startsWith('☐') || trimmedExercise.startsWith('☑');
+                        const exerciseText = isCheckboxItem ? trimmedExercise.substring(1).trim() : trimmedExercise;
+                        
+                        return (
+                          <div 
+                            key={`${workout.id}-${exerciseIndex}`}
+                            className="flex items-start gap-3 py-1"
+                            data-testid={`exercise-${exerciseIndex}`}
+                          >
+                            {isCheckboxItem && (
+                              <div className="mt-0.5">
+                                <div className="w-4 h-4 border-2 border-gray-400 dark:border-gray-500 rounded-sm flex items-center justify-center bg-white dark:bg-gray-700">
+                                  {trimmedExercise.startsWith('☑') && (
+                                    <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            <span className="text-foreground leading-relaxed flex-1">
+                              {exerciseText}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Notes if available */}
+                    {workout.notes && (
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                        <div className="text-sm text-muted-foreground">
+                          <strong>Notes:</strong> {workout.notes}
+                        </div>
                       </div>
                     )}
                   </div>
-                )}
-
-                {/* Raw Exercise Text */}
-                <div className="p-4 rounded-lg border bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
-                  <div className="whitespace-pre-wrap text-foreground leading-relaxed">
-                    {exercises}
-                  </div>
-                </div>
+                ))}
               </div>
             )}
           </div>
