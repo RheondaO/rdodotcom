@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, isToday } from 'date-fns';
+import { format, isToday, isYesterday, isTomorrow } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,8 +23,13 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
   const { toast } = useToast();
   const dateString = format(selectedDate, 'yyyy-MM-dd');
 
-  // Static title since main Belle Journal navigation controls the date
-  const getDateLabel = () => "Today's Workout";
+  // Dynamic title based on selected date
+  const getDateLabel = () => {
+    if (isToday(selectedDate)) return "Today's Workout";
+    if (isYesterday(selectedDate)) return "Yesterday's Workout";
+    if (isTomorrow(selectedDate)) return "Tomorrow's Workout";
+    return `${format(selectedDate, 'EEEE')}'s Workout`;
+  };
 
   // API Query for workout data
   const { 
