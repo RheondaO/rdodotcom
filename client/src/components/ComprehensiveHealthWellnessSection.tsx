@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import WaterIntakeCard from './WaterIntakeCard';
 import DietJournalPlanner from './DietJournalPlanner';
+import TodayWorkoutsCard from './TodayWorkoutsCard';
 
 interface ComprehensiveHealthWellnessSectionProps {
   selectedDate: Date;
@@ -562,38 +563,11 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-                <CardHeader>
-                  <CardTitle>Today's Workouts</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {workouts.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p>No workouts logged</p>
-                      </div>
-                    ) : (
-                      workouts.map((workout, index) => (
-                        <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-medium">{workout.name}</h4>
-                            <Badge>{workout.type}</Badge>
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                            <div>Duration: {workout.duration} minutes</div>
-                            <div>Calories: {workout.calories || 0}</div>
-                            <div>Difficulty: {workout.difficulty}/5</div>
-                          </div>
-                          {workout.notes && (
-                            <p className="text-sm text-gray-500 mt-2">{workout.notes}</p>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Today's Workouts - Integrated with Notion TODAYSWORKOUT database */}
+              <TodayWorkoutsCard 
+                selectedDate={selectedDate} 
+                isReadOnly={isReadOnly} 
+              />
 
               <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
