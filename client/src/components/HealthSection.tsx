@@ -1,7 +1,6 @@
 import { Heart, Plus, Edit, Moon, Utensils, Dumbbell } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
-import WaterIntakeCard from "./WaterIntakeCard";
 import { useDailyData } from "../hooks/use-daily-data";
 import { format, isToday, isYesterday, isTomorrow } from "date-fns";
 import { useQuery } from '@tanstack/react-query';
@@ -62,11 +61,7 @@ export default function HealthSection({ selectedDate, isReadOnly = false }: Heal
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        {/* Water Intake Card */}
-        <WaterIntakeCard selectedDate={selectedDate} isEditable={isEditable} />
-
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Workout Card - Enhanced with Notion data */}
         <Card className={`bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl overflow-hidden ${
           !isEditable ? 'opacity-60' : ''
