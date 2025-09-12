@@ -636,14 +636,14 @@ router.post('/food-database', requireAuth, (req: Request, res: Response) => {
   }
 });
 
-// AI FITNESS INSIGHTS (requires OpenAI API key)
+// AI FITNESS INSIGHTS (requires Gemini API key)
 router.get('/fitness-insights', requireAuth, async (req: Request, res: Response) => {
   try {
-    // Check if OpenAI API key is available
-    if (!process.env.OPENAI_API_KEY) {
+    // Check if Gemini API key is available
+    if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ 
-        error: 'OpenAI API key not configured',
-        message: 'Please add OPENAI_API_KEY to environment variables for AI insights'
+        error: 'Gemini API key not configured',
+        message: 'Please add GEMINI_API_KEY to environment variables for AI insights'
       });
     }
 
@@ -664,23 +664,9 @@ router.get('/fitness-insights', requireAuth, async (req: Request, res: Response)
       dietGoals: activeDietGoals
     };
 
-    // This would use OpenAI to analyze fitness data and provide insights
-    // For now, return basic analysis
-    const insights = {
-      summary: "Fitness and nutrition tracking active",
-      recommendations: [
-        "Continue logging workouts consistently",
-        "Monitor weight trends weekly", 
-        "Track nutrition for better results",
-        "Plan meals in advance for better nutrition consistency"
-      ],
-      progress: {
-        workoutsThisWeek: recentWorkouts.length,
-        weightTrend: recentWeights.length > 1 ? "stable" : "insufficient data",
-        goalProgress: activeGoals.length > 0 ? "on track" : "no active goals",
-        mealPlanAdherence: recentMealPlans.filter(p => p.isCompleted).length / Math.max(recentMealPlans.length, 1) * 100
-      }
-    };
+    // Use Gemini to analyze fitness data and provide insights
+    const { generateFitnessInsights } = await import('./gemini.js');
+    const insights = await generateFitnessInsights(fitnessData);
 
     res.json(insights);
   } catch (error) {

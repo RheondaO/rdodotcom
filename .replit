@@ -18,6 +18,10 @@ externalPort = 80
 localPort = 36765
 externalPort = 3000
 
+[[ports]]
+localPort = 42597
+externalPort = 3001
+
 [workflows]
 runButton = "Project"
 
@@ -40,4 +44,4 @@ args = "npm run dev"
 waitForPort = 5000
 
 [agent]
-integrations = ["javascript_stripe:1.0.0", "notion:1.0.0"]
+integrations = ["javascript_stripe:1.0.0", "notion:1.0.0", "javascript_gemini:1.0.0"]
