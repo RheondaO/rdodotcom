@@ -86,7 +86,6 @@ export default function WorkoutStats({ selectedDate, isReadOnly = false }: Worko
           <BarChart3 className="h-5 w-5" />
           Workout Stats
         </CardTitle>
-        <p className="text-sm text-muted-foreground">Statistics from your workout history</p>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
