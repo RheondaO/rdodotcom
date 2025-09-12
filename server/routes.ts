@@ -2513,12 +2513,11 @@ Weight tracking: ${healthSummary.bodyWeights} entries
 Recent weights: ${healthSummary.weightTrend.join(', ')} lbs
 
 Provide insights in this format:
-- summary: A brief 2-3 sentence overview of my health for this day
-- recommendations: 2-4 specific actionable recommendations
-- highlights: 1-3 positive things to celebrate
-- concerns: 0-2 areas that need attention (only if there are genuine concerns)
+- workoutRecommendation: One specific workout recommendation based on my fitness data
+- nutritionInsight: One specific nutrition insight or advice based on my eating patterns
+- goalProgress: One statement about my goal progress or goal-setting advice
 
-Focus on being encouraging while providing useful guidance.`
+Keep each insight to 1-2 sentences. Focus on being encouraging while providing useful guidance.`
           }
         ],
         max_tokens: 500,
@@ -2551,32 +2550,23 @@ Focus on being encouraging while providing useful guidance.`
         const lines = response.split('\n').filter(line => line.trim());
         let currentSection = '';
         const parsedInsights: any = {
-          summary: '',
-          recommendations: [],
-          highlights: [],
-          concerns: []
+          workoutRecommendation: '',
+          nutritionInsight: '',
+          goalProgress: ''
         };
 
         for (const line of lines) {
-          if (line.includes('summary:')) {
-            currentSection = 'summary';
-            parsedInsights.summary = line.replace(/.*summary:\s*/i, '').trim();
-          } else if (line.includes('recommendations:')) {
-            currentSection = 'recommendations';
-          } else if (line.includes('highlights:')) {
-            currentSection = 'highlights';
-          } else if (line.includes('concerns:')) {
-            currentSection = 'concerns';
-          } else if (line.trim().startsWith('-') && currentSection !== 'summary') {
-            const item = line.replace(/^-\s*/, '').trim();
-            if (item && parsedInsights[currentSection]) {
-              parsedInsights[currentSection].push(item);
-            }
+          if (line.includes('workoutRecommendation:')) {
+            parsedInsights.workoutRecommendation = line.replace(/.*workoutRecommendation:\s*/i, '').trim();
+          } else if (line.includes('nutritionInsight:')) {
+            parsedInsights.nutritionInsight = line.replace(/.*nutritionInsight:\s*/i, '').trim();
+          } else if (line.includes('goalProgress:')) {
+            parsedInsights.goalProgress = line.replace(/.*goalProgress:\s*/i, '').trim();
           }
         }
 
         // Use parsed insights if we got valid data
-        if (parsedInsights.summary) {
+        if (parsedInsights.workoutRecommendation) {
           Object.assign(insights, parsedInsights);
         }
       } catch (parseError) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Brain, RefreshCw, Sparkles, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Brain, RefreshCw, Sparkles, TrendingUp, AlertTriangle, Apple, Target } from 'lucide-react';
 import { format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 
@@ -17,6 +17,9 @@ interface InsightData {
   recommendations: string[];
   highlights: string[];
   concerns: string[];
+  workoutRecommendation?: string;
+  nutritionInsight?: string;
+  goalProgress?: string;
 }
 
 export default function AIInsightsPanel({ 
@@ -122,67 +125,44 @@ export default function AIInsightsPanel({
 
           {insights && (
             <>
-              {/* Summary - Blue theme */}
+              {/* Workout Recommendation - Blue theme */}
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
-                  <span className="font-medium">Daily Summary</span>
+                  <Brain className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium">Workout Recommendation</span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {insights.summary}
+                  {insights.workoutRecommendation || 
+                   (insights.recommendations.length > 0 ? insights.recommendations[0] : 
+                   "Continue with your current workout routine and maintain consistency.")}
                 </p>
               </div>
 
-              {/* Recommendations - Green theme */}
-              {insights.recommendations.length > 0 && (
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Brain className="h-5 w-5 text-green-600" />
-                    <span className="font-medium">Recommendations</span>
-                  </div>
-                  <div className="space-y-1">
-                    {insights.recommendations.map((rec, index) => (
-                      <p key={index} className="text-sm text-gray-600">
-                        • {rec}
-                      </p>
-                    ))}
-                  </div>
+              {/* Nutrition Insight - Green theme */}
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Apple className="h-5 w-5 text-green-600" />
+                  <span className="font-medium">Nutrition Insight</span>
                 </div>
-              )}
+                <p className="text-sm text-gray-600">
+                  {insights.nutritionInsight || 
+                   (insights.recommendations.length > 1 ? insights.recommendations[1] : 
+                   "Focus on balanced nutrition with adequate protein and hydration.")}
+                </p>
+              </div>
 
-              {/* Highlights - Purple theme */}
-              {insights.highlights.length > 0 && (
-                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium">Highlights</span>
-                  </div>
-                  <div className="space-y-1">
-                    {insights.highlights.map((highlight, index) => (
-                      <p key={index} className="text-sm text-gray-600">
-                        • {highlight}
-                      </p>
-                    ))}
-                  </div>
+              {/* Goal Progress - Purple theme */}
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="h-5 w-5 text-purple-600" />
+                  <span className="font-medium">Goal Progress</span>
                 </div>
-              )}
-
-              {/* Concerns - Amber theme */}
-              {insights.concerns.length > 0 && (
-                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
-                    <span className="font-medium">Areas to Watch</span>
-                  </div>
-                  <div className="space-y-1">
-                    {insights.concerns.map((concern, index) => (
-                      <p key={index} className="text-sm text-gray-600">
-                        • {concern}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
+                <p className="text-sm text-gray-600">
+                  {insights.goalProgress || 
+                   (insights.highlights.length > 0 ? insights.highlights[0] : 
+                   "Set specific, measurable goals to track your fitness journey effectively.")}
+                </p>
+              </div>
             </>
           )}
         </div>
