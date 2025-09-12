@@ -2455,6 +2455,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mount Fitness routes
   app.use("/api", fitnessRoutes);
 
+  // AI Insights endpoint
+  app.post("/api/ai-insights", async (req, res) => {
+    try {
+      const { date, workouts, nutritionEntries, bodyWeights } = req.body;
+      
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(400).json({ 
+          error: "OpenAI API key not configured. Please set OPENAI_API_KEY environment variable." 
+        });
+      }
+
+      // Import OpenAI
+      const { OpenAI } = await import('openai');
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      // Prepare health data summary
+      const healthSummary = {
+        date,
+        workouts: workouts?.length || 0,
+        nutrition: nutritionEntries?.length || 0,
+        bodyWeights: bodyWeights?.length || 0,
+        workoutDetails: workouts?.slice(0, 3).map((w: any) => ({
+          type: w.type,
+          duration: w.duration,
+          difficulty: w.difficulty
+        })) || [],
+        recentNutrition: nutritionEntries?.slice(0, 3).map((n: any) => ({
+          meal: n.meal,
+          calories: n.calories,
+          protein: n.protein
+        })) || [],
+        weightTrend: bodyWeights?.slice(-5).map((w: any) => w.weight) || []
+      };
+
+      // Generate AI insights
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a health and wellness AI coach. Analyze the provided health data and provide personalized insights, recommendations, and observations. Be encouraging, specific, and actionable. Focus on patterns, progress, and areas for improvement."
+          },
+          {
+            role: "user",
+            content: `Please analyze my health data for ${date}:
+
+Workouts: ${healthSummary.workouts} logged
+Recent workouts: ${JSON.stringify(healthSummary.workoutDetails)}
+
+Nutrition: ${healthSummary.nutrition} entries
+Recent meals: ${JSON.stringify(healthSummary.recentNutrition)}
+
+Weight tracking: ${healthSummary.bodyWeights} entries
+Recent weights: ${healthSummary.weightTrend.join(', ')} lbs
+
+Provide insights in this format:
+- summary: A brief 2-3 sentence overview of my health for this day
+- recommendations: 2-4 specific actionable recommendations
+- highlights: 1-3 positive things to celebrate
+- concerns: 0-2 areas that need attention (only if there are genuine concerns)
+
+Focus on being encouraging while providing useful guidance.`
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      
+      if (!response) {
+        throw new Error("No response from OpenAI");
+      }
+
+      // Parse the AI response into structured data
+      const insights = {
+        summary: "Based on your health data, you're maintaining consistent tracking habits which is great for long-term health monitoring.",
+        recommendations: [
+          "Continue logging your workouts and meals consistently",
+          "Consider adding more variety to your exercise routine",
+          "Track your hydration levels throughout the day"
+        ],
+        highlights: [
+          "Great job maintaining your health tracking routine!",
+          "Your consistency in logging data shows dedication to your health goals"
+        ],
+        concerns: []
+      };
+
+      // Try to parse structured response from AI
+      try {
+        const lines = response.split('\n').filter(line => line.trim());
+        let currentSection = '';
+        const parsedInsights: any = {
+          summary: '',
+          recommendations: [],
+          highlights: [],
+          concerns: []
+        };
+
+        for (const line of lines) {
+          if (line.includes('summary:')) {
+            currentSection = 'summary';
+            parsedInsights.summary = line.replace(/.*summary:\s*/i, '').trim();
+          } else if (line.includes('recommendations:')) {
+            currentSection = 'recommendations';
+          } else if (line.includes('highlights:')) {
+            currentSection = 'highlights';
+          } else if (line.includes('concerns:')) {
+            currentSection = 'concerns';
+          } else if (line.trim().startsWith('-') && currentSection !== 'summary') {
+            const item = line.replace(/^-\s*/, '').trim();
+            if (item && parsedInsights[currentSection]) {
+              parsedInsights[currentSection].push(item);
+            }
+          }
+        }
+
+        // Use parsed insights if we got valid data
+        if (parsedInsights.summary) {
+          Object.assign(insights, parsedInsights);
+        }
+      } catch (parseError) {
+        console.log("Could not parse AI response, using default structure");
+      }
+
+      res.json(insights);
+
+    } catch (error: any) {
+      console.error("AI Insights error:", error);
+      res.status(500).json({ 
+        error: "Failed to generate AI insights", 
+        details: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

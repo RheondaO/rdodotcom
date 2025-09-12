@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import DietJournalPlanner from './DietJournalPlanner';
 import TodayWorkoutsCard from './TodayWorkoutsCard';
+import AIInsightsPanel from './AIInsightsPanel';
 
 interface ComprehensiveHealthWellnessSectionProps {
   selectedDate: Date;
@@ -466,27 +467,13 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Weight Tracking Chart */}
-              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Weight className="h-5 w-5" />
-                    Weight Progress (Last 30 Days)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={weightChartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line type="monotone" dataKey="weight" stroke="#3b82f6" strokeWidth={2} />
-                      <Line type="monotone" dataKey="bodyFat" stroke="#ef4444" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+              {/* AI Insights Panel */}
+              <AIInsightsPanel 
+                selectedDate={selectedDate}
+                workouts={workouts}
+                nutritionEntries={nutritionEntries}
+                bodyWeights={bodyWeights}
+              />
 
               {/* Nutrition Breakdown */}
               <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
