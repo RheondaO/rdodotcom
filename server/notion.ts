@@ -668,13 +668,13 @@ export async function getTodaysWorkouts(date: string) {
             const firstRecord = response.results[0] as any;
             console.log("🏋️ First record properties:", Object.keys(firstRecord.properties));
             
-            // Check if dates field exists
-            if (firstRecord.properties.dates) {
-                console.log("🏋️ ✅ 'dates' field found!");
-                console.log("🏋️ 'dates' field type:", firstRecord.properties.dates.type);
-                console.log("🏋️ 'dates' field value:", firstRecord.properties.dates);
+            // Check if Dates field exists
+            if (firstRecord.properties.Dates) {
+                console.log("🏋️ ✅ 'Dates' field found!");
+                console.log("🏋️ 'Dates' field type:", firstRecord.properties.Dates.type);
+                console.log("🏋️ 'Dates' field value:", firstRecord.properties.Dates);
             } else {
-                console.log("🏋️ ❌ 'dates' field NOT found. Available fields:", Object.keys(firstRecord.properties));
+                console.log("🏋️ ❌ 'Dates' field NOT found. Available fields:", Object.keys(firstRecord.properties));
             }
             
             // Check if Exercises field exists  
@@ -691,7 +691,7 @@ export async function getTodaysWorkouts(date: string) {
         const filteredResponse = await notion.databases.query({
             database_id: database.id,
             filter: {
-                property: "dates",
+                property: "Dates",
                 date: {
                     on_or_after: `${date}T00:00:00`,
                     before: `${date}T23:59:59`
