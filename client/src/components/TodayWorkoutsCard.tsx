@@ -23,6 +23,7 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
   const { toast } = useToast();
   const dateString = format(selectedDate, 'yyyy-MM-dd');
 
+
   // Dynamic title based on selected date
   const getDateLabel = () => {
     if (isToday(selectedDate)) return "Today's Workout";
@@ -46,7 +47,7 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch today\'s workouts');
+        throw new Error(`Failed to fetch workouts for ${dateString}`);
       }
       
       return response.json();
@@ -54,7 +55,8 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
     refetchOnWindowFocus: true,
     refetchInterval: isToday(selectedDate) ? 30000 : false, // Only poll for today's date
     retry: 2,
-    staleTime: 30000
+    staleTime: 10000, // Reduce stale time to ensure fresh data when switching dates
+    enabled: true // Ensure query runs whenever dateString changes
   });
 
   // Handle query errors with useEffect to prevent repeated toasts

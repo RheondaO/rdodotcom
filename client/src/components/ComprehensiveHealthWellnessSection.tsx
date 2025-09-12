@@ -581,7 +581,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Today's Workouts - Integrated with Notion TODAYSWORKOUT database */}
               <TodayWorkoutsCard 
-                selectedDate={currentDate} 
+                selectedDate={selectedDate} 
                 isReadOnly={isReadOnly} 
               />
 
