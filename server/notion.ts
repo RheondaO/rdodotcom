@@ -81,6 +81,7 @@ export const notion = {
 console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);
 console.log("📅 NOTION_TIMEBLOCKS_URL configured:", !!process.env.NOTION_TIMEBLOCKS_URL);
 console.log("🎯 NOTION_ACTIVEGOALS_URL configured:", !!process.env.NOTION_ACTIVEGOALS_URL);
+console.log("🏋️ NOTION_TODAYSWORKOUT_URL configured:", !!process.env.NOTION_TODAYSWORKOUT_URL);
 
 if (process.env.NOTION_TASKS_URL) {
     console.log("📋 Tasks URL length:", process.env.NOTION_TASKS_URL.length);
@@ -92,6 +93,10 @@ if (process.env.NOTION_TIMEBLOCKS_URL) {
 
 if (process.env.NOTION_ACTIVEGOALS_URL) {
     console.log("🎯 Active Goals URL length:", process.env.NOTION_ACTIVEGOALS_URL.length);
+}
+
+if (process.env.NOTION_TODAYSWORKOUT_URL) {
+    console.log("🏋️ Today's Workout URL length:", process.env.NOTION_TODAYSWORKOUT_URL.length);
 }
 
 // Extract the page ID from the Notion page URL
@@ -110,6 +115,7 @@ let NOTION_TIMEBLOCKS_DATABASE_ID: string | null = null;
 let NOTION_ACTIVEGOALS_DATABASE_ID: string | null = null;
 
 export let NOTION_TASKS_DATABASE_ID: string | null = null;
+export let NOTION_TODAYSWORKOUT_DATABASE_ID: string | null = null;
 
 try {
     NOTION_DATABASE_ID = process.env.NOTION_TASKS_URL ? extractPageIdFromUrl(process.env.NOTION_TASKS_URL) : null;
@@ -147,12 +153,21 @@ try {
     console.error("⏱️ Timer Sessions URL:", process.env.NOTION_TIMERSESSIONS_URL);
 }
 
+try {
+    NOTION_TODAYSWORKOUT_DATABASE_ID = process.env.NOTION_TODAYSWORKOUT_URL ? extractPageIdFromUrl(process.env.NOTION_TODAYSWORKOUT_URL) : null;
+    console.log("🏋️ Today's Workout database ID extracted:", NOTION_TODAYSWORKOUT_DATABASE_ID ? `${NOTION_TODAYSWORKOUT_DATABASE_ID.substring(0, 8)}...` : "null");
+} catch (error: any) {
+    console.error("❌ Failed to extract Today's Workout database ID:", error.message);
+    console.error("🏋️ Today's Workout URL:", process.env.NOTION_TODAYSWORKOUT_URL);
+}
+
 export { NOTION_DATABASE_ID, NOTION_TIMEBLOCKS_DATABASE_ID };
 
 // Log database configuration
 console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);
 console.log("📅 NOTION_TIMEBLOCKS_URL configured:", !!process.env.NOTION_TIMEBLOCKS_URL);
 console.log("⏱️ NOTION_TIMERSESSIONS_URL configured:", !!process.env.NOTION_TIMERSESSIONS_URL);
+console.log("🏋️ NOTION_TODAYSWORKOUT_URL configured:", !!process.env.NOTION_TODAYSWORKOUT_URL);
 
 if (process.env.NOTION_TASKS_URL) {
     console.log("📋 Tasks URL length:", process.env.NOTION_TASKS_URL.length);
@@ -164,6 +179,10 @@ if (process.env.NOTION_TIMEBLOCKS_URL) {
 
 if (process.env.NOTION_TIMERSESSIONS_URL) {
     console.log("⏱️ Timer Sessions URL length:", process.env.NOTION_TIMERSESSIONS_URL.length);
+}
+
+if (process.env.NOTION_TODAYSWORKOUT_URL) {
+    console.log("🏋️ Today's Workout URL length:", process.env.NOTION_TODAYSWORKOUT_URL.length);
 }
 
 /**
@@ -588,6 +607,135 @@ export async function deleteNotionTimeBlock(notionId: string) {
         throw new Error("Failed to delete time block from Notion");
     }
 }
+
+// =============================================================================
+// TODAY'S WORKOUTS FUNCTIONS
+// =============================================================================
+
+// Find the TODAYSWORKOUT database using dedicated database ID
+export async function findTodaysWorkoutDatabase() {
+    try {
+        if (!NOTION_TODAYSWORKOUT_DATABASE_ID) {
+            throw new Error("NOTION_TODAYSWORKOUT_DATABASE_ID is not configured");
+        }
+        
+        console.log("🏋️ Retrieving Today's Workout database with ID:", NOTION_TODAYSWORKOUT_DATABASE_ID);
+        
+        const database = await notion.databases.retrieve({
+            database_id: NOTION_TODAYSWORKOUT_DATABASE_ID,
+        });
+        
+        console.log("🏋️ Found Today's Workout database:", (database as any).title?.[0]?.plain_text || "Unknown");
+        return database;
+    } catch (error: any) {
+        console.error("Error finding Today's Workout database:", error.message);
+        console.error("Database ID:", NOTION_TODAYSWORKOUT_DATABASE_ID);
+        console.error("Error code:", error.code);
+        console.error("Error status:", error.status);
+        
+        // Provide more specific error messages
+        if (error.code === 'unauthorized') {
+            throw new Error("Notion integration secret is invalid or expired. Please update your NOTION_INTEGRATION_SECRET.");
+        } else if (error.code === 'object_not_found') {
+            throw new Error("Today's Workout database not found. Please check your NOTION_TODAYSWORKOUT_URL points to the correct database.");
+        } else if (error.code === 'forbidden') {
+            throw new Error("Notion integration doesn't have permission to access the Today's Workout database. Please share the database with your integration.");
+        } else {
+            throw new Error(`Notion API error: ${error.message}`);
+        }
+    }
+}
+
+// Get today's workouts from the TODAYSWORKOUT database
+export async function getTodaysWorkouts(date: string) {
+    try {
+        const database = await findTodaysWorkoutDatabase();
+        
+        console.log("🏋️ Fetching today's workouts from Notion database for date:", date);
+        
+        const response = await notion.databases.query({
+            database_id: database.id,
+            filter: {
+                property: "dates",
+                date: {
+                    on_or_after: `${date}T00:00:00`,
+                    before: `${date}T23:59:59`
+                }
+            }
+        });
+
+        const workouts = response.results.map((page: any) => {
+            const properties = page.properties;
+            
+            // Extract exercises - handle multiple possible formats
+            let exercises: string[] = [];
+            
+            if (properties.Exercises) {
+                if (properties.Exercises.rich_text && Array.isArray(properties.Exercises.rich_text)) {
+                    // Handle rich_text format
+                    const richTextContent = properties.Exercises.rich_text
+                        .map((item: any) => item.plain_text || "")
+                        .join("")
+                        .trim();
+                    
+                    if (richTextContent) {
+                        // Split by common delimiters
+                        exercises = richTextContent
+                            .split(/[,;\n]/)
+                            .map((exercise: string) => exercise.trim())
+                            .filter((exercise: string) => exercise.length > 0);
+                    }
+                } else if (properties.Exercises.title && Array.isArray(properties.Exercises.title)) {
+                    // Handle title format
+                    const titleContent = properties.Exercises.title
+                        .map((item: any) => item.plain_text || "")
+                        .join("")
+                        .trim();
+                    
+                    if (titleContent) {
+                        exercises = titleContent
+                            .split(/[,;\n]/)
+                            .map((exercise: string) => exercise.trim())
+                            .filter((exercise: string) => exercise.length > 0);
+                    }
+                } else if (properties.Exercises.multi_select && Array.isArray(properties.Exercises.multi_select)) {
+                    // Handle multi_select format
+                    exercises = properties.Exercises.multi_select
+                        .map((item: any) => item.name || "")
+                        .filter((name: string) => name.length > 0);
+                }
+            }
+            
+            // Extract notes if available
+            let notes = "";
+            if (properties.Notes?.rich_text && Array.isArray(properties.Notes.rich_text)) {
+                notes = properties.Notes.rich_text
+                    .map((item: any) => item.plain_text || "")
+                    .join("")
+                    .trim();
+            }
+
+            return {
+                id: page.id,
+                date: date,
+                exercises: exercises,
+                notes: notes || undefined
+            };
+        });
+
+        console.log(`🏋️ Retrieved ${workouts.length} workouts from Notion for ${date}`);
+        
+        return workouts;
+    } catch (error) {
+        console.error("Error fetching today's workouts from Notion:", error);
+        // Return empty array instead of throwing error to match requirement
+        return [];
+    }
+}
+
+// =============================================================================
+// TASKS FUNCTIONS
+// =============================================================================
 
 // Create a new entry in your TABLEMAKER database
 export async function createNotionTask(tasksDatabaseId: string = NOTION_DATABASE_ID || "", task: {

@@ -10,8 +10,14 @@ import {
   insertDietGoalSchema,
   insertFoodDatabaseSchema
 } from '@shared/schema';
+import { getTodaysWorkouts } from './notion';
 
 const router = Router();
+
+// Date validation schema
+const dateQuerySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+});
 
 // In-memory storage for fitness data (will replace with database later)
 let workouts: any[] = [];
@@ -32,6 +38,36 @@ const requireAuth = (req: Request, res: Response, next: Function) => {
   }
   next();
 };
+
+// TODAY'S WORKOUTS FROM NOTION
+
+// Get today's workouts
+router.get('/todays-workouts', async (req: Request, res: Response) => {
+  try {
+    const { date } = req.query;
+    
+    // Validate date parameter
+    if (!date) {
+      return res.status(400).json({ error: 'Date parameter is required in YYYY-MM-DD format' });
+    }
+    
+    const validatedQuery = dateQuerySchema.parse({ date });
+    
+    console.log(`🏋️ API: Getting today's workouts for date: ${validatedQuery.date}`);
+    
+    const workouts = await getTodaysWorkouts(validatedQuery.date);
+    
+    console.log(`🏋️ API: Found ${workouts.length} workouts for ${validatedQuery.date}`);
+    res.json(workouts);
+  } catch (error) {
+    console.error('Error getting today\'s workouts:', error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid date format', details: error.errors });
+    } else {
+      res.status(500).json({ error: 'Failed to get today\'s workouts' });
+    }
+  }
+});
 
 // WORKOUTS
 
