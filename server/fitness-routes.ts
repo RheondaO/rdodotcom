@@ -320,6 +320,130 @@ router.post('/exercises', requireAuth, (req: Request, res: Response) => {
   }
 });
 
+// WORKOUT STATS - FROM NOTION
+
+// Get workout statistics from Notion WORKOUTSTATS database
+router.get('/workout-stats', async (req: Request, res: Response) => {
+  try {
+    console.log('📊 API: Getting workout stats from Notion WORKOUTSTATS database');
+    
+    const notionModule = await import('../notion');
+    const { NOTION_WORKOUTSTATS_DATABASE_ID } = notionModule;
+    
+    if (!NOTION_WORKOUTSTATS_DATABASE_ID) {
+      console.log('📊 No WORKOUTSTATS database ID found, returning empty stats');
+      return res.json({
+        totalSets: 0,
+        totalReps: 0,
+        totalWeight: 0,
+        avgWeight: 0,
+        topExercise: 'None',
+        recentSessions: 0
+      });
+    }
+
+    console.log('📊 Retrieving Workout Stats database with ID:', NOTION_WORKOUTSTATS_DATABASE_ID);
+    
+    const notionModule2 = await import('../notion');
+    const { notion } = notionModule2;
+    
+    // First, check database connection and properties
+    const database = await notion.databases.retrieve({
+      database_id: NOTION_WORKOUTSTATS_DATABASE_ID,
+    });
+    
+    console.log('📊 Found Workout Stats database:', database.title?.[0]?.plain_text);
+    console.log('📊 Successfully connected to Workout Stats database!');
+    console.log('📊 Database title:', database.title?.[0]?.plain_text);
+
+    // Fetch all workout stats records
+    const response = await notion.databases.query({
+      database_id: NOTION_WORKOUTSTATS_DATABASE_ID,
+      sorts: [
+        {
+          property: 'Date',
+          direction: 'descending',
+        },
+      ],
+    });
+
+    console.log('📊 Raw response: Found', response.results.length, 'total records in database');
+
+    if (response.results.length > 0) {
+      const firstRecord = response.results[0] as any;
+      const properties = Object.keys(firstRecord.properties || {});
+      console.log('📊 First record properties:', properties);
+    }
+
+    // Process the workout stats data
+    let totalSets = 0;
+    let totalReps = 0;
+    let totalWeight = 0;
+    const exerciseFreq: { [key: string]: number } = {};
+    let validRecords = 0;
+
+    response.results.forEach((record: any) => {
+      const properties = record.properties;
+      
+      // Extract sets
+      if (properties.Sets && properties.Sets.number) {
+        totalSets += properties.Sets.number;
+      }
+      
+      // Extract reps
+      if (properties.Reps && properties.Reps.number) {
+        totalReps += properties.Reps.number;
+      }
+      
+      // Extract weight
+      if (properties.Weight && properties.Weight.number) {
+        totalWeight += properties.Weight.number;
+      }
+      
+      // Extract exercise name for frequency count
+      if (properties.Exercise && properties.Exercise.title && properties.Exercise.title[0]) {
+        const exercise = properties.Exercise.title[0].plain_text;
+        exerciseFreq[exercise] = (exerciseFreq[exercise] || 0) + 1;
+      }
+      
+      validRecords++;
+    });
+
+    // Find top exercise
+    const topExercise = Object.keys(exerciseFreq).reduce((a, b) => 
+      exerciseFreq[a] > exerciseFreq[b] ? a : b, 'None'
+    );
+
+    // Calculate average weight
+    const avgWeight = validRecords > 0 ? Math.round(totalWeight / validRecords) : 0;
+
+    const stats = {
+      totalSets,
+      totalReps,
+      totalWeight: Math.round(totalWeight),
+      avgWeight,
+      topExercise,
+      recentSessions: response.results.length
+    };
+
+    console.log('📊 API: Successfully compiled workout stats:', stats);
+    res.json(stats);
+
+  } catch (error: any) {
+    console.error('❌ Error fetching workout stats from Notion:', error);
+    
+    // Return default stats on error
+    res.json({
+      totalSets: 0,
+      totalReps: 0,
+      totalWeight: 0,
+      avgWeight: 0,
+      topExercise: 'None',
+      recentSessions: 0
+    });
+  }
+});
+
 // MEAL PLANNING
 
 // Get meal plans by date range

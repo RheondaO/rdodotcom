@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import DietJournalPlanner from './DietJournalPlanner';
 import TodayWorkoutsCard from './TodayWorkoutsCard';
+import WorkoutStats from './WorkoutStats';
 import AIInsightsPanel from './AIInsightsPanel';
 
 interface ComprehensiveHealthWellnessSectionProps {
@@ -567,44 +568,10 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
                 isReadOnly={isReadOnly} 
               />
 
-              <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Manual Log Stats
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">Statistics from manually logged workouts</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span>Total Workouts</span>
-                      <span className="font-bold">{workouts.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Total Minutes</span>
-                      <span className="font-bold">
-                        {workouts.reduce((sum, w) => sum + (w.duration || 0), 0)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Calories Burned</span>
-                      <span className="font-bold">
-                        {workouts.reduce((sum, w) => sum + (w.calories || 0), 0)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Avg Difficulty</span>
-                      <span className="font-bold">
-                        {workouts.length > 0 ? 
-                          (workouts.reduce((sum, w) => sum + w.difficulty, 0) / workouts.length).toFixed(1) : 
-                          '0'
-                        }/5
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <WorkoutStats 
+                selectedDate={selectedDate} 
+                isReadOnly={isReadOnly} 
+              />
 
               <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>

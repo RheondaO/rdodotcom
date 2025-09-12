@@ -82,6 +82,7 @@ console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL)
 console.log("📅 NOTION_TIMEBLOCKS_URL configured:", !!process.env.NOTION_TIMEBLOCKS_URL);
 console.log("🎯 NOTION_ACTIVEGOALS_URL configured:", !!process.env.NOTION_ACTIVEGOALS_URL);
 console.log("🏋️ NOTION_TODAYSWORKOUT_URL configured:", !!process.env.NOTION_TODAYSWORKOUT_URL);
+console.log("📊 NOTION_WORKOUTSTATS_URL configured:", !!process.env.NOTION_WORKOUTSTATS_URL);
 
 if (process.env.NOTION_TASKS_URL) {
     console.log("📋 Tasks URL length:", process.env.NOTION_TASKS_URL.length);
@@ -97,6 +98,10 @@ if (process.env.NOTION_ACTIVEGOALS_URL) {
 
 if (process.env.NOTION_TODAYSWORKOUT_URL) {
     console.log("🏋️ Today's Workout URL length:", process.env.NOTION_TODAYSWORKOUT_URL.length);
+}
+
+if (process.env.NOTION_WORKOUTSTATS_URL) {
+    console.log("📊 Workout Stats URL length:", process.env.NOTION_WORKOUTSTATS_URL.length);
 }
 
 // Extract the page ID from the Notion page URL
@@ -116,6 +121,7 @@ let NOTION_ACTIVEGOALS_DATABASE_ID: string | null = null;
 
 export let NOTION_TASKS_DATABASE_ID: string | null = null;
 export let NOTION_TODAYSWORKOUT_DATABASE_ID: string | null = null;
+export let NOTION_WORKOUTSTATS_DATABASE_ID: string | null = null;
 
 try {
     NOTION_DATABASE_ID = process.env.NOTION_TASKS_URL ? extractPageIdFromUrl(process.env.NOTION_TASKS_URL) : null;
@@ -159,6 +165,14 @@ try {
 } catch (error: any) {
     console.error("❌ Failed to extract Today's Workout database ID:", error.message);
     console.error("🏋️ Today's Workout URL:", process.env.NOTION_TODAYSWORKOUT_URL);
+}
+
+try {
+    NOTION_WORKOUTSTATS_DATABASE_ID = process.env.NOTION_WORKOUTSTATS_URL ? extractPageIdFromUrl(process.env.NOTION_WORKOUTSTATS_URL) : null;
+    console.log("📊 Workout Stats database ID extracted:", NOTION_WORKOUTSTATS_DATABASE_ID ? `${NOTION_WORKOUTSTATS_DATABASE_ID.substring(0, 8)}...` : "null");
+} catch (error: any) {
+    console.error("❌ Failed to extract Workout Stats database ID:", error.message);
+    console.error("📊 Workout Stats URL:", process.env.NOTION_WORKOUTSTATS_URL);
 }
 
 export { NOTION_DATABASE_ID, NOTION_TIMEBLOCKS_DATABASE_ID };
