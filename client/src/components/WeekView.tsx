@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Dumbbell } from "lucide-react";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay } from "date-fns";
 import { useDailyData } from "../hooks/use-daily-data";
+import { useQuery } from '@tanstack/react-query';
 
 interface WeekViewProps {
   selectedDate: Date;
@@ -95,9 +96,33 @@ interface DayCardProps {
   onSelect: () => void;
 }
 
+interface WorkoutResponse {
+  id: string;
+  date: string;
+  exercises: string;
+  notes?: string;
+}
+
 function DayCard({ date, isSelected, onSelect }: DayCardProps) {
   const dateString = format(date, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
+
+  // Fetch workout data from Notion database
+  const { data: workoutData = [] } = useQuery<WorkoutResponse[]>({
+    queryKey: ['/api/todays-workouts', dateString],
+    queryFn: async () => {
+      const response = await fetch(`/api/todays-workouts?date=${dateString}`, {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        return [];
+      }
+      
+      return response.json();
+    },
+    staleTime: 30000
+  });
   
   const waterProgress = dailyEntry?.waterIntake ? (dailyEntry.waterIntake / 8) * 100 : 0;
   const mealCount = [
@@ -152,14 +177,19 @@ function DayCard({ date, isSelected, onSelect }: DayCardProps) {
             </div>
           </div>
 
-          {/* Exercise */}
+          {/* Workout */}
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Exercise</span>
-            <div className={`w-3 h-3 rounded-full ${
-              dailyEntry?.exerciseCompleted 
-                ? 'bg-gradient-to-r from-green-400 to-emerald-400' 
-                : 'bg-gray-200'
-            }`} />
+            <span className="text-xs text-muted-foreground">Workout</span>
+            <div className="flex items-center space-x-1">
+              <div className={`w-3 h-3 rounded-full ${
+                workoutData.length > 0 || dailyEntry?.exerciseCompleted
+                  ? 'bg-gradient-to-r from-green-400 to-emerald-400' 
+                  : 'bg-gray-200'
+              }`} />
+              {workoutData.length > 0 && (
+                <span className="text-xs text-green-600 font-medium">{workoutData.length}</span>
+              )}
+            </div>
           </div>
 
           {/* Meals */}
