@@ -52,6 +52,7 @@ import TodayWorkoutsCard from './TodayWorkoutsCard';
 interface ComprehensiveHealthWellnessSectionProps {
   selectedDate: Date;
   isReadOnly?: boolean;
+  onDateChange?: (date: Date) => void;
 }
 
 // Performance indicator colors
@@ -62,11 +63,24 @@ const performanceColors = {
   poor: '#ef4444'
 };
 
-export default function ComprehensiveHealthWellnessSection({ selectedDate, isReadOnly = false }: ComprehensiveHealthWellnessSectionProps) {
+export default function ComprehensiveHealthWellnessSection({ selectedDate, isReadOnly = false, onDateChange }: ComprehensiveHealthWellnessSectionProps) {
   const queryClient = useQueryClient();
   const { isAdmin } = useAuth();
   const { toast } = useToast();
-  const dateString = format(selectedDate, 'yyyy-MM-dd');
+  
+  // Internal date management with fallback to props
+  const [internalDate, setInternalDate] = useState(selectedDate);
+  const currentDate = onDateChange ? selectedDate : internalDate;
+  const dateString = format(currentDate, 'yyyy-MM-dd');
+  
+  // Handle date changes - use provided callback or internal state
+  const handleDateChange = (newDate: Date) => {
+    if (onDateChange) {
+      onDateChange(newDate);
+    } else {
+      setInternalDate(newDate);
+    }
+  };
   
   // State management
   const [activeTab, setActiveTab] = useState('overview');
@@ -124,13 +138,13 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
 
   // Utility functions
   const getDateLabel = () => {
-    if (isToday(selectedDate)) return "Today";
-    if (isYesterday(selectedDate)) return "Yesterday";
-    if (isTomorrow(selectedDate)) return "Tomorrow";
-    return format(selectedDate, 'EEEE');
+    if (isToday(currentDate)) return "Today";
+    if (isYesterday(currentDate)) return "Yesterday";
+    if (isTomorrow(currentDate)) return "Tomorrow";
+    return format(currentDate, 'EEEE');
   };
 
-  const isEditable = !isReadOnly && (isToday(selectedDate) || isYesterday(selectedDate));
+  const isEditable = !isReadOnly && (isToday(currentDate) || isYesterday(currentDate));
 
   // API Queries with comprehensive fitness data
   const { data: workouts = [] } = useQuery<any[]>({
@@ -220,7 +234,9 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
       return await apiRequest('/api/workouts', 'POST', data);
     },
     onSuccess: () => {
+      // Invalidate both data sources to maintain consistency
       queryClient.invalidateQueries({ queryKey: ['/api/workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/todays-workouts'] });
       setShowModal(null);
       setWorkoutForm({ name: '', duration: '', notes: '', calories: '', difficulty: 3, type: 'strength' });
     },
@@ -565,13 +581,18 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Today's Workouts - Integrated with Notion TODAYSWORKOUT database */}
               <TodayWorkoutsCard 
-                selectedDate={selectedDate} 
+                selectedDate={currentDate} 
                 isReadOnly={isReadOnly} 
+                onChangeDate={handleDateChange}
               />
 
               <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
-                  <CardTitle>Workout Stats</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Manual Log Stats
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">Statistics from manually logged workouts</p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">

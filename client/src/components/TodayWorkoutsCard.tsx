@@ -80,7 +80,18 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false, on
     refetch,
     isRefetching 
   } = useQuery<WorkoutResponse>({
-    queryKey: [`/api/todays-workouts?date=${dateString}`, dateString],
+    queryKey: ['/api/todays-workouts', dateString],
+    queryFn: async () => {
+      const response = await fetch(`/api/todays-workouts?date=${dateString}`, {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch today\'s workouts');
+      }
+      
+      return response.json();
+    },
     refetchOnWindowFocus: true,
     refetchInterval: isToday(selectedDate) ? 30000 : false, // Only poll for today's date
     retry: 2,
