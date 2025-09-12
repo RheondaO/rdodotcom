@@ -667,42 +667,28 @@ export async function getTodaysWorkouts(date: string) {
         const workouts = response.results.map((page: any) => {
             const properties = page.properties;
             
-            // Extract exercises - handle multiple possible formats
-            let exercises: string[] = [];
+            // Extract exercises as raw text - preserve original formatting
+            let exercises = "";
             
             if (properties.Exercises) {
                 if (properties.Exercises.rich_text && Array.isArray(properties.Exercises.rich_text)) {
-                    // Handle rich_text format
-                    const richTextContent = properties.Exercises.rich_text
+                    // Handle rich_text format - return raw text with formatting preserved
+                    exercises = properties.Exercises.rich_text
                         .map((item: any) => item.plain_text || "")
                         .join("")
                         .trim();
-                    
-                    if (richTextContent) {
-                        // Split by common delimiters
-                        exercises = richTextContent
-                            .split(/[,;\n]/)
-                            .map((exercise: string) => exercise.trim())
-                            .filter((exercise: string) => exercise.length > 0);
-                    }
                 } else if (properties.Exercises.title && Array.isArray(properties.Exercises.title)) {
-                    // Handle title format
-                    const titleContent = properties.Exercises.title
+                    // Handle title format - return raw text
+                    exercises = properties.Exercises.title
                         .map((item: any) => item.plain_text || "")
                         .join("")
                         .trim();
-                    
-                    if (titleContent) {
-                        exercises = titleContent
-                            .split(/[,;\n]/)
-                            .map((exercise: string) => exercise.trim())
-                            .filter((exercise: string) => exercise.length > 0);
-                    }
                 } else if (properties.Exercises.multi_select && Array.isArray(properties.Exercises.multi_select)) {
-                    // Handle multi_select format
+                    // Handle multi_select format - join as single string
                     exercises = properties.Exercises.multi_select
                         .map((item: any) => item.name || "")
-                        .filter((name: string) => name.length > 0);
+                        .filter((name: string) => name.length > 0)
+                        .join("\n");
                 }
             }
             
@@ -718,7 +704,7 @@ export async function getTodaysWorkouts(date: string) {
             return {
                 id: page.id,
                 date: date,
-                exercises: exercises,
+                exercises: exercises || "", // Raw text from Notion
                 notes: notes || undefined
             };
         });

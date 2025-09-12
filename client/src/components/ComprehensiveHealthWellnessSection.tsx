@@ -583,7 +583,6 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
               <TodayWorkoutsCard 
                 selectedDate={currentDate} 
                 isReadOnly={isReadOnly} 
-                onChangeDate={handleDateChange}
               />
 
               <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
