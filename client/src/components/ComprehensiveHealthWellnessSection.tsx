@@ -649,11 +649,10 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
 
               <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
                 <CardHeader>
-                  <CardTitle>Age-Based Recommendations</CardTitle>
+                  <CardTitle>Daily Nutrition Goals</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="text-sm text-gray-600 mb-4">Based on average adult nutritional needs:</div>
                     
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
