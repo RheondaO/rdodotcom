@@ -267,16 +267,46 @@ const COLORS = ['#8B5CF6', '#06D6A0', '#FFD23F', '#EE6C4D'];
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {healthData ? Math.round((
-                    (healthData.trends?.hydrationGood ? 1 : 0) +
-                    (healthData.trends?.sleepGood ? 1 : 0) +
-                    (healthData.trends?.exerciseConsistent ? 1 : 0)
-                  ) * 100 / 3) : 0}%
+                  {healthData ? (() => {
+                    // Age-based nutrition targets
+                    const getAgeBasedRecommendations = (age = 30) => {
+                      const baseCalories = age < 30 ? 2200 : age < 50 ? 2000 : 1800;
+                      const protein = Math.round(baseCalories * 0.15 / 4); // 15% of calories
+                      const carbs = Math.round(baseCalories * 0.45 / 4); // 45% from carbs  
+                      const fat = Math.round(baseCalories * 0.30 / 9); // 30% from fat
+                      return { baseCalories, protein, carbs, fat };
+                    };
+                    
+                    const targets = getAgeBasedRecommendations();
+                    
+                    // Get today's nutrition (would need to access nutrition data)
+                    // For now, using healthData trends if available, otherwise assume decent nutrition
+                    const dailyCalories = healthData.nutrition?.calories || 0;
+                    const dailyProtein = healthData.nutrition?.protein || 0;
+                    const dailyCarbs = healthData.nutrition?.carbs || 0;
+                    const dailyFat = healthData.nutrition?.fat || 0;
+                    
+                    // Calculate nutrition scores (each factor worth 1 point)
+                    const hydrationGood = healthData.trends?.hydrationGood ? 1 : 0;
+                    const sleepGood = healthData.trends?.sleepGood ? 1 : 0;
+                    const exerciseConsistent = healthData.trends?.exerciseConsistent ? 1 : 0;
+                    
+                    // Nutrition scoring: 1 point each if within reasonable ranges
+                    const nutritionLogged = dailyCalories > 0 || dailyProtein > 0 ? 1 : 0;
+                    const caloriesGood = dailyCalories > 0 && dailyCalories >= (targets.baseCalories * 0.8) && dailyCalories <= (targets.baseCalories * 1.2) ? 1 : 0;
+                    const proteinGood = dailyProtein > 0 && dailyProtein >= (targets.protein * 0.8) ? 1 : 0;
+                    const macrosBalanced = (dailyCarbs > 0 && dailyFat > 0) ? 1 : 0;
+                    
+                    // Total: 7 possible points
+                    const totalScore = hydrationGood + sleepGood + exerciseConsistent + nutritionLogged + caloriesGood + proteinGood + macrosBalanced;
+                    
+                    return Math.round((totalScore / 7) * 100);
+                  })() : 0}%
                 </div>
                 <p className="text-xs text-muted-foreground">
                   <span className={`flex items-center ${Object.values(healthData?.trends || {}).filter(Boolean).length >= 2 ? 'text-green-600' : 'text-yellow-600'}`}>
                     <TrendingUp className="h-3 w-3 mr-1" />
-                    Overall wellness rating
+                    7-factor wellness score
                   </span>
                 </p>
               </CardContent>
