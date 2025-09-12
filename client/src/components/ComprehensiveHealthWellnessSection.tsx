@@ -184,6 +184,13 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
     refetchOnWindowFocus: true
   });
 
+  // Fetch workout stats from Notion database to match other components
+  const { data: workoutStats } = useQuery({
+    queryKey: ['/api/workout-stats'],
+    enabled: true,
+    refetchOnWindowFocus: true
+  });
+
   // Calculate performance indicators
   const calculatePerformanceIndicators = () => {
     const recentWeights = bodyWeights.slice(-30); // Last 30 entries
@@ -206,7 +213,7 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
       workoutConsistency,
       dailyCalories,
       dailyProtein,
-      totalWorkouts: workouts.length,
+      totalWorkouts: workoutStats?.totalWorkouts || workouts.length,
       currentWeight: recentWeights[recentWeights.length - 1]?.weight || 0,
       bodyFatPercentage: recentWeights[recentWeights.length - 1]?.bodyFat || 0
     };
