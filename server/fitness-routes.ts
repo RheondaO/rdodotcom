@@ -10,7 +10,7 @@ import {
   insertDietGoalSchema,
   insertFoodDatabaseSchema
 } from '@shared/schema';
-import { getTodaysWorkouts } from './notion';
+import { getTodaysWorkouts, notion, NOTION_WORKOUTSTATS_DATABASE_ID } from './notion';
 
 const router = Router();
 
@@ -327,25 +327,17 @@ router.get('/workout-stats', async (req: Request, res: Response) => {
   try {
     console.log('📊 API: Getting workout stats from Notion WORKOUTSTATS database');
     
-    const notionModule = await import('../notion');
-    const { NOTION_WORKOUTSTATS_DATABASE_ID } = notionModule;
-    
     if (!NOTION_WORKOUTSTATS_DATABASE_ID) {
       console.log('📊 No WORKOUTSTATS database ID found, returning empty stats');
       return res.json({
-        totalSets: 0,
-        totalReps: 0,
-        totalWeight: 0,
-        avgWeight: 0,
-        topExercise: 'None',
-        recentSessions: 0
+        totalWorkouts: 0,
+        totalMinutes: 0,
+        caloriesBurned: 0,
+        avgDifficulty: 0.0
       });
     }
 
     console.log('📊 Retrieving Workout Stats database with ID:', NOTION_WORKOUTSTATS_DATABASE_ID);
-    
-    const notionModule2 = await import('../notion');
-    const { notion } = notionModule2;
     
     // First, check database connection and properties
     const database = await notion.databases.retrieve({
@@ -356,15 +348,9 @@ router.get('/workout-stats', async (req: Request, res: Response) => {
     console.log('📊 Successfully connected to Workout Stats database!');
     console.log('📊 Database title:', database.title?.[0]?.plain_text);
 
-    // Fetch all workout stats records
+    // Fetch all workout stats records (no sorting since rollup database may not have Date field)
     const response = await notion.databases.query({
       database_id: NOTION_WORKOUTSTATS_DATABASE_ID,
-      sorts: [
-        {
-          property: 'Date',
-          direction: 'descending',
-        },
-      ],
     });
 
     console.log('📊 Raw response: Found', response.results.length, 'total records in database');
@@ -373,57 +359,84 @@ router.get('/workout-stats', async (req: Request, res: Response) => {
       const firstRecord = response.results[0] as any;
       const properties = Object.keys(firstRecord.properties || {});
       console.log('📊 First record properties:', properties);
+      
+      // Debug field types for rollup fields
+      if (firstRecord.properties['Total Workouts']) {
+        console.log('📊 Total Workouts field type:', firstRecord.properties['Total Workouts'].type);
+        console.log('📊 Total Workouts field structure:', JSON.stringify(firstRecord.properties['Total Workouts'], null, 2));
+      }
+      if (firstRecord.properties['Total Minutes']) {
+        console.log('📊 Total Minutes field type:', firstRecord.properties['Total Minutes'].type);
+      }
+      if (firstRecord.properties['Calories Burned']) {
+        console.log('📊 Calories Burned field type:', firstRecord.properties['Calories Burned'].type);
+      }
+      if (firstRecord.properties['Avg Difficulty']) {
+        console.log('📊 Avg Difficulty field type:', firstRecord.properties['Avg Difficulty'].type);
+      }
     }
 
     // Process the workout stats data
-    let totalSets = 0;
-    let totalReps = 0;
-    let totalWeight = 0;
-    const exerciseFreq: { [key: string]: number } = {};
+    let totalWorkouts = 0;
+    let totalMinutes = 0;
+    let totalCalories = 0;
+    let totalDifficulty = 0;
     let validRecords = 0;
 
     response.results.forEach((record: any) => {
       const properties = record.properties;
       
-      // Extract sets
-      if (properties.Sets && properties.Sets.number) {
-        totalSets += properties.Sets.number;
+      // Extract total workouts (handle rollup fields)
+      if (properties['Total Workouts']) {
+        if (properties['Total Workouts'].rollup && properties['Total Workouts'].rollup.number) {
+          totalWorkouts += properties['Total Workouts'].rollup.number;
+        } else if (properties['Total Workouts'].number) {
+          totalWorkouts += properties['Total Workouts'].number;
+        }
       }
       
-      // Extract reps
-      if (properties.Reps && properties.Reps.number) {
-        totalReps += properties.Reps.number;
+      // Extract total minutes (handle rollup fields)
+      if (properties['Total Minutes']) {
+        if (properties['Total Minutes'].rollup && properties['Total Minutes'].rollup.number) {
+          totalMinutes += properties['Total Minutes'].rollup.number;
+        } else if (properties['Total Minutes'].number) {
+          totalMinutes += properties['Total Minutes'].number;
+        }
       }
       
-      // Extract weight
-      if (properties.Weight && properties.Weight.number) {
-        totalWeight += properties.Weight.number;
+      // Extract calories burned (handle rollup fields)
+      if (properties['Calories Burned']) {
+        if (properties['Calories Burned'].rollup && properties['Calories Burned'].rollup.number) {
+          totalCalories += properties['Calories Burned'].rollup.number;
+        } else if (properties['Calories Burned'].number) {
+          totalCalories += properties['Calories Burned'].number;
+        }
       }
       
-      // Extract exercise name for frequency count
-      if (properties.Exercise && properties.Exercise.title && properties.Exercise.title[0]) {
-        const exercise = properties.Exercise.title[0].plain_text;
-        exerciseFreq[exercise] = (exerciseFreq[exercise] || 0) + 1;
+      // Extract difficulty for average calculation (handle rollup fields)
+      if (properties['Avg Difficulty']) {
+        let difficulty = 0;
+        if (properties['Avg Difficulty'].rollup && properties['Avg Difficulty'].rollup.number) {
+          difficulty = properties['Avg Difficulty'].rollup.number;
+        } else if (properties['Avg Difficulty'].number) {
+          difficulty = properties['Avg Difficulty'].number;
+        }
+        
+        if (difficulty > 0) {
+          totalDifficulty += difficulty;
+          validRecords++;
+        }
       }
-      
-      validRecords++;
     });
 
-    // Find top exercise
-    const topExercise = Object.keys(exerciseFreq).reduce((a, b) => 
-      exerciseFreq[a] > exerciseFreq[b] ? a : b, 'None'
-    );
-
-    // Calculate average weight
-    const avgWeight = validRecords > 0 ? Math.round(totalWeight / validRecords) : 0;
+    // Calculate average difficulty
+    const avgDifficulty = validRecords > 0 ? (totalDifficulty / validRecords).toFixed(1) : '0.0';
 
     const stats = {
-      totalSets,
-      totalReps,
-      totalWeight: Math.round(totalWeight),
-      avgWeight,
-      topExercise,
-      recentSessions: response.results.length
+      totalWorkouts,
+      totalMinutes,
+      caloriesBurned: totalCalories,
+      avgDifficulty: parseFloat(avgDifficulty)
     };
 
     console.log('📊 API: Successfully compiled workout stats:', stats);
@@ -434,12 +447,10 @@ router.get('/workout-stats', async (req: Request, res: Response) => {
     
     // Return default stats on error
     res.json({
-      totalSets: 0,
-      totalReps: 0,
-      totalWeight: 0,
-      avgWeight: 0,
-      topExercise: 'None',
-      recentSessions: 0
+      totalWorkouts: 0,
+      totalMinutes: 0,
+      caloriesBurned: 0,
+      avgDifficulty: 0.0
     });
   }
 });

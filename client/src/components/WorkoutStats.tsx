@@ -3,12 +3,10 @@ import { BarChart3, TrendingUp, Dumbbell, Target, Calendar } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query';
 
 interface WorkoutStatsData {
-  totalSets: number;
-  totalReps: number;
-  totalWeight: number;
-  avgWeight: number;
-  topExercise: string;
-  recentSessions: number;
+  totalWorkouts: number;
+  totalMinutes: number;
+  caloriesBurned: number;
+  avgDifficulty: number;
 }
 
 interface WorkoutStatsProps {
@@ -95,51 +93,34 @@ export default function WorkoutStats({ selectedDate, isReadOnly = false }: Worko
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Dumbbell className="h-4 w-4 text-blue-600" />
-              <span>Total Sets</span>
+              <span>Total Workouts</span>
             </div>
-            <span className="font-bold text-blue-600">{workoutStats.totalSets}</span>
+            <span className="font-bold text-blue-600">{workoutStats.totalWorkouts}</span>
           </div>
           
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-green-600" />
-              <span>Total Reps</span>
+              <span>Total Minutes</span>
             </div>
-            <span className="font-bold text-green-600">{workoutStats.totalReps.toLocaleString()}</span>
+            <span className="font-bold text-green-600">{workoutStats.totalMinutes?.toLocaleString() || 0}</span>
           </div>
           
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-purple-600" />
-              <span>Total Weight (lbs)</span>
+              <span>Calories Burned</span>
             </div>
-            <span className="font-bold text-purple-600">{workoutStats.totalWeight.toLocaleString()}</span>
+            <span className="font-bold text-purple-600">{workoutStats.caloriesBurned?.toLocaleString() || 0}</span>
           </div>
           
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-orange-600" />
-              <span>Avg Weight</span>
+              <span>Avg Difficulty</span>
             </div>
-            <span className="font-bold text-orange-600">{workoutStats.avgWeight} lbs</span>
+            <span className="font-bold text-orange-600">{workoutStats.avgDifficulty}/5.0</span>
           </div>
-          
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-indigo-600" />
-              <span>Recent Sessions</span>
-            </div>
-            <span className="font-bold text-indigo-600">{workoutStats.recentSessions}</span>
-          </div>
-          
-          {workoutStats.topExercise !== 'None' && (
-            <div className="pt-2 border-t">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">Top Exercise</p>
-                <p className="font-bold text-lg text-primary">{workoutStats.topExercise}</p>
-              </div>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
