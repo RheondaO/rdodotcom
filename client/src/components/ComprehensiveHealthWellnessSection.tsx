@@ -45,7 +45,6 @@ import {
   Edit2,
   Trash2
 } from 'lucide-react';
-import WaterIntakeCard from './WaterIntakeCard';
 import DietJournalPlanner from './DietJournalPlanner';
 import TodayWorkoutsCard from './TodayWorkoutsCard';
 
@@ -560,10 +559,6 @@ export default function ComprehensiveHealthWellnessSection({ selectedDate, isRea
               </Card>
             </div>
 
-            {/* Water Intake Integration */}
-            <WaterIntakeCard 
-              selectedDate={selectedDate} 
-            />
           </TabsContent>
 
           {/* Workouts Tab */}
