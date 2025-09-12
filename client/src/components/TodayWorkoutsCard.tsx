@@ -5,10 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Dumbbell, 
-  RefreshCcw
-} from 'lucide-react';
+import { Dumbbell } from 'lucide-react';
 
 interface TodayWorkoutsCardProps {
   selectedDate: Date;
@@ -70,25 +67,11 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
 
   return (
     <Card className="bg-white/80 dark:bg-[#17111d]/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg font-heading font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            <Dumbbell className="h-5 w-5 text-primary" />
-            {getDateLabel()}
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isRefetching || isReadOnly}
-              data-testid="button-refresh"
-              className="hover:bg-primary/10 rounded-xl"
-            >
-              <RefreshCcw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </div>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Dumbbell className="h-5 w-5" />
+          {getDateLabel()}
+        </CardTitle>
       </CardHeader>
 
       <CardContent className="pt-0">
