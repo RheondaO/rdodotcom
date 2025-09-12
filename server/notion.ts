@@ -651,9 +651,44 @@ export async function getTodaysWorkouts(date: string) {
     try {
         const database = await findTodaysWorkoutDatabase();
         
-        console.log("🏋️ Fetching today's workouts from Notion database for date:", date);
+        console.log("🏋️ Successfully connected to Today's Workout database!");
+        console.log("🏋️ Database title:", (database as any).title?.[0]?.plain_text || "Unknown");
+        console.log("🏋️ Fetching ALL workouts first to test connection...");
         
+        // First try to get ALL records to test connection
         const response = await notion.databases.query({
+            database_id: database.id,
+            page_size: 10 // Limit to 10 records for testing
+        });
+        
+        console.log(`🏋️ Raw response: Found ${response.results.length} total records in database`);
+        
+        // If we have records, let's see what they look like
+        if (response.results.length > 0) {
+            const firstRecord = response.results[0] as any;
+            console.log("🏋️ First record properties:", Object.keys(firstRecord.properties));
+            
+            // Check if dates field exists
+            if (firstRecord.properties.dates) {
+                console.log("🏋️ ✅ 'dates' field found!");
+                console.log("🏋️ 'dates' field type:", firstRecord.properties.dates.type);
+                console.log("🏋️ 'dates' field value:", firstRecord.properties.dates);
+            } else {
+                console.log("🏋️ ❌ 'dates' field NOT found. Available fields:", Object.keys(firstRecord.properties));
+            }
+            
+            // Check if Exercises field exists  
+            if (firstRecord.properties.Exercises) {
+                console.log("🏋️ ✅ 'Exercises' field found!");
+                console.log("🏋️ 'Exercises' field type:", firstRecord.properties.Exercises.type);
+            } else {
+                console.log("🏋️ ❌ 'Exercises' field NOT found. Available fields:", Object.keys(firstRecord.properties));
+            }
+        }
+        
+        // Now try date filtering if we got this far
+        console.log(`🏋️ Now attempting date filtering for: ${date}`);
+        const filteredResponse = await notion.databases.query({
             database_id: database.id,
             filter: {
                 property: "dates",
@@ -664,7 +699,9 @@ export async function getTodaysWorkouts(date: string) {
             }
         });
 
-        const workouts = response.results.map((page: any) => {
+        console.log(`🏋️ Date filtering result: Found ${filteredResponse.results.length} records for ${date}`);
+        
+        const workouts = filteredResponse.results.map((page: any) => {
             const properties = page.properties;
             
             // Extract exercises as raw text - preserve original formatting
