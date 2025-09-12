@@ -693,8 +693,7 @@ export async function getTodaysWorkouts(date: string) {
             filter: {
                 property: "Dates",
                 date: {
-                    on_or_after: `${date}T00:00:00`,
-                    before: `${date}T23:59:59`
+                    equals: date
                 }
             }
         });
@@ -738,9 +737,15 @@ export async function getTodaysWorkouts(date: string) {
                     .trim();
             }
 
+            // Extract the actual date from the Notion record
+            let recordDate = date; // fallback to query date
+            if (properties.Dates?.date?.start) {
+                recordDate = properties.Dates.date.start;
+            }
+
             return {
                 id: page.id,
-                date: date,
+                date: recordDate,
                 exercises: exercises || "", // Raw text from Notion
                 notes: notes || undefined
             };

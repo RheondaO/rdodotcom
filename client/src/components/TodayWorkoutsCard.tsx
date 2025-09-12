@@ -118,12 +118,6 @@ export default function TodayWorkoutsCard({ selectedDate, isReadOnly = false }: 
                     key={workout.id} 
                     className="p-4 rounded-lg border bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
                   >
-                    {workouts.length > 1 && (
-                      <div className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
-                        <Dumbbell className="h-4 w-4" />
-                        Workout {index + 1}
-                      </div>
-                    )}
                     
                     {/* Exercise Checklist */}
                     <div className="space-y-2">
