@@ -1448,19 +1448,36 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
     withStartDate: projects.filter(p => p.startDate).length
   };
 
-  // Daily Activity Stats based on selected date
+  // Story Stats based on Jira issues from ALL projects (AGENT, ATLA, NEWS, OBVI, RDOC, SNOW, TASD, DOCZ, VIEW, CODE)
   const taskStats = {
-    // Yesterday's completed todos
-    completed: yesterdayTodos.filter(t => t.isCompleted).length,
-    // Today's active/in-progress todos
-    inProgress: todayTodos.filter(t => !t.isCompleted).length,
-    // Tomorrow's scheduled todos
-    todo: tomorrowTodos.length,
-    // Total todos for selected date
-    total: todayTodos.length,
-    // Legacy fields for compatibility
-    bugs: baseFilteredTasks.filter(t => t.issueType === 'bug').length,
-    features: baseFilteredTasks.filter(t => t.issueType === 'feature').length
+    // Stories completed (Done, Closed, Resolved statuses)
+    completed: jiraIssues.filter(issue => {
+      const status = issue.status?.toLowerCase() || '';
+      return status === 'done' || status === 'closed' || status === 'resolved' || 
+             status === 'complete' || status === 'completed';
+    }).length,
+    
+    // Stories currently in progress (Active Work from all projects)
+    inProgress: jiraIssues.filter(issue => {
+      const status = issue.status?.toLowerCase() || '';
+      return status === 'in progress' || status === 'prompt engineering' || 
+             status === 'in development' || status === 'active';
+    }).length,
+    
+    // Stories in backlog/todo (To Do, Open, New statuses)
+    todo: jiraIssues.filter(issue => {
+      const status = issue.status?.toLowerCase() || '';
+      return status === 'to do' || status === 'open' || status === 'new' ||
+             status === 'backlog' || status === 'todo';
+    }).length,
+    
+    // Total stories across all projects
+    total: jiraIssues.length,
+    
+    // Legacy fields for compatibility - using all Jira issues
+    bugs: jiraIssues.filter(t => t.issueType?.toLowerCase() === 'bug').length,
+    features: jiraIssues.filter(t => t.issueType?.toLowerCase() === 'story' || 
+                                     t.issueType?.toLowerCase() === 'feature').length
   };
 
   // Use Active Work issues from dedicated endpoint (with "Prompt Engineering" and "In Progress" statuses)
