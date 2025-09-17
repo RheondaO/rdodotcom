@@ -441,34 +441,49 @@ export class JiraIntegrationService {
     }
   }
 
-  // Search issues with JQL - with pagination support
+  // Search issues with JQL - with pagination support  
   async searchIssues(jql: string, maxResults: number = 50): Promise<JiraIssue[]> {
     try {
       console.log(`🔍 Jira JQL Query: "${jql}" with maxResults: ${maxResults}`);
       
       let allIssues: JiraIssue[] = [];
-      let startAt = 0;
-      const pageSize = 100; // Jira's typical max per page
+      let nextPageToken: string | undefined = undefined;
+      const pageSize = Math.min(maxResults, 100); // Don't fetch more than needed
+      let pageNum = 1;
       
       while (true) {
-        const response = await this.client.post('/search/jql', {
+        const requestBody: any = {
           jql: jql || '',
           maxResults: pageSize,
           fields: ['summary', 'status', 'project', 'issuetype', 'assignee', 'priority', 'created', 'updated', 'duedate', 'labels'],
           fieldsByKeys: true
-        });
+        };
         
-        const issues = response.data.issues;
+        // Add pagination token if we have one
+        if (nextPageToken) {
+          requestBody.nextPageToken = nextPageToken;
+        }
+        
+        const response = await this.client.post('/search/jql', requestBody);
+        
+        const issues = response.data.issues || [];
         allIssues = allIssues.concat(issues);
         
-        console.log(`📊 Page ${Math.floor(startAt / pageSize) + 1}: Got ${issues.length} issues (${allIssues.length}/${response.data.total} total)`);
+        console.log(`📊 Page ${pageNum}: Got ${issues.length} issues (${allIssues.length} total)`);
         
-        // Stop if we've got all issues or reached our limit
-        if (issues.length < pageSize || allIssues.length >= response.data.total || allIssues.length >= maxResults) {
+        // Stop if we've got all issues or reached our limit or no more pages
+        if (issues.length === 0 || allIssues.length >= maxResults || !response.data.nextPageToken) {
           break;
         }
         
-        startAt += pageSize;
+        nextPageToken = response.data.nextPageToken;
+        pageNum++;
+        
+        // Safety limit to prevent infinite loops
+        if (pageNum > 50) {
+          console.warn('⚠️ Pagination safety limit reached, stopping at 50 pages');
+          break;
+        }
       }
       
       console.log(`✅ Jira API: Retrieved ${allIssues.length} total issues`);
