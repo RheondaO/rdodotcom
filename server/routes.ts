@@ -426,6 +426,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/public/jira/active-work", async (req, res) => {
+    try {
+      if (!jiraService.isConfigured()) {
+        return res.status(400).json({ error: 'Jira integration not configured' });
+      }
+      
+      // Get active work issues from all projects with specific statuses
+      const projects = await jiraService.getProjects();
+      let rawIssues: any[] = [];
+      
+      if (projects.length > 0) {
+        // Query all projects with Active Work statuses: "Prompt Engineering" and "In Progress"
+        const projectKeys = projects.map(p => `"${p.key}"`).join(',');
+        const jql = `project IN (${projectKeys}) AND status IN ("Prompt Engineering", "In Progress") ORDER BY created DESC`;
+        rawIssues = await jiraService.searchIssues(jql, 1000);
+      }
+      
+      // Convert to internal format to properly handle description objects
+      const issues = rawIssues.map(issue => jiraService.convertToInternalFormat(issue));
+      
+      res.json(issues);
+    } catch (error: any) {
+      console.error('Error fetching active work from Jira:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/public/jira/projects/:projectKey/issues", async (req, res) => {
     try {
       if (!jiraService.isConfigured()) {
