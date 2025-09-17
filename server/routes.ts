@@ -403,15 +403,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Jira integration not configured' });
       }
       
-      // Try to get issues from RDOC project first, then fall back to first project
+      // Get issues from all projects
       const projects = await jiraService.getProjects();
       let rawIssues = [];
       
       if (projects.length > 0) {
-        // Look for RDOC project first
-        const rdocProject = projects.find(p => p.key === 'RDOC');
-        const targetProject = rdocProject || projects[0];
-        rawIssues = await jiraService.getProjectIssues(targetProject.key, 100);
+        // Query all projects to get all issues (quote project keys to handle reserved words)
+        const projectKeys = projects.map(p => `"${p.key}"`).join(',');
+        const jql = `project IN (${projectKeys}) ORDER BY created DESC`;
+        rawIssues = await jiraService.searchIssues(jql, 1000);
       } else {
         rawIssues = await jiraService.searchIssues('ORDER BY created DESC', 10);
       }
