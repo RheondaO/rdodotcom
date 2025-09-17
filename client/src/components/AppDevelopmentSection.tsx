@@ -1450,23 +1450,30 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
 
   // Story Stats based on Jira issues from ALL projects (AGENT, ATLA, NEWS, OBVI, RDOC, SNOW, TASD, DOCZ, VIEW, CODE)
   const taskStats = {
-    // Stories completed (Done, Closed, Resolved statuses)
+    // Stories completed (Done, Closed, Resolved statuses) - type = Story only
     completed: jiraIssues.filter(issue => {
       const status = issue.status?.toLowerCase() || '';
-      return status === 'done' || status === 'closed' || status === 'resolved' || 
-             status === 'complete' || status === 'completed';
+      const issueType = issue.issueType?.toLowerCase() || '';
+      const isCompleted = status === 'done' || status === 'closed' || status === 'resolved' || 
+                         status === 'complete' || status === 'completed';
+      return isCompleted && issueType === 'story';
     }).length,
     
-    // Stories currently in progress (Active Work from all projects)
+    // Stories currently in progress (Active Work from all projects) - type = Story only
     inProgress: jiraIssues.filter(issue => {
       const status = issue.status?.toLowerCase() || '';
-      return status === 'in progress' || status === 'prompt engineering' || 
-             status === 'in development' || status === 'active';
+      const issueType = issue.issueType?.toLowerCase() || '';
+      const isInProgress = status === 'in progress' || status === 'prompt engineering' || 
+                          status === 'in development' || status === 'active';
+      return isInProgress && issueType === 'story';
     }).length,
     
-    // Stories due tomorrow (filtering by dueDate field)
+    // Stories due tomorrow (filtering by dueDate field) - type = Story only
     todo: jiraIssues.filter(issue => {
       if (!issue.dueDate) return false;
+      const issueType = issue.issueType?.toLowerCase() || '';
+      if (issueType !== 'story') return false;
+      
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowDateStr = tomorrow.toISOString().split('T')[0]; // YYYY-MM-DD format
