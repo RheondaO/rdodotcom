@@ -230,21 +230,27 @@ export class JiraIntegrationService {
     }
   }
 
-  // Get issues for a project
+  // Get issues for a project - using POST for better compatibility
   async getProjectIssues(projectKey: string, maxResults: number = 50): Promise<JiraIssue[]> {
     try {
       const jql = `project = ${projectKey} ORDER BY created DESC`;
-      const response = await this.client.get('/search', {
-        params: {
-          jql,
-          maxResults,
-          fields: 'summary,description,status,assignee,priority,project,issuetype,created,updated,duedate,labels,components,customfield_10001,customfield_10014'
-        }
+      const response = await this.client.post('/search/jql', {
+        jql: jql,
+        maxResults: maxResults,
+        fields: ['summary', 'status', 'project', 'issuetype', 'assignee', 'priority', 'created', 'updated', 'duedate', 'labels'],
+        fieldsByKeys: true
       });
       return response.data.issues;
     } catch (error: any) {
-      console.error('Error fetching Jira issues:', error.message);
-      throw new Error(`Failed to fetch Jira issues: ${error.message}`);
+      console.error('Error fetching Jira issues:', {
+        url: `/project/${projectKey}`,
+        method: 'GET',
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      throw new Error(`Failed to fetch Jira issues: ${error.message} (Status: ${error.response?.status})`);
     }
   }
 
@@ -445,13 +451,11 @@ export class JiraIntegrationService {
       const pageSize = 100; // Jira's typical max per page
       
       while (true) {
-        const response = await this.client.get('/search', {
-          params: {
-            jql: jql || '',
-            maxResults: pageSize,
-            startAt,
-            fields: 'summary,description,status,assignee,priority,project,issuetype,created,updated,duedate,labels,components'
-          }
+        const response = await this.client.post('/search/jql', {
+          jql: jql || '',
+          maxResults: pageSize,
+          fields: ['summary', 'status', 'project', 'issuetype', 'assignee', 'priority', 'created', 'updated', 'duedate', 'labels'],
+          fieldsByKeys: true
         });
         
         const issues = response.data.issues;
@@ -470,8 +474,16 @@ export class JiraIntegrationService {
       console.log(`✅ Jira API: Retrieved ${allIssues.length} total issues`);
       return allIssues.slice(0, maxResults); // Respect the maxResults limit
     } catch (error: any) {
-      console.error('Error searching Jira issues:', error.message);
-      throw new Error(`Failed to search Jira issues: ${error.message}`);
+      console.error('Error searching Jira issues:', {
+        url: '/search',
+        method: 'GET',
+        jql: jql,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      throw new Error(`Failed to search Jira issues: ${error.message} (Status: ${error.response?.status})`);
     }
   }
 
