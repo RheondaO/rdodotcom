@@ -403,12 +403,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Jira integration not configured' });
       }
       
-      // Try a more conservative approach - get issues from recent projects first
-      // If we get projects successfully, let's try to get issues from the first project
+      // Try to get issues from RDOC project first, then fall back to first project
       const projects = await jiraService.getProjects();
-      const rawIssues = projects.length > 0 
-        ? await jiraService.getProjectIssues(projects[0].key, 100)
-        : await jiraService.searchIssues('ORDER BY created DESC LIMIT 10', 10);
+      let rawIssues = [];
+      
+      if (projects.length > 0) {
+        // Look for RDOC project first
+        const rdocProject = projects.find(p => p.key === 'RDOC');
+        const targetProject = rdocProject || projects[0];
+        rawIssues = await jiraService.getProjectIssues(targetProject.key, 100);
+      } else {
+        rawIssues = await jiraService.searchIssues('ORDER BY created DESC', 10);
+      }
       // Convert to internal format to properly handle description objects
       const issues = rawIssues.map(issue => jiraService.convertToInternalFormat(issue));
       // Cache the result
