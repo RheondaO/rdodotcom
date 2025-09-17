@@ -1464,11 +1464,14 @@ export default function AppDevelopmentSection({ selectedDate }: AppDevelopmentSe
              status === 'in development' || status === 'active';
     }).length,
     
-    // Stories in backlog/todo (To Do, Open, New statuses)
+    // Stories due tomorrow (filtering by dueDate field)
     todo: jiraIssues.filter(issue => {
-      const status = issue.status?.toLowerCase() || '';
-      return status === 'to do' || status === 'open' || status === 'new' ||
-             status === 'backlog' || status === 'todo';
+      if (!issue.dueDate) return false;
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowDateStr = tomorrow.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const issueDueDate = new Date(issue.dueDate).toISOString().split('T')[0];
+      return issueDueDate === tomorrowDateStr;
     }).length,
     
     // Total stories across all projects
