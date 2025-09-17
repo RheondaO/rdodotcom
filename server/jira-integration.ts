@@ -67,6 +67,15 @@ interface JiraWebhook {
 export class JiraIntegrationService {
   private client: AxiosInstance;
   private config: JiraConfig;
+  private readonly DEPRECATED_ENDPOINTS = [
+    'GET /search',
+    'GET /issueLinkType',
+    'GET /jql/match',
+    'GET /myself/preferences/columns',
+    'GET /resolution'
+  ];
+  private readonly MAX_RETRIES = 3;
+  private readonly BASE_DELAY_MS = 1000;
 
   constructor() {
     this.config = {
@@ -99,6 +108,55 @@ export class JiraIntegrationService {
     return !!(this.config.domain && this.config.email && this.config.apiToken);
   }
 
+  // Validate that endpoint is not deprecated
+  private validateEndpoint(method: string, url: string): void {
+    const endpoint = `${method.toUpperCase()} ${url}`;
+    if (this.DEPRECATED_ENDPOINTS.includes(endpoint)) {
+      throw new Error(`Attempted to use deprecated endpoint: ${endpoint}. Please use the modern alternative.`);
+    }
+  }
+
+  // Retry mechanism with exponential backoff
+  private async withRetry<T>(operation: () => Promise<T>, context: string): Promise<T> {
+    let lastError: any;
+    
+    for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
+      try {
+        return await operation();
+      } catch (error: any) {
+        lastError = error;
+        
+        // Don't retry on client errors (4xx) except for rate limiting (429)
+        if (error.response?.status >= 400 && error.response?.status < 500 && error.response?.status !== 429) {
+          throw error;
+        }
+        
+        // Don't retry on the last attempt
+        if (attempt === this.MAX_RETRIES) {
+          break;
+        }
+        
+        const delay = this.BASE_DELAY_MS * Math.pow(2, attempt - 1) + Math.random() * 1000;
+        console.log(`⏳ ${context} failed (attempt ${attempt}/${this.MAX_RETRIES}), retrying in ${Math.round(delay)}ms...`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    throw lastError;
+  }
+
+  // Get optimized field list based on use case
+  private getOptimizedFields(context: 'minimal' | 'standard' | 'full'): string[] {
+    const fieldSets = {
+      minimal: ['summary', 'status', 'project', 'issuetype', 'key', 'id'],
+      standard: ['summary', 'status', 'project', 'issuetype', 'assignee', 'priority', 'created', 'updated', 'key', 'id'],
+      full: ['summary', 'description', 'status', 'assignee', 'priority', 'project', 'issuetype', 'created', 'updated', 'duedate', 'labels', 'components', 'customfield_10001', 'customfield_10014', 'key', 'id']
+    };
+    
+    return fieldSets[context] || fieldSets.standard;
+  }
+
   // Check user permissions in Jira
   async checkUserPermissions(): Promise<any> {
     try {
@@ -119,7 +177,16 @@ export class JiraIntegrationService {
       console.log('🔐 Jira permissions check:', result);
       return result;
     } catch (error: any) {
-      console.error('Error checking Jira permissions:', error.message);
+      console.error('Error checking Jira permissions:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      });
+      
+      if (error.response?.status === 410) {
+        throw new Error('Jira permissions API endpoint has been deprecated. Please update the integration.');
+      }
+      
       throw new Error(`Failed to check Jira permissions: ${error.message}`);
     }
   }
@@ -130,7 +197,16 @@ export class JiraIntegrationService {
       const response = await this.client.get('/project');
       return response.data;
     } catch (error: any) {
-      console.error('Error fetching Jira projects:', error.message);
+      console.error('Error fetching Jira projects:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      });
+      
+      if (error.response?.status === 410) {
+        throw new Error('Jira projects API endpoint has been deprecated. Please update the integration.');
+      }
+      
       throw new Error(`Failed to fetch Jira projects: ${error.message}`);
     }
   }
@@ -232,44 +308,42 @@ export class JiraIntegrationService {
 
   // Get issues for a project - using POST for better compatibility
   async getProjectIssues(projectKey: string, maxResults: number = 50): Promise<JiraIssue[]> {
-    try {
+    this.validateEndpoint('POST', '/search/jql');
+    
+    return this.withRetry(async () => {
       const jql = `project = ${projectKey} ORDER BY created DESC`;
+      console.log(`🔍 Fetching project issues: "${jql}" with maxResults: ${maxResults}`);
+      
       const response = await this.client.post('/search/jql', {
         jql: jql,
         maxResults: maxResults,
-        fields: ['summary', 'status', 'project', 'issuetype', 'assignee', 'priority', 'created', 'updated', 'duedate', 'labels'],
+        fields: this.getOptimizedFields('standard'),
         fieldsByKeys: true
       });
+      
+      console.log(`✅ Retrieved ${response.data.issues?.length || 0} project issues`);
       return response.data.issues;
-    } catch (error: any) {
-      console.error('Error fetching Jira issues:', {
-        url: `/project/${projectKey}`,
-        method: 'GET',
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
-      throw new Error(`Failed to fetch Jira issues: ${error.message} (Status: ${error.response?.status})`);
-    }
+    }, `Project issues fetch for ${projectKey}`);
   }
 
   // Get all issues assigned to the current user
   async getMyIssues(maxResults: number = 50): Promise<JiraIssue[]> {
-    try {
+    this.validateEndpoint('POST', '/search/jql');
+    
+    return this.withRetry(async () => {
       const jql = `assignee = currentUser() ORDER BY updated DESC`;
-      const response = await this.client.get('/search', {
-        params: {
-          jql,
-          maxResults,
-          fields: 'summary,description,status,assignee,priority,project,issuetype,created,updated,duedate,labels,components,customfield_10001,customfield_10014'
-        }
+      console.log(`🔍 Fetching my issues: "${jql}" with maxResults: ${maxResults}`);
+      
+      const response = await this.client.post('/search/jql', {
+        jql: jql,
+        maxResults: maxResults,
+        fields: this.getOptimizedFields('full'),
+        fieldsByKeys: true
       });
+      
+      console.log(`✅ Retrieved ${response.data.issues?.length || 0} user issues`);
       return response.data.issues;
-    } catch (error: any) {
-      console.error('Error fetching user issues:', error.message);
-      throw new Error(`Failed to fetch user issues: ${error.message}`);
-    }
+    }, 'User issues fetch');
   }
 
   // Get a single issue by key
@@ -282,7 +356,16 @@ export class JiraIntegrationService {
       });
       return response.data;
     } catch (error: any) {
-      console.error(`Error fetching Jira issue ${issueKey}:`, error.message);
+      console.error(`Error fetching Jira issue ${issueKey}:`, {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      });
+      
+      if (error.response?.status === 410) {
+        throw new Error('Jira issue API endpoint has been deprecated. Please update the integration.');
+      }
+      
       throw new Error(`Failed to fetch Jira issue: ${error.message}`);
     }
   }
@@ -340,7 +423,17 @@ export class JiraIntegrationService {
       const response = await this.client.post('/issue', payload);
       return response.data;
     } catch (error: any) {
-      console.error('Error creating Jira issue:', error.response?.data || error.message);
+      console.error('Error creating Jira issue:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      if (error.response?.status === 410) {
+        throw new Error('Jira issue creation API endpoint has been deprecated. Please update the integration.');
+      }
+      
       throw new Error(`Failed to create Jira issue: ${error.message}`);
     }
   }
@@ -399,7 +492,17 @@ export class JiraIntegrationService {
         await this.transitionIssue(issueKey, updates.status);
       }
     } catch (error: any) {
-      console.error(`Error updating Jira issue ${issueKey}:`, error.response?.data || error.message);
+      console.error(`Error updating Jira issue ${issueKey}:`, {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      
+      if (error.response?.status === 410) {
+        throw new Error('Jira issue update API endpoint has been deprecated. Please update the integration.');
+      }
+      
       throw new Error(`Failed to update Jira issue: ${error.message}`);
     }
   }
@@ -436,14 +539,25 @@ export class JiraIntegrationService {
     try {
       await this.client.delete(`/issue/${issueKey}`);
     } catch (error: any) {
-      console.error(`Error deleting Jira issue ${issueKey}:`, error.message);
+      console.error(`Error deleting Jira issue ${issueKey}:`, {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      });
+      
+      if (error.response?.status === 410) {
+        throw new Error('Jira issue deletion API endpoint has been deprecated. Please update the integration.');
+      }
+      
       throw new Error(`Failed to delete Jira issue: ${error.message}`);
     }
   }
 
   // Search issues with JQL - with pagination support  
   async searchIssues(jql: string, maxResults: number = 50): Promise<JiraIssue[]> {
-    try {
+    this.validateEndpoint('POST', '/search/jql');
+    
+    return this.withRetry(async () => {
       console.log(`🔍 Jira JQL Query: "${jql}" with maxResults: ${maxResults}`);
       
       let allIssues: JiraIssue[] = [];
@@ -455,7 +569,7 @@ export class JiraIntegrationService {
         const requestBody: any = {
           jql: jql || '',
           maxResults: pageSize,
-          fields: ['summary', 'status', 'project', 'issuetype', 'assignee', 'priority', 'created', 'updated', 'duedate', 'labels'],
+          fields: this.getOptimizedFields('standard'),
           fieldsByKeys: true
         };
         
@@ -488,18 +602,7 @@ export class JiraIntegrationService {
       
       console.log(`✅ Jira API: Retrieved ${allIssues.length} total issues`);
       return allIssues.slice(0, maxResults); // Respect the maxResults limit
-    } catch (error: any) {
-      console.error('Error searching Jira issues:', {
-        url: '/search',
-        method: 'GET',
-        jql: jql,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
-      throw new Error(`Failed to search Jira issues: ${error.message} (Status: ${error.response?.status})`);
-    }
+    }, `JQL search: ${jql}`);
   }
 
   // Get issue types for a project
@@ -513,7 +616,16 @@ export class JiraIntegrationService {
       }));
       return [...new Map(issueTypes.map((item: any) => [item.id, item])).values()];
     } catch (error: any) {
-      console.error('Error fetching issue types:', error.message);
+      console.error('Error fetching issue types:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      });
+      
+      if (error.response?.status === 410) {
+        throw new Error('Jira issue types API endpoint has been deprecated. Please update the integration.');
+      }
+      
       throw new Error(`Failed to fetch issue types: ${error.message}`);
     }
   }
@@ -524,7 +636,16 @@ export class JiraIntegrationService {
       const response = await this.client.get('/priority');
       return response.data;
     } catch (error: any) {
-      console.error('Error fetching priorities:', error.message);
+      console.error('Error fetching priorities:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      });
+      
+      if (error.response?.status === 410) {
+        throw new Error('Jira priorities API endpoint has been deprecated. Please update the integration.');
+      }
+      
       throw new Error(`Failed to fetch priorities: ${error.message}`);
     }
   }
