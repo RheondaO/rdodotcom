@@ -620,6 +620,8 @@ export interface ScheduleTemplate {
   id: number;
   name: string;
   description?: string;
+  type: string; // Content type (e.g., "Personal Stories", "Creative Experiments")
+  platform: string; // Platform (e.g., "Instagram", "TikTok", "Blog")
   recurrenceType: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase';
   recurrenceConfig: string; // JSON configuration
   isActive?: boolean;
@@ -846,6 +848,8 @@ export const scheduleTemplates = pgTable('schedule_templates', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
+  type: text('type').notNull(), // Content type (e.g., "Personal Stories", "Creative Experiments")
+  platform: text('platform').notNull(), // Platform (e.g., "Instagram", "TikTok", "Blog")
   recurrenceType: text('recurrence_type').notNull(), // 'weekly', 'nth_weekday', 'quarterly', 'monthly_day', 'moon_phase'
   recurrenceConfig: text('recurrence_config').notNull(), // JSON configuration for specific recurrence settings
   isActive: boolean('is_active').default(true),

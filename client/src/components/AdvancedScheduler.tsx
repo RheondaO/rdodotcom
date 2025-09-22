@@ -61,6 +61,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   const [showPreview, setShowPreview] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ScheduleTemplate | null>(null);
   const [previewOccurrences, setPreviewOccurrences] = useState<ScheduleOccurrence[]>([]);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewConfirmData, setPreviewConfirmData] = useState<any>(null);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -69,6 +71,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   const [newTemplate, setNewTemplate] = useState({
     name: "",
     description: "",
+    type: "",
+    platform: "",
     recurrenceType: "weekly" as 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase',
     config: {
       // Weekly config
@@ -187,6 +191,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     setNewTemplate({
       name: "",
       description: "",
+      type: "",
+      platform: "",
       recurrenceType: "weekly",
       config: {
         dayOfWeek: 1,
@@ -242,6 +248,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     createTemplateMutation.mutate({
       name: newTemplate.name,
       description: newTemplate.description,
+      type: newTemplate.type,
+      platform: newTemplate.platform,
       recurrenceType: newTemplate.recurrenceType,
       recurrenceConfig
     });
@@ -372,6 +380,40 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                           onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
                           placeholder="Describe when and how this content should be scheduled..."
                         />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="template-type">Content Type</Label>
+                          <Input 
+                            id="template-type"
+                            placeholder="e.g., Personal Stories, Creative Experiments"
+                            value={newTemplate.type}
+                            onChange={(e) => setNewTemplate(prev => ({ ...prev, type: e.target.value }))}
+                            data-testid="input-type"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="template-platform">Platform</Label>
+                          <Select 
+                            value={newTemplate.platform} 
+                            onValueChange={(value: string) => setNewTemplate(prev => ({ ...prev, platform: value }))}
+                          >
+                            <SelectTrigger data-testid="select-platform">
+                              <SelectValue placeholder="Select platform" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Instagram">Instagram</SelectItem>
+                              <SelectItem value="TikTok">TikTok</SelectItem>
+                              <SelectItem value="YouTube">YouTube</SelectItem>
+                              <SelectItem value="Blog">Blog</SelectItem>
+                              <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                              <SelectItem value="Twitter">Twitter</SelectItem>
+                              <SelectItem value="Facebook">Facebook</SelectItem>
+                              <SelectItem value="Pinterest">Pinterest</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
 
                       {/* Configuration based on recurrence type */}

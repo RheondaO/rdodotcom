@@ -62,7 +62,7 @@ interface ContentManagementSuiteProps {
 }
 
 export default function ContentManagementSuite({ selectedDate, isReadOnly = false }: ContentManagementSuiteProps) {
-  const [activeView, setActiveView] = useState<"overview" | "create" | "analytics" | "progress" | "scheduler">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "scheduler" | "analytics" | "progress">("overview");
   const [showNewBlockForm, setShowNewBlockForm] = useState(false);
   const [showAnalyticsForm, setShowAnalyticsForm] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
@@ -282,11 +282,12 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 Overview
               </Button>
               <Button
-                variant={activeView === "create" ? "default" : "outline"}
-                onClick={() => setActiveView("create")}
+                variant={activeView === "scheduler" ? "default" : "outline"}
+                onClick={() => setActiveView("scheduler")}
                 size="sm"
+                data-testid="button-scheduler-nav"
               >
-                Create
+                Scheduler
               </Button>
               <Button
                 variant={activeView === "analytics" ? "default" : "outline"}
@@ -512,7 +513,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             </div>
           )}
 
-          {activeView === "create" && (
+          {false && (
             <div className="space-y-6">
               <Card className="bg-white/70 dark:bg-[#0c0910] backdrop-blur-sm border border-pink-200/50 dark:border-pink-800/50 shadow-lg rounded-xl">
                 <CardHeader>
