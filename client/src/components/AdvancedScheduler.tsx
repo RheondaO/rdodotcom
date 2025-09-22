@@ -60,7 +60,6 @@ interface AdvancedSchedulerProps {
 
 export default function AdvancedScheduler({ selectedDate, onContentScheduled }: AdvancedSchedulerProps) {
   const [activeTab, setActiveTab] = useState<"templates" | "scheduled" | "calendar">("templates");
-  const [showCreateTemplate, setShowCreateTemplate] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ScheduleTemplate | null>(null);
   const [previewOccurrences, setPreviewOccurrences] = useState<ScheduleOccurrence[]>([]);
@@ -127,7 +126,6 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     },
     onSuccess: () => {
       toast({ title: "Schedule template created successfully!" });
-      setShowCreateTemplate(false);
       resetForm();
       queryClient.invalidateQueries({ queryKey: ['/api/schedule-templates'] });
     },
@@ -392,21 +390,21 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
             </TabsList>
 
             {/* Templates Tab */}
-            <TabsContent value="templates" className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Schedule Templates</h3>
-                <Dialog open={showCreateTemplate} onOpenChange={setShowCreateTemplate}>
-                  <DialogTrigger asChild>
-                    <Button className="flex items-center gap-2" data-testid="button-create-template">
-                      <Plus className="h-4 w-4" />
-                      Create Template
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Create Schedule Template</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
+            <TabsContent value="templates" className="space-y-6">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold mb-2">Create New Mini-Game</h3>
+                <p className="text-gray-600 dark:text-gray-400">Name your mini-game and set the schedule. This will create multiple Notion records (12 for monthly, 54 for weekly, etc.)</p>
+              </div>
+
+              {/* Inline Create Form */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Plus className="h-5 w-5" />
+                    Mini-Game Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="template-name">Template Name</Label>
@@ -709,36 +707,31 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         )}
                       </div>
 
-                      <div className="flex justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setShowCreateTemplate(false)}
-                          data-testid="button-cancel-template"
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          onClick={handleCreateTemplate}
-                          disabled={!newTemplate.name || !newTemplate.type || !newTemplate.platform || createTemplateMutation.isPending}
-                          data-testid="button-save-template"
-                        >
-                          {createTemplateMutation.isPending ? 'Creating...' : 'Create Template'}
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+                  <div className="flex justify-center pt-4">
+                    <Button 
+                      onClick={handleCreateTemplate}
+                      disabled={!newTemplate.name || !newTemplate.type || !newTemplate.platform || createTemplateMutation.isPending}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
+                      data-testid="button-save-template"
+                    >
+                      {createTemplateMutation.isPending ? 'Creating Mini-Game...' : 'Create Mini-Game Schedule'}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-              {templatesLoading ? (
-                <div className="text-center py-8">Loading templates...</div>
-              ) : templates.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  No schedule templates created yet. Click "Create Template" to get started.
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {templates.map((template) => (
+              {/* Existing Templates */}
+              <div>
+                <h4 className="text-lg font-semibold mb-4">Your Created Mini-Games</h4>
+                {templatesLoading ? (
+                  <div className="text-center py-8">Loading mini-games...</div>
+                ) : templates.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No mini-games created yet. Fill out the form above to get started.
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {templates.map((template) => (
                     <Card key={template.id} data-testid={`template-card-${template.id}`}>
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
@@ -793,9 +786,10 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </TabsContent>
 
             {/* Scheduled Items Tab */}
