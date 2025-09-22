@@ -979,7 +979,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       }));
                       
                       // Create each scheduled item individually with standardized names
-                      Promise.all(itemsToCreate.map(item => 
+                      Promise.all(itemsToCreate.map((item: any) => 
                         fetch('/api/scheduled-content-items', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
