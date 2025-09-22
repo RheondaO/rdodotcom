@@ -1,0 +1,786 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { 
+  Calendar as CalendarIcon, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  Clock, 
+  Moon,
+  Repeat,
+  Play,
+  Pause,
+  Settings,
+  ChevronDown,
+  Save,
+  X,
+  RefreshCw
+} from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { useToast } from "../hooks/use-toast";
+import { apiRequest } from "../lib/queryClient";
+
+interface ScheduleTemplate {
+  id: number;
+  name: string;
+  description?: string;
+  recurrenceType: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase';
+  recurrenceConfig: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface ScheduleOccurrence {
+  date: Date;
+  title: string;
+  description?: string;
+}
+
+interface AdvancedSchedulerProps {
+  selectedDate: Date;
+  onContentScheduled?: (items: any[]) => void;
+}
+
+export default function AdvancedScheduler({ selectedDate, onContentScheduled }: AdvancedSchedulerProps) {
+  const [activeTab, setActiveTab] = useState<"templates" | "scheduled" | "calendar">("templates");
+  const [showCreateTemplate, setShowCreateTemplate] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ScheduleTemplate | null>(null);
+  const [previewOccurrences, setPreviewOccurrences] = useState<ScheduleOccurrence[]>([]);
+  
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Form state for new template
+  const [newTemplate, setNewTemplate] = useState({
+    name: "",
+    description: "",
+    recurrenceType: "weekly" as 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase',
+    config: {
+      // Weekly config
+      dayOfWeek: 1, // Monday
+      time: "09:00",
+      // Nth weekday config
+      weekNumber: 1,
+      // Quarterly config
+      monthInQuarter: 1,
+      dayOfMonth: 1,
+      // Moon phase config
+      phaseTypes: ['full_moon'],
+      offsetDays: 0
+    }
+  });
+
+  // Fetch schedule templates
+  const { data: templates = [], isLoading: templatesLoading, refetch: refetchTemplates } = useQuery({
+    queryKey: ['/api/schedule-templates'],
+    select: (data: ScheduleTemplate[]) => data || []
+  });
+
+  // Fetch scheduled content items
+  const { data: scheduledItems = [], isLoading: itemsLoading } = useQuery({
+    queryKey: ['/api/scheduled-content-items'],
+    select: (data: any[]) => data || []
+  });
+
+  // Fetch moon phases
+  const { data: moonPhases = [] } = useQuery({
+    queryKey: ['/api/moon-phases'],
+    select: (data: any[]) => data || []
+  });
+
+  // Create template mutation
+  const createTemplateMutation = useMutation({
+    mutationFn: async (templateData: any) => {
+      const response = await fetch('/api/schedule-templates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(templateData)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create template');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Schedule template created successfully!" });
+      setShowCreateTemplate(false);
+      resetForm();
+      queryClient.invalidateQueries({ queryKey: ['/api/schedule-templates'] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error creating template", description: error.message, variant: "destructive" });
+    }
+  });
+
+  // Preview template mutation
+  const previewMutation = useMutation({
+    mutationFn: async ({ templateId, fromDate }: { templateId: number; fromDate: Date }) => {
+      const response = await fetch(`/api/schedule-templates/${templateId}/preview`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ fromDate: fromDate.toISOString(), maxOccurrences: 10 })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to generate preview');
+      }
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      setPreviewOccurrences(data.occurrences || []);
+      setShowPreview(true);
+    },
+    onError: (error: any) => {
+      toast({ title: "Error generating preview", description: error.message, variant: "destructive" });
+    }
+  });
+
+  // Generate content items mutation
+  const generateItemsMutation = useMutation({
+    mutationFn: async ({ templateId, fromDate, toDate, title, description }: any) => {
+      const response = await fetch(`/api/scheduled-content-items/generate-from-template/${templateId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ fromDate, toDate, title, description })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to generate content items');
+      }
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      toast({ 
+        title: `Generated ${data.generated_count} scheduled items!`,
+        description: `Created content schedule from template: ${data.template.name}`
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduled-content-items'] });
+      if (onContentScheduled) {
+        onContentScheduled(data.items);
+      }
+    },
+    onError: (error: any) => {
+      toast({ title: "Error generating content", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const resetForm = () => {
+    setNewTemplate({
+      name: "",
+      description: "",
+      recurrenceType: "weekly",
+      config: {
+        dayOfWeek: 1,
+        time: "09:00",
+        weekNumber: 1,
+        monthInQuarter: 1,
+        dayOfMonth: 1,
+        phaseTypes: ['full_moon'],
+        offsetDays: 0
+      }
+    });
+  };
+
+  const handleCreateTemplate = () => {
+    let recurrenceConfig: any = {};
+
+    switch (newTemplate.recurrenceType) {
+      case 'weekly':
+        recurrenceConfig = {
+          dayOfWeek: newTemplate.config.dayOfWeek,
+          time: newTemplate.config.time
+        };
+        break;
+      case 'nth_weekday':
+        recurrenceConfig = {
+          weekNumber: newTemplate.config.weekNumber,
+          dayOfWeek: newTemplate.config.dayOfWeek,
+          time: newTemplate.config.time
+        };
+        break;
+      case 'quarterly':
+        recurrenceConfig = {
+          monthInQuarter: newTemplate.config.monthInQuarter,
+          dayOfMonth: newTemplate.config.dayOfMonth,
+          time: newTemplate.config.time
+        };
+        break;
+      case 'monthly_day':
+        recurrenceConfig = {
+          dayOfMonth: newTemplate.config.dayOfMonth,
+          time: newTemplate.config.time
+        };
+        break;
+      case 'moon_phase':
+        recurrenceConfig = {
+          phaseTypes: newTemplate.config.phaseTypes,
+          offsetDays: newTemplate.config.offsetDays,
+          time: newTemplate.config.time
+        };
+        break;
+    }
+
+    createTemplateMutation.mutate({
+      name: newTemplate.name,
+      description: newTemplate.description,
+      recurrenceType: newTemplate.recurrenceType,
+      recurrenceConfig
+    });
+  };
+
+  const handlePreviewTemplate = (template: ScheduleTemplate) => {
+    setSelectedTemplate(template);
+    previewMutation.mutate({ templateId: template.id, fromDate: selectedDate });
+  };
+
+  const getDayName = (dayNumber: number) => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[dayNumber];
+  };
+
+  const getRecurrenceDescription = (template: ScheduleTemplate) => {
+    try {
+      const config = JSON.parse(template.recurrenceConfig);
+      
+      switch (template.recurrenceType) {
+        case 'weekly':
+          return `Every ${getDayName(config.dayOfWeek)}${config.time ? ` at ${config.time}` : ''}`;
+        case 'nth_weekday':
+          const weekText = config.weekNumber === -1 ? 'Last' : 
+                          config.weekNumber === 1 ? '1st' :
+                          config.weekNumber === 2 ? '2nd' :
+                          config.weekNumber === 3 ? '3rd' : '4th';
+          return `${weekText} ${getDayName(config.dayOfWeek)} of each month${config.time ? ` at ${config.time}` : ''}`;
+        case 'quarterly':
+          const monthNames = ['first', 'second', 'third'];
+          return `Day ${config.dayOfMonth} of the ${monthNames[config.monthInQuarter - 1]} month each quarter${config.time ? ` at ${config.time}` : ''}`;
+        case 'monthly_day':
+          return `${config.dayOfMonth}${config.dayOfMonth === 1 ? 'st' : config.dayOfMonth === 2 ? 'nd' : config.dayOfMonth === 3 ? 'rd' : 'th'} day of each month${config.time ? ` at ${config.time}` : ''}`;
+        case 'moon_phase':
+          const phaseNames = config.phaseTypes.map((phase: string) => 
+            phase.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
+          ).join(', ');
+          const offsetText = config.offsetDays ? ` (${config.offsetDays > 0 ? '+' : ''}${config.offsetDays} days)` : '';
+          return `${phaseNames}${offsetText}${config.time ? ` at ${config.time}` : ''}`;
+        default:
+          return 'Unknown recurrence type';
+      }
+    } catch (error) {
+      return 'Invalid configuration';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'scheduled': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'created': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+      case 'published': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
+      case 'failed': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+    }
+  };
+
+  return (
+    <div className="space-y-6" data-testid="advanced-scheduler">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Repeat className="h-5 w-5" />
+            Advanced Content Scheduler
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="templates" data-testid="tab-templates">Templates</TabsTrigger>
+              <TabsTrigger value="scheduled" data-testid="tab-scheduled">Scheduled Items</TabsTrigger>
+              <TabsTrigger value="calendar" data-testid="tab-calendar">Calendar View</TabsTrigger>
+            </TabsList>
+
+            {/* Templates Tab */}
+            <TabsContent value="templates" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Schedule Templates</h3>
+                <Dialog open={showCreateTemplate} onOpenChange={setShowCreateTemplate}>
+                  <DialogTrigger asChild>
+                    <Button className="flex items-center gap-2" data-testid="button-create-template">
+                      <Plus className="h-4 w-4" />
+                      Create Template
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Create Schedule Template</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="template-name">Template Name</Label>
+                          <Input
+                            id="template-name"
+                            data-testid="input-template-name"
+                            value={newTemplate.name}
+                            onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., Weekly Monday Posts"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="recurrence-type">Recurrence Type</Label>
+                          <Select 
+                            value={newTemplate.recurrenceType} 
+                            onValueChange={(value: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase') => setNewTemplate(prev => ({ ...prev, recurrenceType: value }))}
+                          >
+                            <SelectTrigger data-testid="select-recurrence-type">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="weekly">Weekly (Every Monday, Tuesday, etc.)</SelectItem>
+                              <SelectItem value="nth_weekday">Nth Weekday (2nd Monday, 4th Sunday, etc.)</SelectItem>
+                              <SelectItem value="quarterly">Quarterly</SelectItem>
+                              <SelectItem value="monthly_day">Monthly Day (1st, 2nd, 7th, 14th of month)</SelectItem>
+                              <SelectItem value="moon_phase">Moon Phase</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="template-description">Description (Optional)</Label>
+                        <Textarea
+                          id="template-description"
+                          data-testid="textarea-template-description"
+                          value={newTemplate.description}
+                          onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Describe when and how this content should be scheduled..."
+                        />
+                      </div>
+
+                      {/* Configuration based on recurrence type */}
+                      <div className="border rounded-lg p-4 space-y-4">
+                        <h4 className="font-semibold">Recurrence Configuration</h4>
+
+                        {newTemplate.recurrenceType === 'weekly' && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>Day of Week</Label>
+                              <Select 
+                                value={newTemplate.config.dayOfWeek.toString()} 
+                                onValueChange={(value) => setNewTemplate(prev => ({ 
+                                  ...prev, 
+                                  config: { ...prev.config, dayOfWeek: parseInt(value) }
+                                }))}
+                              >
+                                <SelectTrigger data-testid="select-day-of-week">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="0">Sunday</SelectItem>
+                                  <SelectItem value="1">Monday</SelectItem>
+                                  <SelectItem value="2">Tuesday</SelectItem>
+                                  <SelectItem value="3">Wednesday</SelectItem>
+                                  <SelectItem value="4">Thursday</SelectItem>
+                                  <SelectItem value="5">Friday</SelectItem>
+                                  <SelectItem value="6">Saturday</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Time (Optional)</Label>
+                              <Input
+                                type="time"
+                                data-testid="input-time"
+                                value={newTemplate.config.time}
+                                onChange={(e) => setNewTemplate(prev => ({ 
+                                  ...prev, 
+                                  config: { ...prev.config, time: e.target.value }
+                                }))}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {(newTemplate.recurrenceType as string) === 'nth_weekday' && (
+                          <div className="grid grid-cols-3 gap-4">
+                            <div>
+                              <Label>Week Number</Label>
+                              <Select 
+                                value={newTemplate.config.weekNumber.toString()} 
+                                onValueChange={(value) => setNewTemplate(prev => ({ 
+                                  ...prev, 
+                                  config: { ...prev.config, weekNumber: parseInt(value) }
+                                }))}
+                              >
+                                <SelectTrigger data-testid="select-week-number">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1">1st</SelectItem>
+                                  <SelectItem value="2">2nd</SelectItem>
+                                  <SelectItem value="3">3rd</SelectItem>
+                                  <SelectItem value="4">4th</SelectItem>
+                                  <SelectItem value="-1">Last</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Day of Week</Label>
+                              <Select 
+                                value={newTemplate.config.dayOfWeek.toString()} 
+                                onValueChange={(value) => setNewTemplate(prev => ({ 
+                                  ...prev, 
+                                  config: { ...prev.config, dayOfWeek: parseInt(value) }
+                                }))}
+                              >
+                                <SelectTrigger data-testid="select-nth-day-of-week">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="0">Sunday</SelectItem>
+                                  <SelectItem value="1">Monday</SelectItem>
+                                  <SelectItem value="2">Tuesday</SelectItem>
+                                  <SelectItem value="3">Wednesday</SelectItem>
+                                  <SelectItem value="4">Thursday</SelectItem>
+                                  <SelectItem value="5">Friday</SelectItem>
+                                  <SelectItem value="6">Saturday</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Time (Optional)</Label>
+                              <Input
+                                type="time"
+                                data-testid="input-nth-time"
+                                value={newTemplate.config.time}
+                                onChange={(e) => setNewTemplate(prev => ({ 
+                                  ...prev, 
+                                  config: { ...prev.config, time: e.target.value }
+                                }))}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {(newTemplate.recurrenceType as string) === 'moon_phase' && (
+                          <div className="space-y-4">
+                            <div>
+                              <Label>Moon Phases</Label>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                {[
+                                  { value: 'new_moon', label: 'New Moon' },
+                                  { value: 'first_quarter', label: 'First Quarter' },
+                                  { value: 'full_moon', label: 'Full Moon' },
+                                  { value: 'last_quarter', label: 'Last Quarter' },
+                                  { value: 'waxing_crescent', label: 'Waxing Crescent' },
+                                  { value: 'waxing_gibbous', label: 'Waxing Gibbous' },
+                                  { value: 'waning_gibbous', label: 'Waning Gibbous' },
+                                  { value: 'waning_crescent', label: 'Waning Crescent' }
+                                ].map((phase) => (
+                                  <label key={phase.value} className="flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      data-testid={`checkbox-phase-${phase.value}`}
+                                      checked={newTemplate.config.phaseTypes.includes(phase.value)}
+                                      onChange={(e) => {
+                                        const updatedPhases = e.target.checked 
+                                          ? [...newTemplate.config.phaseTypes, phase.value]
+                                          : newTemplate.config.phaseTypes.filter(p => p !== phase.value);
+                                        setNewTemplate(prev => ({ 
+                                          ...prev, 
+                                          config: { ...prev.config, phaseTypes: updatedPhases }
+                                        }));
+                                      }}
+                                    />
+                                    <span className="text-sm">{phase.label}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Offset Days</Label>
+                                <Input
+                                  type="number"
+                                  data-testid="input-offset-days"
+                                  value={newTemplate.config.offsetDays}
+                                  onChange={(e) => setNewTemplate(prev => ({ 
+                                    ...prev, 
+                                    config: { ...prev.config, offsetDays: parseInt(e.target.value) || 0 }
+                                  }))}
+                                  placeholder="0"
+                                  min="-30"
+                                  max="30"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Days before (-) or after (+) the moon phase</p>
+                              </div>
+                              <div>
+                                <Label>Time (Optional)</Label>
+                                <Input
+                                  type="time"
+                                  data-testid="input-moon-time"
+                                  value={newTemplate.config.time}
+                                  onChange={(e) => setNewTemplate(prev => ({ 
+                                    ...prev, 
+                                    config: { ...prev.config, time: e.target.value }
+                                  }))}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {((newTemplate.recurrenceType as string) === 'quarterly' || (newTemplate.recurrenceType as string) === 'monthly_day') && (
+                          <div className="grid grid-cols-2 gap-4">
+                            {(newTemplate.recurrenceType as string) === 'quarterly' && (
+                              <div>
+                                <Label>Month in Quarter</Label>
+                                <Select 
+                                  value={newTemplate.config.monthInQuarter.toString()} 
+                                  onValueChange={(value) => setNewTemplate(prev => ({ 
+                                    ...prev, 
+                                    config: { ...prev.config, monthInQuarter: parseInt(value) }
+                                  }))}
+                                >
+                                  <SelectTrigger data-testid="select-month-in-quarter">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="1">1st month</SelectItem>
+                                    <SelectItem value="2">2nd month</SelectItem>
+                                    <SelectItem value="3">3rd month</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                            <div>
+                              <Label>Day of Month</Label>
+                              <Input
+                                type="number"
+                                data-testid="input-day-of-month"
+                                value={newTemplate.config.dayOfMonth}
+                                onChange={(e) => setNewTemplate(prev => ({ 
+                                  ...prev, 
+                                  config: { ...prev.config, dayOfMonth: parseInt(e.target.value) || 1 }
+                                }))}
+                                min="1"
+                                max="31"
+                              />
+                            </div>
+                            <div>
+                              <Label>Time (Optional)</Label>
+                              <Input
+                                type="time"
+                                data-testid="input-quarterly-time"
+                                value={newTemplate.config.time}
+                                onChange={(e) => setNewTemplate(prev => ({ 
+                                  ...prev, 
+                                  config: { ...prev.config, time: e.target.value }
+                                }))}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setShowCreateTemplate(false)}
+                          data-testid="button-cancel-template"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleCreateTemplate}
+                          disabled={!newTemplate.name || createTemplateMutation.isPending}
+                          data-testid="button-save-template"
+                        >
+                          {createTemplateMutation.isPending ? 'Creating...' : 'Create Template'}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {templatesLoading ? (
+                <div className="text-center py-8">Loading templates...</div>
+              ) : templates.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No schedule templates created yet. Click "Create Template" to get started.
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {templates.map((template) => (
+                    <Card key={template.id} data-testid={`template-card-${template.id}`}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-lg">{template.name}</h4>
+                            {template.description && (
+                              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                                {template.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="outline" className="text-xs">
+                                {template.recurrenceType.replace('_', ' ')}
+                              </Badge>
+                              <span className="text-sm text-gray-500">
+                                {getRecurrenceDescription(template)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handlePreviewTemplate(template)}
+                              disabled={previewMutation.isPending}
+                              data-testid={`button-preview-${template.id}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                              Preview
+                            </Button>
+                            <Button 
+                              size="sm"
+                              onClick={() => {
+                                const fromDate = new Date();
+                                const toDate = new Date();
+                                toDate.setMonth(toDate.getMonth() + 3); // 3 months ahead
+                                generateItemsMutation.mutate({
+                                  templateId: template.id,
+                                  fromDate: fromDate.toISOString(),
+                                  toDate: toDate.toISOString(),
+                                  title: `Auto-generated from ${template.name}`,
+                                  description: template.description
+                                });
+                              }}
+                              disabled={generateItemsMutation.isPending}
+                              data-testid={`button-generate-${template.id}`}
+                            >
+                              <Play className="h-4 w-4" />
+                              Generate
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Scheduled Items Tab */}
+            <TabsContent value="scheduled" className="space-y-4">
+              <h3 className="text-lg font-semibold">Scheduled Content Items</h3>
+              
+              {itemsLoading ? (
+                <div className="text-center py-8">Loading scheduled items...</div>
+              ) : scheduledItems.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No scheduled content items yet. Generate some from your templates!
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {scheduledItems.map((item: any) => (
+                    <Card key={item.id} data-testid={`scheduled-item-${item.id}`}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h4 className="font-semibold">{item.title}</h4>
+                            {item.description && (
+                              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                                {item.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge className={getStatusColor(item.status)}>
+                                {item.status}
+                              </Badge>
+                              <span className="text-sm text-gray-500">
+                                Scheduled for {format(parseISO(item.scheduledDate), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Calendar View Tab */}
+            <TabsContent value="calendar" className="space-y-4">
+              <h3 className="text-lg font-semibold">Calendar View</h3>
+              <div className="text-center py-8 text-gray-500">
+                Calendar view coming soon - will show all scheduled items in a monthly calendar format.
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Preview Dialog */}
+          <Dialog open={showPreview} onOpenChange={setShowPreview}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  Schedule Preview: {selectedTemplate?.name}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                {previewMutation.isPending ? (
+                  <div className="text-center py-8">Generating preview...</div>
+                ) : previewOccurrences.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No upcoming occurrences found for this schedule.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Next 10 Occurrences:</h4>
+                    {previewOccurrences.map((occurrence, index) => (
+                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <div className="font-medium">{occurrence.title}</div>
+                          {occurrence.description && (
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              {occurrence.description}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-sm font-mono">
+                          {format(new Date(occurrence.date), 'MMM d, yyyy h:mm a')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex justify-end">
+                  <Button onClick={() => setShowPreview(false)}>Close</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

@@ -36,6 +36,7 @@ import {
 import { format } from "date-fns";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../hooks/useAuth";
+import AdvancedScheduler from "./AdvancedScheduler";
 
 interface MiniGameBlock {
   id: number;
@@ -61,7 +62,7 @@ interface ContentManagementSuiteProps {
 }
 
 export default function ContentManagementSuite({ selectedDate, isReadOnly = false }: ContentManagementSuiteProps) {
-  const [activeView, setActiveView] = useState<"overview" | "create" | "analytics" | "progress">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "create" | "analytics" | "progress" | "scheduler">("overview");
   const [showNewBlockForm, setShowNewBlockForm] = useState(false);
   const [showAnalyticsForm, setShowAnalyticsForm] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
@@ -300,6 +301,15 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 size="sm"
               >
                 Progress
+              </Button>
+              <Button
+                variant={activeView === "scheduler" ? "default" : "outline"}
+                onClick={() => setActiveView("scheduler")}
+                size="sm"
+                data-testid="button-scheduler"
+              >
+                <Clock className="h-4 w-4 mr-1" />
+                Scheduler
               </Button>
             </div>
           </div>
@@ -623,6 +633,20 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {activeView === "scheduler" && (
+            <div className="space-y-6">
+              <AdvancedScheduler 
+                selectedDate={selectedDate}
+                onContentScheduled={(items) => {
+                  toast({ 
+                    title: `Generated ${items.length} scheduled content items!`,
+                    description: "Content has been scheduled successfully."
+                  });
+                }}
+              />
             </div>
           )}
         </div>

@@ -24,6 +24,7 @@ import {
 import timerRoutes from "./timer-routes-new";
 import fitnessRoutes from "./fitness-routes";
 import jiraRoutes from "./jira-routes";
+import scheduleRoutes from "./schedule-routes";
 import { jiraService } from "./jira-integration";
 import { 
   getAIDevProjects, 
@@ -2491,6 +2492,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount Fitness routes
   app.use("/api", fitnessRoutes);
+
+  // Mount Schedule routes
+  app.use("/api", scheduleRoutes);
 
   // AI Insights endpoint
   app.post("/api/ai-insights", async (req, res) => {
