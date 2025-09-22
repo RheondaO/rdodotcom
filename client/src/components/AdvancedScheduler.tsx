@@ -6,7 +6,8 @@ import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "./ui/dialog";
+import { ScrollArea } from "./ui/scroll-area";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -37,6 +38,8 @@ interface ScheduleTemplate {
   id: number;
   name: string;
   description?: string;
+  type: string;
+  platform: string;
   recurrenceType: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase';
   recurrenceConfig: string;
   isActive?: boolean;
@@ -255,9 +258,73 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     });
   };
 
-  const handlePreviewTemplate = (template: ScheduleTemplate) => {
+  // Generate standardized Notion record names
+  const generateStandardizedName = (type: string, date: Date, index?: number): string => {
+    const monthYear = format(date, 'MMMM yyyy');
+    if (index !== undefined && index > 0) {
+      return `${type} - ${index + 1} - ${monthYear}`;
+    }
+    return `${type} - ${monthYear}`;
+  };
+
+  // Enhanced preview handler with confirmation modal
+  const handlePreviewTemplate = async (template: ScheduleTemplate) => {
     setSelectedTemplate(template);
-    previewMutation.mutate({ templateId: template.id, fromDate: selectedDate });
+    
+    try {
+      const response = await fetch(`/api/schedule-templates/${template.id}/preview`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          fromDate: selectedDate.toISOString(), 
+          maxOccurrences: 50 // Show more occurrences for better preview
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate preview');
+      }
+      
+      const previewData = await response.json();
+      
+      // Generate standardized names for each occurrence
+      const occurrencesWithNames = previewData.occurrences.map((occurrence: any, index: number) => {
+        const occurrenceDate = new Date(occurrence.date);
+        const monthYearKey = format(occurrenceDate, 'yyyy-MM');
+        
+        // Count how many occurrences are in the same month
+        const monthOccurrences = previewData.occurrences.filter((occ: any) => 
+          format(new Date(occ.date), 'yyyy-MM') === monthYearKey
+        );
+        
+        const monthIndex = monthOccurrences.findIndex((occ: any) => occ.date === occurrence.date);
+        
+        return {
+          ...occurrence,
+          standardizedName: generateStandardizedName(
+            template.type || template.name, 
+            occurrenceDate, 
+            monthOccurrences.length > 1 ? monthIndex : undefined
+          )
+        };
+      });
+      
+      setPreviewConfirmData({
+        ...previewData,
+        template,
+        occurrences: occurrencesWithNames
+      });
+      setShowPreviewModal(true);
+      
+    } catch (error: any) {
+      toast({ 
+        title: "Error generating preview", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    }
   };
 
   const getDayName = (dayNumber: number) => {
@@ -652,7 +719,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         </Button>
                         <Button 
                           onClick={handleCreateTemplate}
-                          disabled={!newTemplate.name || createTemplateMutation.isPending}
+                          disabled={!newTemplate.name || !newTemplate.type || !newTemplate.platform || createTemplateMutation.isPending}
                           data-testid="button-save-template"
                         >
                           {createTemplateMutation.isPending ? 'Creating...' : 'Create Template'}
@@ -819,6 +886,132 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                   <Button onClick={() => setShowPreview(false)}>Close</Button>
                 </div>
               </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Preview Confirmation Modal */}
+          <Dialog open={showPreviewModal} onOpenChange={setShowPreviewModal}>
+            <DialogContent className="max-w-4xl max-h-[80vh]">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  Schedule Preview Confirmation
+                </DialogTitle>
+              </DialogHeader>
+              
+              {previewConfirmData && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Template</p>
+                      <p className="font-semibold">{previewConfirmData.template.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Content Type</p>
+                      <p className="font-semibold">{previewConfirmData.template.type}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Platform</p>
+                      <p className="font-semibold">{previewConfirmData.template.platform}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Occurrences</p>
+                      <p className="font-semibold">{previewConfirmData.occurrences?.length || 0}</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-3">Scheduled Dates & Names:</h4>
+                    <ScrollArea className="h-64 w-full border rounded-lg p-4">
+                      <div className="space-y-2">
+                        {previewConfirmData.occurrences?.map((occurrence: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded border">
+                            <div>
+                              <p className="font-medium text-blue-600 dark:text-blue-400">
+                                {occurrence.standardizedName}
+                              </p>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {format(new Date(occurrence.date), 'EEEE, MMMM d, yyyy')}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {format(new Date(occurrence.date), 'MMM yyyy')}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                  
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <h5 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+                      📋 What happens when you confirm:
+                    </h5>
+                    <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                      <li>• Creates {previewConfirmData.occurrences?.length} scheduled content items</li>
+                      <li>• Each item will be named with the standardized format shown above</li>
+                      <li>• Content will be scheduled to sync with Notion on each date</li>
+                      <li>• You can manage and edit these items in the "Scheduled Items" tab</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+              
+              <DialogFooter className="gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowPreviewModal(false)}
+                  data-testid="button-cancel-preview"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    if (previewConfirmData) {
+                      // Generate the content items with standardized names
+                      const itemsToCreate = previewConfirmData.occurrences.map((occurrence: any) => ({
+                        templateId: previewConfirmData.template.id,
+                        title: occurrence.standardizedName,
+                        description: previewConfirmData.template.description,
+                        scheduledDate: occurrence.date,
+                        notionPageId: null,
+                        status: 'scheduled'
+                      }));
+                      
+                      // Create each scheduled item individually with standardized names
+                      Promise.all(itemsToCreate.map(item => 
+                        fetch('/api/scheduled-content-items', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(item)
+                        })
+                      )).then(() => {
+                        toast({ 
+                          title: `Created ${itemsToCreate.length} scheduled items!`,
+                          description: "Content has been scheduled with standardized names."
+                        });
+                        queryClient.invalidateQueries({ queryKey: ['/api/scheduled-content-items'] });
+                        if (onContentScheduled) {
+                          onContentScheduled(itemsToCreate);
+                        }
+                      }).catch((error) => {
+                        toast({ 
+                          title: "Error creating scheduled items", 
+                          description: error.message, 
+                          variant: "destructive" 
+                        });
+                      });
+                      
+                      setShowPreviewModal(false);
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  data-testid="button-confirm-schedule"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Confirm & Create Schedule
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </CardContent>
