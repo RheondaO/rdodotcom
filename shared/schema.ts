@@ -615,6 +615,85 @@ export interface SocialMediaAnalytics {
   createdAt?: Date;
 }
 
+// Advanced Scheduling Interfaces
+export interface ScheduleTemplate {
+  id: number;
+  name: string;
+  description?: string;
+  recurrenceType: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase';
+  recurrenceConfig: string; // JSON configuration
+  isActive?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ScheduledContentItem {
+  id: number;
+  templateId: number;
+  notionPageId?: string;
+  title: string;
+  description?: string;
+  miniGameBlockId?: number;
+  status: 'scheduled' | 'created' | 'published' | 'failed';
+  scheduledDate: Date;
+  actualCreatedDate?: Date;
+  nextScheduledDate?: Date;
+  metadata?: string; // JSON
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface MoonPhase {
+  id: number;
+  phaseType: 'new_moon' | 'first_quarter' | 'full_moon' | 'last_quarter' | 'waxing_crescent' | 'waxing_gibbous' | 'waning_gibbous' | 'waning_crescent';
+  phaseDate: Date;
+  year: number;
+  month: number;
+  illumination?: string;
+  isMainPhase?: boolean;
+  createdAt?: Date;
+}
+
+export interface ScheduleExecutionLog {
+  id: number;
+  scheduleItemId: number;
+  executionDate: Date;
+  status: 'success' | 'failed' | 'skipped';
+  errorMessage?: string;
+  notionResponse?: string;
+  processingTime?: number;
+  createdAt?: Date;
+}
+
+// Recurrence Configuration Types
+export interface WeeklyConfig {
+  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday, 1 = Monday, etc.
+  time?: string; // HH:MM format
+}
+
+export interface NthWeekdayConfig {
+  weekNumber: 1 | 2 | 3 | 4 | -1; // 1st, 2nd, 3rd, 4th, or last (-1)
+  dayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  time?: string;
+}
+
+export interface QuarterlyConfig {
+  monthInQuarter: 1 | 2 | 3; // 1st, 2nd, or 3rd month of quarter
+  dayOfMonth: number; // 1-31
+  time?: string;
+}
+
+export interface MonthlyDayConfig {
+  dayOfMonth: number; // 1-31
+  time?: string;
+}
+
+export interface MoonPhaseConfig {
+  phaseTypes: Array<'new_moon' | 'first_quarter' | 'full_moon' | 'last_quarter' | 'waxing_crescent' | 'waxing_gibbous' | 'waning_gibbous' | 'waning_crescent'>;
+  offsetDays?: number; // Days before (-) or after (+) the phase
+  time?: string;
+}
+
 export interface PerformanceInsights {
   id: number;
   miniGameBlockId: number;
@@ -759,6 +838,56 @@ export const blogCalendar = pgTable('blog_calendar', {
   time: text('time'),
   status: text('status').notNull().default('scheduled'),
   notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Advanced Scheduling System for Mini-Game Block Studio
+export const scheduleTemplates = pgTable('schedule_templates', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  recurrenceType: text('recurrence_type').notNull(), // 'weekly', 'nth_weekday', 'quarterly', 'monthly_day', 'moon_phase'
+  recurrenceConfig: text('recurrence_config').notNull(), // JSON configuration for specific recurrence settings
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const scheduledContentItems = pgTable('scheduled_content_items', {
+  id: serial('id').primaryKey(),
+  templateId: integer('template_id').references(() => scheduleTemplates.id),
+  notionPageId: text('notion_page_id'), // Reference to Notion page/record
+  title: text('title').notNull(),
+  description: text('description'),
+  miniGameBlockId: integer('mini_game_block_id'),
+  status: text('status').notNull().default('scheduled'), // 'scheduled', 'created', 'published', 'failed'
+  scheduledDate: timestamp('scheduled_date').notNull(),
+  actualCreatedDate: timestamp('actual_created_date'),
+  nextScheduledDate: timestamp('next_scheduled_date'),
+  metadata: text('metadata'), // JSON for additional data
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const moonPhases = pgTable('moon_phases', {
+  id: serial('id').primaryKey(),
+  phaseType: text('phase_type').notNull(), // 'new_moon', 'first_quarter', 'full_moon', 'last_quarter', 'waxing_crescent', 'waxing_gibbous', 'waning_gibbous', 'waning_crescent'
+  phaseDate: timestamp('phase_date').notNull(),
+  year: integer('year').notNull(),
+  month: integer('month').notNull(),
+  illumination: decimal('illumination'), // Percentage of moon illuminated
+  isMainPhase: boolean('is_main_phase').default(false), // True for primary phases (new, first quarter, full, last quarter)
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const scheduleExecutionLog = pgTable('schedule_execution_log', {
+  id: serial('id').primaryKey(),
+  scheduleItemId: integer('schedule_item_id').references(() => scheduledContentItems.id),
+  executionDate: timestamp('execution_date').notNull(),
+  status: text('status').notNull(), // 'success', 'failed', 'skipped'
+  errorMessage: text('error_message'),
+  notionResponse: text('notion_response'), // JSON response from Notion API
+  processingTime: integer('processing_time'), // milliseconds
   createdAt: timestamp('created_at').defaultNow(),
 });
 

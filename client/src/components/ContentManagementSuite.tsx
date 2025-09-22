@@ -96,7 +96,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   });
 
   // Mapping between @rotationonly tags and mini block titles
-  const tagToBlockMapping = {
+  const tagToBlockMapping: Record<string, string[]> = {
     "rotationonly.ext": ["Astro Insights"],
     "rotationonly.ceo": ["Personal Stories"],
     "rotationonly.mag": ["Morning Motivation Series"],
