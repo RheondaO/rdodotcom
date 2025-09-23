@@ -857,6 +857,15 @@ export const scheduleTemplates = pgTable('schedule_templates', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+export const calendarSelections = pgTable('calendar_selections', {
+  id: serial('id').primaryKey(),
+  selectedDate: timestamp('selected_date').notNull(),
+  notionPageId: text('notion_page_id'),
+  status: text('status').notNull().default('selected'), // 'selected', 'created', 'failed'
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 export const scheduledContentItems = pgTable('scheduled_content_items', {
   id: serial('id').primaryKey(),
   templateId: integer('template_id').references(() => scheduleTemplates.id),
@@ -1637,6 +1646,14 @@ export const timerSessions = pgTable("timer_sessions", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
 });
+
+export const insertCalendarSelectionSchema = createInsertSchema(calendarSelections).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true
+});
+export type InsertCalendarSelection = z.infer<typeof insertCalendarSelectionSchema>;
+export type SelectCalendarSelection = typeof calendarSelections.$inferSelect;
 
 export const insertTimerSessionSchema = createInsertSchema(timerSessions).omit({ 
   id: true, 

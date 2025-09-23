@@ -85,7 +85,9 @@ import {
   type BlogPostType,
   type BlogIdeaType,
   type BlogCalendarType,
-  type PurchaseType
+  type PurchaseType,
+  type SelectCalendarSelection,
+  type InsertCalendarSelection
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -435,6 +437,11 @@ export interface IStorage {
   // Timer Sessions
   getActiveTimerSession(): Promise<TimerSession | null>;
   completeTimerSession(id: number, tasksCompleted: string[], habitsCompleted: string[], sessionContext: string): Promise<void>;
+  
+  // Calendar Selections
+  getCalendarSelections(): Promise<SelectCalendarSelection[]>;
+  createCalendarSelections(selections: InsertCalendarSelection[]): Promise<SelectCalendarSelection[]>;
+  deleteCalendarSelection(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -488,6 +495,7 @@ export class MemStorage implements IStorage {
   private investmentTransactions: Map<number, InvestmentTransaction> = new Map();
   private purchases: Map<number, Purchase> = new Map();
   private jiraSyncMappings: Map<string, any> = new Map();
+  private calendarSelections: Map<number, SelectCalendarSelection> = new Map();
   private currentId = 1;
 
   constructor() {
@@ -2836,6 +2844,51 @@ class CombinedStorage extends MemStorage {
   async getActiveTimerSession(): Promise<TimerSession | null> {
     return null;
   }
+
+  // Calendar Selections
+  async getCalendarSelections(): Promise<SelectCalendarSelection[]> {
+    return Array.from(this.calendarSelections.values()).sort((a, b) => 
+      new Date(a.selectedDate).getTime() - new Date(b.selectedDate).getTime()
+    );
+  }
+
+  async createCalendarSelections(selections: InsertCalendarSelection[]): Promise<SelectCalendarSelection[]> {
+    const created: SelectCalendarSelection[] = [];
+    for (const selection of selections) {
+      const newSelection: SelectCalendarSelection = {
+        id: this.currentId++,
+        status: selection.status || 'selected',
+        selectedDate: selection.selectedDate,
+        notionPageId: selection.notionPageId || null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.calendarSelections.set(newSelection.id, newSelection);
+      created.push(newSelection);
+    }
+    return created;
+  }
+
+  async deleteCalendarSelection(id: number): Promise<boolean> {
+    return this.calendarSelections.delete(id);
+  }
+
+  // Additional calendar selection helper methods
+  async getCalendarSelectionsByDate(date: string): Promise<SelectCalendarSelection[]> {
+    const targetDate = new Date(date).toISOString().split('T')[0];
+    return Array.from(this.calendarSelections.values()).filter(selection => 
+      selection.selectedDate.toISOString().split('T')[0] === targetDate
+    );
+  }
+
+  async updateCalendarSelection(id: number, updates: Partial<SelectCalendarSelection>): Promise<SelectCalendarSelection | null> {
+    const existing = this.calendarSelections.get(id);
+    if (!existing) return null;
+    
+    const updated = { ...existing, ...updates, updatedAt: new Date() };
+    this.calendarSelections.set(id, updated);
+    return updated;
+  }
 }
 
 // DatabaseStorage class for PostgreSQL-based persistence
@@ -3242,6 +3295,11 @@ export class DatabaseStorage implements IStorage {
   // Timer helper method
   async getTimerSession(id: number) { return this.memStorage.getTimerSession(id); }
   async storeCompletedTimerSession(sessionData: any) { return this.memStorage.storeCompletedTimerSession(sessionData); }
+
+  // Calendar Selections
+  async getCalendarSelections() { return this.memStorage.getCalendarSelections(); }
+  async createCalendarSelections(selections: InsertCalendarSelection[]) { return this.memStorage.createCalendarSelections(selections); }
+  async deleteCalendarSelection(id: number) { return this.memStorage.deleteCalendarSelection(id); }
 }
 
 export const storage = new DatabaseStorage();

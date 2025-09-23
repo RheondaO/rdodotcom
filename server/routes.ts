@@ -1841,6 +1841,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Calendar Selections API Routes
+  app.get('/api/calendar-selections', async (req, res) => {
+    try {
+      const selections = await storage.getCalendarSelections();
+      res.json(selections);
+    } catch (error) {
+      console.error('Error fetching calendar selections:', error);
+      res.status(500).json({ error: 'Failed to fetch calendar selections' });
+    }
+  });
+
+  app.post('/api/calendar-selections', async (req, res) => {
+    try {
+      const { dates } = req.body;
+      
+      if (!dates || !Array.isArray(dates)) {
+        return res.status(400).json({ error: 'dates array is required' });
+      }
+
+      const calendarSelections = dates.map(dateStr => ({
+        selectedDate: new Date(dateStr),
+        status: 'selected' as const
+      }));
+
+      const created = await storage.createCalendarSelections(calendarSelections);
+      
+      res.json({ 
+        success: true, 
+        created: created.length, 
+        selections: created 
+      });
+    } catch (error) {
+      console.error('Error creating calendar selections:', error);
+      res.status(500).json({ error: 'Failed to create calendar selections' });
+    }
+  });
+
+  app.delete('/api/calendar-selections/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteCalendarSelection(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: 'Calendar selection not found' });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting calendar selection:', error);
+      res.status(500).json({ error: 'Failed to delete calendar selection' });
+    }
+  });
+
   // Investment Management Routes
   app.get("/api/investments", async (req, res) => {
     try {

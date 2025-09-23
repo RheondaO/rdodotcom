@@ -31,6 +31,8 @@ import {
   RefreshCw
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 
@@ -65,6 +67,9 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   const [previewOccurrences, setPreviewOccurrences] = useState<ScheduleOccurrence[]>([]);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewConfirmData, setPreviewConfirmData] = useState<any>(null);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartDate, setDragStartDate] = useState<Date | null>(null);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -158,6 +163,38 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     }
   });
 
+  // Save selected dates mutation
+  const saveSelectedDatesMutation = useMutation({
+    mutationFn: async (dates: Date[]) => {
+      const response = await fetch('/api/calendar-selections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ dates: dates.map(d => d.toISOString()) })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save selected dates');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({ 
+        title: `Successfully saved ${data.created} calendar selections!`,
+        description: "Each selected date has been saved as a unique Notion record."
+      });
+      setSelectedDates([]);
+      queryClient.invalidateQueries({ queryKey: ['/api/calendar-selections'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Error saving calendar selections", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    }
+  });
+
   // Generate content items mutation
   const generateItemsMutation = useMutation({
     mutationFn: async ({ templateId, fromDate, toDate, title, description }: any) => {
@@ -187,6 +224,31 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       toast({ title: "Error generating content", description: error.message, variant: "destructive" });
     }
   });
+
+  // Helper functions for date range selection
+  const getDatesInRange = (start: Date, end: Date): Date[] => {
+    const dates: Date[] = [];
+    const startDate = new Date(Math.min(start.getTime(), end.getTime()));
+    const endDate = new Date(Math.max(start.getTime(), end.getTime()));
+    
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      dates.push(new Date(d));
+    }
+    return dates;
+  };
+
+  const isDateInRange = (date: Date, start: Date, end: Date): boolean => {
+    const dateTime = date.getTime();
+    const startTime = Math.min(start.getTime(), end.getTime());
+    const endTime = Math.max(start.getTime(), end.getTime());
+    return dateTime >= startTime && dateTime <= endTime;
+  };
+
+  const handleSaveSelectedDates = () => {
+    if (selectedDates.length > 0) {
+      saveSelectedDatesMutation.mutate(selectedDates);
+    }
+  };
 
   const resetForm = () => {
     setNewTemplate({
@@ -834,9 +896,115 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
 
             {/* Calendar View Tab */}
             <TabsContent value="calendar" className="space-y-4">
-              <h3 className="text-lg font-semibold">Calendar View</h3>
-              <div className="text-center py-8 text-gray-500">
-                Calendar view coming soon - will show all scheduled items in a monthly calendar format.
+              <h3 className="text-lg font-semibold">Date Selection Calendar</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Click dates to select them, or drag to select consecutive dates. Selected dates will be saved as individual Notion records.
+              </p>
+              
+              <div className="flex gap-6">
+                {/* Calendar */}
+                <div className="flex-1">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <CalendarIcon className="h-5 w-5" />
+                        Select Dates
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <DayPicker
+                        mode="multiple"
+                        selected={selectedDates}
+                        onSelect={(dates) => setSelectedDates(dates || [])}
+                        className="rdp"
+                        classNames={{
+                          day_selected: "bg-blue-600 text-white hover:bg-blue-700",
+                          day: "hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer",
+                          day_today: "font-bold text-blue-600"
+                        }}
+                        data-testid="calendar-date-picker"
+                      />
+                      <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                        <p><strong>How to use:</strong></p>
+                        <p>• Click individual dates to select/deselect them</p>
+                        <p>• Hold Shift and click to select a range of dates</p>
+                        <p>• Use the sidebar to review and save your selections</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Selected Dates Sidebar */}
+                <div className="w-80">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>Selected Dates ({selectedDates.length})</span>
+                        {selectedDates.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedDates([])}
+                            data-testid="button-clear-dates"
+                          >
+                            <X className="h-4 w-4" />
+                            Clear All
+                          </Button>
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {selectedDates.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          No dates selected. Click on calendar dates to select them.
+                        </div>
+                      ) : (
+                        <>
+                          <div className="max-h-64 overflow-y-auto space-y-2">
+                            {selectedDates
+                              .sort((a, b) => a.getTime() - b.getTime())
+                              .map((date, index) => (
+                                <div
+                                  key={index}
+                                  className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded"
+                                  data-testid={`selected-date-${index}`}
+                                >
+                                  <span className="text-sm font-mono">
+                                    {format(date, 'MMM d, yyyy')}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedDates(prev => 
+                                        prev.filter(d => d.getTime() !== date.getTime())
+                                      );
+                                    }}
+                                    data-testid={`button-remove-date-${index}`}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ))
+                            }
+                          </div>
+                          
+                          <div className="pt-4 border-t">
+                            <Button
+                              onClick={handleSaveSelectedDates}
+                              disabled={saveSelectedDatesMutation.isPending}
+                              className="w-full bg-green-600 hover:bg-green-700 text-white"
+                              data-testid="button-save-selected-dates"
+                            >
+                              <Save className="h-4 w-4 mr-2" />
+                              {saveSelectedDatesMutation.isPending ? 'Saving...' : `Save ${selectedDates.length} Date${selectedDates.length === 1 ? '' : 's'} to Notion`}
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
