@@ -89,113 +89,32 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
   };
 
   // Transform database data for Content Studio metrics
-  const displayBlocks = miniGameBlocks.length > 0 ? miniGameBlocks.map((block: any, index: number) => {
+  // Transform real mini game blocks data for Content Studio metrics
+  const displayBlocks = miniGameBlocks.map((block: any) => {
     const blockInsights = performanceInsights.filter(p => p.miniGameBlockId === block.id);
     const totalPosts = blockInsights.reduce((sum, p) => sum + p.totalPosts, 0);
     const avgEngagement = blockInsights.length > 0 
       ? blockInsights.reduce((sum, p) => sum + p.avgEngagementRate, 0) / blockInsights.length / 100
-      : 85;
+      : 0;
     
     return {
       id: block.id,
-      title: block.name,
-      description: block.description || "No description",
+      title: block.title || block.name,
+      description: block.description || "",
       category: block.category,
-      totalPosts: totalPosts || 25,
-      scheduledPosts: Math.floor(totalPosts * 0.3) || 8,
-      publishedPosts: Math.floor(totalPosts * 0.7) || 17,
+      totalPosts: totalPosts,
+      scheduledPosts: Math.floor(totalPosts * 0.3),
+      publishedPosts: Math.floor(totalPosts * 0.7),
+      designedPosts: Math.floor(totalPosts * 0.4),
+      reviewedPosts: Math.floor(totalPosts * 0.6),
+      approvedPosts: Math.floor(totalPosts * 0.8),
       engagement: Math.round(avgEngagement),
-      lastUpdated: format(new Date(block.updatedAt || new Date()), 'yyyy-MM-dd'),
-      status: block.isActive ? "active" : "paused" as "active" | "paused" | "completed",
+      lastUpdated: format(new Date(block.updatedAt || block.createdAt || new Date()), 'yyyy-MM-dd'),
+      status: block.status || "active" as "active" | "paused" | "completed",
       color: block.color || "#8B5CF6",
       icon: getBlockIcon(block.category)
     };
-  }) : [
-    {
-      id: 1,
-      title: "Morning Motivation Series",
-      description: "Daily inspiring quotes and affirmations",
-      category: "wellness",
-      totalPosts: 45,
-      scheduledPosts: 12,
-      publishedPosts: 33,
-      engagement: 85,
-      lastUpdated: "2025-06-15",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#8B5CF6",
-      icon: "🌅"
-    },
-    {
-      id: 2,
-      title: "Astro Insights",
-      description: "Weekly astrological readings and moon phases",
-      category: "astrological",
-      totalPosts: 32,
-      scheduledPosts: 8,
-      publishedPosts: 24,
-      engagement: 92,
-      lastUpdated: "2025-06-14",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#3B82F6",
-      icon: "🌙"
-    },
-    {
-      id: 3,
-      title: "Creative Experiments",
-      description: "Innovative content formats and media tests",
-      category: "creative",
-      totalPosts: 28,
-      scheduledPosts: 6,
-      publishedPosts: 22,
-      engagement: 78,
-      lastUpdated: "2025-06-13",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#EF4444",
-      icon: "🧪"
-    },
-    {
-      id: 4,
-      title: "Personal Stories",
-      description: "Behind-the-scenes and personal insights",
-      category: "personal",
-      totalPosts: 19,
-      scheduledPosts: 4,
-      publishedPosts: 15,
-      engagement: 96,
-      lastUpdated: "2025-06-12",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#EC4899",
-      icon: "✨"
-    },
-    {
-      id: 5,
-      title: "Community Challenges",
-      description: "Interactive games and community engagement",
-      category: "engagement",
-      totalPosts: 24,
-      scheduledPosts: 7,
-      publishedPosts: 17,
-      engagement: 88,
-      lastUpdated: "2025-06-11",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#10B981",
-      icon: "🎯"
-    },
-    {
-      id: 6,
-      title: "Tutorial Tuesdays",
-      description: "Educational content and how-to guides",
-      category: "educational",
-      totalPosts: 16,
-      scheduledPosts: 3,
-      publishedPosts: 13,
-      engagement: 74,
-      lastUpdated: "2025-06-10",
-      status: "paused" as "active" | "paused" | "completed",
-      color: "#F59E0B",
-      icon: "📚"
-    }
-  ];
+  });
 
   const contentStats = {
     totalBlocks: displayBlocks.length,
@@ -203,7 +122,9 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     totalPosts: displayBlocks.reduce((sum, b) => sum + b.totalPosts, 0),
     scheduledPosts: displayBlocks.reduce((sum, b) => sum + b.scheduledPosts, 0),
     publishedPosts: displayBlocks.reduce((sum, b) => sum + b.publishedPosts, 0),
-    avgEngagement: Math.round(displayBlocks.reduce((sum, b) => sum + b.engagement, 0) / displayBlocks.length)
+    avgEngagement: displayBlocks.length > 0 
+      ? Math.round(displayBlocks.reduce((sum, b) => sum + b.engagement, 0) / displayBlocks.length)
+      : 0
   };
   
   const [activeTimer, setActiveTimer] = useState<{
@@ -490,46 +411,62 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
         </CardHeader>
         <CardContent>
           <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                  {contentStats.totalBlocks}
+            {displayBlocks.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      {contentStats.totalBlocks}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Mini Game Blocks</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {contentStats.totalPosts}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Content Pieces</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {contentStats.publishedPosts}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Published Content</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
+                      {contentStats.scheduledPosts}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Scheduled Posts</div>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Mini Game Blocks</div>
+                
+                {/* Content Pipeline Progress */}
+                {contentStats.totalPosts > 0 && (
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">Production Pipeline</span>
+                      <span className="text-gray-500">{Math.round((contentStats.publishedPosts / contentStats.totalPosts) * 100)}% complete</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div 
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500" 
+                        style={{ width: `${(contentStats.publishedPosts / contentStats.totalPosts) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-6xl mb-4">🎯</div>
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  No Mini Game Blocks Yet
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  Create your first mini game block to start tracking content performance and scheduling posts.
+                </p>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  {contentStats.totalPosts}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Content Pieces</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {contentStats.publishedPosts}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Published Content</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-                  {contentStats.scheduledPosts}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Scheduled Posts</div>
-              </div>
-            </div>
-            
-            {/* Content Pipeline Progress */}
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-gray-700 dark:text-gray-300">Production Pipeline</span>
-                <span className="text-gray-500">{Math.round((contentStats.publishedPosts / contentStats.totalPosts) * 100)}% complete</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500" 
-                  style={{ width: `${(contentStats.publishedPosts / contentStats.totalPosts) * 100}%` }}
-                ></div>
-              </div>
-            </div>
+            )}
 
             <div className="mt-4 text-center">
               <Button
@@ -538,7 +475,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
                 size="sm"
                 className="bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
               >
-                Open Content Studio →
+                {displayBlocks.length > 0 ? 'Open Content Studio →' : 'Create First Mini Game Block →'}
               </Button>
             </div>
           </div>

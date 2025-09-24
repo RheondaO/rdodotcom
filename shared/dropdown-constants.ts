@@ -6,11 +6,12 @@
 // Page options for @rotationonly platform
 export const PAGE_OPTIONS = [
   '@rotationonly.mag',
-  '@rotationonly.ext',
+  '@rotationonly.econ',
   '@rotationonly.stem',
-  '@rotationonly.art',
-  '@rotationonly.sci',
-  '@rotationonly.tech'
+  '@rotationonly.ext',
+  '@rotationonly.music',
+  '@rotationonly.xxx',
+  '@rotationonly.ceo'
 ] as const;
 
 export type PageOption = typeof PAGE_OPTIONS[number];
@@ -45,12 +46,42 @@ export const MOON_PHASE_DISPLAY_TO_BACKEND: Record<string, string | null> = {
 
 // Mini-game block titles (Square Type options)
 export const MINI_GAME_TITLES = [
-  'Morning Motivation Series',
-  'Astro Insights',
-  'Creative Experiments', 
-  'Personal Stories',
-  'Community Challenges',
-  'Tutorial Tuesdays'
+  'Administration',
+  'An Elevated Edit',
+  'Angel Numbers', 
+  '@SEXDotEdu',
+  'Backchannel" Unfiltered; Unposted',
+  'Booth Report',
+  'Definitions & Introductions',
+  'FearFactory',
+  'FreekyFridazeLive',
+  'Moon Cycle Message',
+  'GayDay 3D',
+  'Glow Mode',
+  'Intent Quest',
+  'Lucky && Blessed',
+  'Numerology',
+  'OkieMaps',
+  'One Thought',
+  'One Word',
+  'PickACard',
+  'Portal Message',
+  'Portal Word Bank',
+  'Quarterly Message',
+  'Rock It!',
+  'Safe Xxx Saturdaze',
+  'Say Something Nice',
+  'She Stays On My Mind',
+  'Sun Signs',
+  'The 100 Club',
+  'The Guide',
+  'The Way He Makes Me Feel',
+  'ThiccFitt',
+  'ThirstyThurdaze',
+  'Word of the Week',
+  'Writing Quest',
+  'Wrong Turn Friend',
+  '4x2 Laws of Maat'
 ] as const;
 
 export type MiniGameTitle = typeof MINI_GAME_TITLES[number];
@@ -71,10 +102,12 @@ export type MoonPhaseBackendValue = typeof MOON_PHASE_BACKEND_VALUES[number];
 
 // Status options for scheduled content items
 export const CONTENT_STATUS_OPTIONS = [
-  'scheduled',
-  'created',
-  'published',
-  'failed'
+  'Not Started',
+  'Scheduled',
+  'Design',
+  'Review',
+  'Published',
+  'Cancelled'
 ] as const;
 
 export type ContentStatusOption = typeof CONTENT_STATUS_OPTIONS[number];
