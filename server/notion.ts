@@ -252,14 +252,41 @@ export async function getNotionDatabases() {
 
 // Find get a Notion database with the matching title
 export async function findDatabaseByTitle(title: string) {
-    const database = await getNotionDatabase();
-    
-    const dbTitle = (database as any).title?.[0]?.plain_text?.toLowerCase() || "";
-    if (dbTitle === title.toLowerCase()) {
-        return database;
-    }
+    try {
+        console.log(`🔍 Searching for database with title: "${title}"`);
+        
+        const client = await getUncachableNotionClient();
+        
+        // Search for the database by querying all accessible databases
+        const response = await client.search({
+            query: title,
+            filter: {
+                property: 'object',
+                value: 'database'
+            }
+        });
 
-    return null;
+        console.log(`📊 Found ${response.results.length} database(s) matching search for "${title}"`);
+        
+        // Look for exact title match
+        for (const result of response.results) {
+            if (result.object === 'database') {
+                const dbTitle = (result as any).title?.[0]?.plain_text || "";
+                console.log(`🏷️ Database found: "${dbTitle}"`);
+                
+                if (dbTitle.toLowerCase() === title.toLowerCase()) {
+                    console.log(`✅ Found exact match for database: "${title}"`);
+                    return result;
+                }
+            }
+        }
+        
+        console.log(`❌ No exact match found for database: "${title}"`);
+        return null;
+    } catch (error: any) {
+        console.error(`❌ Error searching for database "${title}":`, error.message);
+        return null;
+    }
 }
 
 // Create a new database if one with a matching title does not exist
