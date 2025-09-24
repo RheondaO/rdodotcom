@@ -57,13 +57,20 @@ const scheduleTemplateSchema = z.object({
 });
 
 const scheduledContentItemSchema = z.object({
-  templateId: z.number(),
-  notionPageId: z.string().optional(),
+  templateId: z.number().nullable(),
+  notionPageId: z.string().optional().nullable(),
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),
   miniGameBlockId: z.number().optional(),
   scheduledDate: z.string().transform(str => new Date(str)),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
+  // New fields for automatic population
+  page: z.string().optional().nullable(),
+  month: z.string().optional().nullable(),
+  dayOfWeek: z.string().optional().nullable(),
+  moonPhase: z.string().optional().nullable(),
+  squareType: z.string().optional().nullable(),
+  status: z.string().optional()
 });
 
 // In-memory storage for demo (replace with actual database calls)
@@ -97,6 +104,8 @@ router.post('/schedule-templates', async (req, res) => {
       id: nextTemplateId++,
       name: validatedData.name,
       description: validatedData.description,
+      type: 'mini-game-block', // Default type
+      platform: '@rotationonly', // Default platform
       recurrenceType: validatedData.recurrenceType,
       recurrenceConfig: JSON.stringify(validatedData.recurrenceConfig),
       isActive: true,
@@ -248,14 +257,20 @@ router.post('/scheduled-content-items', async (req, res) => {
     
     const newItem: ScheduledContentItem = {
       id: nextItemId++,
-      templateId: validatedData.templateId,
-      notionPageId: validatedData.notionPageId,
+      templateId: validatedData.templateId || 0,
+      notionPageId: validatedData.notionPageId || undefined,
       title: validatedData.title,
       description: validatedData.description,
       miniGameBlockId: validatedData.miniGameBlockId,
-      status: 'scheduled',
+      status: validatedData.status || 'scheduled',
       scheduledDate: validatedData.scheduledDate,
       metadata: validatedData.metadata ? JSON.stringify(validatedData.metadata) : undefined,
+      // Include new fields for automatic population
+      page: validatedData.page,
+      month: validatedData.month,
+      dayOfWeek: validatedData.dayOfWeek,
+      moonPhase: validatedData.moonPhase,
+      squareType: validatedData.squareType,
       createdAt: new Date(),
       updatedAt: new Date()
     };

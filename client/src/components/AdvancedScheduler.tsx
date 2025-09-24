@@ -414,6 +414,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       description: "",
       type: "",
       platform: "",
+      page: "",
       recurrenceType: "weekly",
       config: {
         dayOfWeek: 1,
@@ -1046,13 +1047,27 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                             // Create scheduled content items using proper mutation
                             const itemsToCreate = selectedDates.map((date) => {
                               const dateTimeObj = selectedDateTimes.find(dt => dt.date.getTime() === date.getTime()) || { date, time: undefined };
+                              
+                              // Auto-populate the new fields
+                              const monthName = format(date, 'MMMM'); // e.g., "March", "April"
+                              const dayOfWeekName = format(date, 'EEEE'); // e.g., "Friday"
+                              const moonPhaseValue = selectedMoonPhase && selectedMoonPhase !== 'None' ? selectedMoonPhase : null;
+                              const squareTypeValue = miniGameTitle; // Mini Game Title becomes Square Type
+                              const pageValue = newTemplate.page || null;
+                              
                               return {
                                 templateId: null, // This will be generated server-side
                                 title: generateNamePreview(miniGameTitle, date, selectedDates, selectedMoonPhase),
                                 description: `Generated from ${newTemplate.recurrenceType} recurrence pattern`,
                                 scheduledDate: date.toISOString(),
                                 notionPageId: null,
-                                status: 'scheduled'
+                                status: 'scheduled',
+                                // Auto-populated fields
+                                page: pageValue,
+                                month: monthName,
+                                dayOfWeek: dayOfWeekName,
+                                moonPhase: moonPhaseValue,
+                                squareType: squareTypeValue
                               };
                             });
                             
