@@ -261,6 +261,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint to check ROMLCONTENTCALENDAR database records
+  app.get("/api/public/test-roml-database", async (req, res) => {
+    try {
+      console.log('🔍 Testing ROMLCONTENTCALENDAR database records...');
+      
+      const { getUncachableNotionClient, findDatabaseByTitle } = await import('./notion');
+      const client = await getUncachableNotionClient();
+      
+      // Find the database first
+      const database = await findDatabaseByTitle('ROMLCONTENTCALENDAR');
+      if (!database) {
+        return res.json({ found: false, error: 'ROMLCONTENTCALENDAR database not found' });
+      }
+      
+      console.log(`📊 Querying database: ${database.id}`);
+      
+      // Query all records from the database
+      const response = await client.databases.query({
+        database_id: database.id
+      });
+
+      console.log(`📋 Found ${response.results.length} records in ROMLCONTENTCALENDAR`);
+      
+      const records = response.results.map((page: any) => {
+        const properties: any = {};
+        
+        // Extract all properties
+        Object.entries(page.properties).forEach(([key, prop]: [string, any]) => {
+          switch (prop.type) {
+            case 'title':
+              properties[key] = prop.title?.[0]?.plain_text || '';
+              break;
+            case 'rich_text':
+              properties[key] = prop.rich_text?.[0]?.plain_text || '';
+              break;
+            case 'select':
+              properties[key] = prop.select?.name || '';
+              break;
+            case 'date':
+              properties[key] = prop.date?.start || null;
+              break;
+            case 'number':
+              properties[key] = prop.number || null;
+              break;
+            case 'checkbox':
+              properties[key] = prop.checkbox || false;
+              break;
+            default:
+              properties[key] = prop;
+          }
+        });
+        
+        return {
+          id: page.id,
+          created_time: page.created_time,
+          last_edited_time: page.last_edited_time,
+          properties: properties
+        };
+      });
+
+      records.forEach((record: any, index: number) => {
+        console.log(`📄 Record ${index + 1}:`, JSON.stringify(record.properties, null, 2));
+      });
+
+      res.json({
+        found: true,
+        database_id: database.id,
+        total_records: records.length,
+        records: records
+      });
+    } catch (error: any) {
+      console.error('❌ Error querying ROMLCONTENTCALENDAR database:', error.message);
+      res.status(500).json({ 
+        found: false,
+        error: error.message
+      });
+    }
+  });
+
 
   // Cache for public active timer to reduce database load during deployment
   let publicTimerCache: { data: any; timestamp: number } | null = null;
