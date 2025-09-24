@@ -231,7 +231,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   Studio Content Scheduler
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Create and manage content blocks with workflow tracking</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Mini-Game Management</p>
               </div>
             </div>
             <div className="flex gap-2">

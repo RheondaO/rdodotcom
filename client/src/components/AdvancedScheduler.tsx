@@ -1230,7 +1230,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                 <div className="text-center py-8">Loading scheduled items...</div>
               ) : scheduledItems.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  No scheduled content items yet. Generate some from your templates!
+                  No scheduled content items. 
                 </div>
               ) : (
                 <div className="grid gap-4">
