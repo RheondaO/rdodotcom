@@ -68,6 +68,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewConfirmData, setPreviewConfirmData] = useState<any>(null);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [selectedDateTimes, setSelectedDateTimes] = useState<{ date: Date; time?: string }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartDate, setDragStartDate] = useState<Date | null>(null);
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
@@ -397,8 +398,9 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   };
 
   // Auto-populate calendar dates based on recurrence type
-  const handleAutoPopulateDates = (recurrenceType: string) => {
-    if (!miniGameTitle || !recurrenceType) return;
+  const handleAutoPopulateDates = (recurrenceType?: string) => {
+    const activeRecurrenceType = recurrenceType || newTemplate.recurrenceType;
+    if (!activeRecurrenceType) return;
 
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1); // Start from beginning of current month
@@ -529,8 +531,9 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
           break;
       }
 
-      // Update selectedDates with the generated dates
-      setSelectedDates(dates);
+      // Update both selectedDates and selectedDateTimes
+      setSelectedDates(dates.map(d => d.date));
+      setSelectedDateTimes(dates);
       
     } catch (error) {
       console.error('Error auto-populating dates:', error);
@@ -747,9 +750,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         onValueChange={(value: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase') => {
                           setNewTemplate(prev => ({ ...prev, recurrenceType: value }));
                           // Auto-populate calendar dates when recurrence type changes
-                          if (value && miniGameTitle) {
-                            handleAutoPopulateDates(value);
-                          }
+                          handleAutoPopulateDates(value);
                         }}
                       >
                         <SelectTrigger data-testid="select-recurrence-type">
@@ -777,7 +778,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                 ...prev, 
                                 config: { ...prev.config, dayOfWeek: parseInt(value) }
                               }));
-                              if (miniGameTitle) handleAutoPopulateDates('weekly');
+                              handleAutoPopulateDates();
                             }}
                           >
                             <SelectTrigger data-testid="select-day-of-week">
@@ -820,7 +821,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                 ...prev, 
                                 config: { ...prev.config, weekNumber: parseInt(value) }
                               }));
-                              if (miniGameTitle) handleAutoPopulateDates('nth_weekday');
+                              handleAutoPopulateDates();
                             }}
                           >
                             <SelectTrigger data-testid="select-week-number">
@@ -844,7 +845,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                 ...prev, 
                                 config: { ...prev.config, dayOfWeek: parseInt(value) }
                               }));
-                              if (miniGameTitle) handleAutoPopulateDates('nth_weekday');
+                              handleAutoPopulateDates();
                             }}
                           >
                             <SelectTrigger data-testid="select-nth-day-of-week">
@@ -891,7 +892,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                 ...prev, 
                                 config: { ...prev.config, dayOfMonth: parseInt(e.target.value) }
                               }));
-                              if (miniGameTitle) handleAutoPopulateDates('monthly_day');
+                              handleAutoPopulateDates();
                             }}
                             placeholder="1-31"
                           />
