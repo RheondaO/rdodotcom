@@ -237,22 +237,27 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               </div>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowNewBlockForm(true)}
-                disabled={isReadOnly}
-                size="sm"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Block
-              </Button>
-              <Button
-                onClick={() => setShowAnalyticsForm(true)}
-                disabled={isReadOnly}
-                size="sm"
-              >
-                Add Analytics
-              </Button>
+              {/* Hidden until designed later */}
+              {false && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowNewBlockForm(true)}
+                    disabled={isReadOnly}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Block
+                  </Button>
+                  <Button
+                    onClick={() => setShowAnalyticsForm(true)}
+                    disabled={isReadOnly}
+                    size="sm"
+                  >
+                    Add Analytics
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
