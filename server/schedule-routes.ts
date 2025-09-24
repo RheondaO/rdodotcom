@@ -276,7 +276,12 @@ router.post('/scheduled-content-items', async (req, res) => {
       updatedAt: new Date()
     };
     
+    // Store in memory for now (fallback)
     scheduledContentItems.push(newItem);
+    
+    // TODO: Implement proper Notion integration here
+    // For now, add a small delay to simulate actual database write
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     console.log(`✅ Created scheduled content item: ${newItem.title}`);
     res.status(201).json(newItem);

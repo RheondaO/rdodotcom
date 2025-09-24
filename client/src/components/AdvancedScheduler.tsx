@@ -744,7 +744,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Repeat className="h-5 w-5" />
-            Advanced Content Scheduler
+            Create Schedule
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -757,8 +757,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
             {/* Create Schedule Tab - Unified Interface */}
             <TabsContent value="create-schedule" className="space-y-6">
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold mb-2">Create Schedule</h3>
-                <p className="text-gray-600 dark:text-gray-400">Configure your mini-game schedule settings and see the automatically generated dates and names</p>
+                {/* <h3 className="text-xl font-bold mb-2">Create Schedule</h3>
+                <p className="text-gray-600 dark:text-gray-400">Configure your mini-game schedule settings and see the automatically generated dates and names</p> */}
               </div>
 
               {/* Unified Schedule Configuration */}
@@ -774,13 +774,13 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                   <CardContent className="space-y-4">
                     {/* Mini-Game Title Selection */}
                     <div>
-                      <Label htmlFor="mini-game-title-select">Mini-Game Title</Label>
+                      <Label htmlFor="mini-game-title-select">Mini-Game Name</Label>
                       <Select 
                         value={miniGameTitle} 
                         onValueChange={setMiniGameTitle}
                       >
                         <SelectTrigger data-testid="select-mini-game-title-main">
-                          <SelectValue placeholder="Select mini-game..." />
+                          <SelectValue placeholder="greatness takes patience..." />
                         </SelectTrigger>
                         <SelectContent>
                           {miniGameTitles.map((title) => (
@@ -816,7 +816,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
 
                     {/* Moon Phase Selection */}
                     <div>
-                      <Label htmlFor="moon-phase-select">Moon Phase (Optional)</Label>
+                      <Label htmlFor="moon-phase-select">Moon Phase</Label>
                       <Select 
                         value={selectedMoonPhase} 
                         onValueChange={setSelectedMoonPhase}
@@ -837,7 +837,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                     {/* Template Name Preview (Read-only) */}
                     {miniGameTitle && (
                       <div>
-                        <Label>Generated Template Name</Label>
+                        <Label>Name Preview</Label>
                         <Input
                           value={miniGameTitle && selectedDates.length > 0 ? 
                             generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase) : 
@@ -852,7 +852,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
 
                     {/* Recurrence Type */}
                     <div>
-                      <Label htmlFor="recurrence-type">Recurrence Type</Label>
+                      <Label htmlFor="recurrence-type">Cadence & Frequency</Label>
                       <Select 
                         value={newTemplate.recurrenceType} 
                         onValueChange={(value: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase') => {
@@ -1090,7 +1090,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CalendarIcon className="h-5 w-5" />
-                      Interactive Calendar & Preview
+                      Calendar & Preview
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
