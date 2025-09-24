@@ -61,7 +61,7 @@ interface AdvancedSchedulerProps {
 }
 
 export default function AdvancedScheduler({ selectedDate, onContentScheduled }: AdvancedSchedulerProps) {
-  const [activeTab, setActiveTab] = useState<"templates" | "scheduled" | "calendar">("templates");
+  const [activeTab, setActiveTab] = useState<"create-schedule" | "scheduled">("create-schedule");
   const [showPreview, setShowPreview] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ScheduleTemplate | null>(null);
   const [previewOccurrences, setPreviewOccurrences] = useState<ScheduleOccurrence[]>([]);
@@ -292,8 +292,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   // Navigate to specific date on calendar
   const navigateToDate = (date: Date) => {
     setCalendarMonth(new Date(date.getFullYear(), date.getMonth(), 1));
-    // Switch to calendar tab if not already there
-    setActiveTab("calendar");
+    // Switch to create schedule tab if not already there
+    setActiveTab("create-schedule");
   };
 
   // Available mini-game titles from the system
@@ -514,416 +514,110 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="templates" data-testid="tab-templates">Templates</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="create-schedule" data-testid="tab-create-schedule">Create Schedule</TabsTrigger>
               <TabsTrigger value="scheduled" data-testid="tab-scheduled">Scheduled Items</TabsTrigger>
-              <TabsTrigger value="calendar" data-testid="tab-calendar">Calendar View</TabsTrigger>
             </TabsList>
 
-            {/* Templates Tab */}
-            <TabsContent value="templates" className="space-y-6">
+            {/* Create Schedule Tab - Unified Interface */}
+            <TabsContent value="create-schedule" className="space-y-6">
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold mb-2">Create New Mini-Game</h3>
-                <p className="text-gray-600 dark:text-gray-400">Name your mini-game and set the schedule. This will create multiple Notion records (12 for monthly, 54 for weekly, etc.)</p>
+                <h3 className="text-xl font-bold mb-2">Create Schedule</h3>
+                <p className="text-gray-600 dark:text-gray-400">Configure your mini-game schedule settings and see the automatically generated dates and names</p>
               </div>
 
-              {/* Inline Create Form */}
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5" />
-                    Mini-Game Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="template-name">Template Name</Label>
-                          <Input
-                            id="template-name"
-                            data-testid="input-template-name"
-                            value={newTemplate.name}
-                            onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Weekly Monday Posts"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="recurrence-type">Recurrence Type</Label>
-                          <Select 
-                            value={newTemplate.recurrenceType} 
-                            onValueChange={(value: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase') => setNewTemplate(prev => ({ ...prev, recurrenceType: value }))}
-                          >
-                            <SelectTrigger data-testid="select-recurrence-type">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="weekly">Weekly (Every Monday, Tuesday, etc.)</SelectItem>
-                              <SelectItem value="nth_weekday">Nth Weekday (2nd Monday, 4th Sunday, etc.)</SelectItem>
-                              <SelectItem value="quarterly">Quarterly</SelectItem>
-                              <SelectItem value="monthly_day">Monthly Day (1st, 2nd, 7th, 14th of month)</SelectItem>
-                              <SelectItem value="moon_phase">Moon Phase</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+              {/* Unified Schedule Configuration */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Side - Configuration Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      Schedule Configuration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Mini-Game Title Selection */}
+                    <div>
+                      <Label htmlFor="mini-game-title-select">Mini-Game Title</Label>
+                      <Select 
+                        value={miniGameTitle} 
+                        onValueChange={setMiniGameTitle}
+                      >
+                        <SelectTrigger data-testid="select-mini-game-title-main">
+                          <SelectValue placeholder="Select mini-game..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {miniGameTitles.map((title) => (
+                            <SelectItem key={title} value={title}>
+                              {title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
+                    {/* Moon Phase Selection */}
+                    <div>
+                      <Label htmlFor="moon-phase-select">Moon Phase (Optional)</Label>
+                      <Select 
+                        value={selectedMoonPhase} 
+                        onValueChange={setSelectedMoonPhase}
+                      >
+                        <SelectTrigger data-testid="select-moon-phase-main">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {moonPhaseOptions.map((phase) => (
+                            <SelectItem key={phase} value={phase}>
+                              {phase}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Template Name Preview (Read-only) */}
+                    {miniGameTitle && (
                       <div>
-                        <Label htmlFor="template-description">Description (Optional)</Label>
-                        <Textarea
-                          id="template-description"
-                          data-testid="textarea-template-description"
-                          value={newTemplate.description}
-                          onChange={(e) => setNewTemplate(prev => ({ ...prev, description: e.target.value }))}
-                          placeholder="Describe when and how this content should be scheduled..."
+                        <Label>Generated Template Name</Label>
+                        <Input
+                          value={miniGameTitle && selectedDates.length > 0 ? 
+                            generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase) : 
+                            miniGameTitle}
+                          readOnly
+                          className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                          data-testid="input-generated-name"
                         />
+                        <p className="text-xs text-gray-500 mt-1">This name will be used for the schedule template</p>
                       </div>
+                    )}
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="template-type">Content Type</Label>
-                          <Input 
-                            id="template-type"
-                            placeholder="e.g., Personal Stories, Creative Experiments"
-                            value={newTemplate.type}
-                            onChange={(e) => setNewTemplate(prev => ({ ...prev, type: e.target.value }))}
-                            data-testid="input-type"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="template-platform">Platform</Label>
-                          <Select 
-                            value={newTemplate.platform} 
-                            onValueChange={(value: string) => setNewTemplate(prev => ({ ...prev, platform: value }))}
-                          >
-                            <SelectTrigger data-testid="select-platform">
-                              <SelectValue placeholder="Select platform" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Instagram">Instagram</SelectItem>
-                              <SelectItem value="TikTok">TikTok</SelectItem>
-                              <SelectItem value="YouTube">YouTube</SelectItem>
-                              <SelectItem value="Blog">Blog</SelectItem>
-                              <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                              <SelectItem value="Twitter">Twitter</SelectItem>
-                              <SelectItem value="Facebook">Facebook</SelectItem>
-                              <SelectItem value="Pinterest">Pinterest</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      {/* Configuration based on recurrence type */}
-                      <div className="border rounded-lg p-4 space-y-4">
-                        <h4 className="font-semibold">Recurrence Configuration</h4>
-
-                        {newTemplate.recurrenceType === 'weekly' && (
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label>Day of Week</Label>
-                              <Select 
-                                value={newTemplate.config.dayOfWeek.toString()} 
-                                onValueChange={(value) => setNewTemplate(prev => ({ 
-                                  ...prev, 
-                                  config: { ...prev.config, dayOfWeek: parseInt(value) }
-                                }))}
-                              >
-                                <SelectTrigger data-testid="select-day-of-week">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="0">Sunday</SelectItem>
-                                  <SelectItem value="1">Monday</SelectItem>
-                                  <SelectItem value="2">Tuesday</SelectItem>
-                                  <SelectItem value="3">Wednesday</SelectItem>
-                                  <SelectItem value="4">Thursday</SelectItem>
-                                  <SelectItem value="5">Friday</SelectItem>
-                                  <SelectItem value="6">Saturday</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label>Time (Optional)</Label>
-                              <Input
-                                type="time"
-                                data-testid="input-time"
-                                value={newTemplate.config.time}
-                                onChange={(e) => setNewTemplate(prev => ({ 
-                                  ...prev, 
-                                  config: { ...prev.config, time: e.target.value }
-                                }))}
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {(newTemplate.recurrenceType as string) === 'nth_weekday' && (
-                          <div className="grid grid-cols-3 gap-4">
-                            <div>
-                              <Label>Week Number</Label>
-                              <Select 
-                                value={newTemplate.config.weekNumber.toString()} 
-                                onValueChange={(value) => setNewTemplate(prev => ({ 
-                                  ...prev, 
-                                  config: { ...prev.config, weekNumber: parseInt(value) }
-                                }))}
-                              >
-                                <SelectTrigger data-testid="select-week-number">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="1">1st</SelectItem>
-                                  <SelectItem value="2">2nd</SelectItem>
-                                  <SelectItem value="3">3rd</SelectItem>
-                                  <SelectItem value="4">4th</SelectItem>
-                                  <SelectItem value="-1">Last</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label>Day of Week</Label>
-                              <Select 
-                                value={newTemplate.config.dayOfWeek.toString()} 
-                                onValueChange={(value) => setNewTemplate(prev => ({ 
-                                  ...prev, 
-                                  config: { ...prev.config, dayOfWeek: parseInt(value) }
-                                }))}
-                              >
-                                <SelectTrigger data-testid="select-nth-day-of-week">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="0">Sunday</SelectItem>
-                                  <SelectItem value="1">Monday</SelectItem>
-                                  <SelectItem value="2">Tuesday</SelectItem>
-                                  <SelectItem value="3">Wednesday</SelectItem>
-                                  <SelectItem value="4">Thursday</SelectItem>
-                                  <SelectItem value="5">Friday</SelectItem>
-                                  <SelectItem value="6">Saturday</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label>Time (Optional)</Label>
-                              <Input
-                                type="time"
-                                data-testid="input-nth-time"
-                                value={newTemplate.config.time}
-                                onChange={(e) => setNewTemplate(prev => ({ 
-                                  ...prev, 
-                                  config: { ...prev.config, time: e.target.value }
-                                }))}
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {(newTemplate.recurrenceType as string) === 'moon_phase' && (
-                          <div className="space-y-4">
-                            <div>
-                              <Label>Moon Phases</Label>
-                              <div className="grid grid-cols-2 gap-2 mt-2">
-                                {[
-                                  { value: 'new_moon', label: 'New Moon' },
-                                  { value: 'first_quarter', label: 'First Quarter' },
-                                  { value: 'full_moon', label: 'Full Moon' },
-                                  { value: 'last_quarter', label: 'Last Quarter' },
-                                  { value: 'waxing_crescent', label: 'Waxing Crescent' },
-                                  { value: 'waxing_gibbous', label: 'Waxing Gibbous' },
-                                  { value: 'waning_gibbous', label: 'Waning Gibbous' },
-                                  { value: 'waning_crescent', label: 'Waning Crescent' }
-                                ].map((phase) => (
-                                  <label key={phase.value} className="flex items-center space-x-2">
-                                    <input
-                                      type="checkbox"
-                                      data-testid={`checkbox-phase-${phase.value}`}
-                                      checked={newTemplate.config.phaseTypes.includes(phase.value)}
-                                      onChange={(e) => {
-                                        const updatedPhases = e.target.checked 
-                                          ? [...newTemplate.config.phaseTypes, phase.value]
-                                          : newTemplate.config.phaseTypes.filter(p => p !== phase.value);
-                                        setNewTemplate(prev => ({ 
-                                          ...prev, 
-                                          config: { ...prev.config, phaseTypes: updatedPhases }
-                                        }));
-                                      }}
-                                    />
-                                    <span className="text-sm">{phase.label}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label>Offset Days</Label>
-                                <Input
-                                  type="number"
-                                  data-testid="input-offset-days"
-                                  value={newTemplate.config.offsetDays}
-                                  onChange={(e) => setNewTemplate(prev => ({ 
-                                    ...prev, 
-                                    config: { ...prev.config, offsetDays: parseInt(e.target.value) || 0 }
-                                  }))}
-                                  placeholder="0"
-                                  min="-30"
-                                  max="30"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Days before (-) or after (+) the moon phase</p>
-                              </div>
-                              <div>
-                                <Label>Time (Optional)</Label>
-                                <Input
-                                  type="time"
-                                  data-testid="input-moon-time"
-                                  value={newTemplate.config.time}
-                                  onChange={(e) => setNewTemplate(prev => ({ 
-                                    ...prev, 
-                                    config: { ...prev.config, time: e.target.value }
-                                  }))}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {((newTemplate.recurrenceType as string) === 'quarterly' || (newTemplate.recurrenceType as string) === 'monthly_day') && (
-                          <div className="grid grid-cols-2 gap-4">
-                            {(newTemplate.recurrenceType as string) === 'quarterly' && (
-                              <div>
-                                <Label>Month in Quarter</Label>
-                                <Select 
-                                  value={newTemplate.config.monthInQuarter.toString()} 
-                                  onValueChange={(value) => setNewTemplate(prev => ({ 
-                                    ...prev, 
-                                    config: { ...prev.config, monthInQuarter: parseInt(value) }
-                                  }))}
-                                >
-                                  <SelectTrigger data-testid="select-month-in-quarter">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="1">1st month</SelectItem>
-                                    <SelectItem value="2">2nd month</SelectItem>
-                                    <SelectItem value="3">3rd month</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            )}
-                            <div>
-                              <Label>Day of Month</Label>
-                              <Input
-                                type="number"
-                                data-testid="input-day-of-month"
-                                value={newTemplate.config.dayOfMonth}
-                                onChange={(e) => setNewTemplate(prev => ({ 
-                                  ...prev, 
-                                  config: { ...prev.config, dayOfMonth: parseInt(e.target.value) || 1 }
-                                }))}
-                                min="1"
-                                max="31"
-                              />
-                            </div>
-                            <div>
-                              <Label>Time (Optional)</Label>
-                              <Input
-                                type="time"
-                                data-testid="input-quarterly-time"
-                                value={newTemplate.config.time}
-                                onChange={(e) => setNewTemplate(prev => ({ 
-                                  ...prev, 
-                                  config: { ...prev.config, time: e.target.value }
-                                }))}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                  <div className="flex justify-center pt-4">
-                    <Button 
-                      onClick={handleCreateTemplate}
-                      disabled={!newTemplate.name || !newTemplate.type || !newTemplate.platform || createTemplateMutation.isPending}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2"
-                      data-testid="button-save-template"
-                    >
-                      {createTemplateMutation.isPending ? 'Creating Mini-Game...' : 'Create Mini-Game Schedule'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Existing Templates */}
-              <div>
-                <h4 className="text-lg font-semibold mb-4">Your Created Mini-Games</h4>
-                {templatesLoading ? (
-                  <div className="text-center py-8">Loading mini-games...</div>
-                ) : templates.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    No mini-games created yet. Fill out the form above to get started.
-                  </div>
-                ) : (
-                  <div className="grid gap-4">
-                    {templates.map((template) => (
-                    <Card key={template.id} data-testid={`template-card-${template.id}`}>
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-lg">{template.name}</h4>
-                            {template.description && (
-                              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                                {template.description}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline" className="text-xs">
-                                {template.recurrenceType.replace('_', ' ')}
-                              </Badge>
-                              <span className="text-sm text-gray-500">
-                                {getRecurrenceDescription(template)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handlePreviewTemplate(template)}
-                              disabled={previewMutation.isPending}
-                              data-testid={`button-preview-${template.id}`}
-                            >
-                              <Eye className="h-4 w-4" />
-                              Preview
-                            </Button>
-                            <Button 
-                              size="sm"
-                              onClick={() => {
-                                const fromDate = new Date();
-                                const toDate = new Date();
-                                toDate.setMonth(toDate.getMonth() + 3); // 3 months ahead
-                                generateItemsMutation.mutate({
-                                  templateId: template.id,
-                                  fromDate: fromDate.toISOString(),
-                                  toDate: toDate.toISOString(),
-                                  title: `Auto-generated from ${template.name}`,
-                                  description: template.description
-                                });
-                              }}
-                              disabled={generateItemsMutation.isPending}
-                              data-testid={`button-generate-${template.id}`}
-                            >
-                              <Play className="h-4 w-4" />
-                              Generate
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    ))}
-                  </div>
-                )}
+                    {/* Recurrence Type */}
+                    <div>
+                      <Label htmlFor="recurrence-type">Recurrence Type</Label>
+                      <Select 
+                        value={newTemplate.recurrenceType} 
+                        onValueChange={(value: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase') => setNewTemplate(prev => ({ ...prev, recurrenceType: value }))}
+                      >
+                        <SelectTrigger data-testid="select-recurrence-type">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="weekly">Weekly (Every Monday, Tuesday, etc.)</SelectItem>
+                          <SelectItem value="nth_weekday">Nth Weekday (2nd Monday, 4th Sunday, etc.)</SelectItem>
+                          <SelectItem value="quarterly">Quarterly</SelectItem>
+                          <SelectItem value="monthly_day">Monthly Day (1st, 2nd, 7th, 14th of month)</SelectItem>
+                          <SelectItem value="moon_phase">Moon Phase</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
 
-            {/* Scheduled Items Tab */}
+            {/* Scheduled Items Tab - Remaining unchanged for now */}
             <TabsContent value="scheduled" className="space-y-4">
               <h3 className="text-lg font-semibold">Scheduled Content Items</h3>
               
@@ -961,237 +655,6 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                   ))}
                 </div>
               )}
-            </TabsContent>
-
-            {/* Calendar View Tab */}
-            <TabsContent value="calendar" className="space-y-4">
-              <h3 className="text-lg font-semibold">Date Selection Calendar</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Click dates to select them, or drag to select consecutive dates. Selected dates will be saved as individual Notion records.
-              </p>
-              
-              <div className="flex gap-6">
-                {/* Calendar */}
-                <div className="flex-1">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-5 w-5" />
-                          Select Dates
-                        </div>
-                        {/* Interactive Month/Year Selector */}
-                        <div className="flex items-center gap-2">
-                          <Select 
-                            value={calendarMonth.getMonth().toString()}
-                            onValueChange={(value) => setCalendarMonth(new Date(calendarMonth.getFullYear(), parseInt(value), 1))}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Array.from({ length: 12 }, (_, i) => (
-                                <SelectItem key={i} value={i.toString()}>
-                                  {format(new Date(2000, i, 1), 'MMMM')}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Select 
-                            value={calendarMonth.getFullYear().toString()}
-                            onValueChange={(value) => setCalendarMonth(new Date(parseInt(value), calendarMonth.getMonth(), 1))}
-                          >
-                            <SelectTrigger className="w-20">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Array.from({ length: 10 }, (_, i) => {
-                                const year = new Date().getFullYear() + i;
-                                return (
-                                  <SelectItem key={year} value={year.toString()}>
-                                    {year}
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <DayPicker
-                        mode="multiple"
-                        selected={selectedDates}
-                        onSelect={(dates) => setSelectedDates(dates || [])}
-                        month={calendarMonth}
-                        onMonthChange={setCalendarMonth}
-                        className="rdp"
-                        classNames={{
-                          day_selected: "bg-blue-600 text-white hover:bg-blue-700",
-                          day: "hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer",
-                          day_today: "font-bold text-blue-600"
-                        }}
-                        data-testid="calendar-date-picker"
-                      />
-                      <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                        <p><strong>How to use:</strong></p>
-                        <p>• Click individual dates to select/deselect them</p>
-                        <p>• Hold Shift and click to select a range of dates</p>
-                        <p>• Use the month/year dropdowns above to navigate quickly</p>
-                        <p>• Click on selected dates in the sidebar to navigate to them</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Selected Dates Sidebar */}
-                <div className="w-96">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span>Selected Dates ({selectedDates.length})</span>
-                        {selectedDates.length > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedDates([])}
-                            data-testid="button-clear-dates"
-                          >
-                            <X className="h-4 w-4" />
-                            Clear All
-                          </Button>
-                        )}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {selectedDates.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          No dates selected. Click on calendar dates to select them.
-                        </div>
-                      ) : (
-                        <>
-                          {/* Mini-Game Title and Moon Phase Fields */}
-                          <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div>
-                              <Label htmlFor="mini-game-title" className="text-sm font-medium">
-                                Mini-Game Title
-                              </Label>
-                              <Select 
-                                value={miniGameTitle} 
-                                onValueChange={setMiniGameTitle}
-                              >
-                                <SelectTrigger className="mt-1" data-testid="select-mini-game-title">
-                                  <SelectValue placeholder="Select mini-game..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {miniGameTitles.map((title) => (
-                                    <SelectItem key={title} value={title}>
-                                      {title}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div>
-                              <Label htmlFor="moon-phase" className="text-sm font-medium">
-                                Moon Phase (Optional)
-                              </Label>
-                              <Select 
-                                value={selectedMoonPhase} 
-                                onValueChange={setSelectedMoonPhase}
-                              >
-                                <SelectTrigger className="mt-1" data-testid="select-moon-phase">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {moonPhaseOptions.map((phase) => (
-                                    <SelectItem key={phase} value={phase}>
-                                      {phase}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-
-                          {/* Name Preview */}
-                          {miniGameTitle && (
-                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                              <Label className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                Name Preview:
-                              </Label>
-                              <div className="mt-1 text-sm text-blue-700 dark:text-blue-300 font-mono">
-                                {selectedDates.length > 0 && generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase)}
-                                {selectedDates.length > 1 && (
-                                  <div className="mt-1 text-xs opacity-75">
-                                    (Example for first date - each date gets unique numbering)
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Selected Dates List */}
-                          <div className="max-h-64 overflow-y-auto space-y-2">
-                            {selectedDates
-                              .sort((a, b) => a.getTime() - b.getTime())
-                              .map((date, index) => (
-                                <div
-                                  key={index}
-                                  className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-                                  data-testid={`selected-date-${index}`}
-                                  onClick={() => navigateToDate(date)}
-                                >
-                                  <div className="flex-1">
-                                    <div className="text-sm font-semibold">
-                                      {format(date, 'EEEE MMM d, yyyy')}
-                                    </div>
-                                    {miniGameTitle && (
-                                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                        {generateNamePreview(miniGameTitle, date, selectedDates, selectedMoonPhase)}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedDates(prev => 
-                                        prev.filter(d => d.getTime() !== date.getTime())
-                                      );
-                                    }}
-                                    data-testid={`button-remove-date-${index}`}
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              ))
-                            }
-                          </div>
-                          
-                          <div className="pt-4 border-t">
-                            <Button
-                              onClick={handleSaveSelectedDates}
-                              disabled={saveSelectedDatesMutation.isPending || !miniGameTitle.trim()}
-                              className="w-full bg-green-600 hover:bg-green-700 text-white"
-                              data-testid="button-save-selected-dates"
-                            >
-                              <Save className="h-4 w-4 mr-2" />
-                              {saveSelectedDatesMutation.isPending ? 'Saving...' : `Save ${selectedDates.length} Date${selectedDates.length === 1 ? '' : 's'} to Notion`}
-                            </Button>
-                            {!miniGameTitle.trim() && selectedDates.length > 0 && (
-                              <p className="text-xs text-red-500 mt-1">
-                                Mini-Game title is required to save dates
-                              </p>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
             </TabsContent>
           </Tabs>
 
