@@ -396,6 +396,152 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     return `${type} - ${monthYear}`;
   };
 
+  // Auto-populate calendar dates based on recurrence type
+  const handleAutoPopulateDates = (recurrenceType: string) => {
+    if (!miniGameTitle || !recurrenceType) return;
+
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1); // Start from beginning of current month
+    const endDate = new Date(now.getFullYear() + 1, now.getMonth(), 0); // Go through next year
+    const dates: { date: Date; time?: string }[] = [];
+
+    try {
+      switch (recurrenceType) {
+        case 'weekly':
+          if (newTemplate.config.dayOfWeek !== undefined) {
+            const dayOfWeek = newTemplate.config.dayOfWeek;
+            const currentDate = new Date(startDate);
+            
+            // Find first occurrence of the day of week
+            while (currentDate.getDay() !== dayOfWeek) {
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Generate weekly occurrences
+            while (currentDate <= endDate && dates.length < 52) { // Max 52 weeks
+              dates.push({
+                date: new Date(currentDate),
+                time: newTemplate.config.time
+              });
+              currentDate.setDate(currentDate.getDate() + 7);
+            }
+          }
+          break;
+
+        case 'nth_weekday':
+          if (newTemplate.config.weekNumber !== undefined && newTemplate.config.dayOfWeek !== undefined) {
+            const weekNumber = newTemplate.config.weekNumber;
+            const dayOfWeek = newTemplate.config.dayOfWeek;
+            
+            // Generate for each month
+            for (let month = startDate.getMonth(); month <= endDate.getMonth() + 12; month++) {
+              const year = startDate.getFullYear() + Math.floor(month / 12);
+              const monthIndex = month % 12;
+              
+              let targetDate: Date;
+              
+              if (weekNumber === -1) { // Last occurrence
+                const lastDayOfMonth = new Date(year, monthIndex + 1, 0);
+                targetDate = new Date(lastDayOfMonth);
+                
+                // Find the last occurrence of the day of week
+                while (targetDate.getDay() !== dayOfWeek) {
+                  targetDate.setDate(targetDate.getDate() - 1);
+                }
+              } else { // Nth occurrence
+                const firstDayOfMonth = new Date(year, monthIndex, 1);
+                targetDate = new Date(firstDayOfMonth);
+                
+                // Find first occurrence of the day of week
+                while (targetDate.getDay() !== dayOfWeek) {
+                  targetDate.setDate(targetDate.getDate() + 1);
+                }
+                
+                // Add (n-1) weeks
+                targetDate.setDate(targetDate.getDate() + (weekNumber - 1) * 7);
+              }
+              
+              if (targetDate.getMonth() === monthIndex && targetDate >= now) {
+                dates.push({
+                  date: new Date(targetDate),
+                  time: newTemplate.config.time
+                });
+              }
+            }
+          }
+          break;
+
+        case 'monthly_day':
+          if (newTemplate.config.dayOfMonth !== undefined) {
+            const dayOfMonth = newTemplate.config.dayOfMonth;
+            
+            for (let month = startDate.getMonth(); month <= endDate.getMonth() + 12; month++) {
+              const year = startDate.getFullYear() + Math.floor(month / 12);
+              const monthIndex = month % 12;
+              
+              // Check if the day exists in this month
+              const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+              if (dayOfMonth <= daysInMonth) {
+                const targetDate = new Date(year, monthIndex, dayOfMonth);
+                if (targetDate >= now) {
+                  dates.push({
+                    date: targetDate,
+                    time: newTemplate.config.time
+                  });
+                }
+              }
+            }
+          }
+          break;
+
+        case 'quarterly':
+          // Generate quarterly dates (every 3 months)
+          const quarterlyStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          for (let i = 0; i < 8; i++) { // 8 quarters (2 years)
+            const quarterDate = new Date(quarterlyStartDate);
+            quarterDate.setMonth(quarterDate.getMonth() + (i * 3));
+            if (quarterDate >= now) {
+              dates.push({
+                date: quarterDate,
+                time: newTemplate.config.time
+              });
+            }
+          }
+          break;
+
+        case 'moon_phase':
+          // For moon phase, generate monthly occurrences as an approximation
+          // (Real moon phase calculation would require a moon phase library)
+          for (let month = startDate.getMonth(); month <= endDate.getMonth() + 12; month++) {
+            const year = startDate.getFullYear() + Math.floor(month / 12);
+            const monthIndex = month % 12;
+            const moonDate = new Date(year, monthIndex, 15); // Approximate middle of month
+            if (moonDate >= now) {
+              dates.push({
+                date: moonDate,
+                time: newTemplate.config.time
+              });
+            }
+          }
+          break;
+
+        default:
+          break;
+      }
+
+      // Update selectedDates with the generated dates
+      setSelectedDates(dates);
+      
+    } catch (error) {
+      console.error('Error auto-populating dates:', error);
+      toast({ 
+        title: "Error generating dates", 
+        description: "Please check your recurrence configuration", 
+        variant: "destructive" 
+      });
+    }
+  };
+
   // Enhanced preview handler with confirmation modal
   const handlePreviewTemplate = async (template: ScheduleTemplate) => {
     setSelectedTemplate(template);
@@ -598,7 +744,13 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       <Label htmlFor="recurrence-type">Recurrence Type</Label>
                       <Select 
                         value={newTemplate.recurrenceType} 
-                        onValueChange={(value: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase') => setNewTemplate(prev => ({ ...prev, recurrenceType: value }))}
+                        onValueChange={(value: 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase') => {
+                          setNewTemplate(prev => ({ ...prev, recurrenceType: value }));
+                          // Auto-populate calendar dates when recurrence type changes
+                          if (value && miniGameTitle) {
+                            handleAutoPopulateDates(value);
+                          }
+                        }}
                       >
                         <SelectTrigger data-testid="select-recurrence-type">
                           <SelectValue />
@@ -612,6 +764,245 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Additional Configuration based on recurrence type */}
+                    {newTemplate.recurrenceType === 'weekly' && (
+                      <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
+                        <div>
+                          <Label>Day of Week</Label>
+                          <Select 
+                            value={newTemplate.config.dayOfWeek?.toString() || ''} 
+                            onValueChange={(value) => {
+                              setNewTemplate(prev => ({ 
+                                ...prev, 
+                                config: { ...prev.config, dayOfWeek: parseInt(value) }
+                              }));
+                              if (miniGameTitle) handleAutoPopulateDates('weekly');
+                            }}
+                          >
+                            <SelectTrigger data-testid="select-day-of-week">
+                              <SelectValue placeholder="Select day..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">Sunday</SelectItem>
+                              <SelectItem value="1">Monday</SelectItem>
+                              <SelectItem value="2">Tuesday</SelectItem>
+                              <SelectItem value="3">Wednesday</SelectItem>
+                              <SelectItem value="4">Thursday</SelectItem>
+                              <SelectItem value="5">Friday</SelectItem>
+                              <SelectItem value="6">Saturday</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Time (Optional)</Label>
+                          <Input
+                            type="time"
+                            data-testid="input-weekly-time"
+                            value={newTemplate.config.time || ''}
+                            onChange={(e) => setNewTemplate(prev => ({ 
+                              ...prev, 
+                              config: { ...prev.config, time: e.target.value }
+                            }))}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {newTemplate.recurrenceType === 'nth_weekday' && (
+                      <div className="grid grid-cols-3 gap-4 p-4 border rounded-lg">
+                        <div>
+                          <Label>Week Number</Label>
+                          <Select 
+                            value={newTemplate.config.weekNumber?.toString() || ''} 
+                            onValueChange={(value) => {
+                              setNewTemplate(prev => ({ 
+                                ...prev, 
+                                config: { ...prev.config, weekNumber: parseInt(value) }
+                              }));
+                              if (miniGameTitle) handleAutoPopulateDates('nth_weekday');
+                            }}
+                          >
+                            <SelectTrigger data-testid="select-week-number">
+                              <SelectValue placeholder="Week..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">1st</SelectItem>
+                              <SelectItem value="2">2nd</SelectItem>
+                              <SelectItem value="3">3rd</SelectItem>
+                              <SelectItem value="4">4th</SelectItem>
+                              <SelectItem value="-1">Last</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Day of Week</Label>
+                          <Select 
+                            value={newTemplate.config.dayOfWeek?.toString() || ''} 
+                            onValueChange={(value) => {
+                              setNewTemplate(prev => ({ 
+                                ...prev, 
+                                config: { ...prev.config, dayOfWeek: parseInt(value) }
+                              }));
+                              if (miniGameTitle) handleAutoPopulateDates('nth_weekday');
+                            }}
+                          >
+                            <SelectTrigger data-testid="select-nth-day-of-week">
+                              <SelectValue placeholder="Day..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">Sunday</SelectItem>
+                              <SelectItem value="1">Monday</SelectItem>
+                              <SelectItem value="2">Tuesday</SelectItem>
+                              <SelectItem value="3">Wednesday</SelectItem>
+                              <SelectItem value="4">Thursday</SelectItem>
+                              <SelectItem value="5">Friday</SelectItem>
+                              <SelectItem value="6">Saturday</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Time (Optional)</Label>
+                          <Input
+                            type="time"
+                            data-testid="input-nth-time"
+                            value={newTemplate.config.time || ''}
+                            onChange={(e) => setNewTemplate(prev => ({ 
+                              ...prev, 
+                              config: { ...prev.config, time: e.target.value }
+                            }))}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {newTemplate.recurrenceType === 'monthly_day' && (
+                      <div className="grid grid-cols-2 gap-4 p-4 border rounded-lg">
+                        <div>
+                          <Label>Day of Month</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            max="31"
+                            data-testid="input-day-of-month"
+                            value={newTemplate.config.dayOfMonth || ''}
+                            onChange={(e) => {
+                              setNewTemplate(prev => ({ 
+                                ...prev, 
+                                config: { ...prev.config, dayOfMonth: parseInt(e.target.value) }
+                              }));
+                              if (miniGameTitle) handleAutoPopulateDates('monthly_day');
+                            }}
+                            placeholder="1-31"
+                          />
+                        </div>
+                        <div>
+                          <Label>Time (Optional)</Label>
+                          <Input
+                            type="time"
+                            data-testid="input-monthly-time"
+                            value={newTemplate.config.time || ''}
+                            onChange={(e) => setNewTemplate(prev => ({ 
+                              ...prev, 
+                              config: { ...prev.config, time: e.target.value }
+                            }))}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2 pt-4 border-t">
+                      <Button
+                        onClick={handleGeneratePreview}
+                        disabled={!miniGameTitle || !newTemplate.recurrenceType}
+                        className="flex-1"
+                        data-testid="button-preview-schedule"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview Schedule
+                      </Button>
+                      <Button
+                        onClick={handleCreateTemplate}
+                        disabled={!miniGameTitle || !newTemplate.recurrenceType}
+                        variant="outline"
+                        data-testid="button-save-template"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Template
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Right Side - Calendar View & Selected Dates */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      Auto-Generated Calendar
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Calendar View */}
+                    <div className="border rounded-lg p-4">
+                      {selectedDates.length > 0 ? (
+                        <>
+                          <h4 className="font-semibold mb-3">Next {Math.min(selectedDates.length, 12)} Scheduled Dates:</h4>
+                          <ScrollArea className="h-64 w-full">
+                            <div className="space-y-2">
+                              {selectedDates.slice(0, 12).map((dateObj, index) => (
+                                <div key={index} className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border">
+                                  <div>
+                                    <p className="font-medium text-blue-700 dark:text-blue-300">
+                                      {miniGameTitle && generateNamePreview(miniGameTitle, dateObj, selectedDates, selectedMoonPhase)}
+                                    </p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                      {format(dateObj.date, 'EEEE, MMMM d, yyyy')}
+                                      {dateObj.time && ` at ${dateObj.time}`}
+                                    </p>
+                                  </div>
+                                  <Badge variant="outline" className="text-xs">
+                                    {format(dateObj.date, 'MMM')}
+                                  </Badge>
+                                </div>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                          {selectedDates.length > 12 && (
+                            <p className="text-sm text-gray-500 mt-2 text-center">
+                              + {selectedDates.length - 12} more dates...
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                          <p>Select a mini-game title and recurrence type</p>
+                          <p className="text-sm">to see auto-generated dates here</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Summary Info */}
+                    {selectedDates.length > 0 && (
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <h5 className="font-medium text-green-800 dark:text-green-200 mb-2">
+                          📊 Schedule Summary:
+                        </h5>
+                        <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                          <li>• Total dates: {selectedDates.length}</li>
+                          <li>• Period: {selectedDates.length > 0 ? 
+                            `${format(selectedDates[0].date, 'MMM yyyy')} - ${format(selectedDates[selectedDates.length - 1].date, 'MMM yyyy')}` 
+                            : 'N/A'}
+                          </li>
+                          <li>• Recurrence: {newTemplate.recurrenceType}</li>
+                          {selectedMoonPhase && selectedMoonPhase !== 'none' && (
+                            <li>• Moon phase: {selectedMoonPhase}</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
