@@ -220,7 +220,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
           </div>
         </div>
 
-        {/* Mini-Game Block Studio Section */}
+        {/* Studio Content Scheduler Section */}
         <div className="bg-white dark:bg-[#17111d] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">
@@ -229,7 +229,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Mini-Game Block Studio
+                  Studio Content Scheduler
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">Create and manage content blocks with workflow tracking</p>
               </div>

@@ -6,8 +6,8 @@
 // Page options for @rotationonly platform
 export const PAGE_OPTIONS = [
   '@rotationonly.mag',
-  '@rotationonly.econ',
-  '@rotationonly.stem',
+  '@rotationonly.biz',
+  '@rotationonly.tech',
   '@rotationonly.ext',
   '@rotationonly.music',
   '@rotationonly.xxx',
