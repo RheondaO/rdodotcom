@@ -40,7 +40,7 @@ async function getAccessToken() {
 // WARNING: Never cache this client.
 // Access tokens expire, so a new client must be created each time.
 // Always call this function again to get a fresh client.
-async function getUncachableNotionClient() {
+export async function getUncachableNotionClient() {
   const accessToken = await getAccessToken();
   return new Client({ auth: accessToken });
 }

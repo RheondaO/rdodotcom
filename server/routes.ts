@@ -261,6 +261,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DEBUG: Test endpoint to list all available Notion databases (no auth required)
+  app.get("/api/public/debug-notion-databases", async (req, res) => {
+    try {
+      console.log('🔍 DEBUG: Testing Notion database search...');
+      
+      const { getUncachableNotionClient } = await import('./notion');
+      const client = await getUncachableNotionClient();
+      
+      // Search for the ROMLCONTENTCALENDAR database
+      console.log('🔍 Searching for ROMLCONTENTCALENDAR database...');
+      const response = await client.search({
+        query: 'ROMLCONTENTCALENDAR',
+        filter: {
+          property: 'object',
+          value: 'database'
+        }
+      });
+
+      console.log(`📊 Found ${response.results.length} database(s) matching search`);
+      
+      const databases = response.results.map((db: any) => ({
+        id: db.id,
+        title: db.title?.[0]?.plain_text || 'Untitled',
+        created_time: db.created_time,
+        last_edited_time: db.last_edited_time
+      }));
+
+      databases.forEach((db: any) => {
+        console.log(`🏷️ Database found: "${db.title}" (ID: ${db.id})`);
+      });
+
+      // Look for exact match
+      const exactMatch = databases.find(db => 
+        db.title.toLowerCase() === 'romlcontentcalendar'
+      );
+
+      if (exactMatch) {
+        console.log('✅ Found ROMLCONTENTCALENDAR database!');
+        res.json({
+          found: true,
+          database: exactMatch,
+          total_databases_found: databases.length,
+          all_databases: databases,
+          message: 'ROMLCONTENTCALENDAR database found successfully!'
+        });
+      } else {
+        console.log('❌ ROMLCONTENTCALENDAR database not found in search results');
+        res.json({
+          found: false,
+          searched_for: 'ROMLCONTENTCALENDAR',
+          total_databases_found: databases.length,
+          all_databases: databases,
+          message: 'ROMLCONTENTCALENDAR database not found. Check if the database exists and the Notion integration has access to it.'
+        });
+      }
+    } catch (error: any) {
+      console.error('❌ Error testing Notion database search:', error.message);
+      res.status(500).json({ 
+        found: false,
+        error: error.message,
+        message: 'Error occurred while searching for database. Check Notion integration setup.'
+      });
+    }
+  });
+
   // Cache for public active timer to reduce database load during deployment
   let publicTimerCache: { data: any; timestamp: number } | null = null;
   const CACHE_DURATION = 2000; // Cache for 2 seconds
