@@ -492,40 +492,4 @@ router.get('/moon-phases/next/:phaseType', async (req, res) => {
   }
 });
 
-// DEBUG: Test endpoint to list all available Notion databases
-router.get('/debug/notion-databases', async (req, res) => {
-  try {
-    console.log('🔍 DEBUG: Listing all available Notion databases...');
-    
-    const client = await import('./notion').then(m => m.getUncachableNotionClient());
-    const response = await client.search({
-      filter: {
-        property: 'object',
-        value: 'database'
-      }
-    });
-
-    console.log(`📊 Found ${response.results.length} total databases`);
-    
-    const databases = response.results.map((db: any) => ({
-      id: db.id,
-      title: db.title?.[0]?.plain_text || 'Untitled',
-      created_time: db.created_time,
-      last_edited_time: db.last_edited_time
-    }));
-
-    databases.forEach((db: any) => {
-      console.log(`🏷️ Database: "${db.title}" (ID: ${db.id})`);
-    });
-
-    res.json({
-      total: databases.length,
-      databases: databases
-    });
-  } catch (error: any) {
-    console.error('❌ Error listing Notion databases:', error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 export default router;
