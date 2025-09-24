@@ -88,21 +88,12 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Create dynamic mapping from blocks data
-  const tagToBlockMapping: Record<string, string[]> = React.useMemo(() => {
-    const mapping: Record<string, string[]> = {};
-    allBlocks.forEach((block: MiniGameBlock) => {
-      block.rotationOnlyTags?.forEach((tag: string) => {
-        if (!mapping[tag]) mapping[tag] = [];
-        mapping[tag].push(block.title);
-      });
-    });
-    return mapping;
-  }, [allBlocks]);
 
   // Filter blocks based on selected @rotationonly tag
   const displayBlocks = selectedFilter 
-    ? allBlocks.filter((block: MiniGameBlock) => tagToBlockMapping[selectedFilter]?.includes(block.title))
+    ? allBlocks.filter((block: MiniGameBlock) => 
+        block.rotationOnlyTags?.includes(selectedFilter)
+      )
     : allBlocks;
 
   const getStatusColor = (status: string) => {
@@ -115,7 +106,9 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   }
 
   const getTagColor = (tag: string) => {
-    switch (tag) {
+    // Remove @ prefix for color matching
+    const cleanTag = tag.replace('@', '');
+    switch (cleanTag) {
       case 'rotationonly.mag':
         return 'bg-gradient-to-r from-pink-100 to-pink-200 text-pink-800 border border-pink-300 dark:from-pink-900 dark:to-pink-800 dark:text-pink-200 dark:border-pink-600';
       case 'rotationonly.econ':
@@ -206,7 +199,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             >
               <span>All</span>
             </div>
-            {Object.keys(tagToBlockMapping).map((tag) => (
+            {PAGE_OPTIONS.map((tag) => (
               <div 
                 key={tag}
                 className={`flex items-center gap-2 px-3 py-1 rounded-md text-sm cursor-pointer transition-all duration-200 ${
@@ -216,7 +209,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 }`}
                 onClick={() => setSelectedFilter(tag)}
               >
-                <span>@{tag}</span>
+                <span>{tag}</span>
               </div>
             ))}
           </div>
