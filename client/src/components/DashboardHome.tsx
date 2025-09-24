@@ -474,7 +474,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
                 size="sm"
                 className="bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
               >
-                {displayBlocks.length > 0 ? 'Open rotationONLY Mini-Game Block Studio →' : 'Create First Block in rotationONLY Mini-Game Block Studio →'}
+                {displayBlocks.length > 0 ? 'Open rotationONLY Content Studio — Mini-Game Block Studio →' : 'Create First Block in rotationONLY Content Studio — Mini-Game Block Studio →'}
               </Button>
             </div>
           </div>
