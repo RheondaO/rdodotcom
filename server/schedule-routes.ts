@@ -262,15 +262,15 @@ router.post('/scheduled-content-items', async (req, res) => {
       title: validatedData.title,
       description: validatedData.description,
       miniGameBlockId: validatedData.miniGameBlockId,
-      status: validatedData.status || 'scheduled',
+      status: (validatedData.status as 'scheduled' | 'created' | 'published' | 'failed') || 'scheduled',
       scheduledDate: validatedData.scheduledDate,
       metadata: validatedData.metadata ? JSON.stringify(validatedData.metadata) : undefined,
       // Include new fields for automatic population
-      page: validatedData.page,
-      month: validatedData.month,
-      dayOfWeek: validatedData.dayOfWeek,
-      moonPhase: validatedData.moonPhase,
-      squareType: validatedData.squareType,
+      page: validatedData.page || undefined,
+      month: validatedData.month || undefined,
+      dayOfWeek: validatedData.dayOfWeek || undefined,
+      moonPhase: validatedData.moonPhase || undefined,
+      squareType: validatedData.squareType || undefined,
       createdAt: new Date(),
       updatedAt: new Date()
     };
