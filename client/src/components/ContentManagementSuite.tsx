@@ -285,9 +285,10 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 variant={activeView === "scheduler" ? "default" : "outline"}
                 onClick={() => setActiveView("scheduler")}
                 size="sm"
-                data-testid="button-scheduler-nav"
+                data-testid="button-create-schedule"
               >
-                Scheduler
+                <Clock className="h-4 w-4 mr-1" />
+                Create Schedule
               </Button>
               <Button
                 variant={activeView === "analytics" ? "default" : "outline"}
@@ -302,15 +303,6 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                 size="sm"
               >
                 Progress
-              </Button>
-              <Button
-                variant={activeView === "scheduler" ? "default" : "outline"}
-                onClick={() => setActiveView("scheduler")}
-                size="sm"
-                data-testid="button-scheduler"
-              >
-                <Clock className="h-4 w-4 mr-1" />
-                Scheduler
               </Button>
             </div>
           </div>
