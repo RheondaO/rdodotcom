@@ -641,6 +641,12 @@ export interface ScheduledContentItem {
   actualCreatedDate?: Date;
   nextScheduledDate?: Date;
   metadata?: string; // JSON
+  // New fields for automatic population
+  page?: string; // e.g., @rotationonly.mag, @rotationonly.ext, @rotationonly.stem
+  month?: string; // e.g., March, April
+  dayOfWeek?: string; // e.g., Friday
+  moonPhase?: string; // e.g., New Moon, Full Moon, or blank
+  squareType?: string; // Mini Game Title (e.g., Creative Experiments)
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -878,6 +884,12 @@ export const scheduledContentItems = pgTable('scheduled_content_items', {
   actualCreatedDate: timestamp('actual_created_date'),
   nextScheduledDate: timestamp('next_scheduled_date'),
   metadata: text('metadata'), // JSON for additional data
+  // New fields for automatic population
+  page: text('page'), // e.g., @rotationonly.mag, @rotationonly.ext, @rotationonly.stem
+  month: text('month'), // e.g., March, April
+  dayOfWeek: text('day_of_week'), // e.g., Friday
+  moonPhase: text('moon_phase'), // e.g., New Moon, Full Moon, or blank
+  squareType: text('square_type'), // Mini Game Title (e.g., Creative Experiments)
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
