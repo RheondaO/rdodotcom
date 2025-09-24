@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { recurrenceEngine, RecurrencePattern } from './recurrence-engine';
 import { moonPhaseService } from './moon-phase-service';
+import { notion, findDatabaseByTitle } from './notion';
 import { 
   ScheduleTemplate, 
   ScheduledContentItem, 
@@ -256,10 +257,67 @@ router.post('/scheduled-content-items', async (req, res) => {
   try {
     const validatedData = scheduledContentItemSchema.parse(req.body);
     
+    // Create Notion record first
+    let notionPageId: string | undefined = undefined;
+    let notionError: string | undefined = undefined;
+    
+    try {
+      // Find the ROMLCONTENTCALENDAR database
+      const contentCalendarDb = await findDatabaseByTitle("ROMLCONTENTCALENDAR");
+      if (!contentCalendarDb) {
+        throw new Error("ROMLCONTENTCALENDAR database not found in Notion");
+      }
+
+      // Create the page in Notion
+      const notionResponse = await notion.pages.create({
+        parent: { database_id: contentCalendarDb.id },
+        properties: {
+          'Title': {
+            title: [{ text: { content: validatedData.title } }]
+          },
+          'Description': validatedData.description ? {
+            rich_text: [{ text: { content: validatedData.description } }]
+          } : { rich_text: [] },
+          'Status': {
+            select: { name: (validatedData.status as string) || 'scheduled' }
+          },
+          'Scheduled Date': {
+            date: { start: validatedData.scheduledDate.toISOString().split('T')[0] }
+          },
+          'Page': validatedData.page ? {
+            rich_text: [{ text: { content: validatedData.page } }]
+          } : { rich_text: [] },
+          'Month': validatedData.month ? {
+            rich_text: [{ text: { content: validatedData.month } }]
+          } : { rich_text: [] },
+          'Day of Week': validatedData.dayOfWeek ? {
+            rich_text: [{ text: { content: validatedData.dayOfWeek } }]
+          } : { rich_text: [] },
+          'Moon Phase': validatedData.moonPhase ? {
+            rich_text: [{ text: { content: validatedData.moonPhase } }]
+          } : { rich_text: [] },
+          'Square Type': validatedData.squareType ? {
+            rich_text: [{ text: { content: validatedData.squareType } }]
+          } : { rich_text: [] },
+          'Created At': {
+            date: { start: new Date().toISOString() }
+          }
+        }
+      });
+
+      notionPageId = notionResponse.id;
+      console.log(`✅ Created Notion record for scheduled content item: ${validatedData.title}`);
+      
+    } catch (error: any) {
+      console.error('⚠️ Failed to create Notion record:', error.message);
+      notionError = error.message;
+      // Continue with in-memory storage as fallback
+    }
+    
     const newItem: ScheduledContentItem = {
       id: nextItemId++,
       templateId: validatedData.templateId || 0,
-      notionPageId: validatedData.notionPageId || undefined,
+      notionPageId: notionPageId,
       title: validatedData.title,
       description: validatedData.description,
       miniGameBlockId: validatedData.miniGameBlockId,
@@ -276,15 +334,18 @@ router.post('/scheduled-content-items', async (req, res) => {
       updatedAt: new Date()
     };
     
-    // Store in memory for now (fallback)
+    // Store in memory as fallback/cache
     scheduledContentItems.push(newItem);
     
-    // TODO: Implement proper Notion integration here
-    // For now, add a small delay to simulate actual database write
-    await new Promise(resolve => setTimeout(resolve, 100));
+    console.log(`✅ Created scheduled content item: ${newItem.title}${notionPageId ? ' with Notion ID: ' + notionPageId : ' (in-memory only)'}`);
     
-    console.log(`✅ Created scheduled content item: ${newItem.title}`);
-    res.status(201).json(newItem);
+    // Return success with optional warning about Notion
+    const response: any = { ...newItem };
+    if (notionError) {
+      response._warning = `Item created in memory but failed to sync with Notion: ${notionError}`;
+    }
+    
+    res.status(201).json(response);
   } catch (error: any) {
     console.error('Error creating scheduled content item:', error);
     res.status(400).json({ error: error.message });
