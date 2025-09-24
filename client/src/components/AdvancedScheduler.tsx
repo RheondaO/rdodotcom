@@ -1060,15 +1060,6 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                           : `Create ${selectedDates.length || 0} Items in Notion`
                         }
                       </Button>
-                      <Button
-                        onClick={handleCreateTemplate}
-                        disabled={!miniGameTitle || !newTemplate.recurrenceType}
-                        variant="outline"
-                        data-testid="button-save-template"
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Template
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
