@@ -289,6 +289,16 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     setActiveTab("calendar");
   };
 
+  // Available mini-game titles from the system
+  const miniGameTitles = [
+    "Morning Motivation Series",
+    "Astro Insights",
+    "Creative Experiments", 
+    "Personal Stories",
+    "Community Challenges",
+    "Tutorial Tuesdays"
+  ];
+
   // Moon phase options
   const moonPhaseOptions = [
     "None",
@@ -1059,14 +1069,21 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                               <Label htmlFor="mini-game-title" className="text-sm font-medium">
                                 Mini-Game Title
                               </Label>
-                              <Input
-                                id="mini-game-title"
-                                value={miniGameTitle}
-                                onChange={(e) => setMiniGameTitle(e.target.value)}
-                                placeholder="Enter mini-game title..."
-                                className="mt-1"
-                                data-testid="input-mini-game-title"
-                              />
+                              <Select 
+                                value={miniGameTitle} 
+                                onValueChange={setMiniGameTitle}
+                              >
+                                <SelectTrigger className="mt-1" data-testid="select-mini-game-title">
+                                  <SelectValue placeholder="Select mini-game..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {miniGameTitles.map((title) => (
+                                    <SelectItem key={title} value={title}>
+                                      {title}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                             <div>
                               <Label htmlFor="moon-phase" className="text-sm font-medium">
