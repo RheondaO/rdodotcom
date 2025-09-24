@@ -405,66 +405,65 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
           <CardTitle className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             <span className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-              Content Studio Overview
+              rotationONLY Content Studio — Mini-Game Block Studio
             </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border">
-            {displayBlocks.length > 0 ? (
-              <>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {contentStats.totalBlocks}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Mini Game Blocks</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {contentStats.totalPosts}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Content Pieces</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {contentStats.publishedPosts}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Published Content</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-                      {contentStats.scheduledPosts}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Scheduled Posts</div>
-                  </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  {contentStats.totalBlocks}
                 </div>
-                
-                {/* Content Pipeline Progress */}
-                {contentStats.totalPosts > 0 && (
-                  <div className="mt-6 space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Production Pipeline</span>
-                      <span className="text-gray-500">{Math.round((contentStats.publishedPosts / contentStats.totalPosts) * 100)}% complete</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3">
-                      <div 
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500" 
-                        style={{ width: `${(contentStats.publishedPosts / contentStats.totalPosts) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <div className="text-6xl mb-4">🎯</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Mini-Game Blocks</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {contentStats.totalPosts}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Content Pieces</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {contentStats.publishedPosts}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Published Content</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
+                  {contentStats.scheduledPosts}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Scheduled Posts</div>
+              </div>
+            </div>
+            
+            {/* Empty State Message */}
+            {displayBlocks.length === 0 && (
+              <div className="text-center py-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="text-4xl mb-3">🎯</div>
                 <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  No Mini Game Blocks Yet
+                  No Mini-Game Blocks Yet
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  Create your first mini game block to start tracking content performance and scheduling posts.
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Create your first Mini-Game Block in the rotationONLY Content Studio's Mini-Game Block Studio to start tracking @rotationonly content performance and scheduling posts.
                 </p>
+              </div>
+            )}
+            
+            {/* Content Pipeline Progress */}
+            {contentStats.totalPosts > 0 && (
+              <div className="mt-6 space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">Production Pipeline</span>
+                  <span className="text-gray-500">{Math.round((contentStats.publishedPosts / contentStats.totalPosts) * 100)}% complete</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500" 
+                    style={{ width: `${(contentStats.publishedPosts / contentStats.totalPosts) * 100}%` }}
+                  ></div>
+                </div>
               </div>
             )}
 
@@ -475,7 +474,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
                 size="sm"
                 className="bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
               >
-                {displayBlocks.length > 0 ? 'Open Content Studio →' : 'Create First Mini Game Block →'}
+                {displayBlocks.length > 0 ? 'Open rotationONLY Mini-Game Block Studio →' : 'Create First Block in rotationONLY Mini-Game Block Studio →'}
               </Button>
             </div>
           </div>
