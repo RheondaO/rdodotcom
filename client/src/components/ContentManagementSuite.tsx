@@ -89,10 +89,15 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
   });
 
 
+  // Helper function to normalize tag format (remove @ prefix)
+  const normalizeTag = (tag: string) => tag?.replace(/^@/, '');
+
   // Filter blocks based on selected @rotationonly tag
   const displayBlocks = selectedFilter 
     ? allBlocks.filter((block: MiniGameBlock) => 
-        block.rotationOnlyTags?.includes(selectedFilter)
+        (block.rotationOnlyTags || []).some(tag => 
+          normalizeTag(tag) === normalizeTag(selectedFilter)
+        )
       )
     : allBlocks;
 
