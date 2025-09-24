@@ -264,7 +264,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   };
 
   // Generate name preview for mini-game
-  const generateNamePreview = (title: string, date: Date, dates: Date[]): string => {
+  const generateNamePreview = (title: string, date: Date, dates: Date[], moonPhase?: string): string => {
     if (!title) return "";
     
     const monthYear = format(date, 'MMMM yyyy');
@@ -272,14 +272,21 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear()
     ).sort((a, b) => a.getTime() - b.getTime());
     
+    let baseName = "";
     if (sameMonthDates.length <= 1) {
-      return `${title} - ${monthYear}`;
+      baseName = `${title} - ${monthYear}`;
+    } else {
+      const dateIndex = sameMonthDates.findIndex(d => d.getTime() === date.getTime());
+      const weekNumber = dateIndex + 1;
+      baseName = `${title} - ${weekNumber} - ${monthYear}`;
     }
     
-    const dateIndex = sameMonthDates.findIndex(d => d.getTime() === date.getTime());
-    const weekNumber = dateIndex + 1;
+    // Add moon phase if selected and not "None"
+    if (moonPhase && moonPhase !== "None") {
+      baseName += ` - ${moonPhase}`;
+    }
     
-    return `${title} - ${weekNumber} - ${monthYear}`;
+    return baseName;
   };
 
   // Navigate to specific date on calendar
@@ -1114,7 +1121,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                 Name Preview:
                               </Label>
                               <div className="mt-1 text-sm text-blue-700 dark:text-blue-300 font-mono">
-                                {selectedDates.length > 0 && generateNamePreview(miniGameTitle, selectedDates[0], selectedDates)}
+                                {selectedDates.length > 0 && generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase)}
                                 {selectedDates.length > 1 && (
                                   <div className="mt-1 text-xs opacity-75">
                                     (Example for first date - each date gets unique numbering)
@@ -1141,7 +1148,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                     </div>
                                     {miniGameTitle && (
                                       <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                        {generateNamePreview(miniGameTitle, date, selectedDates)}
+                                        {generateNamePreview(miniGameTitle, date, selectedDates, selectedMoonPhase)}
                                       </div>
                                     )}
                                   </div>
