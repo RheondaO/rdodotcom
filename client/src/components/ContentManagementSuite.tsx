@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -37,24 +37,10 @@ import { format } from "date-fns";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../hooks/useAuth";
 import AdvancedScheduler from "./AdvancedScheduler";
+import { apiRequest } from "../lib/queryClient";
 
-interface MiniGameBlock {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  totalPosts: number;
-  scheduledPosts: number;
-  publishedPosts: number;
-  designedPosts: number;
-  reviewedPosts: number;
-  approvedPosts: number;
-  engagement: number;
-  lastUpdated: string;
-  status: "active" | "paused" | "completed";
-  color: string;
-  icon: string;
-}
+import { MiniGameBlock } from "@shared/schema";
+import { PAGE_OPTIONS } from "@shared/dropdown-constants";
 
 interface ContentManagementSuiteProps {
   selectedDate: Date;
@@ -96,126 +82,27 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
     totalPosts: 0
   });
 
-  // Mapping between @rotationonly tags and mini block titles
-  const tagToBlockMapping: Record<string, string[]> = {
-    "rotationonly.ext": ["Astro Insights"],
-    "rotationonly.ceo": ["Personal Stories"],
-    "rotationonly.mag": ["Morning Motivation Series"],
-    "rotationonly.econ": ["Community Challenges"],
-    "rotationonly.xxx": ["Creative Experiments"],
-    "rotationonly.stem": ["Tutorial Tuesdays"],
-    "rotationonly.music": ["Morning Motivation Series", "Creative Experiments"] // Multiple blocks can be mapped to music
-  };
+  // Get mini game blocks from API
+  const { data: allBlocks = [], isLoading: blocksLoading } = useQuery<MiniGameBlock[]>({
+    queryKey: ['/api/mini-game-blocks'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-  // Sample data for mini game blocks
-  const allBlocks = [
-    {
-      id: 1,
-      title: "Morning Motivation Series",
-      description: "Daily inspiring quotes and affirmations",
-      category: "wellness",
-      totalPosts: 45,
-      scheduledPosts: 12,
-      publishedPosts: 33,
-      designedPosts: 40,
-      reviewedPosts: 37,
-      approvedPosts: 35,
-      engagement: 85,
-      lastUpdated: "2025-06-15",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#6B7280",
-      icon: "W"
-    },
-    {
-      id: 2,
-      title: "Astro Insights",
-      description: "Weekly astrological readings and moon phases",
-      category: "astrological",
-      totalPosts: 32,
-      scheduledPosts: 8,
-      publishedPosts: 24,
-      designedPosts: 30,
-      reviewedPosts: 28,
-      approvedPosts: 26,
-      engagement: 92,
-      lastUpdated: "2025-06-14",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#6B7280",
-      icon: "A"
-    },
-    {
-      id: 3,
-      title: "Creative Experiments",
-      description: "Innovative content formats and media tests",
-      category: "creative",
-      totalPosts: 28,
-      scheduledPosts: 6,
-      publishedPosts: 22,
-      designedPosts: 26,
-      reviewedPosts: 24,
-      approvedPosts: 23,
-      engagement: 78,
-      lastUpdated: "2025-06-13",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#6B7280",
-      icon: "C"
-    },
-    {
-      id: 4,
-      title: "Personal Stories",
-      description: "Behind-the-scenes and personal insights",
-      category: "personal",
-      totalPosts: 19,
-      scheduledPosts: 4,
-      publishedPosts: 15,
-      designedPosts: 18,
-      reviewedPosts: 17,
-      approvedPosts: 16,
-      engagement: 96,
-      lastUpdated: "2025-06-12",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#6B7280",
-      icon: "P"
-    },
-    {
-      id: 5,
-      title: "Community Challenges",
-      description: "Interactive games and community engagement",
-      category: "engagement",
-      totalPosts: 24,
-      scheduledPosts: 7,
-      publishedPosts: 17,
-      designedPosts: 22,
-      reviewedPosts: 20,
-      approvedPosts: 19,
-      engagement: 88,
-      lastUpdated: "2025-06-11",
-      status: "active" as "active" | "paused" | "completed",
-      color: "#6B7280",
-      icon: "E"
-    },
-    {
-      id: 6,
-      title: "Tutorial Tuesdays",
-      description: "Educational content and how-to guides",
-      category: "educational",
-      totalPosts: 16,
-      scheduledPosts: 3,
-      publishedPosts: 13,
-      designedPosts: 15,
-      reviewedPosts: 14,
-      approvedPosts: 14,
-      engagement: 74,
-      lastUpdated: "2025-06-10",
-      status: "paused" as "active" | "paused" | "completed",
-      color: "#6B7280",
-      icon: "T"
-    }
-  ];
+  // Create dynamic mapping from blocks data
+  const tagToBlockMapping: Record<string, string[]> = React.useMemo(() => {
+    const mapping: Record<string, string[]> = {};
+    allBlocks.forEach((block: MiniGameBlock) => {
+      block.rotationOnlyTags?.forEach((tag: string) => {
+        if (!mapping[tag]) mapping[tag] = [];
+        mapping[tag].push(block.title);
+      });
+    });
+    return mapping;
+  }, [allBlocks]);
 
   // Filter blocks based on selected @rotationonly tag
   const displayBlocks = selectedFilter 
-    ? allBlocks.filter(block => tagToBlockMapping[selectedFilter]?.includes(block.title))
+    ? allBlocks.filter((block: MiniGameBlock) => tagToBlockMapping[selectedFilter]?.includes(block.title))
     : allBlocks;
 
   const getStatusColor = (status: string) => {
@@ -250,11 +137,11 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
   const totalStats = {
     totalBlocks: displayBlocks.length,
-    activeBlocks: displayBlocks.filter(b => b.status === "active").length,
-    totalPosts: displayBlocks.reduce((sum, b) => sum + b.totalPosts, 0),
-    scheduledPosts: displayBlocks.reduce((sum, b) => sum + b.scheduledPosts, 0),
-    publishedPosts: displayBlocks.reduce((sum, b) => sum + b.publishedPosts, 0),
-    avgEngagement: displayBlocks.length > 0 ? Math.round(displayBlocks.reduce((sum, b) => sum + b.engagement, 0) / displayBlocks.length) : 0
+    activeBlocks: displayBlocks.filter((b: MiniGameBlock) => b.status === "active").length,
+    totalPosts: displayBlocks.reduce((sum: number, b: MiniGameBlock) => sum + b.totalPosts, 0),
+    scheduledPosts: displayBlocks.reduce((sum: number, b: MiniGameBlock) => sum + b.scheduledPosts, 0),
+    publishedPosts: displayBlocks.reduce((sum: number, b: MiniGameBlock) => sum + b.publishedPosts, 0),
+    avgEngagement: displayBlocks.length > 0 ? Math.round(displayBlocks.reduce((sum: number, b: MiniGameBlock) => sum + b.engagement, 0) / displayBlocks.length) : 0
   };
 
   return (
@@ -432,7 +319,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
 
               {/* Enhanced Content Blocks Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {displayBlocks.map((block) => (
+                {displayBlocks.map((block: MiniGameBlock) => (
                   <Card key={block.id} className="bg-white/70 dark:bg-[#0c0910] backdrop-blur-sm border border-pink-200/50 dark:border-pink-800/50 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-4 border-b border-gray-200/50 dark:border-gray-700/50" style={{ background: `linear-gradient(135deg, ${block.color}15 0%, ${block.color}08 100%)` }}>
                       <div className="flex items-center justify-between">

@@ -575,10 +575,23 @@ export interface MiniGameBlock {
   id: number;
   title: string;
   description?: string;
-  gameType: string; // puzzle, action, strategy, etc.
-  difficulty?: string; // easy, medium, hard
-  estimatedPlayTime?: number; // minutes
+  category: string;
+  notionDatabaseId?: string;
+  notionPageId?: string;
+  rotationOnlyTags: string[]; // e.g., ["@rotationonly.mag", "@rotationonly.ext"]
+  status: 'active' | 'paused' | 'completed';
+  color: string;
+  icon: string;
+  totalPosts: number;
+  scheduledPosts: number;
+  publishedPosts: number;
+  designedPosts: number;
+  reviewedPosts: number;
+  approvedPosts: number;
+  engagement: number;
+  lastUpdated: string;
   createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface MiniGameDesign {
