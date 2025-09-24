@@ -31,8 +31,6 @@ import {
   RefreshCw
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 
@@ -944,51 +942,115 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                   </CardContent>
                 </Card>
 
-                {/* Right Side - Calendar View & Selected Dates */}
+                {/* Right Side - Interactive Calendar & Selected Dates */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5" />
-                      Auto-Generated Calendar
+                      <CalendarIcon className="h-5 w-5" />
+                      Interactive Calendar & Preview
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Calendar View */}
+                    {/* Interactive Calendar */}
+                    <div className="border rounded-lg p-4">
+                      <h4 className="font-semibold mb-3">Select Dates Directly:</h4>
+                      <Calendar
+                        mode="multiple"
+                        selected={selectedDates}
+                        onSelect={(dates) => {
+                          if (dates) {
+                            const dateArray = Array.from(dates);
+                            setSelectedDates(dateArray);
+                            const dateObjects = dateArray.map(date => ({ 
+                              date, 
+                              time: newTemplate.config.time 
+                            }));
+                            setSelectedDateTimes(dateObjects);
+                          } else {
+                            setSelectedDates([]);
+                            setSelectedDateTimes([]);
+                          }
+                        }}
+                        className="rounded-md border w-full"
+                        data-testid="interactive-calendar"
+                      />
+                      <p className="text-xs text-gray-500 mt-2 text-center">
+                        Click dates to select/deselect • Hold Shift for range selection
+                      </p>
+                    </div>
+
+                    {/* Selected Dates Preview */}
                     <div className="border rounded-lg p-4">
                       {selectedDates.length > 0 ? (
                         <>
-                          <h4 className="font-semibold mb-3">Next {Math.min(selectedDates.length, 12)} Scheduled Dates:</h4>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-semibold">Selected Dates ({selectedDates.length})</h4>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedDates([]);
+                                setSelectedDateTimes([]);
+                              }}
+                              data-testid="button-clear-dates"
+                            >
+                              <X className="h-3 w-3 mr-1" />
+                              Clear All
+                            </Button>
+                          </div>
                           <ScrollArea className="h-64 w-full">
                             <div className="space-y-2">
-                              {selectedDates.slice(0, 12).map((dateObj, index) => (
-                                <div key={index} className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border">
-                                  <div>
-                                    <p className="font-medium text-blue-700 dark:text-blue-300">
-                                      {miniGameTitle && generateNamePreview(miniGameTitle, dateObj, selectedDates, selectedMoonPhase)}
-                                    </p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                                      {format(dateObj.date, 'EEEE, MMMM d, yyyy')}
-                                      {dateObj.time && ` at ${dateObj.time}`}
-                                    </p>
-                                  </div>
-                                  <Badge variant="outline" className="text-xs">
-                                    {format(dateObj.date, 'MMM')}
-                                  </Badge>
-                                </div>
-                              ))}
+                              {selectedDates
+                                .sort((a, b) => a.getTime() - b.getTime())
+                                .slice(0, 20)
+                                .map((date, index) => {
+                                  const dateTimeObj = selectedDateTimes.find(dt => dt.date.getTime() === date.getTime()) || { date, time: undefined };
+                                  return (
+                                    <div key={index} className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border group">
+                                      <div className="flex-1">
+                                        <p className="font-medium text-blue-700 dark:text-blue-300">
+                                          {miniGameTitle ? generateNamePreview(miniGameTitle, dateTimeObj.date, selectedDates, selectedMoonPhase) : 'Select a title to see preview'}
+                                        </p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                          {format(date, 'EEEE, MMMM d, yyyy')}
+                                          {dateTimeObj.time && ` at ${dateTimeObj.time}`}
+                                        </p>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="text-xs">
+                                          {format(date, 'MMM')}
+                                        </Badge>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            const updatedDates = selectedDates.filter((_, i) => i !== index);
+                                            const updatedDateTimes = selectedDateTimes.filter(dt => dt.date.getTime() !== date.getTime());
+                                            setSelectedDates(updatedDates);
+                                            setSelectedDateTimes(updatedDateTimes);
+                                          }}
+                                          className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                                          data-testid={`button-remove-date-${index}`}
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                             </div>
                           </ScrollArea>
-                          {selectedDates.length > 12 && (
+                          {selectedDates.length > 20 && (
                             <p className="text-sm text-gray-500 mt-2 text-center">
-                              + {selectedDates.length - 12} more dates...
+                              + {selectedDates.length - 20} more dates... (showing first 20)
                             </p>
                           )}
                         </>
                       ) : (
                         <div className="text-center py-8 text-gray-500">
-                          <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                          <p>Select a mini-game title and recurrence type</p>
-                          <p className="text-sm">to see auto-generated dates here</p>
+                          <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                          <p>No dates selected</p>
+                          <p className="text-sm">Use the calendar above or auto-generate with recurrence settings</p>
                         </div>
                       )}
                     </div>
@@ -1002,7 +1064,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
                           <li>• Total dates: {selectedDates.length}</li>
                           <li>• Period: {selectedDates.length > 0 ? 
-                            `${format(selectedDates[0].date, 'MMM yyyy')} - ${format(selectedDates[selectedDates.length - 1].date, 'MMM yyyy')}` 
+                            `${format(selectedDates[0], 'MMM yyyy')} - ${format(selectedDates[selectedDates.length - 1], 'MMM yyyy')}` 
                             : 'N/A'}
                           </li>
                           <li>• Recurrence: {newTemplate.recurrenceType}</li>
