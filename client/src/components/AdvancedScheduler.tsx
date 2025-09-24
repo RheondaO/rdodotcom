@@ -915,7 +915,15 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                     {/* Action buttons */}
                     <div className="flex gap-2 pt-4 border-t">
                       <Button
-                        onClick={handleGeneratePreview}
+                        onClick={() => {
+                          if (miniGameTitle && newTemplate.recurrenceType) {
+                            handleAutoPopulateDates();
+                            toast({
+                              title: "Schedule Preview Generated",
+                              description: `Generated ${selectedDates.length} dates for ${newTemplate.recurrenceType} recurrence`
+                            });
+                          }
+                        }}
                         disabled={!miniGameTitle || !newTemplate.recurrenceType}
                         className="flex-1"
                         data-testid="button-preview-schedule"
