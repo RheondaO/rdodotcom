@@ -740,6 +740,14 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
 
   return (
     <div className="space-y-6" data-testid="advanced-scheduler">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Repeat className="h-5 w-5" />
+            Advanced Content Scheduler
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="create-schedule" data-testid="tab-create-schedule">Create Schedule</TabsTrigger>
@@ -1422,6 +1430,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
               </DialogFooter>
             </DialogContent>
           </Dialog>
+        </CardContent>
+      </Card>
     </div>
   );
 }
