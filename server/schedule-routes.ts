@@ -11,6 +11,7 @@ import {
   MonthlyDayConfig, 
   MoonPhaseConfig 
 } from '../shared/schema';
+import { PAGE_OPTIONS, MINI_GAME_TITLES, CONTENT_STATUS_OPTIONS, MOON_PHASE_BACKEND_VALUES } from '../shared/dropdown-constants';
 
 const router = Router();
 
@@ -64,13 +65,13 @@ const scheduledContentItemSchema = z.object({
   miniGameBlockId: z.number().optional(),
   scheduledDate: z.string().transform(str => new Date(str)),
   metadata: z.record(z.any()).optional(),
-  // New fields for automatic population
-  page: z.string().optional().nullable(),
+  // New fields for automatic population with validation
+  page: z.enum(PAGE_OPTIONS as unknown as [string, ...string[]]).optional().nullable(),
   month: z.string().optional().nullable(),
   dayOfWeek: z.string().optional().nullable(),
-  moonPhase: z.string().optional().nullable(),
-  squareType: z.string().optional().nullable(),
-  status: z.string().optional()
+  moonPhase: z.enum(MOON_PHASE_BACKEND_VALUES as unknown as [string, ...string[]]).optional().nullable(),
+  squareType: z.enum(MINI_GAME_TITLES as unknown as [string, ...string[]]).optional().nullable(),
+  status: z.enum(CONTENT_STATUS_OPTIONS as unknown as [string, ...string[]]).optional()
 });
 
 // In-memory storage for demo (replace with actual database calls)

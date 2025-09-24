@@ -33,6 +33,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
+import { MOON_PHASE_OPTIONS, PAGE_OPTIONS, MINI_GAME_TITLES, MOON_PHASE_DISPLAY_TO_BACKEND } from "@shared/dropdown-constants";
 
 interface ScheduleTemplate {
   id: number;
@@ -385,28 +386,9 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     setActiveTab("create-schedule");
   };
 
-  // Available mini-game titles from the system
-  const miniGameTitles = [
-    "Morning Motivation Series",
-    "Astro Insights",
-    "Creative Experiments", 
-    "Personal Stories",
-    "Community Challenges",
-    "Tutorial Tuesdays"
-  ];
-
-  // Moon phase options
-  const moonPhaseOptions = [
-    "None",
-    "New Moon",
-    "Waxing Crescent", 
-    "First Quarter",
-    "Waxing Gibbous",
-    "Full Moon",
-    "Waning Gibbous",
-    "Third Quarter",
-    "Waning Crescent"
-  ];
+  // Use centralized constants for consistency
+  const miniGameTitles = MINI_GAME_TITLES;
+  const moonPhaseOptions = MOON_PHASE_OPTIONS;
 
   const resetForm = () => {
     setNewTemplate({
@@ -823,12 +805,11 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                           <SelectValue placeholder="Select page..." />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="@rotationonly.mag">@rotationonly.mag</SelectItem>
-                          <SelectItem value="@rotationonly.ext">@rotationonly.ext</SelectItem>
-                          <SelectItem value="@rotationonly.stem">@rotationonly.stem</SelectItem>
-                          <SelectItem value="@rotationonly.art">@rotationonly.art</SelectItem>
-                          <SelectItem value="@rotationonly.sci">@rotationonly.sci</SelectItem>
-                          <SelectItem value="@rotationonly.tech">@rotationonly.tech</SelectItem>
+                          {PAGE_OPTIONS.map((page) => (
+                            <SelectItem key={page} value={page}>
+                              {page}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1051,7 +1032,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                               // Auto-populate the new fields
                               const monthName = format(date, 'MMMM'); // e.g., "March", "April"
                               const dayOfWeekName = format(date, 'EEEE'); // e.g., "Friday"
-                              const moonPhaseValue = selectedMoonPhase && selectedMoonPhase !== 'None' ? selectedMoonPhase : null;
+                              const moonPhaseValue = selectedMoonPhase ? MOON_PHASE_DISPLAY_TO_BACKEND[selectedMoonPhase] : null;
                               const squareTypeValue = miniGameTitle; // Mini Game Title becomes Square Type
                               const pageValue = newTemplate.page || null;
                               
