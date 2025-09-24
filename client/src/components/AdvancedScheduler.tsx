@@ -82,6 +82,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     description: "",
     type: "",
     platform: "",
+    page: "", // New field for page selection
     recurrenceType: "weekly" as 'weekly' | 'nth_weekday' | 'quarterly' | 'monthly_day' | 'moon_phase',
     config: {
       // Weekly config
@@ -293,6 +294,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
           description: '',
           type: 'mini-game-block',
           platform: '@rotationonly',
+          page: '',
           recurrenceType: 'weekly', 
           config: {
             dayOfWeek: 0,
@@ -803,6 +805,29 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                               {title}
                             </SelectItem>
                           ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Page Selection */}
+                    <div>
+                      <Label htmlFor="page-select">Page</Label>
+                      <Select 
+                        value={newTemplate.page || ''} 
+                        onValueChange={(value) => {
+                          setNewTemplate(prev => ({ ...prev, page: value }));
+                        }}
+                      >
+                        <SelectTrigger data-testid="select-page">
+                          <SelectValue placeholder="Select page..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="@rotationonly.mag">@rotationonly.mag</SelectItem>
+                          <SelectItem value="@rotationonly.ext">@rotationonly.ext</SelectItem>
+                          <SelectItem value="@rotationonly.stem">@rotationonly.stem</SelectItem>
+                          <SelectItem value="@rotationonly.art">@rotationonly.art</SelectItem>
+                          <SelectItem value="@rotationonly.sci">@rotationonly.sci</SelectItem>
+                          <SelectItem value="@rotationonly.tech">@rotationonly.tech</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
