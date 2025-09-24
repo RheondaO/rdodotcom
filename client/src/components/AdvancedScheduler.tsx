@@ -1043,7 +1043,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                 description: `Generated from ${newTemplate.recurrenceType} recurrence pattern`,
                                 scheduledDate: date.toISOString(),
                                 notionPageId: null,
-                                status: 'scheduled',
+                                status: 'Scheduled',
                                 // Auto-populated fields
                                 page: pageValue,
                                 month: monthName,
@@ -1391,7 +1391,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         description: previewConfirmData.template.description,
                         scheduledDate: occurrence.date,
                         notionPageId: null,
-                        status: 'scheduled'
+                        status: 'Scheduled'
                       }));
                       
                       // Create each scheduled item individually with standardized names
