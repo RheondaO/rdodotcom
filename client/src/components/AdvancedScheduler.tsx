@@ -1098,28 +1098,26 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                     {/* Interactive Calendar */}
                     <div className="border rounded-lg p-4">
                       {/* <h4 className="font-semibold mb-3">Select Dates Directly:</h4> */}
-                      <div className="flex justify-center">
-                        <Calendar
-                          mode="multiple"
-                          selected={selectedDates}
-                          onSelect={(dates) => {
-                            if (dates) {
-                              const dateArray = Array.from(dates);
-                              setSelectedDates(dateArray);
-                              const dateObjects = dateArray.map(date => ({ 
-                                date, 
-                                time: newTemplate.config.time 
-                              }));
-                              setSelectedDateTimes(dateObjects);
-                            } else {
-                              setSelectedDates([]);
-                              setSelectedDateTimes([]);
-                            }
-                          }}
-                          className="rounded-md border"
-                          data-testid="interactive-calendar"
-                        />
-                      </div>
+                      <Calendar
+                        mode="multiple"
+                        selected={selectedDates}
+                        onSelect={(dates) => {
+                          if (dates) {
+                            const dateArray = Array.from(dates);
+                            setSelectedDates(dateArray);
+                            const dateObjects = dateArray.map(date => ({ 
+                              date, 
+                              time: newTemplate.config.time 
+                            }));
+                            setSelectedDateTimes(dateObjects);
+                          } else {
+                            setSelectedDates([]);
+                            setSelectedDateTimes([]);
+                          }
+                        }}
+                        className="rounded-md border w-full"
+                        data-testid="interactive-calendar"
+                      />
                       <p className="text-xs text-gray-500 mt-2 text-center">
                         Click dates to select/deselect </p>
                     </div>
@@ -1154,7 +1152,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                     <div key={index} className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border group">
                                       <div className="flex-1">
                                         <p className="font-medium text-blue-700 dark:text-blue-300">
-                                          {miniGameTitle ? generateNamePreview(miniGameTitle, dateTimeObj.date, selectedDates, selectedMoonPhase) : 'Select a title to see preview'}
+                                          {miniGameTitle ? generateNamePreview(miniGameTitle, dateTimeObj.date, selectedDates, selectedMoonPhase) : 'greatness_name here'}
                                         </p>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                           {format(date, 'EEEE, MMMM d, yyyy')}
