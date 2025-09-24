@@ -865,10 +865,11 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="weekly">Weekly (Every Monday, Tuesday, etc.)</SelectItem>
-                          <SelectItem value="nth_weekday">Nth Weekday (2nd Monday, 4th Sunday, etc.)</SelectItem>
-                          <SelectItem value="quarterly">Quarterly</SelectItem>
-                          <SelectItem value="monthly_day">Monthly Day (1st, 2nd, 7th, 14th of month)</SelectItem>
+                          <SelectItem value="weekly">Weekly (ex. Every Tuesday)</SelectItem>
+                          
+                          <SelectItem value="nth_weekday">Nth Weekday (ex. 4th Sunday)</SelectItem>
+                          <SelectItem value="quarterly">Quarterly (ex. Spring Equinox)</SelectItem>
+                          <SelectItem value="monthly_day">Monthly Day (ex. 7th of month)</SelectItem>
                           <SelectItem value="moon_phase">Moon Phase</SelectItem>
                         </SelectContent>
                       </Select>
@@ -1097,29 +1098,30 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                     {/* Interactive Calendar */}
                     <div className="border rounded-lg p-4">
                       {/* <h4 className="font-semibold mb-3">Select Dates Directly:</h4> */}
-                      <Calendar
-                        mode="multiple"
-                        selected={selectedDates}
-                        onSelect={(dates) => {
-                          if (dates) {
-                            const dateArray = Array.from(dates);
-                            setSelectedDates(dateArray);
-                            const dateObjects = dateArray.map(date => ({ 
-                              date, 
-                              time: newTemplate.config.time 
-                            }));
-                            setSelectedDateTimes(dateObjects);
-                          } else {
-                            setSelectedDates([]);
-                            setSelectedDateTimes([]);
-                          }
-                        }}
-                        className="rounded-md border w-full"
-                        data-testid="interactive-calendar"
-                      />
+                      <div className="flex justify-center">
+                        <Calendar
+                          mode="multiple"
+                          selected={selectedDates}
+                          onSelect={(dates) => {
+                            if (dates) {
+                              const dateArray = Array.from(dates);
+                              setSelectedDates(dateArray);
+                              const dateObjects = dateArray.map(date => ({ 
+                                date, 
+                                time: newTemplate.config.time 
+                              }));
+                              setSelectedDateTimes(dateObjects);
+                            } else {
+                              setSelectedDates([]);
+                              setSelectedDateTimes([]);
+                            }
+                          }}
+                          className="rounded-md border"
+                          data-testid="interactive-calendar"
+                        />
+                      </div>
                       <p className="text-xs text-gray-500 mt-2 text-center">
-                        Click dates to select/deselect • Hold Shift for range selection
-                      </p>
+                        Click dates to select/deselect </p>
                     </div>
 
                     {/* Selected Dates Preview */}
@@ -1192,8 +1194,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       ) : (
                         <div className="text-center py-8 text-gray-500">
                           <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                          <p>No dates selected</p>
-                          <p className="text-sm">Use the calendar above or auto-generate with recurrence settings</p>
+                           <p>No dates selected</p> 
+                          {/* <p className="text-sm">Use the calendar above or auto-generate with recurrence settings</p> */}
                         </div>
                       )}
                     </div>
@@ -1202,7 +1204,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                     {selectedDates.length > 0 && (
                       <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
                         <h5 className="font-medium text-green-800 dark:text-green-200 mb-2">
-                          📊 Schedule Summary:
+                      Summary:
                         </h5>
                         <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
                           <li>• Total dates: {selectedDates.length}</li>
@@ -1210,7 +1212,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                             `${format(selectedDates[0], 'MMM yyyy')} - ${format(selectedDates[selectedDates.length - 1], 'MMM yyyy')}` 
                             : 'N/A'}
                           </li>
-                          <li>• Recurrence: {newTemplate.recurrenceType}</li>
+                          {/*  <li>• Recurrence: {newTemplate.recurrenceType}</li> */}
                           {selectedMoonPhase && selectedMoonPhase !== 'none' && (
                             <li>• Moon phase: {selectedMoonPhase}</li>
                           )}
