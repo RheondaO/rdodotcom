@@ -1222,44 +1222,26 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
               </div>
             </TabsContent>
 
-            {/* Scheduled Items Tab - Remaining unchanged for now */}
+            {/* Scheduled Items Tab - TEMPORARILY PAUSED FOR TESTING */}
             <TabsContent value="scheduled" className="space-y-4">
-              <h3 className="text-lg font-semibold">Scheduled Content Items</h3>
-              
-              {itemsLoading ? (
-                <div className="text-center py-8">Loading scheduled items...</div>
-              ) : scheduledItems.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  No scheduled content items. 
+              <div className="text-center py-12">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/40 rounded-full flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                    Scheduled Items View Paused
+                  </h3>
+                  <p className="text-yellow-700 dark:text-yellow-300 text-sm">
+                    This view is temporarily paused while we test the Notion integration for the ROMLCONTENTCALENDAR database.
+                  </p>
+                  <p className="text-yellow-600 dark:text-yellow-400 text-xs mt-2">
+                    You can continue creating scheduled items - they will sync to Notion in the background.
+                  </p>
                 </div>
-              ) : (
-                <div className="grid gap-4">
-                  {scheduledItems.map((item: any) => (
-                    <Card key={item.id} data-testid={`scheduled-item-${item.id}`}>
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <h4 className="font-semibold">{item.title}</h4>
-                            {item.description && (
-                              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-                                {item.description}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2 mt-2">
-                              <Badge className={getStatusColor(item.status)}>
-                                {item.status}
-                              </Badge>
-                              <span className="text-sm text-gray-500">
-                                Scheduled for {format(parseISO(item.scheduledDate), 'MMM d, yyyy h:mm a')}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+              </div>
             </TabsContent>
           </Tabs>
 
