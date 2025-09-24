@@ -70,6 +70,9 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartDate, setDragStartDate] = useState<Date | null>(null);
+  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+  const [miniGameTitle, setMiniGameTitle] = useState<string>("");
+  const [selectedMoonPhase, setSelectedMoonPhase] = useState<string>("None");
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -249,6 +252,55 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       saveSelectedDatesMutation.mutate(selectedDates);
     }
   };
+
+  // Helper function to get week number in month (1-5)
+  const getWeekNumberInMonth = (date: Date): number => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const firstWeekday = firstDay.getDay();
+    const dateNumber = date.getDate();
+    return Math.ceil((dateNumber + firstWeekday) / 7);
+  };
+
+  // Generate name preview for mini-game
+  const generateNamePreview = (title: string, date: Date, dates: Date[]): string => {
+    if (!title) return "";
+    
+    const monthYear = format(date, 'MMMM yyyy');
+    const sameMonthDates = dates.filter(d => 
+      d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear()
+    ).sort((a, b) => a.getTime() - b.getTime());
+    
+    if (sameMonthDates.length <= 1) {
+      return `${title} - ${monthYear}`;
+    }
+    
+    const dateIndex = sameMonthDates.findIndex(d => d.getTime() === date.getTime());
+    const weekNumber = dateIndex + 1;
+    
+    return `${title} - ${weekNumber} - ${monthYear}`;
+  };
+
+  // Navigate to specific date on calendar
+  const navigateToDate = (date: Date) => {
+    setCalendarMonth(new Date(date.getFullYear(), date.getMonth(), 1));
+    // Switch to calendar tab if not already there
+    setActiveTab("calendar");
+  };
+
+  // Moon phase options
+  const moonPhaseOptions = [
+    "None",
+    "New Moon",
+    "Waxing Crescent", 
+    "First Quarter",
+    "Waxing Gibbous",
+    "Full Moon",
+    "Waning Gibbous",
+    "Third Quarter",
+    "Waning Crescent"
+  ];
 
   const resetForm = () => {
     setNewTemplate({
@@ -906,9 +958,47 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                 <div className="flex-1">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <CalendarIcon className="h-5 w-5" />
-                        Select Dates
+                      <CardTitle className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-5 w-5" />
+                          Select Dates
+                        </div>
+                        {/* Interactive Month/Year Selector */}
+                        <div className="flex items-center gap-2">
+                          <Select 
+                            value={calendarMonth.getMonth().toString()}
+                            onValueChange={(value) => setCalendarMonth(new Date(calendarMonth.getFullYear(), parseInt(value), 1))}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 12 }, (_, i) => (
+                                <SelectItem key={i} value={i.toString()}>
+                                  {format(new Date(2000, i, 1), 'MMMM')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select 
+                            value={calendarMonth.getFullYear().toString()}
+                            onValueChange={(value) => setCalendarMonth(new Date(parseInt(value), calendarMonth.getMonth(), 1))}
+                          >
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 10 }, (_, i) => {
+                                const year = new Date().getFullYear() + i;
+                                return (
+                                  <SelectItem key={year} value={year.toString()}>
+                                    {year}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -916,6 +1006,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         mode="multiple"
                         selected={selectedDates}
                         onSelect={(dates) => setSelectedDates(dates || [])}
+                        month={calendarMonth}
+                        onMonthChange={setCalendarMonth}
                         className="rdp"
                         classNames={{
                           day_selected: "bg-blue-600 text-white hover:bg-blue-700",
@@ -928,14 +1020,15 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         <p><strong>How to use:</strong></p>
                         <p>• Click individual dates to select/deselect them</p>
                         <p>• Hold Shift and click to select a range of dates</p>
-                        <p>• Use the sidebar to review and save your selections</p>
+                        <p>• Use the month/year dropdowns above to navigate quickly</p>
+                        <p>• Click on selected dates in the sidebar to navigate to them</p>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
 
                 {/* Selected Dates Sidebar */}
-                <div className="w-80">
+                <div className="w-96">
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
@@ -960,22 +1053,86 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         </div>
                       ) : (
                         <>
+                          {/* Mini-Game Title and Moon Phase Fields */}
+                          <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <Label htmlFor="mini-game-title" className="text-sm font-medium">
+                                Mini-Game Title
+                              </Label>
+                              <Input
+                                id="mini-game-title"
+                                value={miniGameTitle}
+                                onChange={(e) => setMiniGameTitle(e.target.value)}
+                                placeholder="Enter mini-game title..."
+                                className="mt-1"
+                                data-testid="input-mini-game-title"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="moon-phase" className="text-sm font-medium">
+                                Moon Phase (Optional)
+                              </Label>
+                              <Select 
+                                value={selectedMoonPhase} 
+                                onValueChange={setSelectedMoonPhase}
+                              >
+                                <SelectTrigger className="mt-1" data-testid="select-moon-phase">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {moonPhaseOptions.map((phase) => (
+                                    <SelectItem key={phase} value={phase}>
+                                      {phase}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          {/* Name Preview */}
+                          {miniGameTitle && (
+                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                              <Label className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                Name Preview:
+                              </Label>
+                              <div className="mt-1 text-sm text-blue-700 dark:text-blue-300 font-mono">
+                                {selectedDates.length > 0 && generateNamePreview(miniGameTitle, selectedDates[0], selectedDates)}
+                                {selectedDates.length > 1 && (
+                                  <div className="mt-1 text-xs opacity-75">
+                                    (Example for first date - each date gets unique numbering)
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Selected Dates List */}
                           <div className="max-h-64 overflow-y-auto space-y-2">
                             {selectedDates
                               .sort((a, b) => a.getTime() - b.getTime())
                               .map((date, index) => (
                                 <div
                                   key={index}
-                                  className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded"
+                                  className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                                   data-testid={`selected-date-${index}`}
+                                  onClick={() => navigateToDate(date)}
                                 >
-                                  <span className="text-sm font-mono">
-                                    {format(date, 'MMM d, yyyy')}
-                                  </span>
+                                  <div className="flex-1">
+                                    <div className="text-sm font-semibold">
+                                      {format(date, 'EEEE MMM d, yyyy')}
+                                    </div>
+                                    {miniGameTitle && (
+                                      <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                        {generateNamePreview(miniGameTitle, date, selectedDates)}
+                                      </div>
+                                    )}
+                                  </div>
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setSelectedDates(prev => 
                                         prev.filter(d => d.getTime() !== date.getTime())
                                       );
@@ -992,13 +1149,18 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                           <div className="pt-4 border-t">
                             <Button
                               onClick={handleSaveSelectedDates}
-                              disabled={saveSelectedDatesMutation.isPending}
+                              disabled={saveSelectedDatesMutation.isPending || !miniGameTitle.trim()}
                               className="w-full bg-green-600 hover:bg-green-700 text-white"
                               data-testid="button-save-selected-dates"
                             >
                               <Save className="h-4 w-4 mr-2" />
                               {saveSelectedDatesMutation.isPending ? 'Saving...' : `Save ${selectedDates.length} Date${selectedDates.length === 1 ? '' : 's'} to Notion`}
                             </Button>
+                            {!miniGameTitle.trim() && selectedDates.length > 0 && (
+                              <p className="text-xs text-red-500 mt-1">
+                                Mini-Game title is required to save dates
+                              </p>
+                            )}
                           </div>
                         </>
                       )}
