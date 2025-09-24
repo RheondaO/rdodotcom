@@ -227,6 +227,94 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     }
   });
 
+  // Create bulk content items mutation
+  const createBulkItemsMutation = useMutation({
+    mutationFn: async (items: any[]) => {
+      // Create items sequentially with proper error handling
+      const results = [];
+      const errors = [];
+      
+      for (const item of items) {
+        try {
+          const response = await fetch('/api/scheduled-content-items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item)
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(errorData);
+          }
+          
+          const result = await response.json();
+          results.push(result);
+        } catch (error: any) {
+          errors.push({ item: item.title, error: error.message });
+        }
+      }
+      
+      if (errors.length > 0 && results.length === 0) {
+        throw new Error(`Failed to create all items: ${errors.map(e => e.error).join('; ')}`);
+      }
+      
+      return { results, errors };
+    },
+    onSuccess: ({ results, errors }) => {
+      if (errors.length > 0) {
+        toast({
+          title: `Created ${results.length} items with ${errors.length} errors`,
+          description: `Some items failed: ${errors.map(e => e.item).join(', ')}`,
+          variant: "destructive"
+        });
+      } else {
+        toast({ 
+          title: `Created ${results.length} items in Notion!`,
+          description: "Content has been successfully scheduled."
+        });
+      }
+      
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduled-content-items'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/mini-game-blocks'] });
+      
+      // Call callback if provided
+      if (onContentScheduled && results.length > 0) {
+        onContentScheduled(results);
+      }
+      
+      // Clear form on successful creation
+      if (results.length > 0) {
+        setSelectedDates([]);
+        setSelectedDateTimes([]);
+        setMiniGameTitle('');
+        setNewTemplate({ 
+          name: '',
+          description: '',
+          type: 'mini-game-block',
+          platform: '@rotationonly',
+          recurrenceType: 'weekly', 
+          config: {
+            dayOfWeek: 0,
+            time: '12:00',
+            weekNumber: 1,
+            monthInQuarter: 1,
+            dayOfMonth: 1,
+            phaseTypes: [],
+            offsetDays: 0
+          }
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: "Error creating items in Notion", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    }
+  });
+
   // Helper functions for date range selection
   const getDatesInRange = (start: Date, end: Date): Date[] => {
     const dates: Date[] = [];
@@ -398,7 +486,12 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   // Auto-populate calendar dates based on recurrence type
   const handleAutoPopulateDates = (recurrenceType?: string) => {
     const activeRecurrenceType = recurrenceType || newTemplate.recurrenceType;
-    if (!activeRecurrenceType) return;
+    if (!activeRecurrenceType) {
+      // Clear selections if no recurrence type
+      setSelectedDates([]);
+      setSelectedDateTimes([]);
+      return;
+    }
 
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1); // Start from beginning of current month
@@ -406,7 +499,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     const dates: { date: Date; time?: string }[] = [];
 
     try {
-      switch (recurrenceType) {
+      switch (activeRecurrenceType) {
         case 'weekly':
           if (newTemplate.config.dayOfWeek !== undefined) {
             const dayOfWeek = newTemplate.config.dayOfWeek;
@@ -530,8 +623,18 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       }
 
       // Update both selectedDates and selectedDateTimes
-      setSelectedDates(dates.map(d => d.date));
+      const generatedDates = dates.map(d => d.date);
+      setSelectedDates(generatedDates);
       setSelectedDateTimes(dates);
+      
+      // Show success feedback if dates were generated
+      if (dates.length > 0) {
+        toast({
+          title: "Schedule Auto-Generated",
+          description: `Generated ${dates.length} dates for ${activeRecurrenceType} recurrence`,
+          variant: "default"
+        });
+      }
       
     } catch (error) {
       console.error('Error auto-populating dates:', error);
@@ -914,20 +1017,48 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                     <div className="flex gap-2 pt-4 border-t">
                       <Button
                         onClick={() => {
-                          if (miniGameTitle && newTemplate.recurrenceType) {
-                            handleAutoPopulateDates();
-                            toast({
-                              title: "Schedule Preview Generated",
-                              description: `Generated ${selectedDates.length} dates for ${newTemplate.recurrenceType} recurrence`
+                          if (miniGameTitle && selectedDates.length > 0) {
+                            // Create scheduled content items using proper mutation
+                            const itemsToCreate = selectedDates.map((date) => {
+                              const dateTimeObj = selectedDateTimes.find(dt => dt.date.getTime() === date.getTime()) || { date, time: undefined };
+                              return {
+                                templateId: null, // This will be generated server-side
+                                title: generateNamePreview(miniGameTitle, date, selectedDates, selectedMoonPhase),
+                                description: `Generated from ${newTemplate.recurrenceType} recurrence pattern`,
+                                scheduledDate: date.toISOString(),
+                                notionPageId: null,
+                                status: 'scheduled'
+                              };
                             });
+                            
+                            // Use the proper mutation
+                            createBulkItemsMutation.mutate(itemsToCreate);
+                          } else {
+                            // Show helpful feedback when prerequisites aren't met
+                            if (!miniGameTitle) {
+                              toast({
+                                title: "Missing Title",
+                                description: "Please enter a mini-game title first.",
+                                variant: "destructive"
+                              });
+                            } else if (selectedDates.length === 0) {
+                              toast({
+                                title: "No Dates Selected",
+                                description: "Please select recurrence settings or choose dates manually.",
+                                variant: "destructive"
+                              });
+                            }
                           }
                         }}
-                        disabled={!miniGameTitle || !newTemplate.recurrenceType}
-                        className="flex-1"
-                        data-testid="button-preview-schedule"
+                        disabled={!miniGameTitle || selectedDates.length === 0 || createBulkItemsMutation.isPending}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        data-testid="button-create-in-notion"
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview Schedule
+                        <Plus className="h-4 w-4 mr-2" />
+                        {createBulkItemsMutation.isPending 
+                          ? `Creating ${selectedDates.length} Items...` 
+                          : `Create ${selectedDates.length || 0} Items in Notion`
+                        }
                       </Button>
                       <Button
                         onClick={handleCreateTemplate}
