@@ -1096,7 +1096,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                   <CardContent className="space-y-4">
                     {/* Interactive Calendar */}
                     <div className="border rounded-lg p-4">
-                      <h4 className="font-semibold mb-3">Select Dates Directly:</h4>
+                      {/* <h4 className="font-semibold mb-3">Select Dates Directly:</h4> */}
                       <Calendar
                         mode="multiple"
                         selected={selectedDates}
