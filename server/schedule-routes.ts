@@ -303,10 +303,10 @@ router.post('/scheduled-content-items', async (req, res) => {
         properties['Moon Phase'] = { select: { name: validatedData.moonPhase } };
       }
       
-      // Skip Mini Game - it's a rollup field, not settable via API
-      // if (validatedData.squareType) {
-      //   properties['Mini Game'] = { select: { name: validatedData.squareType } };
-      // }
+      // Mini Game is now a select field (updated by user)
+      if (validatedData.squareType) {
+        properties['Mini Game'] = { select: { name: validatedData.squareType } };
+      }
       
       if (validatedData.page) {
         properties['Page'] = { select: { name: validatedData.page } };
