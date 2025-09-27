@@ -1109,6 +1109,18 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                           : `Create ${selectedDates.length || 0} Items in Notion`
                         }
                       </Button>
+                      
+                      <Button
+                        onClick={() => handleAutoPopulateDates()}
+                        disabled={!newTemplate.recurrenceType}
+                        size="icon"
+                        variant="outline"
+                        className="h-10 w-10"
+                        data-testid="button-generate-preview"
+                        title="Generate Preview"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
