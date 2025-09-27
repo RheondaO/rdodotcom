@@ -475,12 +475,23 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       // Clear selections if no recurrence type
       setSelectedDates([]);
       setSelectedDateTimes([]);
+      setPreviewOccurrences([]); // Clear preview when config changes
       return;
     }
 
+    // Clear preview when config changes to avoid stale data
+    setPreviewOccurrences([]);
+
     const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1); // Start from beginning of current month
-    const endDate = new Date(now.getFullYear() + 1, now.getMonth(), 0); // Go through next year
+    // Normalize to noon to avoid timezone boundary issues
+    now.setHours(12, 0, 0, 0);
+    
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1); 
+    startDate.setHours(12, 0, 0, 0); // Normalize to noon
+    
+    const endDate = new Date(now.getFullYear() + 1, now.getMonth(), 0); 
+    endDate.setHours(12, 0, 0, 0); // Normalize to noon
+    
     const dates: { date: Date; time?: string }[] = [];
 
     try {
@@ -497,8 +508,10 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
             
             // Generate weekly occurrences
             while (currentDate <= endDate && dates.length < 52) { // Max 52 weeks
+              const normalizedDate = new Date(currentDate);
+              normalizedDate.setHours(12, 0, 0, 0); // Normalize to noon
               dates.push({
-                date: new Date(currentDate),
+                date: normalizedDate,
                 time: newTemplate.config.time
               });
               currentDate.setDate(currentDate.getDate() + 7);
@@ -540,8 +553,10 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
               }
               
               if (targetDate.getMonth() === monthIndex && targetDate >= now) {
+                const normalizedDate = new Date(targetDate);
+                normalizedDate.setHours(12, 0, 0, 0); // Normalize to noon
                 dates.push({
-                  date: new Date(targetDate),
+                  date: normalizedDate,
                   time: newTemplate.config.time
                 });
               }
@@ -561,6 +576,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
               const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
               if (dayOfMonth <= daysInMonth) {
                 const targetDate = new Date(year, monthIndex, dayOfMonth);
+                targetDate.setHours(12, 0, 0, 0); // Normalize to noon
                 if (targetDate >= now) {
                   dates.push({
                     date: targetDate,
@@ -578,6 +594,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
           for (let i = 0; i < 8; i++) { // 8 quarters (2 years)
             const quarterDate = new Date(quarterlyStartDate);
             quarterDate.setMonth(quarterDate.getMonth() + (i * 3));
+            quarterDate.setHours(12, 0, 0, 0); // Normalize to noon
             if (quarterDate >= now) {
               dates.push({
                 date: quarterDate,
@@ -594,6 +611,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
             const year = startDate.getFullYear() + Math.floor(month / 12);
             const monthIndex = month % 12;
             const moonDate = new Date(year, monthIndex, 15); // Approximate middle of month
+            moonDate.setHours(12, 0, 0, 0); // Normalize to noon
             if (moonDate >= now) {
               dates.push({
                 date: moonDate,

@@ -63,18 +63,25 @@ export class RecurrenceEngine {
     const targetDay = config.dayOfWeek;
     const currentDay = currentDate.getDay();
     
+    const scheduleHour = config.time ? parseInt(config.time.split(':')[0]) : 12;
+    const scheduleMinute = config.time ? parseInt(config.time.split(':')[1]) : 0;
+    
     let daysUntilTarget = (targetDay - currentDay + 7) % 7;
-    if (daysUntilTarget === 0 && currentDate.getHours() >= (config.time ? parseInt(config.time.split(':')[0]) : 9)) {
-      daysUntilTarget = 7; // If it's the same day but past the time, go to next week
+    if (daysUntilTarget === 0) {
+      // Check if current time is after schedule time (precise comparison)
+      const currentHour = currentDate.getHours();
+      const currentMinute = currentDate.getMinutes();
+      const isAfterScheduleTime = currentHour > scheduleHour || 
+                                  (currentHour === scheduleHour && currentMinute > scheduleMinute);
+      if (isAfterScheduleTime) {
+        daysUntilTarget = 7; // If it's the same day but past the time, go to next week
+      }
     }
     
     currentDate.setDate(currentDate.getDate() + daysUntilTarget);
     
-    // Set the time if specified
-    if (config.time) {
-      const [hours, minutes] = config.time.split(':').map(Number);
-      currentDate.setHours(hours, minutes, 0, 0);
-    }
+    // Set the time
+    currentDate.setHours(scheduleHour, scheduleMinute, 0, 0);
     
     // Generate weekly occurrences
     for (let i = 0; i < maxOccurrences; i++) {
@@ -104,6 +111,9 @@ export class RecurrenceEngine {
     // Start from the beginning of current month
     currentDate.setDate(1);
     
+    const scheduleHour = config.time ? parseInt(config.time.split(':')[0]) : 12;
+    const scheduleMinute = config.time ? parseInt(config.time.split(':')[1]) : 0;
+    
     for (let i = 0; i < maxOccurrences; i++) {
       const occurrence = this.findNthWeekdayInMonth(
         currentDate.getFullYear(),
@@ -112,29 +122,29 @@ export class RecurrenceEngine {
         config.dayOfWeek
       );
       
-      if (occurrence && occurrence >= fromDate) {
-        if (config.time) {
-          const [hours, minutes] = config.time.split(':').map(Number);
-          occurrence.setHours(hours, minutes, 0, 0);
+      if (occurrence) {
+        // Set the time BEFORE comparing with fromDate
+        occurrence.setHours(scheduleHour, scheduleMinute, 0, 0);
+        
+        if (occurrence >= fromDate) {
+          const weekText = config.weekNumber === -1 ? 'Last' : 
+                          config.weekNumber === 1 ? '1st' :
+                          config.weekNumber === 2 ? '2nd' :
+                          config.weekNumber === 3 ? '3rd' : '4th';
+          
+          occurrences.push({
+            date: new Date(occurrence),
+            title: `${weekText} ${this.getDayName(config.dayOfWeek)} of month`,
+            description: `Scheduled for ${weekText} ${this.getDayName(config.dayOfWeek)} of every month${config.time ? ` at ${config.time}` : ''}`
+          });
         }
-        
-        const weekText = config.weekNumber === -1 ? 'Last' : 
-                        config.weekNumber === 1 ? '1st' :
-                        config.weekNumber === 2 ? '2nd' :
-                        config.weekNumber === 3 ? '3rd' : '4th';
-        
-        occurrences.push({
-          date: new Date(occurrence),
-          title: `${weekText} ${this.getDayName(config.dayOfWeek)} of month`,
-          description: `Scheduled for ${weekText} ${this.getDayName(config.dayOfWeek)} of every month${config.time ? ` at ${config.time}` : ''}`
-        });
       }
       
       // Move to next month
       currentDate.setMonth(currentDate.getMonth() + 1);
     }
     
-    return occurrences.filter(o => o.date >= fromDate);
+    return occurrences;
   }
 
   /**
@@ -157,14 +167,15 @@ export class RecurrenceEngine {
     currentDate.setMonth(targetMonth);
     currentDate.setDate(config.dayOfMonth);
     
+    // Set the time immediately to avoid comparison issues
+    const scheduleHour = config.time ? parseInt(config.time.split(':')[0]) : 12;
+    const scheduleMinute = config.time ? parseInt(config.time.split(':')[1]) : 0;
+    currentDate.setHours(scheduleHour, scheduleMinute, 0, 0);
+    
     // If this date has already passed, move to next quarter
     if (currentDate < fromDate) {
       currentDate.setMonth(currentDate.getMonth() + 3);
-    }
-    
-    if (config.time) {
-      const [hours, minutes] = config.time.split(':').map(Number);
-      currentDate.setHours(hours, minutes, 0, 0);
+      currentDate.setHours(scheduleHour, scheduleMinute, 0, 0);
     }
     
     for (let i = 0; i < maxOccurrences; i++) {
@@ -195,14 +206,16 @@ export class RecurrenceEngine {
     // Set to the target day of current month
     currentDate.setDate(config.dayOfMonth);
     
+    // Set the time immediately to avoid comparison issues
+    const scheduleHour = config.time ? parseInt(config.time.split(':')[0]) : 12;
+    const scheduleMinute = config.time ? parseInt(config.time.split(':')[1]) : 0;
+    currentDate.setHours(scheduleHour, scheduleMinute, 0, 0);
+    
     // If this date has already passed this month, move to next month
     if (currentDate < fromDate) {
       currentDate.setMonth(currentDate.getMonth() + 1);
-    }
-    
-    if (config.time) {
-      const [hours, minutes] = config.time.split(':').map(Number);
-      currentDate.setHours(hours, minutes, 0, 0);
+      currentDate.setDate(config.dayOfMonth);
+      currentDate.setHours(scheduleHour, scheduleMinute, 0, 0);
     }
     
     for (let i = 0; i < maxOccurrences; i++) {
@@ -210,10 +223,8 @@ export class RecurrenceEngine {
       const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), config.dayOfMonth);
       
       if (targetDate.getDate() === config.dayOfMonth) {
-        if (config.time) {
-          const [hours, minutes] = config.time.split(':').map(Number);
-          targetDate.setHours(hours, minutes, 0, 0);
-        }
+        // Set time for the target date
+        targetDate.setHours(scheduleHour, scheduleMinute, 0, 0);
         
         occurrences.push({
           date: new Date(targetDate),
@@ -224,6 +235,8 @@ export class RecurrenceEngine {
       
       // Move to next month
       currentDate.setMonth(currentDate.getMonth() + 1);
+      currentDate.setDate(config.dayOfMonth);
+      currentDate.setHours(scheduleHour, scheduleMinute, 0, 0);
     }
     
     return occurrences;
