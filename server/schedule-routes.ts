@@ -268,41 +268,53 @@ router.post('/scheduled-content-items', async (req, res) => {
         throw new Error("ROMLCONTENTCALENDAR database not found in Notion");
       }
 
-      // Create the page in Notion
+      // Create the page in Notion using user's database schema
+      const properties: any = {
+        'Name': {
+          title: [{ text: { content: validatedData.title } }]
+        },
+        'Scheduled Publish Date': {
+          date: { start: validatedData.scheduledDate.toISOString().split('T')[0] }
+        }
+      };
+
+      // Safe status mapping - only use known Notion status values
+      const statusMapping: { [key: string]: string } = {
+        'scheduled': 'Not started',
+        'created': 'In progress', 
+        'published': 'Done',
+        'failed': 'Not started'
+      };
+      const notionStatus = statusMapping[validatedData.status as string] || 'Not started';
+      properties['Status'] = { status: { name: notionStatus } };
+
+      // Add optional select properties only if they have values
+      // Note: Only include properties that are actually select types in Notion
+      if (validatedData.month) {
+        properties['Month'] = { select: { name: validatedData.month } };
+      }
+      
+      if (validatedData.dayOfWeek) {
+        // Use exact property name with trailing space as found in database
+        properties['Day of the Week '] = { select: { name: validatedData.dayOfWeek } };
+      }
+      
+      if (validatedData.moonPhase) {
+        properties['Moon Phase'] = { select: { name: validatedData.moonPhase } };
+      }
+      
+      // Skip Mini Game - it's a rollup field, not settable via API
+      // if (validatedData.squareType) {
+      //   properties['Mini Game'] = { select: { name: validatedData.squareType } };
+      // }
+      
+      if (validatedData.page) {
+        properties['Page'] = { select: { name: validatedData.page } };
+      }
+
       const notionResponse = await notion.pages.create({
         parent: { database_id: contentCalendarDb.id },
-        properties: {
-          'Title': {
-            title: [{ text: { content: validatedData.title } }]
-          },
-          'Description': validatedData.description ? {
-            rich_text: [{ text: { content: validatedData.description } }]
-          } : { rich_text: [] },
-          'Status': {
-            select: { name: (validatedData.status as string) || 'scheduled' }
-          },
-          'Scheduled Date': {
-            date: { start: validatedData.scheduledDate.toISOString().split('T')[0] }
-          },
-          'Page': validatedData.page ? {
-            rich_text: [{ text: { content: validatedData.page } }]
-          } : { rich_text: [] },
-          'Month': validatedData.month ? {
-            rich_text: [{ text: { content: validatedData.month } }]
-          } : { rich_text: [] },
-          'Day of Week': validatedData.dayOfWeek ? {
-            rich_text: [{ text: { content: validatedData.dayOfWeek } }]
-          } : { rich_text: [] },
-          'Moon Phase': validatedData.moonPhase ? {
-            rich_text: [{ text: { content: validatedData.moonPhase } }]
-          } : { rich_text: [] },
-          'Square Type': validatedData.squareType ? {
-            rich_text: [{ text: { content: validatedData.squareType } }]
-          } : { rich_text: [] },
-          'Created At': {
-            date: { start: new Date().toISOString() }
-          }
-        }
+        properties: properties
       });
 
       notionPageId = notionResponse.id;

@@ -267,7 +267,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Blocks</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Designing</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalStats.totalBlocks}</p>
                       </div>
                       <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center">
@@ -281,7 +281,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Blocks</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Scheduled for Today</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalStats.activeBlocks}</p>
                       </div>
                       <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
@@ -295,7 +295,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Published Posts</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Published Today</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalStats.publishedPosts}</p>
                       </div>
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
@@ -309,7 +309,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Engagement</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Engagement this Month</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalStats.avgEngagement}%</p>
                       </div>
                       <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
