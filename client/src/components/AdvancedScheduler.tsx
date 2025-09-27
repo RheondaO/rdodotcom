@@ -928,10 +928,13 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                             type="time"
                             data-testid="input-weekly-time"
                             value={newTemplate.config.time || ''}
-                            onChange={(e) => setNewTemplate(prev => ({ 
-                              ...prev, 
-                              config: { ...prev.config, time: e.target.value }
-                            }))}
+                            onChange={(e) => {
+                              setNewTemplate(prev => ({ 
+                                ...prev, 
+                                config: { ...prev.config, time: e.target.value }
+                              }));
+                              handleAutoPopulateDates();
+                            }}
                           />
                         </div>
                       </div>
@@ -995,10 +998,13 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                             type="time"
                             data-testid="input-nth-time"
                             value={newTemplate.config.time || ''}
-                            onChange={(e) => setNewTemplate(prev => ({ 
-                              ...prev, 
-                              config: { ...prev.config, time: e.target.value }
-                            }))}
+                            onChange={(e) => {
+                              setNewTemplate(prev => ({ 
+                                ...prev, 
+                                config: { ...prev.config, time: e.target.value }
+                              }));
+                              handleAutoPopulateDates();
+                            }}
                           />
                         </div>
                       </div>
@@ -1030,10 +1036,13 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                             type="time"
                             data-testid="input-monthly-time"
                             value={newTemplate.config.time || ''}
-                            onChange={(e) => setNewTemplate(prev => ({ 
-                              ...prev, 
-                              config: { ...prev.config, time: e.target.value }
-                            }))}
+                            onChange={(e) => {
+                              setNewTemplate(prev => ({ 
+                                ...prev, 
+                                config: { ...prev.config, time: e.target.value }
+                              }));
+                              handleAutoPopulateDates();
+                            }}
                           />
                         </div>
                       </div>
