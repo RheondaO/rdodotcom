@@ -33,7 +33,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
-import { MOON_PHASE_OPTIONS, PAGE_OPTIONS, MINI_GAME_TITLES, MOON_PHASE_DISPLAY_TO_BACKEND } from "@shared/dropdown-constants";
+import { MOON_PHASE_OPTIONS, PAGE_OPTIONS, MINI_GAME_TITLES, MOON_PHASE_DISPLAY_TO_BACKEND, ZODIAC_SIGN_OPTIONS } from "@shared/dropdown-constants";
 
 interface ScheduleTemplate {
   id: number;
@@ -73,6 +73,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date(2026, 0, 1)); // Initialize to January 2026
   const [miniGameTitle, setMiniGameTitle] = useState<string>("");
   const [selectedMoonPhase, setSelectedMoonPhase] = useState<string>("None");
+  const [selectedZodiac, setSelectedZodiac] = useState<string>("None");
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -420,6 +421,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
         startDate: format(new Date(), 'yyyy-MM-dd')
       }
     });
+    setSelectedMoonPhase("None");
+    setSelectedZodiac("None");
   };
 
   const handleCreateTemplate = () => {
@@ -1041,7 +1044,13 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       <Label htmlFor="moon-phase-select">Moon Phase</Label>
                       <Select 
                         value={selectedMoonPhase} 
-                        onValueChange={setSelectedMoonPhase}
+                        onValueChange={(value) => {
+                          setSelectedMoonPhase(value);
+                          // Reset zodiac when moon phase changes to None
+                          if (value === "None") {
+                            setSelectedZodiac("None");
+                          }
+                        }}
                       >
                         <SelectTrigger data-testid="select-moon-phase-main">
                           <SelectValue />
@@ -1055,6 +1064,28 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Zodiac Sign Selection (conditional) */}
+                    {selectedMoonPhase !== "None" && (
+                      <div>
+                        <Label htmlFor="zodiac-select">Zodiac Sign</Label>
+                        <Select 
+                          value={selectedZodiac} 
+                          onValueChange={setSelectedZodiac}
+                        >
+                          <SelectTrigger data-testid="select-zodiac">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ZODIAC_SIGN_OPTIONS.map((zodiac) => (
+                              <SelectItem key={zodiac} value={zodiac}>
+                                {zodiac}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
                     {/* Template Name Preview (Read-only) */}
                     {miniGameTitle && (
@@ -1289,6 +1320,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                               const monthName = format(date, 'MMMM'); // e.g., "March", "April"
                               const dayOfWeekName = format(date, 'EEEE'); // e.g., "Friday"
                               const moonPhaseValue = selectedMoonPhase ? MOON_PHASE_DISPLAY_TO_BACKEND[selectedMoonPhase] : null;
+                              const zodiacValue = selectedMoonPhase !== "None" && selectedZodiac !== "None" ? selectedZodiac : null;
                               const squareTypeValue = miniGameTitle; // Mini Game Title becomes Square Type
                               const pageValue = newTemplate.page || null;
                               
@@ -1304,6 +1336,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                 month: monthName,
                                 dayOfWeek: dayOfWeekName,
                                 moonPhase: moonPhaseValue,
+                                zodiac: zodiacValue,
                                 squareType: squareTypeValue
                               };
                             });

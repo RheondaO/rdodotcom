@@ -111,3 +111,22 @@ export const CONTENT_STATUS_OPTIONS = [
 ] as const;
 
 export type ContentStatusOption = typeof CONTENT_STATUS_OPTIONS[number];
+
+// Zodiac sign options
+export const ZODIAC_SIGN_OPTIONS = [
+  'None',
+  'Aries',
+  'Taurus', 
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces'
+] as const;
+
+export type ZodiacSignOption = typeof ZODIAC_SIGN_OPTIONS[number];
