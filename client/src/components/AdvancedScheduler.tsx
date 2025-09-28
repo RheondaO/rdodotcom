@@ -89,6 +89,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       // Weekly config
       dayOfWeek: 1, // Monday
       time: "09:00",
+      startDate: "2026-01-01", // Default start date
       // Nth weekday config
       weekNumber: 1,
       // Quarterly config
@@ -96,9 +97,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       dayOfMonth: 1,
       // Moon phase config
       phaseTypes: ['full_moon'],
-      offsetDays: 0,
-      // Start date for planning
-      startDate: format(new Date(), 'yyyy-MM-dd')
+      offsetDays: 0
     }
   });
 
