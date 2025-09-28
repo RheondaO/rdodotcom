@@ -104,8 +104,9 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   // Initialize calendar month to match default start date
   useEffect(() => {
     if (newTemplate.config.startDate) {
-      const startDate = new Date(newTemplate.config.startDate);
-      setCalendarMonth(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
+      // Parse date string more explicitly to avoid timezone issues
+      const [year, month, day] = newTemplate.config.startDate.split('-').map(Number);
+      setCalendarMonth(new Date(year, month - 1, 1)); // month - 1 because JS months are 0-indexed
     }
   }, []); // Run only on component mount
 
@@ -1085,8 +1086,9 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                           }));
                           // Update calendar month to match start date
                           if (e.target.value) {
-                            const startDate = new Date(e.target.value);
-                            setCalendarMonth(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
+                            // Parse date string more explicitly to avoid timezone issues
+                            const [year, month, day] = e.target.value.split('-').map(Number);
+                            setCalendarMonth(new Date(year, month - 1, 1)); // month - 1 because JS months are 0-indexed
                           }
                           handleAutoPopulateDates();
                         }}
@@ -1368,13 +1370,19 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                           mode="multiple"
                           selected={[
                             ...selectedDates,
-                            ...(newTemplate.config.startDate ? [new Date(newTemplate.config.startDate)] : [])
+                            ...(newTemplate.config.startDate ? (() => {
+                              const [year, month, day] = newTemplate.config.startDate.split('-').map(Number);
+                              return [new Date(year, month - 1, day)]; // month - 1 because JS months are 0-indexed
+                            })() : [])
                           ]}
                           onSelect={(dates) => {
                             if (dates) {
                               const dateArray = Array.from(dates);
                               // Filter out the start date from selected dates to avoid duplication
-                              const startDate = newTemplate.config.startDate ? new Date(newTemplate.config.startDate) : null;
+                              const startDate = newTemplate.config.startDate ? (() => {
+                                const [year, month, day] = newTemplate.config.startDate.split('-').map(Number);
+                                return new Date(year, month - 1, day); // month - 1 because JS months are 0-indexed
+                              })() : null;
                               const filteredDates = startDate ? 
                                 dateArray.filter(date => date.getTime() !== startDate.getTime()) : 
                                 dateArray;
