@@ -1366,12 +1366,21 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       <div className="flex flex-col items-center">
                         <Calendar
                           mode="multiple"
-                          selected={selectedDates}
+                          selected={[
+                            ...selectedDates,
+                            ...(newTemplate.config.startDate ? [new Date(newTemplate.config.startDate)] : [])
+                          ]}
                           onSelect={(dates) => {
                             if (dates) {
                               const dateArray = Array.from(dates);
-                              setSelectedDates(dateArray);
-                              const dateObjects = dateArray.map(date => ({ 
+                              // Filter out the start date from selected dates to avoid duplication
+                              const startDate = newTemplate.config.startDate ? new Date(newTemplate.config.startDate) : null;
+                              const filteredDates = startDate ? 
+                                dateArray.filter(date => date.getTime() !== startDate.getTime()) : 
+                                dateArray;
+                              
+                              setSelectedDates(filteredDates);
+                              const dateObjects = filteredDates.map(date => ({ 
                                 date, 
                                 time: newTemplate.config.time 
                               }));
@@ -1381,6 +1390,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                               setSelectedDateTimes([]);
                             }
                           }}
+                          month={calendarMonth}
+                          onMonthChange={setCalendarMonth}
                           className="rounded-md border"
                           data-testid="interactive-calendar"
                         />
