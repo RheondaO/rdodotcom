@@ -195,7 +195,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     onSuccess: (data) => {
       toast({ 
         title: `Successfully saved ${data.created} calendar selections!`,
-        description: "Each selected date has been saved as a unique Notion record."
+        description: "Each selected date has been saved as a unique record."
       });
       setSelectedDates([]);
       queryClient.invalidateQueries({ queryKey: ['/api/calendar-selections'] });
@@ -281,7 +281,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
         });
       } else {
         toast({ 
-          title: `Created ${results.length} items in Notion!`,
+          title: `Created ${results.length} scheduled items!`,
           description: "Content has been successfully scheduled."
         });
       }
@@ -322,7 +322,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     },
     onError: (error: Error) => {
       toast({ 
-        title: "Error creating items in Notion", 
+        title: "Error creating scheduled items", 
         description: error.message, 
         variant: "destructive" 
       });
@@ -1334,7 +1334,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         <Plus className="h-4 w-4 mr-2" />
                         {createBulkItemsMutation.isPending 
                           ? `Creating ${selectedDates.length} Items...` 
-                          : `Create ${selectedDates.length || 0} Items in Notion`
+                          : `Create ${selectedDates.length || 0} Scheduled Items`
                         }
                       </Button>
                       
