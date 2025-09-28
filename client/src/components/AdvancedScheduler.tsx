@@ -101,6 +101,14 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     }
   });
 
+  // Initialize calendar month to match default start date
+  useEffect(() => {
+    if (newTemplate.config.startDate) {
+      const startDate = new Date(newTemplate.config.startDate);
+      setCalendarMonth(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
+    }
+  }, []); // Run only on component mount
+
   // Fetch schedule templates
   const { data: templates = [], isLoading: templatesLoading, refetch: refetchTemplates } = useQuery({
     queryKey: ['/api/schedule-templates'],
