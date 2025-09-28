@@ -1368,27 +1368,12 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       <div className="flex flex-col items-center">
                         <Calendar
                           mode="multiple"
-                          selected={[
-                            ...selectedDates,
-                            ...(newTemplate.config.startDate ? (() => {
-                              const [year, month, day] = newTemplate.config.startDate.split('-').map(Number);
-                              return [new Date(year, month - 1, day)]; // month - 1 because JS months are 0-indexed
-                            })() : [])
-                          ]}
+                          selected={selectedDates}
                           onSelect={(dates) => {
                             if (dates) {
                               const dateArray = Array.from(dates);
-                              // Filter out the start date from selected dates to avoid duplication
-                              const startDate = newTemplate.config.startDate ? (() => {
-                                const [year, month, day] = newTemplate.config.startDate.split('-').map(Number);
-                                return new Date(year, month - 1, day); // month - 1 because JS months are 0-indexed
-                              })() : null;
-                              const filteredDates = startDate ? 
-                                dateArray.filter(date => date.getTime() !== startDate.getTime()) : 
-                                dateArray;
-                              
-                              setSelectedDates(filteredDates);
-                              const dateObjects = filteredDates.map(date => ({ 
+                              setSelectedDates(dateArray);
+                              const dateObjects = dateArray.map(date => ({ 
                                 date, 
                                 time: newTemplate.config.time 
                               }));
