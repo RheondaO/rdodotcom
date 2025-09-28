@@ -26,7 +26,8 @@ export const MOON_PHASE_OPTIONS = [
   'Full Moon',
   'Waning Gibbous',
   'Third Quarter',
-  'Waning Crescent'
+  'Waning Crescent',
+  'Sun Sign'
 ] as const;
 
 export type MoonPhaseOption = typeof MOON_PHASE_OPTIONS[number];
@@ -41,7 +42,8 @@ export const MOON_PHASE_DISPLAY_TO_BACKEND: Record<string, string | null> = {
   'Full Moon': 'full_moon',
   'Waning Gibbous': 'waning_gibbous',
   'Third Quarter': 'last_quarter',
-  'Waning Crescent': 'waning_crescent'
+  'Waning Crescent': 'waning_crescent',
+  'Sun Sign': 'sun_sign'
 };
 
 // Mini-game block titles (Square Type options)
@@ -95,7 +97,8 @@ export const MOON_PHASE_BACKEND_VALUES = [
   'waxing_crescent',
   'waxing_gibbous',
   'waning_gibbous',
-  'waning_crescent'
+  'waning_crescent',
+  'sun_signs'
 ] as const;
 
 export type MoonPhaseBackendValue = typeof MOON_PHASE_BACKEND_VALUES[number];

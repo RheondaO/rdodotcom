@@ -366,7 +366,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   };
 
   // Generate name preview for mini-game
-  const generateNamePreview = (title: string, date: Date, dates: Date[], moonPhase?: string): string => {
+  const generateNamePreview = (title: string, date: Date, dates: Date[], moonPhase?: string, zodiac?: string): string => {
     if (!title) return "";
     
     const monthYear = format(date, 'MMMM yyyy');
@@ -386,6 +386,11 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     // Add moon phase if selected and not "None"
     if (moonPhase && moonPhase !== "None") {
       baseName += ` - ${moonPhase}`;
+    }
+    
+    // Add zodiac sign if selected and not "None"
+    if (zodiac && zodiac !== "None") {
+      baseName += ` - ${zodiac}`;
     }
     
     return baseName;
@@ -1093,7 +1098,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         <Label>Name Preview</Label>
                         <Input
                           value={miniGameTitle && selectedDates.length > 0 ? 
-                            generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase) : 
+                            generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase, selectedZodiac) : 
                             miniGameTitle}
                           readOnly
                           className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
@@ -1326,7 +1331,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                               
                               return {
                                 templateId: null, // This will be generated server-side
-                                title: generateNamePreview(miniGameTitle, date, selectedDates, selectedMoonPhase),
+                                title: generateNamePreview(miniGameTitle, date, selectedDates, selectedMoonPhase, selectedZodiac),
                                 description: `Generated from ${newTemplate.recurrenceType} recurrence pattern`,
                                 scheduledDate: date.toISOString(),
                                 notionPageId: null,
@@ -1456,7 +1461,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                                     <div key={index} className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border group">
                                       <div className="flex-1">
                                         <p className="font-medium text-blue-700 dark:text-blue-300">
-                                          {miniGameTitle ? generateNamePreview(miniGameTitle, dateTimeObj.date, selectedDates, selectedMoonPhase) : 'greatness_name here'}
+                                          {miniGameTitle ? generateNamePreview(miniGameTitle, dateTimeObj.date, selectedDates, selectedMoonPhase, selectedZodiac) : 'greatness_name here'}
                                         </p>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                           {format(date, 'EEEE, MMMM d, yyyy')}
