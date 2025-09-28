@@ -96,7 +96,9 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
       dayOfMonth: 1,
       // Moon phase config
       phaseTypes: ['full_moon'],
-      offsetDays: 0
+      offsetDays: 0,
+      // Start date for planning
+      startDate: format(new Date(), 'yyyy-MM-dd')
     }
   });
 
@@ -304,7 +306,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
             monthInQuarter: 1,
             dayOfMonth: 1,
             phaseTypes: [],
-            offsetDays: 0
+            offsetDays: 0,
+            startDate: format(new Date(), 'yyyy-MM-dd')
           }
         });
       }
@@ -405,7 +408,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
         monthInQuarter: 1,
         dayOfMonth: 1,
         phaseTypes: ['full_moon'],
-        offsetDays: 0
+        offsetDays: 0,
+        startDate: format(new Date(), 'yyyy-MM-dd')
       }
     });
   };
@@ -468,6 +472,331 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     return `${type} - ${monthYear}`;
   };
 
+  // Validate that generated dates match configuration settings
+  const validateGeneratedDates = (dates: Date[], config: any, recurrenceType: string): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    if (dates.length === 0) {
+      errors.push("No dates were generated");
+      return { isValid: false, errors };
+    }
+
+    try {
+      switch (recurrenceType) {
+        case 'weekly':
+          // Check that all dates are on the correct day of week
+          const expectedDayOfWeek = config.dayOfWeek;
+          const invalidWeeklyDates = dates.filter(date => date.getDay() !== expectedDayOfWeek);
+          if (invalidWeeklyDates.length > 0) {
+            errors.push(`${invalidWeeklyDates.length} dates are not on the configured day of week`);
+          }
+          
+          // Check that dates are exactly 7 days apart
+          for (let i = 1; i < dates.length; i++) {
+            const daysDiff = Math.abs((dates[i].getTime() - dates[i-1].getTime()) / (1000 * 60 * 60 * 24));
+            if (Math.abs(daysDiff - 7) > 0.1) { // Allow small floating point differences
+              errors.push(`Dates are not exactly 7 days apart`);
+              break;
+            }
+          }
+          break;
+
+        case 'nth_weekday':
+          // Check that all dates are on the correct day of week and week number
+          const expectedWeekNumber = config.weekNumber;
+          const expectedNthDayOfWeek = config.dayOfWeek;
+          
+          dates.forEach((date, index) => {
+            if (date.getDay() !== expectedNthDayOfWeek) {
+              errors.push(`Date ${index + 1} is not on the configured day of week`);
+            }
+            
+            // Calculate which week of the month this date falls in
+            const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+            const weekOfMonth = Math.ceil((date.getDate() + firstDayOfMonth.getDay()) / 7);
+            
+            if (expectedWeekNumber === -1) {
+              // Check if it's the last occurrence
+              const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+              const isLastWeek = date.getDate() > lastDayOfMonth.getDate() - 7;
+              if (!isLastWeek) {
+                errors.push(`Date ${index + 1} is not the last occurrence of the day in the month`);
+              }
+            } else if (weekOfMonth !== expectedWeekNumber) {
+              errors.push(`Date ${index + 1} is not in the ${expectedWeekNumber}th week of the month`);
+            }
+          });
+          break;
+
+        case 'monthly_day':
+          // Check that all dates are on the correct day of month
+          const expectedDayOfMonth = config.dayOfMonth;
+          const invalidMonthlyDates = dates.filter(date => date.getDate() !== expectedDayOfMonth);
+          if (invalidMonthlyDates.length > 0) {
+            errors.push(`${invalidMonthlyDates.length} dates are not on the configured day of month`);
+          }
+          break;
+
+        case 'quarterly':
+          // Check that dates honor monthInQuarter and dayOfMonth configuration
+          const expectedMonthInQuarter = config.monthInQuarter; // 1, 2, or 3
+          const expectedQuarterlyDayOfMonth = config.dayOfMonth;
+          
+          dates.forEach((date, index) => {
+            // Check day of month
+            if (date.getDate() !== expectedQuarterlyDayOfMonth) {
+              errors.push(`Date ${index + 1} is not on the configured day of month (${expectedQuarterlyDayOfMonth})`);
+            }
+            
+            // Check month position within quarter
+            const monthInQuarter = (date.getMonth() % 3) + 1; // 1, 2, or 3
+            if (monthInQuarter !== expectedMonthInQuarter) {
+              errors.push(`Date ${index + 1} is not in the configured month of quarter (${expectedMonthInQuarter})`);
+            }
+          });
+          
+          // Check that dates are approximately 3 months apart
+          for (let i = 1; i < dates.length; i++) {
+            const monthsDiff = (dates[i].getFullYear() - dates[i-1].getFullYear()) * 12 + 
+                              (dates[i].getMonth() - dates[i-1].getMonth());
+            if (Math.abs(monthsDiff - 3) > 0.1) {
+              errors.push(`Dates are not exactly 3 months apart`);
+              break;
+            }
+          }
+          break;
+
+        case 'moon_phase':
+          // For moon phase, we can't easily validate without moon phase data
+          // Just check that dates exist
+          if (dates.length === 0) {
+            errors.push("No moon phase dates generated");
+          }
+          break;
+
+        default:
+          errors.push(`Unknown recurrence type: ${recurrenceType}`);
+      }
+    } catch (error) {
+      errors.push(`Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    return { isValid: errors.length === 0, errors };
+  };
+
+  // Pure function to generate dates without side effects
+  const generateDates = (config: any, recurrenceType: string, startDate: Date): { date: Date; time?: string }[] => {
+    const dates: { date: Date; time?: string }[] = [];
+    const endDate = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate());
+    endDate.setHours(12, 0, 0, 0);
+
+    try {
+      switch (recurrenceType) {
+        case 'weekly':
+          if (config.dayOfWeek !== undefined) {
+            const dayOfWeek = config.dayOfWeek;
+            const currentDate = new Date(startDate);
+            
+            // Find first occurrence of the day of week
+            while (currentDate.getDay() !== dayOfWeek) {
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Generate weekly occurrences
+            while (currentDate <= endDate && dates.length < 52) {
+              const normalizedDate = new Date(currentDate);
+              normalizedDate.setHours(12, 0, 0, 0);
+              dates.push({
+                date: normalizedDate,
+                time: config.time
+              });
+              currentDate.setDate(currentDate.getDate() + 7);
+            }
+          }
+          break;
+
+        case 'nth_weekday':
+          if (config.weekNumber !== undefined && config.dayOfWeek !== undefined) {
+            const weekNumber = config.weekNumber;
+            const dayOfWeek = config.dayOfWeek;
+            
+            // Generate for each month within the year range
+            let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+            while (currentMonth <= endDate) {
+              let targetDate: Date;
+              
+              if (weekNumber === -1) { // Last occurrence
+                const lastDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+                targetDate = new Date(lastDayOfMonth);
+                
+                // Find the last occurrence of the day of week
+                while (targetDate.getDay() !== dayOfWeek) {
+                  targetDate.setDate(targetDate.getDate() - 1);
+                }
+              } else { // Nth occurrence
+                const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+                targetDate = new Date(firstDayOfMonth);
+                
+                // Find first occurrence of the day of week
+                while (targetDate.getDay() !== dayOfWeek) {
+                  targetDate.setDate(targetDate.getDate() + 1);
+                }
+                
+                // Add (n-1) weeks
+                targetDate.setDate(targetDate.getDate() + (weekNumber - 1) * 7);
+              }
+              
+              if (targetDate.getMonth() === currentMonth.getMonth() && targetDate >= startDate && targetDate <= endDate) {
+                const normalizedDate = new Date(targetDate);
+                normalizedDate.setHours(12, 0, 0, 0);
+                dates.push({
+                  date: normalizedDate,
+                  time: config.time
+                });
+              }
+              
+              // Move to next month
+              currentMonth.setMonth(currentMonth.getMonth() + 1);
+            }
+          }
+          break;
+
+        case 'monthly_day':
+          if (config.dayOfMonth !== undefined) {
+            const dayOfMonth = config.dayOfMonth;
+            
+            let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+            while (currentMonth <= endDate) {
+              const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+              if (dayOfMonth <= daysInMonth) {
+                const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayOfMonth);
+                targetDate.setHours(12, 0, 0, 0);
+                if (targetDate >= startDate && targetDate <= endDate) {
+                  dates.push({
+                    date: targetDate,
+                    time: config.time
+                  });
+                }
+              }
+              
+              // Move to next month
+              currentMonth.setMonth(currentMonth.getMonth() + 1);
+            }
+          }
+          break;
+
+        case 'quarterly':
+          if (config.monthInQuarter !== undefined && config.dayOfMonth !== undefined) {
+            const monthInQuarter = config.monthInQuarter; // 1, 2, or 3
+            const dayOfMonth = config.dayOfMonth;
+            
+            // Start from the current quarter
+            const startQuarter = Math.floor(startDate.getMonth() / 3);
+            const startYear = startDate.getFullYear();
+            
+            for (let i = 0; i < 8; i++) { // 8 quarters (2 years)
+              const quarterIndex = startQuarter + i;
+              const year = startYear + Math.floor(quarterIndex / 4);
+              const quarterInYear = quarterIndex % 4;
+              
+              // Calculate the target month (0-based)
+              const targetMonth = (quarterInYear * 3) + (monthInQuarter - 1);
+              
+              // Check if day exists in target month
+              const daysInMonth = new Date(year, targetMonth + 1, 0).getDate();
+              if (dayOfMonth <= daysInMonth) {
+                const targetDate = new Date(year, targetMonth, dayOfMonth);
+                targetDate.setHours(12, 0, 0, 0);
+                
+                if (targetDate >= startDate && targetDate <= endDate) {
+                  dates.push({
+                    date: targetDate,
+                    time: config.time
+                  });
+                }
+              }
+            }
+          }
+          break;
+
+        case 'moon_phase':
+          // For moon phase, generate approximate monthly occurrences
+          let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+          while (currentMonth <= endDate) {
+            const moonDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 15);
+            moonDate.setHours(12, 0, 0, 0);
+            if (moonDate >= startDate && moonDate <= endDate) {
+              dates.push({
+                date: moonDate,
+                time: config.time
+              });
+            }
+            
+            // Move to next month
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+          }
+          break;
+      }
+    } catch (error) {
+      console.error('Error generating dates:', error);
+    }
+
+    return dates;
+  };
+
+  // Enhanced Generate Preview with Validation
+  const handleGeneratePreviewWithValidation = () => {
+    // First check if all required configuration is present
+    if (!newTemplate.recurrenceType) {
+      toast({
+        title: "Missing Configuration",
+        description: "Please select a recurrence type first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Get start date
+    const configStartDate = newTemplate.config.startDate ? 
+      new Date(newTemplate.config.startDate) : 
+      new Date();
+    configStartDate.setHours(12, 0, 0, 0);
+
+    // Generate dates synchronously
+    const generatedDates = generateDates(newTemplate.config, newTemplate.recurrenceType, configStartDate);
+    
+    if (generatedDates.length === 0) {
+      toast({
+        title: "No Dates Generated",
+        description: "Check your configuration settings and try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate the generated dates
+    const dateObjects = generatedDates.map(d => d.date);
+    const validation = validateGeneratedDates(dateObjects, newTemplate.config, newTemplate.recurrenceType);
+    
+    if (validation.isValid) {
+      // Update state with validated dates
+      setSelectedDates(dateObjects);
+      setSelectedDateTimes(generatedDates);
+      
+      toast({
+        title: "Preview Generated Successfully ✓",
+        description: `Generated ${dateObjects.length} valid dates matching your configuration.`,
+        variant: "default"
+      });
+    } else {
+      toast({
+        title: "Configuration Mismatch",
+        description: `Validation errors: ${validation.errors.join(', ')}`,
+        variant: "destructive"
+      });
+    }
+  };
+
   // Auto-populate calendar dates based on recurrence type
   const handleAutoPopulateDates = (recurrenceType?: string) => {
     const activeRecurrenceType = recurrenceType || newTemplate.recurrenceType;
@@ -482,148 +811,15 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     // Clear preview when config changes to avoid stale data
     setPreviewOccurrences([]);
 
-    const now = new Date();
-    // Normalize to noon to avoid timezone boundary issues
-    now.setHours(12, 0, 0, 0);
-    
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1); 
-    startDate.setHours(12, 0, 0, 0); // Normalize to noon
-    
-    const endDate = new Date(now.getFullYear() + 1, now.getMonth(), 0); 
-    endDate.setHours(12, 0, 0, 0); // Normalize to noon
-    
-    const dates: { date: Date; time?: string }[] = [];
+    // Use start date from config or default to today
+    const configStartDate = newTemplate.config.startDate ? 
+      new Date(newTemplate.config.startDate) : 
+      new Date();
+    configStartDate.setHours(12, 0, 0, 0); // Normalize to noon
 
     try {
-      switch (activeRecurrenceType) {
-        case 'weekly':
-          if (newTemplate.config.dayOfWeek !== undefined) {
-            const dayOfWeek = newTemplate.config.dayOfWeek;
-            const currentDate = new Date(startDate);
-            
-            // Find first occurrence of the day of week
-            while (currentDate.getDay() !== dayOfWeek) {
-              currentDate.setDate(currentDate.getDate() + 1);
-            }
-            
-            // Generate weekly occurrences
-            while (currentDate <= endDate && dates.length < 52) { // Max 52 weeks
-              const normalizedDate = new Date(currentDate);
-              normalizedDate.setHours(12, 0, 0, 0); // Normalize to noon
-              dates.push({
-                date: normalizedDate,
-                time: newTemplate.config.time
-              });
-              currentDate.setDate(currentDate.getDate() + 7);
-            }
-          }
-          break;
-
-        case 'nth_weekday':
-          if (newTemplate.config.weekNumber !== undefined && newTemplate.config.dayOfWeek !== undefined) {
-            const weekNumber = newTemplate.config.weekNumber;
-            const dayOfWeek = newTemplate.config.dayOfWeek;
-            
-            // Generate for each month
-            for (let month = startDate.getMonth(); month <= endDate.getMonth() + 12; month++) {
-              const year = startDate.getFullYear() + Math.floor(month / 12);
-              const monthIndex = month % 12;
-              
-              let targetDate: Date;
-              
-              if (weekNumber === -1) { // Last occurrence
-                const lastDayOfMonth = new Date(year, monthIndex + 1, 0);
-                targetDate = new Date(lastDayOfMonth);
-                
-                // Find the last occurrence of the day of week
-                while (targetDate.getDay() !== dayOfWeek) {
-                  targetDate.setDate(targetDate.getDate() - 1);
-                }
-              } else { // Nth occurrence
-                const firstDayOfMonth = new Date(year, monthIndex, 1);
-                targetDate = new Date(firstDayOfMonth);
-                
-                // Find first occurrence of the day of week
-                while (targetDate.getDay() !== dayOfWeek) {
-                  targetDate.setDate(targetDate.getDate() + 1);
-                }
-                
-                // Add (n-1) weeks
-                targetDate.setDate(targetDate.getDate() + (weekNumber - 1) * 7);
-              }
-              
-              if (targetDate.getMonth() === monthIndex && targetDate >= now) {
-                const normalizedDate = new Date(targetDate);
-                normalizedDate.setHours(12, 0, 0, 0); // Normalize to noon
-                dates.push({
-                  date: normalizedDate,
-                  time: newTemplate.config.time
-                });
-              }
-            }
-          }
-          break;
-
-        case 'monthly_day':
-          if (newTemplate.config.dayOfMonth !== undefined) {
-            const dayOfMonth = newTemplate.config.dayOfMonth;
-            
-            for (let month = startDate.getMonth(); month <= endDate.getMonth() + 12; month++) {
-              const year = startDate.getFullYear() + Math.floor(month / 12);
-              const monthIndex = month % 12;
-              
-              // Check if the day exists in this month
-              const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-              if (dayOfMonth <= daysInMonth) {
-                const targetDate = new Date(year, monthIndex, dayOfMonth);
-                targetDate.setHours(12, 0, 0, 0); // Normalize to noon
-                if (targetDate >= now) {
-                  dates.push({
-                    date: targetDate,
-                    time: newTemplate.config.time
-                  });
-                }
-              }
-            }
-          }
-          break;
-
-        case 'quarterly':
-          // Generate quarterly dates (every 3 months)
-          const quarterlyStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
-          for (let i = 0; i < 8; i++) { // 8 quarters (2 years)
-            const quarterDate = new Date(quarterlyStartDate);
-            quarterDate.setMonth(quarterDate.getMonth() + (i * 3));
-            quarterDate.setHours(12, 0, 0, 0); // Normalize to noon
-            if (quarterDate >= now) {
-              dates.push({
-                date: quarterDate,
-                time: newTemplate.config.time
-              });
-            }
-          }
-          break;
-
-        case 'moon_phase':
-          // For moon phase, generate monthly occurrences as an approximation
-          // (Real moon phase calculation would require a moon phase library)
-          for (let month = startDate.getMonth(); month <= endDate.getMonth() + 12; month++) {
-            const year = startDate.getFullYear() + Math.floor(month / 12);
-            const monthIndex = month % 12;
-            const moonDate = new Date(year, monthIndex, 15); // Approximate middle of month
-            moonDate.setHours(12, 0, 0, 0); // Normalize to noon
-            if (moonDate >= now) {
-              dates.push({
-                date: moonDate,
-                time: newTemplate.config.time
-              });
-            }
-          }
-          break;
-
-        default:
-          break;
-      }
+      // Use the pure generation function
+      const dates = generateDates(newTemplate.config, activeRecurrenceType, configStartDate);
 
       // Update both selectedDates and selectedDateTimes
       const generatedDates = dates.map(d => d.date);
@@ -868,6 +1064,24 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       </div>
                     )}
 
+                    {/* Start Date for Planning */}
+                    <div>
+                      <Label htmlFor="start-date">Start Date</Label>
+                      <Input
+                        type="date"
+                        data-testid="input-start-date"
+                        value={newTemplate.config.startDate || ''}
+                        onChange={(e) => {
+                          setNewTemplate(prev => ({ 
+                            ...prev, 
+                            config: { ...prev.config, startDate: e.target.value }
+                          }));
+                          handleAutoPopulateDates();
+                        }}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Schedule will start from this date</p>
+                    </div>
+
                     {/* Recurrence Type */}
                     <div>
                       <Label htmlFor="recurrence-type">Cadence & Frequency</Label>
@@ -1111,7 +1325,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       </Button>
                       
                       <Button
-                        onClick={() => handleAutoPopulateDates()}
+                        onClick={() => handleGeneratePreviewWithValidation()}
                         disabled={!newTemplate.recurrenceType}
                         size="icon"
                         variant="outline"
