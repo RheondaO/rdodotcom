@@ -1361,30 +1361,32 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Interactive Calendar */}
-                    <div className="border rounded-lg p-4">
+                    <div className="border rounded-lg p-4 flex justify-center">
                       {/* <h4 className="font-semibold mb-3">Select Dates Directly:</h4> */}
-                      <Calendar
-                        mode="multiple"
-                        selected={selectedDates}
-                        onSelect={(dates) => {
-                          if (dates) {
-                            const dateArray = Array.from(dates);
-                            setSelectedDates(dateArray);
-                            const dateObjects = dateArray.map(date => ({ 
-                              date, 
-                              time: newTemplate.config.time 
-                            }));
-                            setSelectedDateTimes(dateObjects);
-                          } else {
-                            setSelectedDates([]);
-                            setSelectedDateTimes([]);
-                          }
-                        }}
-                        className="rounded-md border w-full"
-                        data-testid="interactive-calendar"
-                      />
-                      <p className="text-xs text-gray-500 mt-2 text-center">
-                        Click dates to select/deselect </p>
+                      <div className="flex flex-col items-center">
+                        <Calendar
+                          mode="multiple"
+                          selected={selectedDates}
+                          onSelect={(dates) => {
+                            if (dates) {
+                              const dateArray = Array.from(dates);
+                              setSelectedDates(dateArray);
+                              const dateObjects = dateArray.map(date => ({ 
+                                date, 
+                                time: newTemplate.config.time 
+                              }));
+                              setSelectedDateTimes(dateObjects);
+                            } else {
+                              setSelectedDates([]);
+                              setSelectedDateTimes([]);
+                            }
+                          }}
+                          className="rounded-md border"
+                          data-testid="interactive-calendar"
+                        />
+                        <p className="text-xs text-gray-500 mt-2 text-center">
+                          Click dates to select/deselect </p>
+                      </div>
                     </div>
 
                     {/* Selected Dates Preview */}
