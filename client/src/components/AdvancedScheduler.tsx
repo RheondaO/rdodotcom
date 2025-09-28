@@ -1075,6 +1075,11 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                             ...prev, 
                             config: { ...prev.config, startDate: e.target.value }
                           }));
+                          // Update calendar month to match start date
+                          if (e.target.value) {
+                            const startDate = new Date(e.target.value);
+                            setCalendarMonth(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
+                          }
                           handleAutoPopulateDates();
                         }}
                       />
