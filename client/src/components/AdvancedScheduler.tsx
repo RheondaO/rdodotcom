@@ -1098,7 +1098,8 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         <Label>Name Preview</Label>
                         <Input
                           value={miniGameTitle && selectedDates.length > 0 ? 
-                            generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase, selectedZodiac) : 
+                            generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase,
+selectedZodiac) : 
                             miniGameTitle}
                           readOnly
                           className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
