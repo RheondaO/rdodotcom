@@ -49,15 +49,15 @@ export const MOON_PHASE_DISPLAY_TO_BACKEND: Record<string, string | null> = {
 // Mini-game block titles (Square Type options)
 export const MINI_GAME_TITLES = [
   'Administration',
+  'Definitions & Introductions',
+  'Moon Cycle Message',
   'An Elevated Edit',
   'Angel Numbers', 
   '@XXXDotEdu',
   'Backchannel: Unfiltered; Unposted',
   'Booth Report',
-  'Definitions & Introductions',
   'FearFactory',
   'FreekyFridazeLive',
-  'Moon Cycle Message',
   'GayDay 3D',
   'Glow Mode',
   'Intent Quest',
