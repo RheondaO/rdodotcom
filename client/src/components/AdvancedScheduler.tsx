@@ -70,7 +70,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   const [selectedDateTimes, setSelectedDateTimes] = useState<{ date: Date; time?: string }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartDate, setDragStartDate] = useState<Date | null>(null);
-  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date(2026, 0, 1)); // Initialize to January 2026
   const [miniGameTitle, setMiniGameTitle] = useState<string>("");
   const [selectedMoonPhase, setSelectedMoonPhase] = useState<string>("None");
   
