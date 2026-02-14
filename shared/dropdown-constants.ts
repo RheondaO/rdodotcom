@@ -30,16 +30,16 @@ export type MoonPhaseOption = typeof MOON_PHASE_OPTIONS[number];
 
 // Mapping between display labels and backend values for moon phases
 export const MOON_PHASE_DISPLAY_TO_BACKEND: Record<string, string | null> = {
-  'None': null,
-  'New Moon': 'new_moon',
-  'Waxing Crescent': 'waxing_crescent',
-  'First Quarter': 'first_quarter',
-  'Waxing Gibbous': 'waxing_gibbous',
-  'Full Moon': 'full_moon',
-  'Waning Gibbous': 'waning_gibbous',
-  'Third Quarter': 'last_quarter',
-  'Waning Crescent': 'waning_crescent',
-  'Sun Sign': 'sun_sign'
+  'None': 'None',
+  'New Moon': 'New Moon',
+  'Waxing Crescent': 'Waxing Crescent',
+  'First Quarter': 'First Quarter',
+  'Waxing Gibbous': 'Waxing Gibbous',
+  'Full Moon': 'Full Moon',
+  'Waning Gibbous': 'Waning Gibbous',
+  'Third Quarter': 'Last Quarter',
+  'Waning Crescent': 'Waning Crescent',
+  'Sun Sign': 'Sun Sign'
 };
 
 // Mini-game block titles (Square Type options)
