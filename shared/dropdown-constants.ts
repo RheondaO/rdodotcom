@@ -95,7 +95,7 @@ export const MINI_GAME_TITLES = [
   'Stats && Strats',
   'Stretch Lab',
   'Sun Sign Info Card',
-  'Tart of The Month',
+  'Tarot of The Month',
   '**The 100 Club',
   'The Ethics of Survival',
   'The Guide',
@@ -122,10 +122,10 @@ export const MOON_PHASE_BACKEND_VALUES = [
   'full_moon',
   'last_quarter',
   'waxing_crescent',
-  'waxing_gibbous',
+  'Waxing Gibbous',
   'waning_gibbous',
   'waning_crescent',
-  'sun_signs'
+  'Sun Signs'
 ] as const;
 
 export type MoonPhaseBackendValue = typeof MOON_PHASE_BACKEND_VALUES[number];
