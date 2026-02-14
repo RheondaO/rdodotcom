@@ -1322,6 +1322,17 @@ selectedZodiac) :
                             const itemsToCreate = selectedDates.map((date) => {
                               const dateTimeObj = selectedDateTimes.find(dt => dt.date.getTime() === date.getTime()) || { date, time: undefined };
                               
+                              // Create a new date object that combines the date and the specific time
+                              let finalScheduledDate = new Date(date);
+                              if (dateTimeObj.time) {
+                                const [hours, minutes] = dateTimeObj.time.split(':').map(Number);
+                                finalScheduledDate.setHours(hours, minutes, 0, 0);
+                              } else if (newTemplate.config.time) {
+                                // Fallback to template-level time if no specific time set for this date
+                                const [hours, minutes] = newTemplate.config.time.split(':').map(Number);
+                                finalScheduledDate.setHours(hours, minutes, 0, 0);
+                              }
+
                               // Auto-populate the new fields
                               const monthName = format(date, 'MMMM'); // e.g., "March", "April"
                               const dayOfWeekName = format(date, 'EEEE'); // e.g., "Friday"
@@ -1334,7 +1345,7 @@ selectedZodiac) :
                                 templateId: null, // This will be generated server-side
                                 title: generateNamePreview(miniGameTitle, date, selectedDates, selectedMoonPhase, selectedZodiac),
                                 description: `Generated from ${newTemplate.recurrenceType} recurrence pattern`,
-                                scheduledDate: date.toISOString(),
+                                scheduledDate: finalScheduledDate.toISOString(),
                                 notionPageId: null,
                                 status: 'Scheduled',
                                 // Auto-populated fields
