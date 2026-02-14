@@ -1188,7 +1188,7 @@ selectedZodiac) :
                           </Select>
                         </div>
                         <div>
-                          <Label>Time (Optional)</Label>
+                          <Label>Time</Label>
                           <Input
                             type="time"
                             data-testid="input-weekly-time"
@@ -1296,7 +1296,7 @@ selectedZodiac) :
                           />
                         </div>
                         <div>
-                          <Label>Time (Optional)</Label>
+                          <Label>Time</Label>
                           <Input
                             type="time"
                             data-testid="input-monthly-time"
