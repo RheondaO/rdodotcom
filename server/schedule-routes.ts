@@ -329,10 +329,9 @@ router.post("/scheduled-content-items", async (req, res) => {
         // Just the date (no time component)
         notionDateStr = dateObj.toISOString().split("T")[0];
       } else {
-        // Format with PST offset
-        // Convert UTC time to PST by subtracting 8 hours (PST) or 7 hours (PDT)
-        const pstOffset = isPDT(dateObj) ? -7 : -8;
-        const pstDate = new Date(dateObj.getTime() + pstOffset * 60 * 60 * 1000);
+        // Format with PST offset (-08:00)
+        // Convert UTC time to PST by subtracting 8 hours
+        const pstDate = new Date(dateObj.getTime() - 8 * 60 * 60 * 1000);
 
         const pad = (n: number) => n.toString().padStart(2, "0");
         const year = pstDate.getUTCFullYear();
@@ -341,23 +340,7 @@ router.post("/scheduled-content-items", async (req, res) => {
         const hours = pad(pstDate.getUTCHours());
         const minutes = pad(pstDate.getUTCMinutes());
 
-        const offsetStr = pstOffset === -7 ? "-07:00" : "-08:00";
-        notionDateStr = `${year}-${month}-${day}T${hours}:${minutes}:00.000${offsetStr}`;
-      }
-
-      // Helper function to determine if date is in PDT (Daylight Saving Time)
-      function isPDT(date: Date): boolean {
-        const year = date.getUTCFullYear();
-        // DST starts 2nd Sunday in March, ends 1st Sunday in November
-        const march = new Date(Date.UTC(year, 2, 1)); // March 1st
-        const november = new Date(Date.UTC(year, 10, 1)); // November 1st
-
-        // Find 2nd Sunday of March
-        const marchSecondSunday = new Date(Date.UTC(year, 2, 8 + (7 - new Date(Date.UTC(year, 2, 8)).getUTCDay())));
-        // Find 1st Sunday of November  
-        const novemberFirstSunday = new Date(Date.UTC(year, 10, 1 + (7 - new Date(Date.UTC(year, 10, 1)).getUTCDay()) % 7));
-
-        return date >= marchSecondSunday && date < novemberFirstSunday;
+        notionDateStr = `${year}-${month}-${day}T${hours}:${minutes}:00.000-08:00`;
       }
 
       // Create the page in Notion using user's database schema
