@@ -343,7 +343,7 @@ router.post("/scheduled-content-items", async (req, res) => {
 
         // PST offset is -08:00 (Standard) or -07:00 (Daylight)
         // We'll use -08:00 as a reasonable default for PST
-        notionDateStr = `${year}-${month}-${day}T${hours}:${minutes}:00.000`;
+        notionDateStr = `${year}-${month}-${day}T${hours}:${minutes}:00.000-00:00`;
       }
 
       // Create the page in Notion using user's database schema
