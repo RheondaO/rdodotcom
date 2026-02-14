@@ -317,33 +317,47 @@ router.post("/scheduled-content-items", async (req, res) => {
         throw new Error("ROMLCONTENTCALENDAR database not found in Notion");
       }
 
-      // Format date for Notion, including time if it's not midnight
-      // The user wants PST. Node.js Date objects are UTC.
-      // We'll format it to include the offset for PST (-08:00 or -07:00 depending on DST)
+      // Format date for Notion with PST timezone
       const dateObj = validatedData.scheduledDate;
-      const isMidnight =
-        dateObj.getUTCHours() === 0 && dateObj.getUTCMinutes() === 0;
+
+      // Check if midnight in PST (convert UTC to PST by subtracting 8 hours)
+      const pstHours = (dateObj.getUTCHours() - 8 + 24) % 24;
+      const isMidnight = pstHours === 0 && dateObj.getUTCMinutes() === 0;
 
       let notionDateStr;
       if (isMidnight) {
-        // Just the date
+        // Just the date (no time component)
         notionDateStr = dateObj.toISOString().split("T")[0];
       } else {
-        // Full ISO string with PST offset
-        // In February, it's PST (-08:00). We'll use a simple approach for now.
-        // If the user specifically asked for PST, we should ensure the time is sent as such.
-        // For simplicity, we'll assume the time picked by user is local/PST and send it with the offset.
+        // Format with PST offset
+        // Convert UTC time to PST by subtracting 8 hours (PST) or 7 hours (PDT)
+        const pstOffset = isPDT(dateObj) ? -7 : -8;
+        const pstDate = new Date(dateObj.getTime() + pstOffset * 60 * 60 * 1000);
 
         const pad = (n: number) => n.toString().padStart(2, "0");
-        const year = dateObj.getFullYear();
-        const month = pad(dateObj.getMonth() + 1);
-        const day = pad(dateObj.getDate());
-        const hours = pad(dateObj.getHours());
-        const minutes = pad(dateObj.getMinutes());
+        const year = pstDate.getUTCFullYear();
+        const month = pad(pstDate.getUTCMonth() + 1);
+        const day = pad(pstDate.getUTCDate());
+        const hours = pad(pstDate.getUTCHours());
+        const minutes = pad(pstDate.getUTCMinutes());
 
-        // PST offset is -08:00 (Standard) or -07:00 (Daylight)
-        // We'll use -08:00 as a reasonable default for PST
-        notionDateStr = `${year}-${month}-${day}T${hours}:${minutes}:00.000-01:00`;
+        const offsetStr = pstOffset === -7 ? "-07:00" : "-08:00";
+        notionDateStr = `${year}-${month}-${day}T${hours}:${minutes}:00.000${offsetStr}`;
+      }
+
+      // Helper function to determine if date is in PDT (Daylight Saving Time)
+      function isPDT(date: Date): boolean {
+        const year = date.getUTCFullYear();
+        // DST starts 2nd Sunday in March, ends 1st Sunday in November
+        const march = new Date(Date.UTC(year, 2, 1)); // March 1st
+        const november = new Date(Date.UTC(year, 10, 1)); // November 1st
+
+        // Find 2nd Sunday of March
+        const marchSecondSunday = new Date(Date.UTC(year, 2, 8 + (7 - new Date(Date.UTC(year, 2, 8)).getUTCDay())));
+        // Find 1st Sunday of November  
+        const novemberFirstSunday = new Date(Date.UTC(year, 10, 1 + (7 - new Date(Date.UTC(year, 10, 1)).getUTCDay()) % 7));
+
+        return date >= marchSecondSunday && date < novemberFirstSunday;
       }
 
       // Create the page in Notion using user's database schema
