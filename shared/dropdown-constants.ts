@@ -20,7 +20,7 @@ export const MOON_PHASE_OPTIONS = [
   'Waxing Gibbous',
   'Full Moon',
   'Waning Gibbous',
-  'Third Quarter',
+  'Last Quarter',
   'Waning Crescent',
   'Void of Course',
   'Sun Sign'
@@ -31,15 +31,15 @@ export type MoonPhaseOption = typeof MOON_PHASE_OPTIONS[number];
 // Mapping between display labels and backend values for moon phases
 export const MOON_PHASE_DISPLAY_TO_BACKEND: Record<string, string | null> = {
   'None': null,
-  'New Moon': 'New Moon',
-  'Waxing Crescent': 'waxing_crescentt',
+  'New Moon': 'new_moon',
+  'Waxing Crescent': 'waxing_crescent',
   'First Quarter': 'first_quarter',
   'Waxing Gibbous': 'waxing_gibbous',
   'Full Moon': 'full_moon',
   'Waning Gibbous': 'waning_gibbous',
-  'Third Quarter': 'last_quarter',
+  'Last Quarter': 'last_quarter',
   'Waning Crescent': 'waning_crescent',
-  'Sun Sign': 'sun_sign'
+  'Sun Sign': 'sun_signs'
 };
 
 // Mini-game block titles (Square Type options)
@@ -174,7 +174,7 @@ export const DEFINITION_TERM_OPTIONS = [
   'An Energetic Portal',
   'The Moon',
   'The New Moon',
-  'The Waxing Crescent',
+  'The Waxing Crescent Moon',
   'The First Quarter Moon',
   'The Waxing Gibbous Moon',
   'The Full Moon',
