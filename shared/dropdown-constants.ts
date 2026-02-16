@@ -30,16 +30,16 @@ export type MoonPhaseOption = typeof MOON_PHASE_OPTIONS[number];
 
 // Mapping between display labels and backend values for moon phases
 export const MOON_PHASE_DISPLAY_TO_BACKEND: Record<string, string | null> = {
-  'None': 'None',
-  'New Moon': 'New Moon',
-  'Waxing Crescent': 'Waxing Crescent',
-  'First Quarter': 'First Quarter',
-  'Waxing Gibbous': 'Waxing Gibbous',
-  'Full Moon': 'Full Moon',
-  'Waning Gibbous': 'Waning Gibbous',
-  'Third Quarter': 'Last Quarter',
-  'Waning Crescent': 'Waning Crescent',
-  'Sun Sign': 'Sun Sign'
+  'None': null,
+  'New Moon': 'new_moon',
+  'Waxing Crescent': 'waxing_crescentt',
+  'First Quarter': 'first_quarter',
+  'Waxing Gibbous': 'waxing_gibbous',
+  'Full Moon': 'full_moon',
+  'Waning Gibbous': 'waning_gibbous',
+  'Third Quarter': 'last_quarter',
+  'Waning Crescent': 'waning_crescent',
+  'Sun Sign': 'sun_sign'
 };
 
 // Mini-game block titles (Square Type options)
@@ -122,10 +122,10 @@ export const MOON_PHASE_BACKEND_VALUES = [
   'full_moon',
   'last_quarter',
   'waxing_crescent',
-  'Waxing Gibbous',
+  'waxing_gibbous',
   'waning_gibbous',
   'waning_crescent',
-  'Sun Signs'
+  'sun_signs'
 ] as const;
 
 export type MoonPhaseBackendValue = typeof MOON_PHASE_BACKEND_VALUES[number];
@@ -165,8 +165,24 @@ export type ZodiacSignOption = typeof ZODIAC_SIGN_OPTIONS[number];
 // Definition Term options
 export const DEFINITION_TERM_OPTIONS = [
   'None',
-  'Positive Affirmation',
-  'Moonology'
+  'A Positive Affirmation',
+  'Moonology',
+  'Numerology',
+  'An Angel Number',
+  'The Sin of God?',
+  'Luck',
+  'An Energetic Portal',
+  'The Moon',
+  'The New Moon',
+  'The Waxing Crescent',
+  'The First Quarter Moon',
+  'The Waxing Gibbous Moon',
+  'The Full Moon',
+  'The Waning Gibbous Moon',
+  'The Last Quarter Moon',
+  'The Waning Crescent Moon',
+  'The Void of Course Moon',
+  
 ] as const;
 
 export type DefinitionTermOption = typeof DEFINITION_TERM_OPTIONS[number];
