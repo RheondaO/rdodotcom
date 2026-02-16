@@ -31,7 +31,7 @@ export type MoonPhaseOption = typeof MOON_PHASE_OPTIONS[number];
 // Mapping between display labels and backend values for moon phases
 export const MOON_PHASE_DISPLAY_TO_BACKEND: Record<string, string | null> = {
   'None': null,
-  'New Moon': 'new_moon',
+  'New Moon': 'New Moon',
   'Waxing Crescent': 'waxing_crescentt',
   'First Quarter': 'first_quarter',
   'Waxing Gibbous': 'waxing_gibbous',
