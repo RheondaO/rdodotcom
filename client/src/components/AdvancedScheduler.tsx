@@ -1161,7 +1161,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       <p className="text-xs text-gray-500 mt-1">Schedule will start from this date</p>
                     </div>
 
-                    {/* Recurrence Type */}
+                    {/* Cadence & Frequency Selection */}
                     <div>
                       <Label htmlFor="recurrence-type">Cadence & Frequency</Label>
                       <Select 
@@ -1177,7 +1177,6 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="weekly">Weekly (ex. Every Tuesday)</SelectItem>
-                          
                           <SelectItem value="nth_weekday">Nth Weekday (ex. 4th Sunday)</SelectItem>
                           <SelectItem value="quarterly">Quarterly (ex. Spring Equinox)</SelectItem>
                           <SelectItem value="monthly_day">Monthly Day (ex. 7th of month)</SelectItem>
@@ -1185,6 +1184,26 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Time field specifically for Quarterly and Moon Phase - Positioned below Cadence & Frequency */}
+                    {(newTemplate.recurrenceType === 'quarterly' || newTemplate.recurrenceType === 'moon_phase') && (
+                      <div className="p-4 border rounded-lg bg-slate-50 dark:bg-slate-900/20">
+                        <Label htmlFor="recurrence-time">Time</Label>
+                        <Input
+                          type="time"
+                          id="recurrence-time"
+                          value={newTemplate.config.time || ''}
+                          onChange={(e) => {
+                            setNewTemplate(prev => ({ 
+                              ...prev, 
+                              config: { ...prev.config, time: e.target.value }
+                            }));
+                            handleAutoPopulateDates();
+                          }}
+                        />
+                        <p className="text-xs text-slate-500 mt-1">These options only require Time configuration</p>
+                      </div>
+                    )}
 
                     {/* Additional Configuration based on recurrence type */}
                     {newTemplate.recurrenceType === 'weekly' && (
