@@ -109,6 +109,7 @@ const scheduledContentItemSchema = z.object({
     .enum(MINI_GAME_TITLES as unknown as [string, ...string[]])
     .optional()
     .nullable(),
+  definitionTerm: z.string().optional().nullable(),
   status: z
     .enum(CONTENT_STATUS_OPTIONS as unknown as [string, ...string[]])
     .optional(),
@@ -394,6 +395,10 @@ router.post("/scheduled-content-items", async (req, res) => {
         properties["Page"] = { select: { name: validatedData.page } };
       }
 
+      if (validatedData.definitionTerm && validatedData.definitionTerm !== "None") {
+        properties["Definition Term"] = { select: { name: validatedData.definitionTerm } };
+      }
+
       const notionResponse = await notion.pages.create({
         parent: { database_id: contentCalendarDb.id },
         properties: properties,
@@ -432,6 +437,7 @@ router.post("/scheduled-content-items", async (req, res) => {
       dayOfWeek: validatedData.dayOfWeek || undefined,
       moonPhase: validatedData.moonPhase || undefined,
       squareType: validatedData.squareType || undefined,
+      definitionTerm: validatedData.definitionTerm || undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

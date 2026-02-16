@@ -161,3 +161,12 @@ export const ZODIAC_SIGN_OPTIONS = [
 ] as const;
 
 export type ZodiacSignOption = typeof ZODIAC_SIGN_OPTIONS[number];
+
+// Definition Term options
+export const DEFINITION_TERM_OPTIONS = [
+  'None',
+  'Positive Affirmation',
+  'Moonology'
+] as const;
+
+export type DefinitionTermOption = typeof DEFINITION_TERM_OPTIONS[number];

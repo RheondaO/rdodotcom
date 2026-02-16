@@ -660,6 +660,7 @@ export interface ScheduledContentItem {
   dayOfWeek?: string; // e.g., Friday
   moonPhase?: string; // e.g., New Moon, Full Moon, or blank
   zodiac?: string; // e.g., Aries, Taurus, Gemini, or blank (only when moonPhase is not None)
+  definitionTerm?: string; // e.g., Positive Affirmation, Moonology, or None
   squareType?: string; // Mini Game Title (e.g., Creative Experiments)
   createdAt?: Date;
   updatedAt?: Date;

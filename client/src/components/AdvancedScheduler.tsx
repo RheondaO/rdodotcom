@@ -33,7 +33,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
-import { MOON_PHASE_OPTIONS, PAGE_OPTIONS, MINI_GAME_TITLES, MOON_PHASE_DISPLAY_TO_BACKEND, ZODIAC_SIGN_OPTIONS } from "@shared/dropdown-constants";
+import { MOON_PHASE_OPTIONS, PAGE_OPTIONS, MINI_GAME_TITLES, MOON_PHASE_DISPLAY_TO_BACKEND, ZODIAC_SIGN_OPTIONS, DEFINITION_TERM_OPTIONS } from "@shared/dropdown-constants";
 
 interface ScheduleTemplate {
   id: number;
@@ -74,6 +74,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   const [miniGameTitle, setMiniGameTitle] = useState<string>("");
   const [selectedMoonPhase, setSelectedMoonPhase] = useState<string>("None");
   const [selectedZodiac, setSelectedZodiac] = useState<string>("None");
+  const [selectedDefinitionTerm, setSelectedDefinitionTerm] = useState<string>("None");
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -366,7 +367,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
   };
 
   // Generate name preview for mini-game
-  const generateNamePreview = (title: string, date: Date, dates: Date[], moonPhase?: string, zodiac?: string): string => {
+  const generateNamePreview = (title: string, date: Date, dates: Date[], moonPhase?: string, zodiac?: string, definitionTerm?: string): string => {
     if (!title) return "";
     
     const monthYear = format(date, 'MMMM yyyy');
@@ -375,6 +376,13 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     ).sort((a, b) => a.getTime() - b.getTime());
     
     let baseName = "";
+    
+    // Special rule: If Mini-Game Name is 'Definitions & Intros', use Definition Term ONLY
+    if (title === 'Definitions & Intros' && definitionTerm && definitionTerm !== "None") {
+      baseName = `${title} - ${monthYear} - ${definitionTerm}`;
+      return baseName;
+    }
+
     if (sameMonthDates.length <= 1) {
       baseName = `${title} - ${monthYear}`;
     } else {
@@ -428,6 +436,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
     });
     setSelectedMoonPhase("None");
     setSelectedZodiac("None");
+    setSelectedDefinitionTerm("None");
   };
 
   const handleCreateTemplate = () => {
@@ -1044,6 +1053,26 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                       </Select>
                     </div>
 
+                    {/* Definition Term Selection */}
+                    <div>
+                      <Label htmlFor="definition-term-select">Definition Term</Label>
+                      <Select 
+                        value={selectedDefinitionTerm} 
+                        onValueChange={setSelectedDefinitionTerm}
+                      >
+                        <SelectTrigger data-testid="select-definition-term">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DEFINITION_TERM_OPTIONS.map((term) => (
+                            <SelectItem key={term} value={term}>
+                              {term}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     {/* Moon Phase Selection */}
                     <div>
                       <Label htmlFor="moon-phase-select">Moon Phase</Label>
@@ -1098,8 +1127,7 @@ export default function AdvancedScheduler({ selectedDate, onContentScheduled }: 
                         <Label>Name Preview</Label>
                         <Input
                           value={miniGameTitle && selectedDates.length > 0 ? 
-                            generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase,
-selectedZodiac) : 
+                            generateNamePreview(miniGameTitle, selectedDates[0], selectedDates, selectedMoonPhase, selectedZodiac, selectedDefinitionTerm) : 
                             miniGameTitle}
                           readOnly
                           className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
@@ -1354,6 +1382,7 @@ selectedZodiac) :
                                 dayOfWeek: dayOfWeekName,
                                 moonPhase: moonPhaseValue,
                                 zodiac: zodiacValue,
+                                definitionTerm: selectedDefinitionTerm,
                                 squareType: squareTypeValue
                               };
                             });
@@ -1473,7 +1502,7 @@ selectedZodiac) :
                                     <div key={index} className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border group">
                                       <div className="flex-1">
                                         <p className="font-medium text-blue-700 dark:text-blue-300">
-                                          {miniGameTitle ? generateNamePreview(miniGameTitle, dateTimeObj.date, selectedDates, selectedMoonPhase, selectedZodiac) : 'greatness_name here'}
+                                          {miniGameTitle ? generateNamePreview(miniGameTitle, dateTimeObj.date, selectedDates, selectedMoonPhase, selectedZodiac, selectedDefinitionTerm) : 'greatness_name here'}
                                         </p>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">
                                           {format(date, 'EEEE, MMMM d, yyyy')}
