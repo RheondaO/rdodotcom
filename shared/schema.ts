@@ -1699,4 +1699,175 @@ export type InsertBodyWeight = z.infer<typeof insertBodyWeightSchema>;
 export type InsertBodyMeasurement = z.infer<typeof insertBodyMeasurementSchema>;
 export type InsertFitnessGoal = z.infer<typeof insertFitnessGoalSchema>;
 export type InsertWorkoutProgram = z.infer<typeof insertWorkoutProgramSchema>;
+
+// ============================================================
+// HEALTH & WELLNESS TRACKING TABLES
+// ============================================================
+
+// Health Vitals - blood pressure, heart rate, temperature, blood sugar, etc.
+export const healthVitals = pgTable('health_vitals', {
+  id: serial('id').primaryKey(),
+  date: text('date').notNull(),
+  time: text('time'), // HH:MM
+  heartRate: integer('heart_rate'), // BPM
+  systolic: integer('systolic'), // BP systolic
+  diastolic: integer('diastolic'), // BP diastolic
+  temperature: decimal('temperature'), // in Fahrenheit
+  bloodSugar: decimal('blood_sugar'), // mg/dL
+  oxygenSaturation: integer('oxygen_saturation'), // percentage
+  respiratoryRate: integer('respiratory_rate'), // breaths per minute
+  weight: decimal('weight'), // lbs
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Sleep Logs - detailed sleep tracking
+export const sleepLogs = pgTable('sleep_logs', {
+  id: serial('id').primaryKey(),
+  date: text('date').notNull(), // the night of sleep (e.g., 2024-06-21)
+  bedtime: text('bedtime'), // HH:MM
+  wakeTime: text('wake_time'), // HH:MM
+  sleepDuration: decimal('sleep_duration'), // hours
+  sleepQuality: integer('sleep_quality'), // 1-10
+  deepSleep: decimal('deep_sleep'), // hours
+  remSleep: decimal('rem_sleep'), // hours
+  lightSleep: decimal('light_sleep'), // hours
+  awakeTime: decimal('awake_time'), // hours
+  sleepEfficiency: integer('sleep_efficiency'), // percentage
+  tookMelatonin: boolean('took_melatonin').default(false),
+  tookSleepAid: boolean('took_sleep_aid').default(false),
+  screenTimeBeforeBed: decimal('screen_time_before_bed'), // minutes
+  caffeineAfter2pm: boolean('caffeine_after_2pm').default(false),
+  exerciseBeforeBed: boolean('exercise_before_bed').default(false),
+  moodOnWaking: text('mood_on_waking'), // refreshed, tired, groggy, etc.
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Wellness Journal - daily mood, energy, symptoms, and notes
+export const wellnessJournal = pgTable('wellness_journal', {
+  id: serial('id').primaryKey(),
+  date: text('date').notNull(),
+  mood: text('mood'), // happy, sad, anxious, excited, neutral, etc.
+  moodScore: integer('mood_score'), // 1-10
+  energyLevel: integer('energy_level'), // 1-10
+  stressLevel: integer('stress_level'), // 1-10
+  anxietyLevel: integer('anxiety_level'), // 1-10
+  motivationLevel: integer('motivation_level'), // 1-10
+  focusLevel: integer('focus_level'), // 1-10
+  socialEnergy: integer('social_energy'), // 1-10
+  symptoms: text('symptoms'), // JSON array
+  medications: text('medications'), // JSON array
+  supplements: text('supplements'), // JSON array
+  periodStarted: boolean('period_started').default(false),
+  periodFlow: text('period_flow'), // none, light, medium, heavy
+  periodSymptoms: text('period_symptoms'), // JSON array
+  headaches: boolean('headaches').default(false),
+  digestiveIssues: boolean('digestive_issues').default(false),
+  muscleSoreness: boolean('muscle_soreness').default(false),
+  skinIssues: boolean('skin_issues').default(false),
+  journalEntry: text('journal_entry'),
+  gratitudeNotes: text('gratitude_notes'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// Health & Wellness Goals
+export const healthWellnessGoals = pgTable('health_wellness_goals', {
+  id: serial('id').primaryKey(),
+  title: text('title').notNull(),
+  description: text('description'),
+  category: text('category').notNull(), // nutrition, fitness, sleep, mental, weight, habit
+  targetValue: decimal('target_value').notNull(),
+  currentValue: decimal('current_value').default('0'),
+  unit: text('unit').notNull(), // lbs, kg, hours, days, glasses, minutes, steps
+  targetDate: text('target_date'),
+  isCompleted: boolean('is_completed').default(false),
+  priority: text('priority').default('medium'), // low, medium, high
+  streakCurrent: integer('streak_current').default(0),
+  streakBest: integer('streak_best').default(0),
+  reminderEnabled: boolean('reminder_enabled').default(false),
+  reminderTime: text('reminder_time'), // HH:MM
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// Health Analytics Snapshot - pre-computed health analytics
+export const healthAnalyticsSnapshot = pgTable('health_analytics_snapshot', {
+  id: serial('id').primaryKey(),
+  date: text('date').notNull(),
+  period: text('period').notNull(), // daily, weekly, monthly
+  avgWeight: decimal('avg_weight'),
+  avgSleepDuration: decimal('avg_sleep_duration'),
+  avgSleepQuality: decimal('avg_sleep_quality'),
+  avgHeartRate: decimal('avg_heart_rate'),
+  avgSteps: integer('avg_steps'),
+  avgCalories: integer('avg_calories'),
+  avgWater: decimal('avg_water'), // glasses
+  totalWorkouts: integer('total_workouts'),
+  totalMinutes: integer('total_minutes'),
+  avgMoodScore: decimal('avg_mood_score'),
+  avgEnergyLevel: decimal('avg_energy_level'),
+  avgStressLevel: decimal('avg_stress_level'),
+  goalProgress: text('goal_progress'), // JSON object
+  trendData: text('trend_data'), // JSON array for charts
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// ============================================================
+// HEALTH & WELLNESS INSERT SCHEMAS
+// ============================================================
+
+export const insertHealthVitalsSchema = createInsertSchema(healthVitals).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertSleepLogSchema = createInsertSchema(sleepLogs).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertWellnessJournalSchema = createInsertSchema(wellnessJournal).omit({
+  id: true,
+  createdAt: true
+});
+
+export const insertHealthWellnessGoalSchema = createInsertSchema(healthWellnessGoals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertHealthAnalyticsSnapshotSchema = createInsertSchema(healthAnalyticsSnapshot).omit({
+  id: true,
+  createdAt: true
+});
+
+// ============================================================
+// HEALTH & WELLNESS TYPE EXPORTS
+// ============================================================
+
+export type HealthVitals = typeof healthVitals.$inferSelect;
+export type InsertHealthVitals = z.infer<typeof insertHealthVitalsSchema>;
+
+export type SleepLog = typeof sleepLogs.$inferSelect;
+export type InsertSleepLog = z.infer<typeof insertSleepLogSchema>;
+
+export type WellnessJournal = typeof wellnessJournal.$inferSelect;
+export type InsertWellnessJournal = z.infer<typeof insertWellnessJournalSchema>;
+
+export type HealthWellnessGoal = typeof healthWellnessGoals.$inferSelect;
+export type InsertHealthWellnessGoal = z.infer<typeof insertHealthWellnessGoalSchema>;
+
+export type HealthAnalyticsSnapshot = typeof healthAnalyticsSnapshot.$inferSelect;
+export type InsertHealthAnalyticsSnapshot = z.infer<typeof insertHealthAnalyticsSnapshotSchema>;
+
+export type InsertMealPlan = z.infer<typeof insertMealPlanSchema>;
+export type InsertDietGoal = z.infer<typeof insertDietGoalSchema>;
+export type InsertFoodDatabase = z.infer<typeof insertFoodDatabaseSchema>;
+export type InsertNutritionEntry = z.infer<typeof insertNutritionEntrySchema>;
+export type InsertBodyWeight = z.infer<typeof insertBodyWeightSchema>;
+export type InsertBodyMeasurement = z.infer<typeof insertBodyMeasurementSchema>;
+export type InsertFitnessGoal = z.infer<typeof insertFitnessGoalSchema>;
+export type InsertWorkoutProgram = z.infer<typeof insertWorkoutProgramSchema>;
 export type InsertNutritionEntry = z.infer<typeof insertNutritionEntrySchema>;

@@ -28,6 +28,7 @@ import {
   type MiniGameBlock,
   type InsertMiniGameBlock,
   type MiniGameDesign,
+  type Medication,
   type InsertMiniGameDesign,
   type SocialMediaPost,
   type InsertSocialMediaPost,
@@ -87,7 +88,17 @@ import {
   type BlogCalendarType,
   type PurchaseType,
   type SelectCalendarSelection,
-  type InsertCalendarSelection
+  type InsertCalendarSelection,
+  type HealthVitals,
+  type InsertHealthVitals,
+  type SleepLog,
+  type InsertSleepLog,
+  type WellnessJournal,
+  type InsertWellnessJournal,
+  type HealthWellnessGoal,
+  type InsertHealthWellnessGoal,
+  type HealthAnalyticsSnapshot,
+  type InsertHealthAnalyticsSnapshot
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -138,7 +149,7 @@ export interface IStorage {
 
   // Medications
   getAllMedications(): Promise<Medication[]>;
-  createMedication(medication: InsertMedication): Promise<Medication>;
+  createMedication(medication: any): Promise<Medication>;
   updateMedication(id: number, updates: Partial<Medication>): Promise<Medication>;
   deleteMedication(id: number): Promise<void>;
 
@@ -442,6 +453,40 @@ export interface IStorage {
   getCalendarSelections(): Promise<SelectCalendarSelection[]>;
   createCalendarSelections(selections: InsertCalendarSelection[]): Promise<SelectCalendarSelection[]>;
   deleteCalendarSelection(id: number): Promise<boolean>;
+
+  // Health & Wellness Tracking
+  getHealthVitals(date?: string): Promise<HealthVitals[]>;
+  getHealthVitalsByDateRange(startDate: string, endDate: string): Promise<HealthVitals[]>;
+  createHealthVitals(vitals: InsertHealthVitals): Promise<HealthVitals>;
+  updateHealthVitals(id: number, updates: Partial<HealthVitals>): Promise<HealthVitals>;
+  deleteHealthVitals(id: number): Promise<void>;
+
+  getSleepLogs(date?: string): Promise<SleepLog[]>;
+  getSleepLogsByDateRange(startDate: string, endDate: string): Promise<SleepLog[]>;
+  createSleepLog(log: InsertSleepLog): Promise<SleepLog>;
+  updateSleepLog(id: number, updates: Partial<SleepLog>): Promise<SleepLog>;
+  deleteSleepLog(id: number): Promise<void>;
+
+  getWellnessJournal(date?: string): Promise<WellnessJournal[]>;
+  getWellnessJournalByDateRange(startDate: string, endDate: string): Promise<WellnessJournal[]>;
+  createWellnessJournal(entry: InsertWellnessJournal): Promise<WellnessJournal>;
+  updateWellnessJournal(id: number, updates: Partial<WellnessJournal>): Promise<WellnessJournal>;
+  deleteWellnessJournal(id: number): Promise<void>;
+
+  getHealthWellnessGoals(): Promise<HealthWellnessGoal[]>;
+  getHealthWellnessGoalsByCategory(category: string): Promise<HealthWellnessGoal[]>;
+  createHealthWellnessGoal(goal: InsertHealthWellnessGoal): Promise<HealthWellnessGoal>;
+  updateHealthWellnessGoal(id: number, updates: Partial<HealthWellnessGoal>): Promise<HealthWellnessGoal>;
+  deleteHealthWellnessGoal(id: number): Promise<void>;
+
+  getHealthAnalyticsSnapshot(date: string): Promise<HealthAnalyticsSnapshot[]>;
+  createHealthAnalyticsSnapshot(snapshot: InsertHealthAnalyticsSnapshot): Promise<HealthAnalyticsSnapshot>;
+
+  // Health Analytics Computed
+  getHealthWellnessDashboard(startDate: string, endDate: string): Promise<any>;
+  getHealthTrends(metric: string, startDate: string, endDate: string): Promise<any>;
+  getNutritionAnalytics(date: string): Promise<any>;
+  getSleepAnalytics(startDate: string, endDate: string): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -496,6 +541,11 @@ export class MemStorage implements IStorage {
   private purchases: Map<number, Purchase> = new Map();
   private jiraSyncMappings: Map<string, any> = new Map();
   private calendarSelections: Map<number, SelectCalendarSelection> = new Map();
+  private healthVitals: Map<number, HealthVitals> = new Map();
+  private sleepLogs: Map<number, SleepLog> = new Map();
+  private wellnessJournal: Map<number, WellnessJournal> = new Map();
+  private healthWellnessGoals: Map<number, HealthWellnessGoal> = new Map();
+  private healthAnalyticsSnapshots: Map<number, HealthAnalyticsSnapshot> = new Map();
   private currentId = 1;
 
   constructor() {
@@ -935,7 +985,7 @@ export class MemStorage implements IStorage {
     return Array.from(this.medications.values());
   }
 
-  async createMedication(medication: InsertMedication): Promise<Medication> {
+  async createMedication(medication: any): Promise<Medication> {
     const newMedication: Medication = {
       id: this.currentId++,
       ...medication,
@@ -1676,6 +1726,324 @@ export class MemStorage implements IStorage {
         focusImproving: avgFocusSessions >= 2,
         consistentProductivity: successfulSessions > focusSessions.length * 0.7
       }
+    };
+  }
+
+  // Health & Wellness Tracking Methods
+  async getHealthVitals(date?: string): Promise<HealthVitals[]> {
+    let vitals = Array.from(this.healthVitals.values());
+    if (date) {
+      vitals = vitals.filter(v => v.date === date);
+    }
+    return vitals.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  async getHealthVitalsByDateRange(startDate: string, endDate: string): Promise<HealthVitals[]> {
+    return Array.from(this.healthVitals.values())
+      .filter(v => v.date >= startDate && v.date <= endDate)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+
+  async createHealthVitals(vitals: InsertHealthVitals): Promise<HealthVitals> {
+    const newVitals: HealthVitals = {
+      id: this.currentId++,
+      ...vitals,
+      createdAt: new Date()
+    };
+    this.healthVitals.set(newVitals.id, newVitals);
+    return newVitals;
+  }
+
+  async updateHealthVitals(id: number, updates: Partial<HealthVitals>): Promise<HealthVitals> {
+    const vitals = this.healthVitals.get(id);
+    if (!vitals) throw new Error("Health vitals not found");
+    const updated = { ...vitals, ...updates };
+    this.healthVitals.set(id, updated);
+    return updated;
+  }
+
+  async deleteHealthVitals(id: number): Promise<void> {
+    this.healthVitals.delete(id);
+  }
+
+  async getSleepLogs(date?: string): Promise<SleepLog[]> {
+    let logs = Array.from(this.sleepLogs.values());
+    if (date) {
+      logs = logs.filter(l => l.date === date);
+    }
+    return logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  async getSleepLogsByDateRange(startDate: string, endDate: string): Promise<SleepLog[]> {
+    return Array.from(this.sleepLogs.values())
+      .filter(l => l.date >= startDate && l.date <= endDate)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+
+  async createSleepLog(log: InsertSleepLog): Promise<SleepLog> {
+    const newLog: SleepLog = {
+      id: this.currentId++,
+      ...log,
+      createdAt: new Date()
+    };
+    this.sleepLogs.set(newLog.id, newLog);
+    return newLog;
+  }
+
+  async updateSleepLog(id: number, updates: Partial<SleepLog>): Promise<SleepLog> {
+    const log = this.sleepLogs.get(id);
+    if (!log) throw new Error("Sleep log not found");
+    const updated = { ...log, ...updates };
+    this.sleepLogs.set(id, updated);
+    return updated;
+  }
+
+  async deleteSleepLog(id: number): Promise<void> {
+    this.sleepLogs.delete(id);
+  }
+
+  async getWellnessJournal(date?: string): Promise<WellnessJournal[]> {
+    let entries = Array.from(this.wellnessJournal.values());
+    if (date) {
+      entries = entries.filter(e => e.date === date);
+    }
+    return entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  async getWellnessJournalByDateRange(startDate: string, endDate: string): Promise<WellnessJournal[]> {
+    return Array.from(this.wellnessJournal.values())
+      .filter(e => e.date >= startDate && e.date <= endDate)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+
+  async createWellnessJournal(entry: InsertWellnessJournal): Promise<WellnessJournal> {
+    const newEntry: WellnessJournal = {
+      id: this.currentId++,
+      ...entry,
+      createdAt: new Date()
+    };
+    this.wellnessJournal.set(newEntry.id, newEntry);
+    return newEntry;
+  }
+
+  async updateWellnessJournal(id: number, updates: Partial<WellnessJournal>): Promise<WellnessJournal> {
+    const entry = this.wellnessJournal.get(id);
+    if (!entry) throw new Error("Wellness journal entry not found");
+    const updated = { ...entry, ...updates };
+    this.wellnessJournal.set(id, updated);
+    return updated;
+  }
+
+  async deleteWellnessJournal(id: number): Promise<void> {
+    this.wellnessJournal.delete(id);
+  }
+
+  async getHealthWellnessGoals(): Promise<HealthWellnessGoal[]> {
+    return Array.from(this.healthWellnessGoals.values())
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }
+
+  async getHealthWellnessGoalsByCategory(category: string): Promise<HealthWellnessGoal[]> {
+    return Array.from(this.healthWellnessGoals.values())
+      .filter(g => g.category === category)
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }
+
+  async createHealthWellnessGoal(goal: InsertHealthWellnessGoal): Promise<HealthWellnessGoal> {
+    const newGoal: HealthWellnessGoal = {
+      id: this.currentId++,
+      ...goal,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.healthWellnessGoals.set(newGoal.id, newGoal);
+    return newGoal;
+  }
+
+  async updateHealthWellnessGoal(id: number, updates: Partial<HealthWellnessGoal>): Promise<HealthWellnessGoal> {
+    const goal = this.healthWellnessGoals.get(id);
+    if (!goal) throw new Error("Health wellness goal not found");
+    const updated = { ...goal, ...updates, updatedAt: new Date() };
+    this.healthWellnessGoals.set(id, updated);
+    return updated;
+  }
+
+  async deleteHealthWellnessGoal(id: number): Promise<void> {
+    this.healthWellnessGoals.delete(id);
+  }
+
+  async getHealthAnalyticsSnapshot(date: string): Promise<HealthAnalyticsSnapshot[]> {
+    return Array.from(this.healthAnalyticsSnapshots.values())
+      .filter(s => s.date === date)
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  }
+
+  async createHealthAnalyticsSnapshot(snapshot: InsertHealthAnalyticsSnapshot): Promise<HealthAnalyticsSnapshot> {
+    const newSnapshot: HealthAnalyticsSnapshot = {
+      id: this.currentId++,
+      ...snapshot,
+      createdAt: new Date()
+    };
+    this.healthAnalyticsSnapshots.set(newSnapshot.id, newSnapshot);
+    return newSnapshot;
+  }
+
+  // Health Wellness Dashboard Analytics
+  async getHealthWellnessDashboard(startDate: string, endDate: string): Promise<any> {
+    const vitals = Array.from(this.healthVitals.values())
+      .filter(v => v.date >= startDate && v.date <= endDate);
+    const sleep = Array.from(this.sleepLogs.values())
+      .filter(l => l.date >= startDate && l.date <= endDate);
+    const wellness = Array.from(this.wellnessJournal.values())
+      .filter(e => e.date >= startDate && e.date <= endDate);
+    const goals = Array.from(this.healthWellnessGoals.values());
+    const workouts = Array.from(this.habits.values()).filter(h => h.category === 'wellness');
+
+    const avgHeartRate = vitals.length > 0
+      ? vitals.reduce((sum, v) => sum + (v.heartRate || 0), 0) / vitals.length
+      : 0;
+    const avgSleepDuration = sleep.length > 0
+      ? sleep.reduce((sum, s) => sum + parseFloat(s.sleepDuration || '0'), 0) / sleep.length
+      : 0;
+    const avgSleepQuality = sleep.length > 0
+      ? sleep.reduce((sum, s) => sum + (s.sleepQuality || 0), 0) / sleep.length
+      : 0;
+    const avgMoodScore = wellness.length > 0
+      ? wellness.reduce((sum, e) => sum + (e.moodScore || 0), 0) / wellness.length
+      : 0;
+    const avgEnergyLevel = wellness.length > 0
+      ? wellness.reduce((sum, e) => sum + (e.energyLevel || 0), 0) / wellness.length
+      : 0;
+    const avgStressLevel = wellness.length > 0
+      ? wellness.reduce((sum, e) => sum + (e.stressLevel || 0), 0) / wellness.length
+      : 0;
+
+    return {
+      period: { startDate, endDate },
+      summary: {
+        totalVitals: vitals.length,
+        totalSleepEntries: sleep.length,
+        totalWellnessEntries: wellness.length,
+        activeGoals: goals.filter(g => !g.isCompleted).length,
+        completedGoals: goals.filter(g => g.isCompleted).length,
+        avgHeartRate: Math.round(avgHeartRate * 10) / 10,
+        avgSleepDuration: Math.round(avgSleepDuration * 10) / 10,
+        avgSleepQuality: Math.round(avgSleepQuality * 10) / 10,
+        avgMoodScore: Math.round(avgMoodScore * 10) / 10,
+        avgEnergyLevel: Math.round(avgEnergyLevel * 10) / 10,
+        avgStressLevel: Math.round(avgStressLevel * 10) / 10,
+        sleepOnTrack: avgSleepDuration >= 7 && avgSleepDuration <= 9,
+        moodStable: avgMoodScore >= 6,
+        energyGood: avgEnergyLevel >= 6,
+        stressLow: avgStressLevel <= 5
+      },
+      vitalsSummary: {
+        latest: vitals.length > 0 ? vitals[0] : null,
+        count: vitals.length
+      },
+      sleepSummary: {
+        latest: sleep.length > 0 ? sleep[0] : null,
+        count: sleep.length
+      },
+      goalsSummary: goals.map(g => {
+        const current = parseFloat(g.currentValue || '0');
+        const target = parseFloat(g.targetValue || '0');
+        const progress = target > 0 ? (current / target) * 100 : 0;
+        return {
+          id: g.id,
+          title: g.title,
+          category: g.category,
+          progress: Math.round(progress),
+          isCompleted: g.isCompleted,
+          targetDate: g.targetDate,
+          streakCurrent: g.streakCurrent,
+          streakBest: g.streakBest
+        };
+      })
+    };
+  }
+
+  async getHealthTrends(metric: string, startDate: string, endDate: string): Promise<any> {
+    const data: { date: string; value: number }[] = [];
+
+    if (metric === 'weight' || metric === 'heartRate' || metric === 'bloodSugar' || metric === 'bloodPressure') {
+      const vitals = Array.from(this.healthVitals.values())
+        .filter(v => v.date >= startDate && v.date <= endDate)
+        .sort((a, b) => a.date.localeCompare(b.date));
+      for (const v of vitals) {
+        if (metric === 'weight' && v.weight) data.push({ date: v.date, value: parseFloat(v.weight) });
+        if (metric === 'heartRate' && v.heartRate) data.push({ date: v.date, value: v.heartRate });
+        if (metric === 'bloodSugar' && v.bloodSugar) data.push({ date: v.date, value: parseFloat(v.bloodSugar) });
+        if (metric === 'bloodPressure' && v.systolic && v.diastolic) {
+          data.push({ date: v.date, value: v.systolic });
+        }
+      }
+    } else if (metric === 'sleepDuration' || metric === 'sleepQuality') {
+      const sleep = Array.from(this.sleepLogs.values())
+        .filter(l => l.date >= startDate && l.date <= endDate)
+        .sort((a, b) => a.date.localeCompare(b.date));
+      for (const s of sleep) {
+        if (metric === 'sleepDuration' && s.sleepDuration) data.push({ date: s.date, value: parseFloat(s.sleepDuration) });
+        if (metric === 'sleepQuality' && s.sleepQuality) data.push({ date: s.date, value: s.sleepQuality });
+      }
+    } else if (metric === 'moodScore' || metric === 'energyLevel' || metric === 'stressLevel') {
+      const wellness = Array.from(this.wellnessJournal.values())
+        .filter(e => e.date >= startDate && e.date <= endDate)
+        .sort((a, b) => a.date.localeCompare(b.date));
+      for (const w of wellness) {
+        if (metric === 'moodScore' && w.moodScore) data.push({ date: w.date, value: w.moodScore });
+        if (metric === 'energyLevel' && w.energyLevel) data.push({ date: w.date, value: w.energyLevel });
+        if (metric === 'stressLevel' && w.stressLevel) data.push({ date: w.date, value: w.stressLevel });
+      }
+    }
+
+    return { metric, startDate, endDate, data, count: data.length };
+  }
+
+  async getNutritionAnalytics(date: string): Promise<any> {
+    // Pull from nutritionEntries (in-memory from fitness-routes)
+    // Since we are migrating to storage, this is a stub for now
+    return {
+      date,
+      totalCalories: 0,
+      totalProtein: 0,
+      totalCarbs: 0,
+      totalFat: 0,
+      meals: 0,
+      onTrack: false
+    };
+  }
+
+  async getSleepAnalytics(startDate: string, endDate: string): Promise<any> {
+    const sleep = Array.from(this.sleepLogs.values())
+      .filter(l => l.date >= startDate && l.date <= endDate)
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    const totalDays = sleep.length;
+    if (totalDays === 0) return { totalDays: 0, insights: null };
+
+    const avgDuration = sleep.reduce((sum, s) => sum + parseFloat(s.sleepDuration || '0'), 0) / totalDays;
+    const avgQuality = sleep.reduce((sum, s) => sum + (s.sleepQuality || 0), 0) / totalDays;
+    const avgDeepSleep = sleep.reduce((sum, s) => sum + parseFloat(s.deepSleep || '0'), 0) / totalDays;
+    const avgREM = sleep.reduce((sum, s) => sum + parseFloat(s.remSleep || '0'), 0) / totalDays;
+
+    const goodSleepDays = sleep.filter(s => parseFloat(s.sleepDuration || '0') >= 7 && (s.sleepQuality || 0) >= 7).length;
+
+    return {
+      totalDays,
+      avgDuration: Math.round(avgDuration * 10) / 10,
+      avgQuality: Math.round(avgQuality * 10) / 10,
+      avgDeepSleep: Math.round(avgDeepSleep * 10) / 10,
+      avgREM: Math.round(avgREM * 10) / 10,
+      goodSleepDays,
+      goodSleepPercentage: Math.round((goodSleepDays / totalDays) * 100),
+      insights: {
+        durationOnTrack: avgDuration >= 7 && avgDuration <= 9,
+        qualityGood: avgQuality >= 7,
+        deepSleepAdequate: avgDeepSleep >= 1,
+        consistent: goodSleepDays / totalDays >= 0.7
+      },
+      entries: sleep
     };
   }
 
@@ -3300,6 +3668,39 @@ export class DatabaseStorage implements IStorage {
   async getCalendarSelections() { return this.memStorage.getCalendarSelections(); }
   async createCalendarSelections(selections: InsertCalendarSelection[]) { return this.memStorage.createCalendarSelections(selections); }
   async deleteCalendarSelection(id: number) { return this.memStorage.deleteCalendarSelection(id); }
+
+  // Health & Wellness Tracking
+  async getHealthVitals(date?: string) { return this.memStorage.getHealthVitals(date); }
+  async getHealthVitalsByDateRange(startDate: string, endDate: string) { return this.memStorage.getHealthVitalsByDateRange(startDate, endDate); }
+  async createHealthVitals(vitals: InsertHealthVitals) { return this.memStorage.createHealthVitals(vitals); }
+  async updateHealthVitals(id: number, updates: Partial<HealthVitals>) { return this.memStorage.updateHealthVitals(id, updates); }
+  async deleteHealthVitals(id: number) { return this.memStorage.deleteHealthVitals(id); }
+
+  async getSleepLogs(date?: string) { return this.memStorage.getSleepLogs(date); }
+  async getSleepLogsByDateRange(startDate: string, endDate: string) { return this.memStorage.getSleepLogsByDateRange(startDate, endDate); }
+  async createSleepLog(log: InsertSleepLog) { return this.memStorage.createSleepLog(log); }
+  async updateSleepLog(id: number, updates: Partial<SleepLog>) { return this.memStorage.updateSleepLog(id, updates); }
+  async deleteSleepLog(id: number) { return this.memStorage.deleteSleepLog(id); }
+
+  async getWellnessJournal(date?: string) { return this.memStorage.getWellnessJournal(date); }
+  async getWellnessJournalByDateRange(startDate: string, endDate: string) { return this.memStorage.getWellnessJournalByDateRange(startDate, endDate); }
+  async createWellnessJournal(entry: InsertWellnessJournal) { return this.memStorage.createWellnessJournal(entry); }
+  async updateWellnessJournal(id: number, updates: Partial<WellnessJournal>) { return this.memStorage.updateWellnessJournal(id, updates); }
+  async deleteWellnessJournal(id: number) { return this.memStorage.deleteWellnessJournal(id); }
+
+  async getHealthWellnessGoals() { return this.memStorage.getHealthWellnessGoals(); }
+  async getHealthWellnessGoalsByCategory(category: string) { return this.memStorage.getHealthWellnessGoalsByCategory(category); }
+  async createHealthWellnessGoal(goal: InsertHealthWellnessGoal) { return this.memStorage.createHealthWellnessGoal(goal); }
+  async updateHealthWellnessGoal(id: number, updates: Partial<HealthWellnessGoal>) { return this.memStorage.updateHealthWellnessGoal(id, updates); }
+  async deleteHealthWellnessGoal(id: number) { return this.memStorage.deleteHealthWellnessGoal(id); }
+
+  async getHealthAnalyticsSnapshot(date: string) { return this.memStorage.getHealthAnalyticsSnapshot(date); }
+  async createHealthAnalyticsSnapshot(snapshot: InsertHealthAnalyticsSnapshot) { return this.memStorage.createHealthAnalyticsSnapshot(snapshot); }
+
+  async getHealthWellnessDashboard(startDate: string, endDate: string) { return this.memStorage.getHealthWellnessDashboard(startDate, endDate); }
+  async getHealthTrends(metric: string, startDate: string, endDate: string) { return this.memStorage.getHealthTrends(metric, startDate, endDate); }
+  async getNutritionAnalytics(date: string) { return this.memStorage.getNutritionAnalytics(date); }
+  async getSleepAnalytics(startDate: string, endDate: string) { return this.memStorage.getSleepAnalytics(startDate, endDate); }
 }
 
 export const storage = new DatabaseStorage();
