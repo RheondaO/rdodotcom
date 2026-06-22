@@ -2456,6 +2456,68 @@ export class MemStorage implements IStorage {
     this.investmentTransactions.delete(id);
   }
 
+  // Budget Categories
+  async getAllBudgetCategories(): Promise<BudgetCategory[]> {
+    return Array.from(this.budgetCategories.values());
+  }
+
+  async createBudgetCategory(category: InsertBudgetCategory): Promise<BudgetCategory> {
+    const newCategory: BudgetCategory = {
+      id: this.currentId++,
+      ...category,
+      createdAt: new Date()
+    };
+    this.budgetCategories.set(newCategory.id, newCategory);
+    return newCategory;
+  }
+
+  async updateBudgetCategory(id: number, updates: Partial<BudgetCategory>): Promise<BudgetCategory> {
+    const category = this.budgetCategories.get(id);
+    if (!category) throw new Error("Budget category not found");
+    const updated = { ...category, ...updates };
+    this.budgetCategories.set(id, updated);
+    return updated;
+  }
+
+  async deleteBudgetCategory(id: number): Promise<void> {
+    this.budgetCategories.delete(id);
+  }
+
+  // Expenses
+  async getAllExpenses(): Promise<Expense[]> {
+    return Array.from(this.expenses.values());
+  }
+
+  async getExpensesByDateRange(startDate: string, endDate: string): Promise<Expense[]> {
+    return Array.from(this.expenses.values()).filter(e => e.date >= startDate && e.date <= endDate);
+  }
+
+  async getExpensesByCategory(categoryId: number): Promise<Expense[]> {
+    return Array.from(this.expenses.values()).filter(e => e.categoryId === categoryId);
+  }
+
+  async createExpense(expense: InsertExpense): Promise<Expense> {
+    const newExpense: Expense = {
+      id: this.currentId++,
+      ...expense,
+      createdAt: new Date()
+    };
+    this.expenses.set(newExpense.id, newExpense);
+    return newExpense;
+  }
+
+  async updateExpense(id: number, updates: Partial<Expense>): Promise<Expense> {
+    const expense = this.expenses.get(id);
+    if (!expense) throw new Error("Expense not found");
+    const updated = { ...expense, ...updates };
+    this.expenses.set(id, updated);
+    return updated;
+  }
+
+  async deleteExpense(id: number): Promise<void> {
+    this.expenses.delete(id);
+  }
+
   // Advanced Analytics Implementation
   async calculateBudgetVsActual(budgetPeriodId: number): Promise<any> {
     const period = this.budgetPeriods.get(budgetPeriodId);
