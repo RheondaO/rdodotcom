@@ -38,3 +38,6 @@ waitForPort = 5000
 
 [agent]
 integrations = ["javascript_stripe:1.0.0", "notion:1.0.0", "javascript_gemini:1.0.0"]
+
+[objectStorage]
+defaultBucketID = "replit-objstore-a1047f6f-9f71-4678-a707-9d511217533c"
