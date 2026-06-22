@@ -2052,29 +2052,40 @@ export class MemStorage implements IStorage {
     const goals = Array.from(this.goals.values());
     const dailyEntries = Array.from(this.dailyEntries.values());
     const contentPieces = Array.from(this.contentPieces.values());
+    const blogPosts = Array.from(this.blogPosts.values());
+
+    const totalGoals = goals.length;
+    const completedGoals = goals.filter(g => g.isCompleted).length;
+    const completionRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
+    const totalContent = blogPosts.length + contentPieces.length;
+    const publishedContent = blogPosts.filter(p => p.status === 'published').length
+      + contentPieces.filter(c => c.status === 'published').length;
 
     return {
       totalHabits: habits.length,
       activeHabits: habits.filter(h => h.isActive).length,
-      completedGoals: goals.filter(g => g.isCompleted).length,
+      totalGoals,
+      completedGoals,
+      completionRate,
+      totalContent,
+      publishedContent,
       totalDailyEntries: dailyEntries.length,
-      publishedContent: contentPieces.filter(c => c.status === 'published').length,
       lastUpdated: new Date().toISOString()
     };
   }
 
   async getPublicRecentContent(): Promise<any> {
-    const contentPieces = Array.from(this.contentPieces.values())
-      .filter(c => c.status === 'published')
-      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
-      .slice(0, 5);
+    const blogPosts = Array.from(this.blogPosts.values())
+      .filter(p => p.status === 'published')
+      .sort((a, b) => new Date(b.publishedDate || b.createdAt || 0).getTime() - new Date(a.publishedDate || a.createdAt || 0).getTime())
+      .slice(0, 6);
 
-    return contentPieces.map(piece => ({
-      id: piece.id,
-      title: piece.title,
-      category: piece.categoryId,
-      publishedDate: piece.createdAt,
-      tags: piece.tags ? JSON.parse(piece.tags) : []
+    return blogPosts.map(post => ({
+      id: post.id,
+      title: post.title,
+      description: post.excerpt || post.content?.substring(0, 120) || '',
+      publishedDate: post.publishedDate || post.createdAt,
+      status: post.status
     }));
   }
 

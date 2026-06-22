@@ -91,28 +91,22 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
   // Transform database data for Content Studio metrics
   // Transform real mini game blocks data for Content Studio metrics
   const displayBlocks = miniGameBlocks.map((block: any) => {
-    const blockInsights = performanceInsights.filter(p => p.miniGameBlockId === block.id);
-    const totalPosts = blockInsights.reduce((sum, p) => sum + p.totalPosts, 0);
-    const avgEngagement = blockInsights.length > 0 
-      ? blockInsights.reduce((sum, p) => sum + p.avgEngagementRate, 0) / blockInsights.length / 100
-      : 0;
-    
     return {
       id: block.id,
       title: block.title || block.name,
       description: block.description || "",
-      category: block.category,
-      totalPosts: totalPosts,
-      scheduledPosts: Math.floor(totalPosts * 0.3),
-      publishedPosts: Math.floor(totalPosts * 0.7),
-      designedPosts: Math.floor(totalPosts * 0.4),
-      reviewedPosts: Math.floor(totalPosts * 0.6),
-      approvedPosts: Math.floor(totalPosts * 0.8),
-      engagement: Math.round(avgEngagement),
-      lastUpdated: format(new Date(block.updatedAt || block.createdAt || new Date()), 'yyyy-MM-dd'),
-      status: block.status || "active" as "active" | "paused" | "completed",
+      category: block.category || block.gameType || "",
+      totalPosts: block.totalPosts || 0,
+      scheduledPosts: block.scheduledPosts || 0,
+      publishedPosts: block.publishedPosts || 0,
+      designedPosts: block.designedPosts || 0,
+      reviewedPosts: block.reviewedPosts || 0,
+      approvedPosts: block.approvedPosts || 0,
+      engagement: block.engagement || 0,
+      lastUpdated: block.lastUpdated || format(new Date(block.updatedAt || block.createdAt || new Date()), 'yyyy-MM-dd'),
+      status: (block.status || "active") as "active" | "paused" | "completed",
       color: block.color || "#8B5CF6",
-      icon: getBlockIcon(block.category)
+      icon: block.icon || getBlockIcon(block.category || block.gameType)
     };
   });
 
