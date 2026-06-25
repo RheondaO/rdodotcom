@@ -108,7 +108,7 @@ export default function NotFound() {
             <span className="text-purple-600 font-medium"> Building in public, one day at a time.</span>
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-            © 2025 Really Obvious Media Lab. All rights reserved.
+            © 2026 Really Obvious Media Lab. All rights reserved.
           </p>
         </div>
       </footer>

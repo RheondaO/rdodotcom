@@ -71,28 +71,13 @@ export default function About() {
                     Admin & Prompt Engineer
                   </p>
                   <div className="text-left text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto space-y-4">
-                    <p>
-                      Hi, my name is Rheonda! I am an American solopreneur, born and raised in Virginia, and a proud VCU Ram. I carry creativity and discipline with me throughout my life, and I have always had a super soft spot for pink, and am thriving in this hyper-femme aesthetic era. When I’m not vibe coding, establishing my SEO, or navigating the limited opportunities in the SaaS ecosystem, you’ll find me making incredible water-based fruit smoothies, painting in abstract strokes, shopping for inspiration, playing basketball to reset my mind, visiting my favorite doctor—the dentist—and when stress hits, losing myself in old Hanna-Barbera cartoons, while my Sims act autonomously. My first personal computer was a Gateway in 2001, which sparked my love for technology and tinkering from an early age.
-                    </p>
-                    
-                    <p>
-                      I needed an outlet for my technical mind—a release for the “backed-up emission” that can literally keep me awake at night. Career pathways that once offered that space for healing and challenge are scarce. Certifications are expensive, and I could never tell which would truly move my career forward. So I built this application instead: a living, personal ecosystem that grows with me, challenges me, and fulfills the technical, creative, and entrepreneurial drive that fuels my life.
-                    </p>
-                    
-                    <p>
-                      Through Really Obvious Media Lab, I explore how ideas take shape in technology and culture. 𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Magazine brings that energy to social media, curating stories, aesthetics, and perspectives that mirror the rhythms of modern life. I’ve also recently started a blog on Substack, expanding my reflections and experiments into writing that reaches beyond this site.
-                    </p>
-                    
-                    <p>
-                      This is not a portfolio. It is not meant for an eight-second skim. With shifts in STEM and tech, I believe it’s essential to decentralize career as the center of identity. This is a dogfooding product for myself first—a space designed to grow across a lifetime, serving far more purposes than a résumé ever could.
-                    </p>
-                    
+                
                     <p>
                       If you’re here, pause. Look deeper. This space is an experiment in what it truly means to build a life worth archiving. 
                     </p>
 
                     <p>
-                      I’m building something beautiful here—a space to share my journey in AI, prompt engineering, and personal wellness.
+                      I’m building something beautiful here.
                     </p>
                   </div>
                 </div>
