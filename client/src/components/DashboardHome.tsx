@@ -399,7 +399,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
           <CardTitle className="flex items-center space-x-2">
             <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             <span className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-              𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio
+              Social Media Content Studio
             </span>
           </CardTitle>
         </CardHeader>
@@ -440,7 +440,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
                   No Mini-Games 
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Create in the rotationONLY Content Studio.
+                  Create in the  Social Media Content Studio.
                 </p>
               </div>
             )}
@@ -468,7 +468,7 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
                 size="sm"
                 className="bg-white/60 dark:bg-gray-900/60 hover:bg-white dark:hover:bg-gray-800"
               >
-                {displayBlocks.length > 0 ? 'Open rotationONLY Content Studio →' : 'Create in rotationONLY Content Studio →'}
+                {displayBlocks.length > 0 ? 'Open  Social Media Content Studio →' : 'Create in  Social Media Content Studio →'}
               </Button>
             </div>
           </div>
