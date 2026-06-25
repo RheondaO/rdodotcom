@@ -47,8 +47,8 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
   const dateString = format(selectedDate, 'yyyy-MM-dd');
   const { data: dailyEntry } = useDailyData(dateString);
   const { data: habits = [] } = useHabits();
-  const { data: todos = [] } = useTodos(dateString);
-  const { data: timeBlocksData = [] } = useTimeBlocks(dateString);
+  const { data: todos = [], isError: todosError } = useTodos(dateString);
+  const { data: timeBlocksData = [], isError: timeBlocksError } = useTimeBlocks(dateString);
   
   // Fetch real goals data from API
   const { data: goals = [] } = useQuery<Goal[]>({
@@ -226,6 +226,20 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     status: block.status,
     date: block.date
   }));
+
+  // Fallback demo data shown when API is unavailable or list is empty
+  const fallbackTodos = [
+    { id: -1, title: 'Review Q3 marketing strategy', priority: 'high', completed: false, dueTime: '10:00', date: dateString },
+    { id: -2, title: 'Update digital wellness blog draft', priority: 'medium', completed: false, dueTime: '14:00', date: dateString },
+  ];
+  const fallbackTimeBlocks = [
+    { id: -1, title: 'Deep Work Session', time: '9:00 AM - 11:00 AM', status: 'upcoming' },
+    { id: -2, title: 'Client Sync', time: '1:30 PM - 2:30 PM', status: 'upcoming' },
+  ];
+  const showFallbackTodos = todosError || todaysTodos.length === 0;
+  const showFallbackBlocks = timeBlocksError || timeBlocks.length === 0;
+  const displayTodos = showFallbackTodos ? fallbackTodos : todaysTodos;
+  const displaySchedule = showFallbackBlocks ? fallbackTimeBlocks : timeBlocks;
 
   const completedHabits = todaysHabits.filter(h => h.completed).length;
   const totalHabits = todaysHabits.length;
@@ -555,35 +569,33 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {todaysTodos.length > 0 ? (
-                todaysTodos.map(todo => (
-                  <div key={todo.id} className="flex items-center justify-between p-3 bg-white/60 dark:bg-gray-900/60 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        todo.priority === 'high' ? 'bg-red-500' : 
-                        todo.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                      }`} />
-                      <div>
-                        <p className={`font-medium ${todo.completed ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>
-                          {todo.title}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Due: {todo.dueTime}
-                        </p>
-                      </div>
-                    </div>
-                    {todo.completed && <CheckCircle className="h-5 w-5 text-green-500" />}
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                  <p className="text-sm">No tasks scheduled for {getDateLabel().toLowerCase()}</p>
-                  {isToday(selectedDate) && (
-                    <p className="text-xs mt-1">Add some tasks to stay organized!</p>
-                  )}
+              {showFallbackTodos && (
+                <div className="flex items-center gap-2 px-1 mb-1">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 font-medium">
+                    {todosError ? '⚡ Connection unavailable — showing sample tasks' : '💡 No tasks yet — showing sample tasks'}
+                  </span>
                 </div>
               )}
-              <Button 
+              {displayTodos.map(todo => (
+                <div key={todo.id} className={`flex items-center justify-between p-3 rounded-lg ${showFallbackTodos ? 'bg-amber-50/60 dark:bg-amber-900/10 border border-dashed border-amber-200 dark:border-amber-800' : 'bg-white/60 dark:bg-gray-900/60'}`}>
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-2 h-2 rounded-full ${
+                      todo.priority === 'high' ? 'bg-red-500' :
+                      todo.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                    }`} />
+                    <div>
+                      <p className={`font-medium ${todo.completed ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                        {todo.title}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Due: {todo.dueTime}
+                      </p>
+                    </div>
+                  </div>
+                  {todo.completed && <CheckCircle className="h-5 w-5 text-green-500" />}
+                </div>
+              ))}
+              <Button
                 onClick={() => onNavigate('productivity')}
                 className="w-full mt-3 bg-gradient-to-r from-blue-400 to-cyan-500 text-white"
               >
@@ -636,23 +648,26 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
               )}
               
               <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">{getDateLabel()}'s Schedule</h4>
-                {timeBlocks.length > 0 ? (
-                  timeBlocks.map((block, index) => (
-                    <div key={`timeblock-${block.id || index}`} className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-gray-600 dark:text-gray-400">{block.time}</span>
-                      <span className={`px-2 py-1 rounded ${
-                        block.status === 'completed' ? 'bg-green-100 text-green-700' :
-                        block.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {block.title}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">No scheduled time blocks</p>
-                )}
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">{getDateLabel()}'s Schedule</h4>
+                  {showFallbackBlocks && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 font-medium">
+                      {timeBlocksError ? '⚡ Sample' : '💡 Sample'}
+                    </span>
+                  )}
+                </div>
+                {displaySchedule.map((block, index) => (
+                  <div key={`timeblock-${block.id ?? index}`} className={`flex items-center justify-between text-xs mb-2 p-1.5 rounded-lg ${showFallbackBlocks ? 'border border-dashed border-amber-200 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-900/10' : ''}`}>
+                    <span className="text-gray-600 dark:text-gray-400 shrink-0 mr-2">{block.time}</span>
+                    <span className={`px-2 py-1 rounded ${
+                      block.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                      block.status === 'upcoming' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                      'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                    }`}>
+                      {block.title}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </CardContent>
