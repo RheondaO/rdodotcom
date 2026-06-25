@@ -227,17 +227,50 @@ export default function DashboardHome({ selectedDate, onNavigate }: DashboardHom
     date: block.date
   }));
 
-  // Fallback demo data shown when API is unavailable or list is empty
-  const fallbackTodos = [
-    { id: -1, title: 'Review Q3 marketing strategy', priority: 'high', completed: false, dueTime: '10:00', date: dateString },
-    { id: -2, title: 'Update digital wellness blog draft', priority: 'medium', completed: false, dueTime: '14:00', date: dateString },
-  ];
-  const fallbackTimeBlocks = [
-    { id: -1, title: 'Deep Work Session', time: '9:00 AM - 11:00 AM', status: 'upcoming' },
-    { id: -2, title: 'Client Sync', time: '1:30 PM - 2:30 PM', status: 'upcoming' },
-  ];
+  // Date-aware fallback demo data — shown when API fails or list is empty
+  const dayType = isYesterday(selectedDate) ? 'yesterday' : isTomorrow(selectedDate) ? 'tomorrow' : 'today';
+
+  const fallbackTodosMap: Record<string, { id: number; title: string; priority: string; completed: boolean; dueTime: string; date: string }[]> = {
+    yesterday: [
+      { id: -1, title: 'Batch film TikTok videos — Wellness Tips', priority: 'high', completed: true, dueTime: '10:00', date: dateString },
+      { id: -2, title: 'Send invoice to client', priority: 'high', completed: true, dueTime: '15:00', date: dateString },
+      { id: -3, title: 'Meal prep for the week', priority: 'medium', completed: false, dueTime: '18:00', date: dateString },
+    ],
+    today: [
+      { id: -1, title: 'Review Q3 marketing strategy', priority: 'high', completed: false, dueTime: '10:00', date: dateString },
+      { id: -2, title: 'Update digital wellness blog draft', priority: 'medium', completed: false, dueTime: '14:00', date: dateString },
+      { id: -3, title: 'Schedule dentist appointment', priority: 'medium', completed: false, dueTime: '11:00', date: dateString },
+    ],
+    tomorrow: [
+      { id: -1, title: 'Update budget spreadsheet', priority: 'medium', completed: false, dueTime: '09:00', date: dateString },
+      { id: -2, title: 'Record TikTok video — Wellness Tips', priority: 'high', completed: false, dueTime: '14:00', date: dateString },
+      { id: -3, title: 'Finalize content calendar for July', priority: 'medium', completed: false, dueTime: '16:00', date: dateString },
+    ],
+  };
+
+  const fallbackTimeBlocksMap: Record<string, { id: number; title: string; time: string; status: string }[]> = {
+    yesterday: [
+      { id: -1, title: 'Morning Run', time: '6:00 AM – 7:00 AM', status: 'completed' },
+      { id: -2, title: 'Content Batch Day', time: '9:00 AM – 1:00 PM', status: 'completed' },
+      { id: -3, title: 'Brand Outreach Emails', time: '2:00 PM – 3:30 PM', status: 'completed' },
+    ],
+    today: [
+      { id: -1, title: 'Deep Work — Content Creation', time: '9:00 AM – 11:00 AM', status: 'upcoming' },
+      { id: -2, title: 'Admin & Planning', time: '1:00 PM – 2:30 PM', status: 'upcoming' },
+      { id: -3, title: 'Content Filming & Editing', time: '3:00 PM – 5:00 PM', status: 'upcoming' },
+    ],
+    tomorrow: [
+      { id: -1, title: 'Morning Routine', time: '5:30 AM – 7:00 AM', status: 'upcoming' },
+      { id: -2, title: 'Strategy & Planning Session', time: '8:00 AM – 10:00 AM', status: 'upcoming' },
+      { id: -3, title: 'Client Calls', time: '10:00 AM – 12:00 PM', status: 'upcoming' },
+    ],
+  };
+
+  const fallbackTodos = fallbackTodosMap[dayType];
+  const fallbackTimeBlocks = fallbackTimeBlocksMap[dayType];
+
   const showFallbackTodos = todosError || todaysTodos.length === 0;
-  const showFallbackBlocks = timeBlocksError || timeBlocks.length === 0;
+  const showFallbackBlocks = timeBlocksError || timeBlocks.length < 2;
   const displayTodos = showFallbackTodos ? fallbackTodos : todaysTodos;
   const displaySchedule = showFallbackBlocks ? fallbackTimeBlocks : timeBlocks;
 
