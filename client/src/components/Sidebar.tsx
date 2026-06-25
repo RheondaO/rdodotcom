@@ -64,7 +64,7 @@ export default function Sidebar({ activeView, onViewChange, onQuickAdd, selected
 
   const navItems = [
     { key: "dashboard" as ViewType, label: "Dashboard", icon: Home },
-    { key: "content" as ViewType, label: "𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio", icon: Moon },
+    { key: "content" as ViewType, label: "Social Media Content Studio", icon: Moon },
     { key: "blog-studio" as ViewType, label: "Blogging Content Studio", icon: PenTool },
     { key: "apps" as ViewType, label: "AI App Development", icon: Code2 },
     { key: "goals" as ViewType, label: "Goals", icon: Target },
