@@ -151,7 +151,7 @@ export default function ContentManagementSuite({ selectedDate, isReadOnly = fals
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-pink-600 to-purple-600 dark:from-pink-400 dark:to-purple-400 bg-clip-text text-transparent">
-                  𝔯𝔬𝔱𝔞𝔱𝔦𝔬𝔫𝐎𝐍𝐋𝐘 Content Studio
+                   Social Media Content Studio
                 </h3>
                 {/* <p className="text-muted-foreground dark:text-gray-300 mt-1">
                   Mini Game Content Studio
