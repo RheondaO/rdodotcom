@@ -9,11 +9,11 @@ import { ArrowLeft, Heart, Award, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import SEOHead from "../components/SEOHead";
 
-// Initialize Stripe outside component
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
+// Initialize Stripe outside component safely
 const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+if (!stripeKey) {
+  console.warn('Warning: VITE_STRIPE_PUBLIC_KEY is not configured.');
+}
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 const CheckoutForm = ({ amount }: { amount: number }) => {
