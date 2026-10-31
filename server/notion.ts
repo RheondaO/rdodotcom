@@ -1,23 +1,12 @@
 import { Client } from "@notionhq/client";
 
-// Use the new Replit Notion integration for authentication
-let connectionSettings: any;
-
-async function getAccessToken() {
-  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings.settings.access_token;
+export async function getUncachableNotionClient() {
+  const secret = process.env.NOTION_INTEGRATION_SECRET;
+  if (!secret) {
+    throw new Error('NOTION_INTEGRATION_SECRET is not configured');
   }
-  
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY 
-    ? 'repl ' + process.env.REPL_IDENTITY 
-    : process.env.WEB_REPL_RENEWAL 
-    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
-    : null;
-
-  if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
-  }
+  return new Client({ auth: secret });
+}
 
   connectionSettings = await fetch(
     'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=notion',
