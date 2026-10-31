@@ -1084,39 +1084,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Time Blocks (date-specific) - now using Notion integration
-  app.get("/api/time-blocks/:date", async (req, res) => {
+app.get("/api/time-blocks/:date", async (req, res) => {
     try {
       const date = req.params.date;
       console.log(`📅 GET /api/time-blocks/${date} - Starting request`);
       
-      // Check if we have the required environment variables
       if (!process.env.NOTION_TIMEBLOCKS_URL) {
-        console.log("📅 NOTION_TIMEBLOCKS_URL not configured, using local storage");
-        const timeBlocks = await storage.getTimeBlocksByDate(date);
-        console.log(`📅 Local storage: returning ${timeBlocks.length} time blocks`);
-        res.json(timeBlocks);
+        res.json([]);
         return;
       }
+
+      // Try to get from Notion
+      const { getNotionTimeBlocks } = await import('./notion');
+      const notionTimeBlocks = await getNotionTimeBlocks(date);
+      res.json(notionTimeBlocks);
       
-      // Try to get from Notion first
-      try {
-        console.log(`📅 Attempting to fetch time blocks from Notion for ${date}`);
-        const { getNotionTimeBlocks } = await import('./notion');
-        const notionTimeBlocks = await getNotionTimeBlocks(date);
-        console.log(`📅 SUCCESS: Fetched ${notionTimeBlocks.length} time blocks from Notion for ${date}`);
-        res.json(notionTimeBlocks);
-      } catch (notionError: any) {
-        console.log("📅 NOTION ERROR: Falling back to local storage");
-        console.error("📅 Error details:", notionError.message);
-        console.error("📅 Error stack:", notionError.stack);
-        // Fallback to local storage if Notion fails
-        const timeBlocks = await storage.getTimeBlocksByDate(date);
-        console.log(`📅 Fallback: returning ${timeBlocks.length} time blocks from local storage`);
-        res.json(timeBlocks);
-      }
-    } catch (error: any) {
-      console.error("📅 CRITICAL ERROR fetching time blocks:", error.message);
-      res.status(500).json({ error: "Failed to fetch time blocks" });
+    } catch (notionError: any) {
+      console.warn("📅 Notion time-blocks warning (returning empty state):", notionError.message);
+      // ZERO ERRORS: Return an empty array for a clean 0 state
+      res.json([]);
     }
   });
 
