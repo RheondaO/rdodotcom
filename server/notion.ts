@@ -1,40 +1,15 @@
 import { Client } from "@notionhq/client";
 
+// Clean, standalone Notion client using your environment secret directly.
 export async function getUncachableNotionClient() {
   const secret = process.env.NOTION_INTEGRATION_SECRET;
   if (!secret) {
-    throw new Error('NOTION_INTEGRATION_SECRET is not configured');
+    throw new Error('NOTION_INTEGRATION_SECRET is not configured in environment variables.');
   }
   return new Client({ auth: secret });
 }
 
-  connectionSettings = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=notion',
-    {
-      headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
-    }
-  ).then(res => res.json()).then(data => data.items?.[0]);
-
-  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
-
-  if (!connectionSettings || !accessToken) {
-    throw new Error('Notion not connected');
-  }
-  return accessToken;
-}
-
-// WARNING: Never cache this client.
-// Access tokens expire, so a new client must be created each time.
-// Always call this function again to get a fresh client.
-export async function getUncachableNotionClient() {
-  const accessToken = await getAccessToken();
-  return new Client({ auth: accessToken });
-}
-
-// Legacy export for backward compatibility
+// Legacy export object mapping directly to clean Notion calls
 export const notion = {
   databases: {
     query: async (params: any) => {
@@ -65,7 +40,6 @@ export const notion = {
     }
   }
 };
-
 // Environment variable logging
 console.log("📋 NOTION_TASKS_URL configured:", !!process.env.NOTION_TASKS_URL);
 console.log("📅 NOTION_TIMEBLOCKS_URL configured:", !!process.env.NOTION_TIMEBLOCKS_URL);
